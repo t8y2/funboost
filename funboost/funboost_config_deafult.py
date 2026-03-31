@@ -27,15 +27,6 @@ class BrokerConnConfig(DataClassBase):
     如果@boost装饰器设置is_using_rpc_mode为True或者 is_using_distributed_frequency_control为True或do_task_filtering=True则需要把redis连接配置好，默认是False不强迫用户安装redis。
     """
 
-    MONGO_CONNECT_URL = f'mongodb://127.0.0.1:27017'  # 如果有密码连接 'mongodb://myUserAdmin:XXXXX@192.168.199.202:27016/'   authSource 指定鉴权db，MONGO_CONNECT_URL = 'mongodb://root:123456@192.168.64.151:27017?authSource=admin'
-
-    RABBITMQ_USER = 'rabbitmq_user'
-    RABBITMQ_PASS = 'rabbitmq_pass'
-    RABBITMQ_HOST = '127.0.0.1'
-    RABBITMQ_PORT = 5672
-    RABBITMQ_VIRTUAL_HOST = '/'  # my_host # 这个是rabbitmq的虚拟子host用户自己创建的，如果你想直接用rabbitmq的根host而不是使用虚拟子host，这里写 空字符串 即可。
-    RABBITMQ_URL = f'amqp://{RABBITMQ_USER}:{quote_plus(RABBITMQ_PASS)}@{RABBITMQ_HOST}:{RABBITMQ_PORT}/{RABBITMQ_VIRTUAL_HOST}'
-
     REDIS_HOST = '127.0.0.1'
     REDIS_USERNAME = ''
     REDIS_PASSWORD = ''
@@ -45,6 +36,16 @@ class BrokerConnConfig(DataClassBase):
     REDIS_SSL = False # 是否使用ssl加密,默认是False
     REDIS_URL = f'{"rediss" if REDIS_SSL else "redis"}://{REDIS_USERNAME}:{quote_plus(REDIS_PASSWORD)}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
 
+    MONGO_CONNECT_URL = f'mongodb://127.0.0.1:27017'  # 如果有密码连接 'mongodb://myUserAdmin:XXXXX@192.168.199.202:27016/'   authSource 指定鉴权db，MONGO_CONNECT_URL = 'mongodb://root:123456@192.168.64.151:27017?authSource=admin'
+
+    RABBITMQ_USER = 'rabbitmq_user'
+    RABBITMQ_PASS = 'rabbitmq_pass'
+    RABBITMQ_HOST = '127.0.0.1'
+    RABBITMQ_PORT = 5672
+    RABBITMQ_VIRTUAL_HOST = '/'  # my_host # 这个是rabbitmq的虚拟子host用户自己创建的，如果你想直接用rabbitmq的根host而不是使用虚拟子host，这里写 空字符串 即可。
+    RABBITMQ_URL = f'amqp://{RABBITMQ_USER}:{quote_plus(RABBITMQ_PASS)}@{RABBITMQ_HOST}:{RABBITMQ_PORT}/{RABBITMQ_VIRTUAL_HOST}'
+
+  
     NSQD_TCP_ADDRESSES = ['127.0.0.1:4150']
     NSQD_HTTP_CLIENT_HOST = '127.0.0.1'
     NSQD_HTTP_CLIENT_PORT = 4151
