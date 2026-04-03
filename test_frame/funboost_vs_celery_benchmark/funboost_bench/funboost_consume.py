@@ -2,7 +2,7 @@ from funboost import boost, BrokerEnum,BoosterParams,ConcurrentModeEnum
 import datetime
 import logging
 
-from funboost.core.broker_kind__exclusive_config_default_define import broker_kind__exclusive_config_default_map
+
 
 @boost(BoosterParams(queue_name='test_queue_funboost01', 
                      broker_kind=BrokerEnum.REDIS,log_level=logging.INFO,
