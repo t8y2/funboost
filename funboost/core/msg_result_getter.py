@@ -251,20 +251,20 @@ if __name__ == '__main__':
 
 
 
-class ResultFromMongo(MongoMixin):
+class MongoResultGetter(MongoMixin):
     """
     以非阻塞等待的方式从funboost的状态结果持久化的mongodb数据库根据taskid获取结果
 
     async_result = add.push(i, i * 2)
     task_id=async_result.task_id
-    print(ResultFromMongo(task_id).get_status_and_result())
-
-
-    print(ResultFromMongo('test_queue77h6_result:764a1ba2-14eb-49e2-9209-ac83fc5db1e8').get_status_and_result())
-    print(ResultFromMongo('test_queue77h6_result:5cdb4386-44cc-452f-97f4-9e5d2882a7c1').get_result())
+    print(MongoResultGetter(task_id,mongo_col_name).get_status_and_result())
     """
 
     def __init__(self, task_id: str, mongo_col_name: str):
+        """
+        task_id: task_id
+        mongo_col_name : FunctionResultStatusPersistanceConfig 中设置的table_name,默认是queue_name
+        """
         self.task_id = task_id
         # self.col_name = task_id.split('_result:')[0]
         self.col_name = mongo_col_name
@@ -285,6 +285,7 @@ class ResultFromMongo(MongoMixin):
         self.query_result()
         return (self.mongo_row or {}).get('result', StrConst.NO_RESULT)
 
+ResultFromMongo = MongoResultGetter # 别名
 
 class FutureStatusResult:
     """
