@@ -11,7 +11,7 @@ import typing
 import asyncio
 import logging
 import datetime
-from pydantic.fields import Field
+from pydantic import Field
 
 
 from funboost.concurrent_pool.pool_commons import ConcurrentPoolBuilder
