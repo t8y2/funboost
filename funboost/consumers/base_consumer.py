@@ -762,11 +762,11 @@ class AbstractConsumer(metaclass=abc.ABCMeta, ):
                         with RedisMixin().redis_db_filter_and_rpc_result.pipeline() as p:
                             current_function_result_status.rpc_result_expire_seconds = self.consumer_params.rpc_result_expire_seconds
                             p.lpush(task_id,
-                                    Serialization.to_json_str(current_function_result_status.get_status_dict(without_datetime_obj=True)))
+                                    Serialization.to_json_str(current_function_result_status.get_status_dict(without_datetime_obj=True,is_return_unstrict_dict=True)))
                             p.expire(task_id, self.consumer_params.rpc_result_expire_seconds)
                             p.execute()
                     except Exception:
-                        err_msg = f'设置rpc结果失败 {task_id} {current_function_result_status.get_status_dict(without_datetime_obj=True)}'
+                        err_msg = f'设置rpc结果失败 {task_id} {current_function_result_status.get_status_dict(without_datetime_obj=True,is_return_unstrict_dict=True)}'
                         if i == redis_retry_times - 1:
                             self.logger.critical(err_msg, exc_info=True)
                         else:

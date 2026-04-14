@@ -6,8 +6,9 @@
 import typing
 import concurrent.futures
 import inspect
-from funboost import BoosterParams, BrokerEnum, Booster, FunctionResultStatus
-from funboost.concurrent_pool.flexible_thread_pool import _new_anyio_fun
+from funboost import BoosterParams, BrokerEnum, Booster, FunctionResultStatus, AsyncResult
+from funboost.concurrent_pool.flexible_thread_pool import _new_anyio_fun,FlexibleThreadPoolMinWorkers0
+
 
 
 class FunboostPool:
@@ -126,9 +127,41 @@ class NbFunboostPool(FunboostPool):
         :return:
         """
         self.booster_params = booster_params
+        if self.booster_params.broker_kind != BrokerEnum.MEMORY_QUEUE:
+            self.booster_params.is_using_rpc_mode = True
         self.is_future_direct_ret_result = is_future_direct_ret_result
         self.booster: Booster = None
         self._create_booster()
+        if self.booster_params.broker_kind != BrokerEnum.MEMORY_QUEUE: 
+            self._callback_run_executor = FlexibleThreadPoolMinWorkers0(self.booster_params.concurrent_num,work_queue_maxsize=50)
+    
+    def submit(self, fn: typing.Callable, *args, **kwargs) -> concurrent.futures.Future:
+        # 1. 如果是内存队列，直接复用父类的高效实现（底层用 get_future）
+        if self.booster_params.broker_kind == BrokerEnum.MEMORY_QUEUE:
+            return super().submit(fn, *args, **kwargs)
+
+        # 2. 如果是分布式队列，走标准 RPC 回调封装
+        task_data = {"func": fn, "args": args, "kwargs": kwargs}
+        async_result: AsyncResult = self.booster.push(task_data)
+        async_result.callback_run_executor = self._callback_run_executor
+
+        final_future = concurrent.futures.Future()
+
+        def rpc_callback(status_and_result: dict):
+            try:
+                status = FunctionResultStatus.parse_status_and_result_to_obj(status_and_result)
+                if self.is_future_direct_ret_result:
+                    if status.success:
+                        final_future.set_result(status.result)
+                    else:
+                        final_future.set_exception(Exception(f"Task failed: {status.exception}"))
+                else:
+                    final_future.set_result(status)
+            except Exception as e:
+                final_future.set_exception(e)
+
+        async_result.set_callback(rpc_callback)
+        return final_future
 
 
 if __name__ == "__main__":
@@ -164,7 +197,7 @@ if __name__ == "__main__":
     pool = NbFunboostPool(
         BoosterParams(
             queue_name="universal_queue",
-            broker_kind=BrokerEnum.MEMORY_QUEUE,
+            broker_kind=BrokerEnum.REDIS,
             concurrent_num=10,
         ),
     )
