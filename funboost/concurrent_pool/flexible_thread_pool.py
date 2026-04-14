@@ -48,6 +48,8 @@ class FlexibleThreadPool(FunboostFileLoggerMixin, LoggerLevelSetterMixin, Funboo
         with self._lock_for_adjust_thread:
             if self.threads_free_count <= self.MIN_WORKERS and self._threads_num < self.max_workers:
                 _KeepAliveTimeThread(self).start()
+                self._change_threads_free_count(1) 
+                self._change_threads_start_count(1)
 
 
 class FlexibleThreadPoolMinWorkers0(FlexibleThreadPool):
@@ -105,10 +107,10 @@ class _KeepAliveTimeThread(threading.Thread, metaclass=FunboostMetaTypeFileLogge
         self.pool = thread_pool
 
     def run(self) -> None:
+        # self.pool._change_threads_free_count(1) # 放在submit里面加1
+        # self.pool._change_threads_start_count(1)
         # 可以设置 LogManager('_KeepAliveTimeThread').preset_log_level(logging.INFO) 来屏蔽下面的话,见文档6.17.b
         self.logger.debug(f'新启动线程 {self.ident} ')
-        self.pool._change_threads_free_count(1)
-        self.pool._change_threads_start_count(1)
         while 1:
             try:
                 func, args, kwargs = self.pool.work_queue.get(block=True, timeout=self.pool.KEEP_ALIVE_TIME)

@@ -25,7 +25,7 @@ class RunStatus:
     running = 'running'
     finish = 'finish'
 
-class FunctionResultStatus():
+class FunctionResultStatus:
     # 类级别缓存，避免每次实例化都调用系统函数
     host_name = socket.gethostname()
     _process_id = os.getpid()  # 进程ID在进程生命周期内不变
