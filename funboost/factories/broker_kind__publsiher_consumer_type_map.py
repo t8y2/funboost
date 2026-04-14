@@ -230,6 +230,8 @@ def regist_to_funboost(broker_kind: str):
         from funboost.contrib.register_custom_broker_contrib import websocket_broker
         # 无需调用 register_custom_broker ，已经在 websocket_broker.py 中注册了
         
+    if broker_kind in [BrokerEnum.REDIS_ZSET_PRIORITY, BrokerEnum.REDIS_ZSET_DELAY]:
+        import funboost.contrib.register_custom_broker_contrib.redis_zset_broker # 已经在 redis_zset_broker.py 中注册了
         
 
 if __name__ == '__main__':

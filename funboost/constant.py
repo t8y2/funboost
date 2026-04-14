@@ -51,9 +51,11 @@ class BrokerEnum:
     REDIS_STREAM = 'REDIS_STREAM'  # 基于redis 5.0 版本以后，使用 stream 数据结构作为分布式消息队列，支持消费确认和持久化和分组消费，是redis官方推荐的消息队列形式，比list结构更适合。
     REDIS_BRPOP_LPUSH = 'RedisBrpopLpush'  # 基于redis的list结构但是采用 brpoplpush 双队列形式，和 redis_ack_able的实现差不多，实现上采用了原生命令就不需要lua脚本来实现取出和加入unack了。
     REDIS_PUBSUB = 'REDIS_PUBSUB'  # 基于redis 发布订阅的，发布一个消息多个消费者都能收到同一条消息，但不支持持久化
+    REDIS_ZSET_PRIORITY = 'REDIS_ZSET_PRIORITY'  # 基于redis的zset结构，支持任务优先级,无级优先级队列（非常适合随意插队），不需要提前声明最大能支持的优先级参数x-max-priority。 实现和用法见 redis_zset_broker.py
+    REDIS_ZSET_DELAY = 'REDIS_ZSET_DELAY'  # 基于redis的zset结构，支持任务延迟。不依赖funboost自身的延时任务用法所依赖的apscheduler。这个比funboost自身的延时任务好处是：不怕由于队列前面其他已有的大量普通消息堆积，导致后进入的延时消息无法及时取出来交给apscheduler调度，导致不能及时运行。 实现和用法见 redis_zset_broker.py
     
     """
-    MEMORY_QUEUE: （funboost中最最最核心的broker，没有之一）
+    MEMORY_QUEUE: （funboost中最最最核心的sss级broker，没有之一）
     python内存队列,虽然不支持跨进程 跨脚本 跨机器共享任务，不支持持久化，
     但是 MEMORY_QUEUE 作为broker 是funboost最最最重要的broker，绝非玩具和只适合简单场景使用，其在funboost中的用途广泛性远超那些正经服务端mq。
     MEMORY_QUEUE 在 funboost 中的重要性是 sss级，重要性远超 redis kafka rabbbitmq等作为broker.

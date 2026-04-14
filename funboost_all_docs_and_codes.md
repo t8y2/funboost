@@ -27,1648 +27,77 @@
     *   **严禁臆造**文档中既未定义、也未在教程中提及的类名、方法名或参数。确保每一个生成的 Token 都有文档依据。
 
 ---
-# markdown content namespace: funboost 框架 ai coding 的 rules 和skills ,ai谨记 
-
-
-## funboost_docs File Tree (relative dir: `funboost/md_for_ai`)
-
-
-`````
-
-└── funboost
-    └── md_for_ai
-        └── funboost_ai_coding_编程指南_rules_and_skills.md
-
-`````
-
----
-
-
-## funboost_docs (relative dir: `funboost/md_for_ai`)  Included Files (total: 1 files)
-
-
-- `funboost/md_for_ai/funboost_ai_coding_编程指南_rules_and_skills.md`
-
-
----
-
-
---- **start of file: funboost/md_for_ai/funboost_ai_coding_编程指南_rules_and_skills.md** (project: funboost_docs) --- 
-
-`````markdown
----
-noteId: "b8794550160c11f1876707e213463054"
-tags: []
-
----
-
-
-# 🤖 Funboost AI 编程指南 (Rules & Skills)
-
-## 📜 一、Rules (AI 行为准则与约束)
-
-这是要求 AI 在编写 `funboost` 代码时 **绝对不可违反的铁律**，用于消除 AI 幻觉（如臆造参数、使用废弃 API、混淆 Celery 概念）。
-
-### 0. 最高知识准则：以官方上下文文档为唯一事实标准 (Single Source of Truth)
-- **必须深度阅读**：在编写任何 `funboost` 相关的代码或解答问题前，你必须全面检索并深度学习用户提供的 `funboost_all_docs_and_codes.md` 文档（该文档包含了十万行的全量教程与底层源码架构）。
-- **绝对禁止臆想**：你的预训练知识中可能没有最新的 `funboost` 细节，或者极易将其与 `Celery` 混淆。你生成的所有类名、方法名、入参定义（特别是 `BoosterParams` 的属性和中间件配置），**必须 100% 基于该文档中的源码事实或教程示例**，绝不允许产生任何大模型幻觉！
-
-### 1. 核心语法：绝对使用 `BoosterParams`
-- **禁止**使用老式的传参方式 `@boost("queue_name", qps=2)`。
-- **必须**将所有配置参数放入 `BoosterParams` 对象中：`@boost(BoosterParams(queue_name="xxx", ...))`。
-- **禁止臆造参数**：`BoosterParams` 是一个 Pydantic 模型，绝对不允许传递不存在的字段（如 `timeout`，正确的是 `function_timeout`；如 `max_retries`，正确的是 `max_retry_times`）。
-
-### 2. 发布消息 (`push` vs `publish`)
-- 只传递函数业务参数时，使用 `func.push(*args, **kwargs)`。
-- 需要传递框架控制参数（如 `task_id`, `countdown`, `eta`, `msg_expire_seconds`）时，**必须**使用 `func.publish(msg_dict, task_options=TaskOptions(...))`。
-- **异步环境** (async def) 中发布消息，必须使用 `await func.aio_push()` 或 `await func.aio_publish()`。
-
-### 3. 消费启动方式
-- 基础启动：`func.consume()`。
-- 多进程+多线程叠加并发（性能炸裂）：`func.multi_process_consume(n)` 或简写 `func.mp_consume(n)`。
-- 分组启动：`BoostersManager.consume_group("group_name")` （BoosterParams 里需要先设置 booster_group 的值）。
-- 启动代码的末尾，如果主线程没有其他阻塞任务，**建议**使用 `from funboost import ctrl_c_recv; ctrl_c_recv()` 阻止主线程退出。
-- 连续启动多个函数.consume()消费：`func1.consume(); func2.consume()`， 不要一厢情愿的使用子线程来启动消费，`func1.consume()`不会阻塞主线程。 
-  不要使用 `threading.Thread(target=func1.consume).start()` 和  `threading.Thread(target=func2.consume).start()` 来连续启动消费，这样做是多此一举，funboost框架很人性化，早就从框架层面让用户可以避免这样写代码了。
-  
-
-### 4. 上下文获取 (禁止 Celery 思维)
-- **禁止**像 Celery 一样在函数参数中加 `self` 或 `bind=True` 来获取上下文。
-- **必须**使用全局上下文对象：`from funboost import fct`。
-- 获取 Task ID：`fct.task_id`。
-- 获取重试次数：`fct.function_result_status.run_times`。 （function_result_status 中还有非常丰富的各种其他属性，其类型是 `FunctionResultStatus`）
-- 获取完整消息：`fct.full_msg`。
-
-### 5. 定时任务 (ApsJobAdder)
-- **禁止**直接使用原生的 `apscheduler.add_job` 去执行消费函数本体。
-- **必须**使用 `ApsJobAdder` 类：`ApsJobAdder(func, job_store_kind='redis').add_push_job(trigger='...', ...)`。
-
-### 6. 异步并发 (Asyncio)
-- 若消费函数为 `async def`，**必须**在 `BoosterParams` 中设置 `concurrent_mode=ConcurrentModeEnum.ASYNC`（并发模式设置为多线程也可以兼容 async def 的异步函数，但不是最佳选择）。
-- asyncio 生态获取 RPC 结果时，**必须**使用 `AioAsyncResult` 并 `await`，绝对禁止在异步函数中使用同步的 `AsyncResult.result`。
-
-### 7. FaaS 微服务
-- 集成 FastAPI/Flask/Django 时，**不需要**手动写发布和获取结果的 API。
-- **优先使用内置 router**直接引入框架内置的 Router：`from funboost.faas import fastapi_router; app.include_router(fastapi_router)`。
-
-### 8. 异构系统兼容与任意 JSON 消费规范 (非常重要)
-- 默认情况下，Funboost 会严格校验发布的消息字段与函数签名的入参是否完全一致。
-- **如果要消费非 Funboost 发布的消息（如 Java/Go 写入的消息，或带有未知 key 的 JSON）**：
-  - **必须**在 BoosterParams 中设置 `should_check_publish_func_params=False`。
-  - **必须**将消费函数入参定义为接收不定长参数，例如 `def task_fun(**kwargs):`，绝对禁止写成 `def task_fun(msg):` 去企图用一个 msg 入参接收整个字典。
-
-### 9. 实例方法与类方法的 `push` 调用规范
-- AI 极易用错实例方法的发布方式！Funboost 支持装饰实例方法和类方法，但 `push` 语法与普通函数不同。
-- **实例方法**：**禁止**写成 `obj.method.push(x)`。**必须**写成 `ClassName.method.push(obj, x)`，第一个参数必须传入对象实例，且该对象必须定义 `obj_init_params` 属性以便反序列化。
-- **类方法**：**禁止**写成 `ClassName.method.push(x)`。**必须**写成 `ClassName.method.push(ClassName, x)`，第一个参数必须传入类本身。
-
-### 10. 自定义扩展规范 (`user_options` 与 `override_cls`)
-- **禁止**为了实现自定义逻辑去修改 Funboost 源码或胡编 `BoosterParams` 的属性。
-- 如果用户需要传递自定义配置，**必须**放在 `BoosterParams(user_options={'my_key': 'value'})` 字典中。
-- 如果用户需要重写拦截逻辑（如格式化消息、限流），**必须**使用 OOP 继承 `AbstractConsumer` 并通过 `consumer_override_cls` 传入。
-
-### 11. AI Agent 应该使用 `python -c "import subprocess; subprocess.run(['python','your_script.py'], timeout=30)"` 启动funboost消费脚本。
-- **核心问题**：Funboost 消费函数启动后是无限循环拉取消息，程序不会自动结束，AI Agent 运行测试时会被阻塞。
-- **必须主动关闭**：AI Agent 在运行 Funboost 启动消费程序后，**必须**在适当时间后主动强制kill关闭程序，避免长时间阻塞。ai最多50秒钟后就应该强制关闭funboost消费程序。
-- **ai应该使用subprocess启动funboost消费** :
-  ai agent 启动测试funboost程序，请记住永远使用 `python -c "import subprocess; subprocess.run(['python','your_script.py'], timeout=30)"`  , 这样就会自动杀死funboost程序了。 your_script.py 替换成ai需要启动的消费脚本.
-  ai agent 禁止直接使用 `python your_script.py` 启动 funboost程序，以免ai流程被一直阻塞。
-- `subprocess.run(['python','your_script.py'], timeout=30)` 中的 your_script.py 替换成实际需要运行的脚本，timeout可以按需修改，但最大不超过50秒，python替换成真正的python解释器绝对路径。
-
-
----
-
-## 🛠️ 二、Skills (AI 技能模板)
-
-这是提供给 AI 的**标准代码切片（Snippets）**，让 AI 遇到特定场景（如写爬虫、写定时任务、写微服务）时，直接照抄最佳实践，无需自行发挥。
-
-### Skill 0: 最简 Hello World 任务 (零配置/本地单进程)
-**场景**：用户想写一个最简单的后台任务，不需要额外安装 Redis/RabbitMQ，只要求能跑起来。
-**模板**：
-```python
-import time
-from funboost import boost, BoosterParams, BrokerEnum, ctrl_c_recv
-
-@boost(BoosterParams(
-    queue_name="hello_queue",
-    broker_kind=BrokerEnum.MEMORY_QUEUE,  # 极简模式：使用内存队列，无需安装任何外部中间件
-    qps=2,                                # 简单的控频：每秒执行2次
-))
-def hello_task(word: str):
-    print(f"Hello, {word}!")
-    time.sleep(1)
-    return True
-
-if __name__ == '__main__':
-    # 1. 发布任务
-    for i in range(10):
-        hello_task.push(word=f"funboost_{i}")
-    
-    # 2. 基础启动消费 (当前进程内使用多线程运行，占用内存极小)
-    hello_task.consume() 
-    
-    # 3. 阻塞主线程
-    ctrl_c_recv()
-```
-
-### Skill 1: 创建标准的基础后台任务 (含高阶控制)
-**场景**：用户需要一个后台队列任务，要求高并发、控频、出错重试。
-**模板**：
-```python
-import time
-from funboost import boost, BoosterParams, BrokerEnum, ctrl_c_recv
-
-@boost(BoosterParams(
-    queue_name="my_standard_task",
-    broker_kind=BrokerEnum.REDIS_ACK_ABLE, # 确保不丢数据
-    concurrent_num=50,                     # 线程池并发数
-    qps=10,                                # 精准控频：每秒执行10次
-    max_retry_times=3,                     # 失败最大重试3次
-))
-def my_task(user_id: int, action: str):
-    print(f"Processing user: {user_id}, action: {action}")
-    time.sleep(1)
-    return True
-
-if __name__ == '__main__':
-    # 发布任务
-    for i in range(100):
-        my_task.push(user_id=i, action="login")
-    
-    # 启动消费 (多进程叠加多线程)
-    my_task.mp_consume(2)  # mp_consume(n) 是 multi_process_consume(n) 的简写
-    ctrl_c_recv()
-```
-
-### Skill 2: 实现 RPC 模式（发布后等待结果）
-**场景**：用户需要在发布任务后，同步或异步等待消费者执行完并返回结果。
-**模板**：
-```python
-from funboost import boost, BoosterParams, BrokerEnum, AsyncResult
-
-@boost(BoosterParams(
-    queue_name="rpc_task",
-    broker_kind=BrokerEnum.REDIS_ACK_ABLE,
-    is_using_rpc_mode=True, # 必须开启 RPC 模式
-))
-def calc_sum(a: int, b: int):
-    return a + b
-
-if __name__ == '__main__':
-    calc_sum.consume()
-    
-    # 发布并获取 AsyncResult 对象
-    async_result: AsyncResult = calc_sum.push(10, 20)
-    
-    print(f"Task ID: {async_result.task_id}, Result: {async_result.result}")
-```
-
-### Skill 3: 创建定时调度任务 (Cron / Interval)
-**场景**：用户需要每天定时、或每隔几秒钟执行一次任务。
-**模板**：
-```python
-from funboost import boost, BoosterParams, BrokerEnum, ApsJobAdder, ctrl_c_recv
-
-@boost(BoosterParams(queue_name="daily_report", broker_kind=BrokerEnum.REDIS))
-def generate_report(report_type: str):
-    print(f"Generating {report_type} report...")
-
-if __name__ == '__main__':
-    generate_report.consume()
-    
-    # 使用 ApsJobAdder 添加定时任务
-    ApsJobAdder(generate_report, job_store_kind='redis').add_push_job(
-        trigger='cron',
-        hour=2,         # 每天凌晨2点执行
-        minute=0,
-        kwargs={"report_type": "sales"},
-        id='daily_sales_report',
-        replace_existing=True
-    )
-    ctrl_c_recv()
-```
-
-### Skill 4: Asyncio 异步任务与协程发布
-**场景**：用户使用 FastAPI 或其他 asyncio 生态，需要纯异步的调度。
-**模板**：
-```python
-import asyncio
-from funboost import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum, AioAsyncResult
-
-@boost(BoosterParams(
-    queue_name="async_crawler",
-    broker_kind=BrokerEnum.REDIS,
-    concurrent_mode=ConcurrentModeEnum.ASYNC, # 指定为 asyncio 并发模式
-    is_using_rpc_mode=True
-))
-async def async_fetch(url: str):
-    await asyncio.sleep(1) # 模拟 aiohttp/httpx 异步请求
-    return f"Data from {url}"
-
-async def main():
-    # 异步生态下，必须使用 aio_push
-    aio_result = await async_fetch.aio_push("http://example.com")
-    
-    # 异步等待结果
-    result_status = await AioAsyncResult(aio_result.task_id).status_and_result
-    print(result_status.result)
-
-if __name__ == '__main__':
-    async_fetch.consume()
-    asyncio.run(main())
-```
-
-### Skill 5: 声明式工作流编排 (Workflow)
-**场景**：用户需要执行串行(Chain)、并行(Group)或并行+汇总(Chord)的复杂任务流。
-**模板**：
-```python
-from funboost import boost
-from funboost.workflow import chain, group, chord, WorkflowBoosterParams
-
-@boost(WorkflowBoosterParams(queue_name="wf_download"))
-def download(url): return f"/tmp/{url}"
-
-@boost(WorkflowBoosterParams(queue_name="wf_process"))
-def process(path, resolution): return f"{path}_{resolution}"
-
-@boost(WorkflowBoosterParams(queue_name="wf_notify"))
-def notify(results, user_id): print(f"User {user_id} done: {results}")
-
-if __name__ == '__main__':
-    # 启动消费者
-    download.consume()
-    process.consume()
-    notify.consume()
-    
-    # 构建 Chord 工作流 (先下载 -> 并行处理3种分辨率 -> 汇总通知)
-    workflow = chain(
-        download.s("video.mp4"),
-        chord(
-            group(process.s(resolution=r) for r in ['360p', '720p', '1080p']),
-            notify.s(user_id=1001)
-        )
-    )
-    result = workflow.apply() # 阻塞等待整个工作流完成
-```
-
-### Skill 6: 快速集成 FaaS 微服务接口
-**场景**：用户需要将 Funboost 任务直接暴露为 HTTP 接口供外部系统调用。
-**模板**：
-```python
-import uvicorn
-from fastapi import FastAPI
-from funboost.faas import fastapi_router, CareProjectNameEnv
-
-# 选填：只关注当前项目的队列，防止被其他队列干扰
-CareProjectNameEnv.set('my_faas_project')
-
-app = FastAPI()
-
-# 核心：一键挂载 funboost 所有标准路由 (publish, get_result, get_msg_count 等)
-app.include_router(fastapi_router)
-
-if __name__ == '__main__':
-    # 启动后访问 http://127.0.0.1:8000/docs 即可看到 /funboost/publish 等接口
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-```
-
-**核心 API 接口说明**：
-
-启动服务后，所有接口都在 `/funboost` 前缀下，自动生成交互式文档访问 `http://127.0.0.1:8000/docs`
-
-#### 6.1 发布消息（支持 RPC 模式）
-
-**接口**：`POST /funboost/publish`
-
-**请求体**：
-```json
-{
-    "queue_name": "my_task_queue",
-    "msg_body": {"user_id": 1001, "action": "login"},
-    "need_result": true,
-    "timeout": 60,
-    "task_id": "optional_custom_task_id"
-}
-```
-
-**字段说明**：
-- `queue_name` (必填): 队列名称
-- `msg_body` (必填): 消息体字典，即消费函数的入参
-- `need_result` (可选): 是否等待 RPC 结果，默认 `false`
-- `timeout` (可选): 等待结果的最大超时时间（秒），默认 `60`
-- `task_id` (可选): 自定义任务 ID，不传则自动生成
-
----
-
-#### 6.2 其他部分重要接口速查
-
-**说明：**接口定义，ai不方便查看网页接口docs，可以查看 funboost\faas\fastapi_adapter.py 文件中的fastapi的路由和pydantic model定义。
-
-**获取 RPC 结果**：`GET /funboost/get_result?task_id={任务 ID}&timeout=5`
-
-**添加定时任务**：`POST /funboost/add_timing_job`
-```json
-{
-    "queue_name": "my_queue",
-    "trigger": "cron",
-    "hour": "2",
-    "minute": "0",
-    "kwargs": {"report_type": "daily"}
-}
-```
-触发器类型：`date`（一次性）/ `interval`（间隔）/ `cron`（周期）
-
-**获取队列消息数**：`GET /funboost/get_msg_count?queue_name={队列名}`
-
-**暂停/恢复消费**：`POST /funboost/pause_consume` 或 `/resume_consume`
-```json
-{"queue_name": "my_queue"}
-```
-
-**获取定时任务列表**：`GET /funboost/get_timing_jobs?queue_name={队列名}`
-
-**获取单个定时任务**：`GET /funboost/get_timing_job?job_id={任务 ID}&queue_name={队列名}`
-
-**删除定时任务**：`DELETE /funboost/delete_timing_job?job_id={任务 ID}&queue_name={队列名}`
-
-**清空队列**：`POST /funboost/clear_queue`
-```json
-{"queue_name": "my_queue"}
-```
-
-**获取所有队列**：`GET /funboost/get_all_queues`
-
-**获取所有队列运行详情**：`GET /funboost/get_all_queue_run_info`
-
----
-
-**提示**：完整 API 文档访问 `http://127.0.0.1:8000/docs`，所有接口统一返回格式：`{"succ": bool, "msg": str, "data": any, "code": int}`
-
-
-
-
-
-### Skill 7: 高效爬虫 (配合 boost_spider)
-**场景**：用户需要写一个分布式爬虫，要求自动换代理、XPath 解析、一键入库。
-**模板**：
-```python
-from funboost import boost, BoosterParams, BrokerEnum
-from boost_spider import  RequestClient, SpiderResponse, DatasetSink
-
-db_sink = DatasetSink("sqlite:///spider_data.db")
-
-@boost(BoosterParams(
-    queue_name="spider_task", 
-    broker_kind=BrokerEnum.REDIS_ACK_ABLE,
-    qps=3, # 控频防封
-    max_retry_times=5
-))
-def crawl_page(url: str):
-    # RequestClient 内置了重试、UA 切换机制
-    client = RequestClient(request_retry_times=3, is_change_ua_every_request=True)
-    resp: SpiderResponse = client.get(url)
-    
-    # SpiderResponse 支持直接使用 xpath/css
-    title = resp.xpath('//title/text()').extract_first()
-    
-    data = {"url": url, "title": title}
-    # 一键入库
-    db_sink.save("article_table", data)
-    return data
-```
-
-### Skill 8：继承 BoosterParams（减少重复配置）
-**场景**：当项目中有多个消费函数时，通常会有大量重复的配置参数。通过继承 `BoosterParams` 创建自定义子类，可以避免在每个 `@boost` 装饰器中重复书写相同的配置。
-**模板**：
-```python
-from funboost import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum, ctrl_c_recv
-
-# 定义项目统一的配置子类
-class MyBoosterParams(BoosterParams):
-    broker_kind: str = BrokerEnum.REDIS_ACK_ABLE
-    max_retry_times: int = 3
-    concurrent_mode: str = ConcurrentModeEnum.THREADING
-    project_name: str = 'my_project'
-
-
-# 使用自定义配置类，无需每次都写重复参数
-@boost(MyBoosterParams(queue_name='task_queue_1'))
-def task1(x: int):
-    print(f"Task1: {x}")
-    return x * 2
-
-@boost(MyBoosterParams(queue_name='task_queue_3', qps=0.5))  # 特殊函数可单独覆盖配置
-def task3(report_type: str):
-    print(f"Generating {report_type} report")
-    return True
-
-
-if __name__ == '__main__':
-    task1.consume()
-    task3.consume()
-    ctrl_c_recv()
-```
-
-### Skill 9: 消费异构系统/第三方的任意 JSON 消息
-**场景**：消息不是由 Funboost 发布的（可能是 Java 部门直接写入 Redis 的），JSON 字段不固定或很多，只需要消费其中的某几个字段或全部原样接收。
-**模板**：
-```python
-from funboost import boost, BoosterParams, BrokerEnum, fct
-
-@boost(BoosterParams(
-    queue_name="java_topic_queue",
-    broker_kind=BrokerEnum.REDIS,
-    should_check_publish_func_params=False  # 核心：关闭严格的参数校验
-))
-def process_any_msg(**kwargs): # 一定要定义成 **kwargs 接收所有未知字段，不要企图用一个msg入参去接受消息队列中的json消息的多个字段。
-    # 使用 **kwargs 接收所有未知字段
-    print(f"接收到外部系统的完整字典: {kwargs}")
-    
-    # 也可以通过 fct.full_msg 获取包含框架 extra 信息的完整原始消息
-    print(f"原始完整消息: {fct.full_msg}")
-
-if __name__ == '__main__':
-    process_any_msg.consume()
-```
-
-### Skill 10: 自定义消费者拦截器 (Override Class)
-**场景**：用户希望在函数运行前后执行自定义逻辑（如特殊的数据清洗、自定义的全局限流器、自定义的结果入库机制）。
-**模板**：
-```python
-from funboost import boost, BoosterParams, AbstractConsumer, FunctionResultStatus
-
-# 1. 继承 AbstractConsumer 编写自定义逻辑
-class MyCustomConsumer(AbstractConsumer):
-    def _user_convert_msg_before_run(self, msg) -> dict:
-        # 在函数运行前，对消息进行清洗或反序列化
-        if isinstance(msg, str) and "=" in msg:
-            # 假设消息是 "a=1,b=2" 这种奇葩非 JSON 格式
-            return {k: int(v) for k, v in [pair.split('=') for pair in msg.split(',')]}
-        return super()._user_convert_msg_before_run(msg)
-        
-    def user_custom_record_process_info_func(self, function_result_status: FunctionResultStatus):
-        # 在函数运行后，自定义记录结果到特定数据库
-        if function_result_status.success:
-            print(f"自定义入库：任务 {function_result_status.task_id} 成功，耗时 {function_result_status.time_cost}")
-
-# 2. 通过 consumer_override_cls 挂载自定义类
-@boost(BoosterParams(
-    queue_name="custom_override_queue",
-    consumer_override_cls=MyCustomConsumer
-))
-def my_task(a: int, b: int):
-    return a + b
-```
-
-### Skill 11: 配置特定中间件专属参数 (`broker_exclusive_config`)
-
-**场景**：你需要为所选的消息队列中间件（如 RabbitMQ、Kafka、Redis）设置其特有的高级功能，例如：RabbitMQ 的消息优先级、Kafka 的消费者组或分区数、Redis Stream 的消费者组名等。这些配置无法通过通用的 `BoosterParams` 字段表达，必须通过 `broker_exclusive_config` 字典传递。
-
-**模板**：
-```python
-from funboost import boost, BoosterParams, BrokerEnum
-
-# 示例 1: RabbitMQ 启用消息优先级 (x-max-priority)
-@boost(BoosterParams(
-    queue_name="priority_queue",
-    broker_kind=BrokerEnum.RABBITMQ_AMQPSTORM,
-    broker_exclusive_config={
-        'x-max-priority': 5,      # 必须为整数，建议 ≤5
-        'no_ack': False,           # 是否自动确认
-    }
-))
-def priority_task(user_id: int):
-    print(f"Processing VIP user: {user_id}")
-    return True
-
-# 示例 2: Kafka 配置消费者组和分区数
-@boost(BoosterParams(
-    queue_name="kafka_topic",
-    broker_kind=BrokerEnum.KAFKA_CONFLUENT,
-    broker_exclusive_config={
-        'group_id': 'my_consumer_group',   # Kafka 消费者组
-        'auto_offset_reset': 'earliest',   # 从最早的消息开始消费
-        'num_partitions': 10,               # Topic 分区数（自动创建时有效）
-        'replication_factor': 1,             # 副本因子
-    }
-))
-def process_kafka_msg(data: dict):
-    print(f"Received from Kafka: {data}")
-
-```
-
-**注意事项**：
-- `broker_exclusive_config` 是一个字典，**只能包含所选 `broker_kind` 所支持的键**。支持的键定义在 `funboost/core/broker_kind__exclusive_config_default_define.py` 中（例如 `'x-max-priority'` 仅对 RabbitMQ 有效，对 Redis 无效）。
-- 如果传递了不支持的键，框架会发出警告，但不会阻止运行。为确保配置生效，请务必查阅对应中间件的文档或框架源码。
-
-
-### Skill 12: 启动 Funboost Web 管理器 (funboost_web_manager)
-**场景**：需要通过 Web 界面实时监控队列状态、消费速度、任务成功率等指标。
-
-**模板**：
-
-#### 方式1：命令行启动（推荐）
-```bash
-# 设置项目根目录到 PYTHONPATH
-# Linux/macOS
-export PYTHONPATH=/path/to/your/project
-# Windows (cmd)
-set PYTHONPATH=C:\path\to\your\project
-# Windows (PowerShell)
-$env:PYTHONPATH = "C:\path\to\your\project"
-
-# 启动 Web 管理器
-python -m funboost.funweb.app
-```
-
-#### 方式2：代码中启动
-```python
-from funboost.funweb.app import start_funboost_web_manager
-
-# 基础启动（默认端口 27018）
-start_funboost_web_manager()
-
-# 自定义端口和项目过滤
-start_funboost_web_manager(
-    port=8080,
-    care_project_name="my_project"  # 只显示该项目的队列
-)
-```
-
-
-
-
-### 🚨 Skill 100 : BoosterParams 配置参数字典 (AI 必读属性库)
-**重要提示**：这是 `BoosterParams` 的全量合法字段定义。**AI 在为用户生成 `@boost` 配置时，只能使用以下属性名，绝对禁止自行创造字典外不存在的参数名！**
-
-```python
-class BoosterParams(BaseJsonAbleModel):
-    """
-    掌握funboost 的精华就是知道 BoosterParams 的入参有哪些，如果知道有哪些入参字段，就掌握了funboost的 90% 用法。
-
-    pydatinc pycharm编程代码补全,请安装 pydantic插件, 在pycharm的  file -> settings -> Plugins -> 输入 pydantic 搜索,点击安装 pydantic 插件.
-
-    @boost的传参必须是此类或者继承此类,如果你不想每个装饰器入参都很多,你可以写一个子类继承BoosterParams, 传参这个子类,例如下面的 BoosterParamsComplete
-    """
-
-    queue_name: str  # 队列名字,必传项,每个函数要使用不同的队列名字.
-    broker_kind: str = BrokerEnum.SQLITE_QUEUE  # 中间件选型见3.1章节 https://funboost.readthedocs.io/zh-cn/latest/articles/c3.html
-
-    """ project_name是项目名，属于管理层面的标签, 默认为None, 给booster设置所属项目名, 用于对于在redis保存的funboost信息中，根据项目名字查看相关队列。
-    # 如果不设置很难从redis保存的funboost信息中，区分哪些队列名属于哪个项目。 主要是给web接口查看用。
-    # 一个项目的队列名字有哪些，是保存在redis的set中，key为 f'funboost.project_name:{project_name}'
-    # 通常配合 CareProjectNameEnv.set($project_name) 使用 ，它可以让你在监控和管理时“只看自己的一亩三分地“，避免被其他人的队列刷屏干扰。"""
-    project_name: typing.Optional[str] = None
-
-    """如果设置了qps，并且cocurrent_num是默认的50，会自动开了500并发，由于是采用的智能线程池任务少时候不会真开那么多线程而且会自动缩小线程数量。
-    具体看ThreadPoolExecutorShrinkAble的说明
-    由于有很好用的qps控制运行频率和智能扩大缩小的线程池，此框架建议不需要理会和设置并发数量只需要关心qps就行了，框架的并发是自适应并发数量，这一点很强很好用。"""
-    concurrent_mode: str = ConcurrentModeEnum.THREADING  # 并发模式,支持THREADING,GEVENT,EVENTLET,ASYNC,SINGLE_THREAD并发,multi_process_consume 支持协程/线程 叠加多进程并发,性能炸裂.
-    concurrent_num: int = 50  # 并发数量，并发种类由concurrent_mode决定
-    specify_concurrent_pool: typing.Optional[FunboostBaseConcurrentPool] = None  # 使用指定的线程池/携程池，可以多个消费者共使用一个线程池,节约线程.不为None时候。threads_num失效
-    
-    specify_async_loop: typing.Optional[asyncio.AbstractEventLoop] = None  # 指定的async的loop循环，设置并发模式为async才能起作用。 有些包例如aiohttp,发送请求和httpclient的实例化不能处在两个不同的loop中,可以传过来.
-    is_auto_start_specify_async_loop_in_child_thread: bool = True  # 是否自动在funboost asyncio并发池的子线程中自动启动指定的async的loop循环，设置并发模式为async才能起作用。如果是False,用户自己在自己的代码中去手动启动自己的loop.run_forever() 
-    
-    """qps:
-    强悍的控制功能,指定1秒内的函数执行次数，例如可以是小数0.01代表每100秒执行一次，也可以是50代表1秒执行50次.为None则不控频。 
-    设置qps时候,不需要指定并发数量,funboost的能够自适应智能动态调节并发池大小."""
-    qps: typing.Union[float, int, None] = None
-    """is_using_distributed_frequency_control:
-    是否使用分布式空频（依赖redis统计消费者数量，然后频率平分），默认只对当前实例化的消费者空频有效。
-    假如实例化了2个qps为10的使用同一队列名的消费者，并且都启动，则每秒运行次数会达到20。
-    如果使用分布式空频则所有消费者加起来的总运行次数是10。"""
-    is_using_distributed_frequency_control: bool = False
-
-    is_send_consumer_heartbeat_to_redis: bool = False  # 是否将发布者的心跳发送到redis，有些功能的实现需要统计活跃消费者。因为有的中间件不是真mq。这个功能,需要安装redis.
-    
-    # --------------- 重试配置 开始
-    """max_retry_times:
-    最大自动重试次数，当函数发生错误，立即自动重试运行n次，对一些特殊不稳定情况会有效果。
-    可以在函数中主动抛出重试的异常ExceptionForRetry，框架也会立即自动重试。
-    主动抛出ExceptionForRequeue异常，则当前 消息会重返中间件，
-    主动抛出 ExceptionForPushToDlxqueue  异常，可以使消息发送到单独的死信队列中，死信队列的名字是 队列名字 + _dlx。"""
-    max_retry_times: int = 3
-    
-    """
-    is_using_advanced_retry:
-    是否使用高级重试，高级重试支持指数退避重试。is_using_advanced_retry=True 时候，is_using_advanced_retry参数才能生效。
-
-
-    重试间隔有2种模式，requeue 模式 和 sleep 模式。
-    requeue模式: 将消息发回队列带延迟重试，立即释放线程,适合重试间隔大，防止长时间sleep占用线程导致降低了系统吞吐量。
-    sleep模式: 在当前线程/协程 sleep 重试，适合重试间隔小，并且消息数量少执行不频繁。此模式的sleep时候会占用工作线程/协程
-    
-    如果retry_base_interval= 1.0,retry_multiplier=2.0,retry_max_interval=60.0,则重试间隔为：
-    1s,2s,4s,8s,16s,32s,60s,60s,60s...
-    """
-    is_using_advanced_retry: bool = False  
-    advanced_retry_config :dict =  { 
-        'retry_mode': 'sleep', # 可以是 'sleep' 或 'requeue'，如果重试间隔大并且指数退避倍数大，那么应该使用requeue模式。因为sleep原地占用线程/协程降低服务吞吐量
-        'retry_base_interval': 1.0, # 基础重试间隔（秒）  1s,2s,4s,8s,16s,30s,30s,30s...
-        'retry_multiplier': 2.0, # 指数退避倍数 ，如果你想固定重试间隔，则设置为1.0
-        'retry_max_interval': 60.0, # 最大重试间隔上限（秒）
-        'retry_jitter': False, # 是否添加随机抖动
-    }
-    
-    is_push_to_dlx_queue_when_retry_max_times: bool = False  # 函数达到最大重试次数仍然没成功，是否发送到死信队列,死信队列的名字是 队列名字 + _dlx。
-    # --------------- 重试配置 结束
-
-    consuming_function_decorator: typing.Optional[typing.Callable[..., typing.Any]] = None  # 函数的装饰器。因为此框架做参数自动转指点，需要获取精准的入参名称，不支持在消费函数上叠加 @ *args  **kwargs的装饰器，如果想用装饰器可以这里指定。
-    
-    
-    """
-    function_timeout: 
-    超时秒数，函数运行超过这个时间，则自动杀死函数。为0是不限制。 
-    用户应该尽量使用各种三方包例如 aiohttp pymysql 自己的 socket timeout 设置来控制超时，而不是无脑使用funboost的function_timeout参数。
-    谨慎使用,非必要别去设置超时时间,设置后性能会降低(因为需要把用户函数包装到另一个线单独的程中去运行),而且突然强制超时杀死运行中函数,可能会造成死锁.
-    (例如用户函数在获得线程锁后突然杀死函数,别的线程再也无法获得锁了)
-    """
-    function_timeout: typing.Union[int, float,None] = None 
-    """
-    is_support_remote_kill_task:
-    是否支持远程任务杀死功能，如果任务数量少，单个任务耗时长，确实需要远程发送命令来杀死正在运行的函数，才设置为true，否则不建议开启此功能。
-    (是把函数放在单独的线程中实现的,随时准备线程被远程命令杀死,所以性能会降低)
-    """
-    is_support_remote_kill_task: bool = False  
-    
-    """
-    log_level:
-        logger_name 对应的 日志级别
-        消费者和发布者的日志级别,建议设置DEBUG级别,不然无法知道正在运行什么消息.
-        这个是funboost每个队列的单独命名空间的日志级别,丝毫不会影响改变用户其他日志以及root命名空间的日志级别,所以DEBUG级别就好,
-        用户不要压根不懂什么是python logger 的name,还去手痒调高级别. 
-        不懂python日志命名空间的小白去看nb_log文档,或者直接问 ai大模型 python logger name的作用是什么.
-    """
-    log_level: int = logging.DEBUG # 不需要改这个级别,请看上面原因
-    logger_prefix: str = ''  # 日志名字前缀,可以设置前缀
-    create_logger_file: bool = True  # 发布者和消费者是否创建文件文件日志,为False则只打印控制台不写文件.
-    logger_name: typing.Union[str, None] = ''  # 队列消费者发布者的日志命名空间.
-    log_filename: typing.Union[str, None] = None  # 消费者发布者的文件日志名字.如果为None,则自动使用 funboost.队列 名字作为文件日志名字.  日志文件夹是在nb_log_config.py的 LOG_PATH中决定的.
-    is_show_message_get_from_broker: bool = False  # 运行时候,是否记录从消息队列获取出来的消息内容
-    is_print_detail_exception: bool = True  # 消费函数出错时候,是否打印详细的报错堆栈,为False则只打印简略的报错信息不包含堆栈.
-    publish_msg_log_use_full_msg: bool = False # 发布到消息队列的消息内容的日志，是否显示消息的完整体，还是只显示函数入参。
-
-    msg_expire_seconds: typing.Union[float, int,None] = None  # 消息过期时间,可以设置消息是多久之前发布的就丢弃这条消息,不运行. 为None则永不丢弃
-
-    do_task_filtering: bool = False  # 是否对函数入参进行过滤去重.
-    task_filtering_expire_seconds: int = 0  # 任务过滤的失效期，为0则永久性过滤任务。例如设置过滤过期时间是1800秒 ， 30分钟前发布过1 + 2 的任务，现在仍然执行，如果是30分钟以内执行过这个任务，则不执行1 + 2
-
-    function_result_status_persistance_conf: FunctionResultStatusPersistanceConfig = FunctionResultStatusPersistanceConfig(
-        is_save_result=False, is_save_status=False, expire_seconds=7 * 24 * 3600, is_use_bulk_insert=False)  # 是否保存函数的入参，运行结果和运行状态到mongodb。这一步用于后续的参数追溯，任务统计和web展示，需要安装mongo。
-
-    user_custom_record_process_info_func: typing.Optional[typing.Callable[..., typing.Any]] = None  # 提供一个用户自定义的保存消息处理记录到某个地方例如mysql数据库的函数，函数仅仅接受一个入参，入参类型是 FunctionResultStatus，用户可以打印参数
-
-    is_using_rpc_mode: bool = False  # 是否使用rpc模式，可以在发布端获取消费端的结果回调，但消耗一定性能，使用async_result.result时候会等待阻塞住当前线程。
-    rpc_result_expire_seconds: int = 1800  # redis保存rpc结果的过期时间.
-    rpc_timeout:int = 1800 # rpc模式下，等待rpc结果返回的超时时间
-
-    delay_task_apscheduler_jobstores_kind :Literal[ 'redis', 'memory'] = 'redis'  # 延时任务的aspcheduler对象使用哪种jobstores ，可以为 redis memory 两种作为jobstore
-
-    
-    """
-    allow_run_time_cron:
-    只允许在规定的crontab表达式时间内运行。
-
-    例如 '* 23,0-2 * * *' 表示只在23点到2点运行。
-    allow_run_time_cron='* 9-17 * * 1-5', 表示只在周一到周五的9点到17:59:59运行。
-    为None则不限制运行时间。
-    语法是知名 croniter 包的语法，不是funboost创造的特殊语法，用户自己去google或者ai学习语法。
-    """
-    allow_run_time_cron: typing.Optional[str] = None
-
-    schedule_tasks_on_main_thread: bool = False  # 直接在主线程调度任务，意味着不能直接在当前主线程同时开启两个消费者。
-
-    is_auto_start_consuming_message: bool = False  # 是否在定义后就自动启动消费，无需用户手动写 .consume() 来启动消息消费。
-    
-    # booster_group :消费分组名字， BoostersManager.consume_group 时候根据 booster_group 启动多个消费函数,减少需要写 f1.consume() f2.consume() ...这种。
-    # 不像BoostersManager.consume_all() 会启动所有不相关消费函数,也不像  f1.consume() f2.consume() 这样需要逐个启动消费函数。
-    # 可以根据业务逻辑创建不同的分组，实现灵活的消费启动策略。
-    # 用法见文档 4.2d.3 章节.   使用 BoostersManager ,通过 consume_group 启动一组消费函数
-    booster_group:typing.Union[str, None] = None
-
-    consuming_function: typing.Optional[typing.Callable[..., typing.Any]] = None  # 消费函数,在@boost时候不用指定,因为装饰器知道下面的函数.
-    consuming_function_raw: typing.Optional[typing.Callable[..., typing.Any]] = None  # 不需要传递，自动生成
-    consuming_function_name: str = '' # 不需要传递，自动生成
-
-    
-    """
-    # 加上一个不同种类中间件非通用的配置,不同中间件自身独有的配置，不是所有中间件都兼容的配置，因为框架支持30种消息队列，消息队列不仅仅是一般的先进先出queue这么简单的概念，
-    # 例如kafka支持消费者组，rabbitmq也支持各种独特概念例如各种ack机制 复杂路由机制，有的中间件原生能支持消息优先级有的中间件不支持,
-    # 每一种消息队列都有独特的配置参数意义，可以通过这里传递。
-    # 每种中间件能传递的键值对可以看 funboost/core/broker_kind__exclusive_config_default.py 的 BROKER_EXCLUSIVE_CONFIG_DEFAULT 属性。
-    """
-    broker_exclusive_config: dict = {} 
-    
-
-
-    should_check_publish_func_params: bool = True  # 消息发布时候是否校验消息发布内容,比如有的人发布消息,函数只接受a,b两个入参,他去传2个入参,或者传参不存在的参数名字; 如果消费函数加了装饰器 ，你非要写*args,**kwargs,那就需要关掉发布消息时候的函数入参检查
-    manual_func_input_params :dict= {'is_manual_func_input_params': False,'must_arg_name_list':[],'optional_arg_name_list':[]} # 也可以手动指定函数入参字段，默认是根据消费函数def定义的入参来生成这个。
-
-
-    consumer_override_cls: typing.Optional[typing.Type] = None  # 使用 consumer_override_cls 和 publisher_override_cls 来自定义重写或新增消费者 发布者,见文档4.21b介绍，
-    publisher_override_cls: typing.Optional[typing.Type] = None
-
-    # func_params_is_pydantic_model: bool = False  # funboost 兼容支持 函数娼还是 pydantic model类型，funboost在发布之前和取出来时候自己转化。
-
-    consuming_function_kind: typing.Optional[str] = None  # 自动生成的信息,不需要用户主动传参,如果自动判断失误就传递。是判断消费函数是函数还是实例方法还是类方法。如果传递了，就不自动获取函数类型。
-    """ consuming_function_kind 可以为以下类型，
-    class FunctionKind:
-        CLASS_METHOD = 'CLASS_METHOD'
-        INSTANCE_METHOD = 'INSTANCE_METHOD'
-        STATIC_METHOD = 'STATIC_METHOD'
-        COMMON_FUNCTION = 'COMMON_FUNCTION'
-    """
-
-    """
-    user_options:
-    用户额外自定义的配置,高级用户或者奇葩需求可以用得到,用户可以自由发挥,存放任何设置.
-    user_options 提供了一个统一的、用户自定义的命名空间，让用户可以为自己的“奇葩需求”或“高级定制”传递配置，而无需等待框架开发者添加官方支持。
-    funboost 是自由框架不是奴役框架,不仅消费函数逻辑自由,目录层级结构自由,自定义奇葩扩展也要追求自由,用户不用改funboost BoosterParams 源码来加装饰器参数
-    
-    使用场景见文档 4b.6 章节.
-    """
-    user_options: dict = {} # 用户自定义的配置,高级用户或者奇葩需求可以用得到,用户可以自由发挥,存放任何设置,例如配合 consumer_override_cls中读取 或 register_custom_broker 使用
-    
-    
-    auto_generate_info: dict = {}  # 自动生成的信息,不需要用户主动传参.例如包含 final_func_input_params_info 和 where_to_instantiate 等。
-    
-    """# is_fake_booster：是否是伪造的booster,
-    # 用于faas模式下，因为跨项目的faas管理只拿到了redis的一些基本元数据，没有booster的函数逻辑，
-    # 例如ApsJobAdder管理定时任务，需要booster，但没有真实的函数逻辑，
-    # 你可以看 SingleQueueConusmerParamsGetter.gen_booster_for_faas 的用法，目前主要是控制不要执行 BoostersManager.regist_booster
-    # 普通用户完全不用改这个参数。
-    """
-    is_fake_booster: bool = False
-
-    # 普通用户不用管不用改，用于隔离boosters注册。例如faas的是虚假的跨服务跨项目的booster，没有具体函数逻辑，不可污染真正的注册。
-    # 如果你是想分组启动部分booster，那你应该用的是 booster_group 参数。
-    booster_registry_name: str = StrConst.BOOSTER_REGISTRY_NAME_DEFAULT  
-
-    
-```
-
-`````
-
---- **end of file: funboost/md_for_ai/funboost_ai_coding_编程指南_rules_and_skills.md** (project: funboost_docs) --- 
-
----
-
-
-
-## funboost 教程 标题大全：             
-`````text
-
-
-============================================================
-文件: c0.md
-============================================================
-  行5: # 0. Funboost 快速预览
-
-============================================================
-文件: c1.md
-============================================================
-  行2: # 1. Python  分布式函数调度平台 Funboost 简介
-  行16: ## 1.0 funboost 框架说明介绍
-  行37: ### 1.0.1 funboost 示意图
-  行40: #### 1.0.1.1 funboost 运行流程图
-  行48: #### 1.0.1.2 funboost 功能思维导图
-  行60: ### 1.0.2 快速了解和上手funboost，直接看[1.3例子](#13-框架使用例子)
-  行63: ### 1.0.3 funboost 框架安装方式
-  行72: ### 1.0.4 funboost 功能作用
-  行88: #### 1.0.4.1 Funboost 的适用场景
-  行116: #### 1.0.4.2 🤔 灵魂发问：Funboost 到底是什么？
-  行130: #### 1.0.4.3 💖 核心关切：值得我投入时间学习吗？
-  行137: #### 1.0.4.4 Funboost 与 Celery 的理念区别
-  行160: #### 1.0.4.5 Funboost 支持的并发模式
-  行167: #### 1.0.4.6 Funboost 支持的消息队列中间件 (Broker)
-  行184: #### 1.0.4.7 **funboost 学习难吗?**
-  行207: #### 1.0.4.8 📊 可视化监控与管理
-  行212: #### 1.0.4.9 🚀 性能表现：断层式领先
-  行218: #### 1.0.4.10 ⭐ 用户口碑与评价
-  行229: ## 1.1 📚 核心资源与文档导航
-  行231: ### 1.1.1 📝 项目文档入口
-  行244: #### 📖 文档章节速览
-  行258: ### 1.1.2 📦 源码与依赖
-  行265: ## 1.2 框架功能介绍
-  行279: ### 1.2.1 🆚 对比：Funboost 取代传统线程池
-  行283: #### ❌ 方式 A：手动开启线程池 (传统)
-  行299: #### ✅ 方式 B：Funboost 模式 (推荐)
-  行318: ### 1.2.2 🚀 任务控制功能矩阵
-  行322: #### 🌌 维度一：连接与架构 (Connectivity & Architecture)
-  行333: #### ⚡ 维度二：并发与吞吐 (Concurrency & Throughput)
-  行340: #### 🛡️ 维度三：可靠性保障 (Reliability)
-  行349: #### 🕹️ 维度四：流量治理 (Traffic Governance)
-  行359: #### 🎼 维度五：调度与编排 (Scheduling & Orchestration)
-  行366: #### 🔭 维度六：可观测性 (Observability)
-  行374: #### 🧬 维度七：开发体验 (Developer Experience)
-  行386: ## 1.3 🚀 快速上手：你的第一个 Funboost 程序
-  行394: ### 1.3.1 ✨ Hello World：最简单的任务调度
-  行439: ### 1.3.2 🔥 进阶实战：RPC、定时任务与丝滑连招
-  行519: ### 1.3.3 ✂️ 极简写法：省略 `@boost`
-  行530: ### 1.3.4 ❌ 过时写法： 直接在 @boost传各种配置入参，不推荐
-  行540: ## 🖥️ funweb (Funboost Web Manager) 界面预览
-  行564: ## 1.4 💡 为什么 Python 极其需要分布式函数计算？
-  行568: ### 1️⃣ 痛点一：GIL 锁的限制 (多核利用率低)
-  行576: ### 2️⃣ 痛点二：原生性能瓶颈 (动态语言特性)
-  行588: ## 1.5 🎓 最佳学习路径
-  行607: ## 1.6 🥋 funboost 练就吸星大法神功，一招吸走 Celery 毕生内力
-  行617: ### ⚔️ 降维打击：化繁为简的绝世武功
-
-============================================================
-文件: c10.md
-============================================================
-  行1: # 10.python3.6-3.12 安装/使用funboost出错问题反馈
-  行12: ## 10.0 框架与你项目依赖的三方包版本不一致冲突？
-  行28: ## 10.1 windwos安装后如果报错 ImportError: DLL load failed while importing win32file
-  行45: ## 10.2 启动消费后报错: RuntimeError: cannot schedule new futures after interpreter shutdown
-  行112: ## 10.3  文档1.3例子 BrokerEnum.PERSISTQUEUE,sqlite作为中间件例子在mac/linux运行,报错 read-only
-
-============================================================
-文件: c11.md
-============================================================
-  行1: # 11 funboost 使用某些中间件或三方任务队列框架作为broker的例子(包括celery框架)。
-  行10: ## 11.1 使用celery作为funboost的中间件
-  行32: ### 11.1.1 funboost启动celery消费和定时和flower
-  行107: ### 11.1.2 funboost发布任务到celery队列
-  行122: ### 11.1.3 funboost使用celery作为中间件的运行截图
-  行138: ### 11.1.4 funboost 的api 操作celery，比人工操作 celery 大大简化。
-  行153: ### 11.1.5 funboost 使用celery作为中间件时候，可以填写的celery任务配置
-  行168: ### 11.1.6 网上关于celery项目目录结构和文件夹/文件命名必须很死板， 是错的
-  行181: ### 11.1.7 仍然想使用celery命令行？
-  行198: ### 11.1.8 任然可以亲自使用celery的原生任务函数对象 `celery.app.task.Task`
-  行247: ### 11.1.10 funboost使用celery作为broker_kind的原理
-  行261: ## 11.2 使用nameko 微服务框架作为funboost消息中间件例子
-  行263: ### 11.2.1 nameko服务端脚本
-  行306: ### 11.2.2 nameko客户端脚本
-  行322: ### 11.2.3 funboost操作nameko能简化亲自使用nameko框架的语法
-  行329: ## 11.3 使用kombu作为funboost的broker
-  行370: ### 11.3.1 kombu操作rabbitmq作为funboost的消息队列
-  行439: ### 11.3.2 kombu+redis作为消息队列
-  行474: #### 11.3.2.b kombu + redis哨兵作为消息队列
-  行490: ### 11.3.3 kombu+sqlalchemy 作为消息队列
-  行535: ### 11.3.4 kombu+mongo作为消息队列
-  行568: ### 11.3.5 kombu+文件作为消息队列
-  行615: ## 11.4 使用dramatiq框架作为funboost消息队列
-  行661: ## 11.5 使用huey框架作为funboost消息队列
-  行697: ## 11.6 使用rq框架作为funboost的broker
-  行747: ## 11.7 使用 grpc 作为funboost的broker
-  行810: ## 11.8 使用 mysql_cdc 作为 funboost 的broker
-  行940: ## 11.9 演示 funboost 使用 tcp/udp/http 作为broker
-  行969: ## 11.10 Watchdog Broker：监听文件系统变更（ETL 利器）
-  行987: ### 11.10.1 核心配置说明
-  行1000: ### 11.10.2 代码示例
-  行1144: ### 11.10.3 特性深度解析
-  行1146: #### 11.10.3.1 关于 `existing` 事件
-  行1153: #### 11.10.3.2 关于 `read_file_content`
-  行1157: #### 11.10.3.3 关于 `debounce_seconds`
-
-============================================================
-文件: c12.md
-============================================================
-  行1: # 12 funboost 控制台支持命令行
-  行18: ## 12.0 funboost命令行使用fire实现
-  行24: ## 12.1  命令行分为调用funboost包内命令和用户自身项目的命令行
-  行26: ### 12.1.1 funboost自身命令行,python -m funboost  是自动调用 funboost的 __main__.py 的fire命令行
-  行28: ### 12.1.2 用户项目根目录下的  funboost_cli_user.py 的文件可以接受命令行传参
-  行40: ### 12.1.3 python -m funboost 和 python 项目根目录/funboost_cli_user.py 传参不同点
-  行55: ## 12.2 funboost命令行指定消费函数所在的模块或文件夹
-  行67: ## 12.3 打印发现的用户定义的@boost消费函数
-  行90: ## 12.4 funboost命令行清空消息队列
-  行97: ## 12.5 funboost命令行给一个队列发布消息
-  行108: ## 12.6 funboost命令行启动多个queue消费者
-  行118: ### 12.6.b  funboost命令行启动所有queue消费者,用户无需指定队列名
-  行128: ## 12.7 funboost命令行暂停消费
-
-============================================================
-文件: c13.md
-============================================================
-  行8: # 13  funweb (funboost web manager) 介绍
-  行16: ## 13.1 介绍 启动 funweb (funboost web manager) (方式一)。
-  行44: ### 13.1.b 直接在代码中启动web start_funboost_web_manager() (方式二)：
-  行53: ## 13.2 funweb 截图
-  行100: ## 13.3 funboost web 图片对应的测试代码
-  行170: ## 13.4 funweb 系统功能-脚本部署管理（爽功能）
-  行193: ### 13.4.1 核心功能
-  行203: ### 13.4.2 使用方式
-  行222: #### 13.4.2.2 funboost 查看日志按时间筛选范围说明
-  行229: ### 13.4.3 funweb 脚本部署功能说明
-  行236: ### 13.4.4 脚本部署功能截图
-  行247: ### 13.4.5 降维打击：funweb 脚本部署为何完爆 Supervisor？
-  行253: #### 13.4.5.1. 📝 纯 Web 可视化配置，告别反人类的 `.ini` 与环境变量地狱
-  行258: #### 13.4.5.2. ⚡️ 堪比 ELK 的神级日志检索（百G日志，毫秒级响应）
-  行263: #### 13.4.5.3. 🚀 内置 CI/CD：兼具“发版平台”能力
-  行269: #### 13.4.5.4. 🛡️ 进程防误杀机制：解决 PID 复用的终极痛点
-  行273: #### 13.4.5.5. 🏥 智能健康检查与“秒退”精准诊断
-  行278: #### 13.4.5.6. 💻 真正的跨平台支持与“零特权”部署 (Win/Linux 双端通吃)
-  行284: #### 13.4.5.7. 👁️ 告别黑箱，极致的透明操作反馈
-  行292: ### 13.4.6 funweb 是否支持远程部署（部署到其他机器）？
-  行304: #### 13.4.6.2 Funboost 部署 vs 传统 Jenkins 发版平台：为什么我们选择“本地化”？
-  行319: ### 13.4.7 降维打击：Funboost Web 部署比直接用 Xshell 爽在哪里？
-  行323: #### 13.4.7.1. 🔌 告别繁琐的登录与“断连焦虑”
-  行327: #### 13.4.7.2. 🖱️ 零门槛“傻瓜式”操作，彻底解放开发者
-  行331: #### 13.4.7.3. 👁️ 拒绝“黑盒启动”，所见即所得的存活监控
-  行335: #### 13.4.7.4. 📖 降维打击的日志查阅体验，终结反人类的 `grep`
-  行342: #### 13.4.7.5. 🛡️ 自带“死而复生”的进程守护，远超脆弱的 `nohup`
-  行346: #### 13.4.7.6. 🧬 配置资产沉淀，告别“祖传 txt 小本本”
-  行350: #### 13.4.7.7. 🎯 精准狙击 PID，彻底杜绝“同名误杀”惨案
-  行354: #### 13.4.7.8. ⚖️ 傻瓜式的一键“多进程”横向扩容
-  行359: ## 13.5 funweb 系统功能-资源监控
-  行370: ## 13.6 📖 funweb 系统功能 - 通用日志查看器
-  行374: ### 13.6.2 ✨ 功能亮点
-
-============================================================
-文件: c14.md
-============================================================
-  行1: # 14 🏅[懒人必看章节] 利用ai来掌握 funboost 的 正确方式
-  行16: ## 14.0 🤬 [高能预警]在此章节最开头，先允许我用最恶毒的语言来**刺激骂醒**一部分又懒又蠢的懒癌患者的大脑皮层！
-  行32: ### 14.0.1 🧠 脑残行为大赏
-  行56: ### 14.0.2 🚫 别拿通用框架的经验来羞辱我的智商
-  行66: ### 14.0.3 ❌ [严重警告] 懒癌患者请把下面这几点刻在脑门上！
-  行76: ### 14.0.4 ✅ ai掌握funboost的唯一正确的路径
-  行88: ### 14.0.5 🤬 当我问你怎么使用ai时候，你最少要回答200字到底是怎么使用ai的，别踏马就简单的说:"我已经用ai来问funboost问题了"
-  行103: ## 14.0b 推荐一个在ai时代 神级别黑科技掌握任意非知名的it项目的方式 nb_ai_context
-  行118: ## 14.0c 为什么要专门写第14章这个教程？
-  行125: ## 14.0d 各个 ai 掌握funboost 能力评分
-  行138: ## funboost_all_docs_and_codes.md 文档说明
-  行140: ### 14.1.1 一定要上传markdown文档再提问
-  行146: ### 14.1.2 funboost 的 markdown文档地址说明
-  行158: ### 14.1.3 funboost的ai markdown文档是使用神级别 ai上下文生成工具 nb_ai_context 生成的
-  行169: ### 14.1.4 公布 funboost ai上下文 markdown 文档的生成方式
-
-============================================================
-文件: c15.md
-============================================================
-  行2: # 15. ⚡ Funboost.FaaS：让函数起飞的 Serverless 引擎
-  行12: ## 15.1 🌟 架构质变：从 Worker 到 Service
-  行24: ## 15.2 💎 核心特性：六大“无限宝石”
-  行26: ### 🔌 **开箱即用 (Out-of-the-Box)**
-  行30: ### 🔥 **无缝热发布 (Hot Discovery)**
-  行36: ### 🔄 **RPC 同步调用 (HTTP-RPC Bridge)**
-  行40: ### 🧬 **全自动参数校验**
-  行43: ### ⏱️ **可编程调度中心**
-  行47: ### 📊 **全景透视能力**
-  行52: ## 15.3 🌌 深度发散：从“任务队列”到“无服务器计算平台”
-  行68: ## 15.4 🛠️ 核心原理：为什么它能"以一当百"？
-  行70: ### ❌ 痛点：传统的"硬编码"地狱
-  行84: ### ✅ Funboost 解法：基于元数据的动态代理
-  行96: ## 15.5 📚 API 接口清单 (Swagger 开箱即用)
-  行101: ### 15.5.1. 📨 消息发布与结果查询
-  行111: ### 15.5.2. 🔍 服务发现与元数据 (FaaS 核心)
-  行121: ### 15.5.3. ⚙️ 队列运维与全景监控
-  行134: ### 15.5.4. ⏰ 动态定时任务编排
-  行148: ### 15.5.5. 🎛️ Scheduler 调度器控制
-  行158: ### 15.5.6. 🏷️ 项目筛选 (care_project_name)
-  行170: ### 15.5.10. 📄 Swagger接口文档
-  行178: ## 15.6 💻 快速接入指南
-  行180: ### 15.6.1 FastAPI 接入 (推荐 🌟)
-  行201: ### 15.6.2 Flask 接入
-  行217: ### 15.6.3 Django 接入 (使用 Django-Ninja)
-  行235: ### 15.6.4 权限控制 (Security)
-  行253: ## 15.7 🎯 调用示例
-  行255: ### 场景：通过 Curl 发布一个 RPC 任务并等待结果
-  行332: ## ⚠️💡 15.8 注意事项
-  行339: ## 🧪 15.9 funboost.faas 演示例子
-  行363: ### 15.9.2 如何测试测试函数自动发现？
-  行371: ## ⏰ 15.10 funboost.faas 定时任务管理 —— 架构级解耦的调度中心(完爆传统 APScheduler 管理)
-  行379: ### 15.10.1 🥊 核心差异：为什么完爆传统 APScheduler 管理？
-  行394: ### 15.10.2 🚀 Funboost 的解决方案：彻底解耦
-  行415: ### 15.10.3 🛠️ 接口能力概览
-  行429: ### 15.10.4 💻 调用示例：完全黑盒化的管理
-  行448: #### 1. 动态添加任务 (无需代码引用)
-  行476: #### 2. 管理任务
-  行488: ### 15.10.5 ⚙️ 技术原理：为什么能做到？
-  行502: ### 15.10.6 总结
-  行509: ## 15.11 funboost.faas 为什么比传统Web框架写接口更爽？
-  行516: ### 15.11.1 传统 Django/Flask 的尴尬："脱了裤子放屁"
-  行542: ### 15.11.2 funboost.faas 的设计哲学：函数即接口
-  行565: ### 15.11.3 代码量对比
-  行577: ### 15.11.4 上新功能流程对比
-  行589: ### 15.11.5 最爽的几个点
-  行591: #### 15.11.5.1 真正的"写完即上线"
-  行601: #### 15.11.5.2 Web 网关 = 万能入口
-  行607: #### 15.11.5.3 天然支持异步和 RPC
-  行614: #### 15.11.5.4 跨团队协作超方便
-  行622: ### 15.11.6 什么场景传统方式更合适？
-  行636: ### 15.11.7 本质区别
-
-============================================================
-文件: c16.md
-============================================================
-  行1: # 16  对funboost的评价
-  行3: ## 16.0 个人用户对funboost的评价
-  行11: ## 16.1 google ai studio + gemini-pro 对funboost的评价
-  行113: ## 16.3 腾讯ima-deepseek 对funboost的评价
-  行121: ### 🧠 **核心战略思想：自由赋能，拒绝奴役**
-  行128: ### 🌉 **战略桥梁：打通“离线任务”与“在线服务”的任督二脉**
-  行136: ### 🧩 **战略抽象：万物皆可调度，万物皆可为 Broker**
-  行144: ### ⚡ **战略性能：数量级领先的代差优势**
-  行155: ### 🎯 **战略价值：开发者生产力的核聚变**
-  行163: ### 🏆 **总结：升维的架构哲学**
-  行171: ## 16.4 qwen3-max 对funboost的评价
-
-============================================================
-文件: c2.md
-============================================================
-  行1: # 2. 对比celery框架
-  行10: ## 2.0 funboost 是不是抄袭celery的源码?
-  行17: ## 2.1 celery对目录层级文件名称格式要求很高
-  行81: ## 2.2 性能远远超过celery20倍以上（使用初中的严格控制变量法）
-  行91: ## 2.3 celery的重要方法全部无法ide自动补全提示
-  行134: ## 2.4 比celery强的方面的优势大全
-  行136: ### 2.4.1 funboost对win linux mac 都支持
-  行146: ### 2.4.2 funboost万物皆可为broker，支持消息队列种类远超celery
-  行160: ### 2.4.3 funboost性能远超celery几十倍，性能不在一个数量级。
-  行167: ### 2.4.4 使用funboost框架时候，代码在ide自动补全暴击使用celery。
-  行178: ### 2.4.5 funboost 无需使用难记复杂的命令行启动消费。
-  行185: ### 2.4.6 框架不依赖任何固定的目录结构，无结构100%自由。
-  行193: ### 2.4.7 funboost框架比celery更简单10倍
-  行199: ### 2.4.8 funboost的消息格式比celery更容易自己构造
-  行207: ### 2.4.9 celery目录结构限制严格，不规范目录结果层级使用难度高。
-  行227: ### 2.4.10 funboost学习难度远低于celery
-  行237: ### 2.4.11 funboost原生支持 asyncio ，支持async def 函数
-  行250: ### 2.4.12 funboost比celery对函数的辅助运行控制方式更多
-  行257: ### 2.4.13 funboost能分布式qps全局控频，celery不能
-  行268: ### 2.4.14 funboost自带内置一键启动多进程，celery无法。
-  行275: ### 2.4.15 funboost 限速控频精准度远高于celery
-  行282: ### 2.4.16 funboost日志的颜色和格式，远超celery。
-  行288: ### 2.4.17  funboost内置支持python代码级别的一键远程linux机器消费部署
-  行295: ### 2.4.18 funboost 直接支持类/实例方法作为消费函数，celery只支持静态方法/函数
-  行301: ### 2.4.19 funboost支持多进程叠加 多线程或者协程，是叠加的。 celery只能gevent/threading和多进程二选一。
-  行309: ### 2.4.20 funboost 队列路由配置直观度和简易度暴击celery，celery的队列路由配置是劝退新手的第一步。
-  行362: ### 2.4.21 funboost的配置方式吊打celery
-  行370: ### 2.4.22 funboost 能非常容易的扩展用户自己的任何中间件作为broker，celery无法做到。
-  行395: ### 2.4.23 funboost 强大的的fct上下文，完胜celery 装饰器的bind=True侵入式设计
-  行419: ### 2.4.24 funboost全流程支持asyncio生态，celery望尘莫及
-  行430: ### 2.4.25 funboost作者的自定义线程池能自动伸缩，完胜。
-  行439: ### 2.4.26 funboost死信队列机制更完善：
-  行445: ### 2.4.27 funboost可以消费一切任意json消息(无论json包含什么keys)，celery无法识别
-  行467: ### 2.4.28 更强力灵活的,funboost 可以消费一切任意不规范格式的消息(非json也能消费), celery完全不可行.
-  行482: ### 2.4.29 funboost等待任务完成机制：提供了 wait_for_possible_has_finish_all_tasks() 方法
-  行490: ### 2.4.30 funboost无需 框架专用插件
-  行495: ### 2.4.31 funboost的定时任务比celery更强，能动态添加删除 和 多点部署。
-  行541: ### 2.4.32 funboost + REDIS_ACK_ABLE ack能力 吊打celery + redis + ack + visibility_timeout (小细节)
-  行571: ### 2.4.33 funboost: 通过继承 BoosterParams 实现显式配置（清晰度爆表）
-  行606: ### 2.4.34 funboost可以是事件驱动平台,远超celery传统消息队列能力
-  行625: ### 2.4.35 funboost可以作为万能发布者对几十种消息队列发布原始消息内容,celery会对消息转换添油加醋
-  行642: ### 2.4.36 funboost 自带 faas 功能，一键实现函数动态发现和 Faas
-  行653: ### 2.4.37 funboost的用户自定义扩展比celery更容易,更彻底
-  行665: ### 2.4.38 funboost支持微批消费
-  行669: ### 2.4.40 （王炸）funboost 支持celery作为broker_kind
-  行686: ## 2.4b 讨Celery檄：Funboost十胜定乾坤，函数王朝开天命
-  行694: #### 十胜十败·定鼎九州
-  行738: #### 弑王绝刃·乾坤倒转：
-  行764: ## 2.5 funboost能支持celery整体框架作为broker_kind
-  行788: ## 2.6 funboost 和 celery 性能比较源码（控制变量法）
-  行797: ### 2.6.1 `funboost` vs `celery` 控制变量法说明
-  行810: ### 2.6.2 `funboost` vs `celery` 发布性能对比
-  行818: ### 2.6.3 `funboost` vs `celery` 消费性能对比
-  行826: ### 2.6.4 `funboost` vs `celery` 总体性能对比
-  行834: ### 2.6.7 funboost VScelery benchmark对比源代码直接贴出来
-  行841: #### 2.6.7.1 celery的跑分源码
-  行883: #### 2.6.7.2 funboost的跑分源码
-  行922: ### 2.6.8 驳斥小白说 celery 在单核机器(或单进程)每分钟可以执行100万个消息
-  行934: #### 什么情况下celery单核机器上能达到每分钟执行100万个消息?
-  行941: ### 2.6.9 【！更新】2026-01最新funboost极限性能优化，发布和消费性能提升120%
-  行967: ## 2.7 rq  celery  funboost 段位比较
-  行989: ### 2.7.1**倔强青铜：RQ (Redis Queue)**
-  行1005: ### 2.7.2**荣耀黄金：Celery**
-  行1024: ### 2.7.3 **传奇王者：Funboost**
-  行1046: ## 2.8 celery 和 funboost 分别将加减乘除作为消费函数完整例子，哪个框架更好用，你自己判断！
-  行1050: ### 2.8.1 funboost 来实现加减乘除
-  行1052: #### 2.8.1.1 Funboost 项目演示（简洁配置）
-  行1065: #### 2.8.1.2 funboost代码文件内容
-  行1179: ### 2.8.2 Celery 项目演示（复杂配置）
-  行1181: #### 2.8.2.1 celery项目文件树
-  行1203: #### 2.8.2.2 Celery代码文件内容
-  行1379: #### 2.8.2.3 Celery 运行说明
-  行1401: ### 2.8.3 对比总结：哪个框架更容易使用？
-  行1403: #### 2.8.3.1 Celery 配置复杂性突出体现：
-  行1429: #### 2.8.3.2 Funboost 简洁性体现：
-  行1436: #### 2.8.3.3 结论
-  行1456: #### 2.8.3.4 说明，celery有稍微简单不爱出错的方式
-  行1461: ## 2.9 funboost到底为什么性能比celery高几十倍？太离谱了,太假了是吗？
-  行1483: ## 2.20 funboost 比 celery 的战略优势和 战术优势
-  行1489: ### 2.20.1 一、 战略优势 (Strategic Advantages)
-  行1492: #### 2.20.1.1 架构定位：FaaS 微服务平台 vs 传统任务队列
-  行1497: #### 2.20.1.2 设计哲学：自由赋能 vs 框架奴役
-  行1502: #### 2.20.1.3 兼容性格局：万物皆 Broker vs 依赖 Kombu
-  行1510: #### 2.20.1.4 技术栈前瞻性：原生 Asyncio vs 伪异步
-  行1516: ### 2.20.2 二、 战术优势 (Tactical Advantages)
-  行1519: #### 2.20.2.1 性能表现：多维叠加并发 vs 单一模式
-  行1525: #### 2.20.2.2 控频能力：精准令牌桶 vs 模糊限制
-  行1531: #### 2.20.2.3 可靠性：心跳 ACK vs 超时重发
-  行1535: #### 2.20.2.4 开发体验：IDE 友好 vs 字符串魔法
-  行1539: #### 2.20.2.5 运维能力：内置可视化 vs 第三方插件
-  行1546: ### 2.20.3 总结
-
-============================================================
-文件: c20.md
-============================================================
-  行1: # 20. Funboost 核心思想：一场关于“函数解放”的革命 🌪️(gemini生成总结)
-  行10: ## 20.1 🗽 核心哲学：拒绝“框架奴役”，拥抱“函数至上”
-  行16: ### 20.1.1 👑 函数即国王 (Function is King)
-  行23: ### 20.1.2 🔓 极致的自由主义 (Absolute Freedom)
-  行27: ## 20.2 🔌 万物皆可 Broker，打破时空界限
-  行31: ### 20.2.1 🌌 Broker 的终极抽象：万物互联
-  行40: ### 20.2.2 ⚡ 并发模式的“核武库”
-  行50: ## 20.3 🚀 Funboost.FaaS：从“后台任务”到“云原生微服务” (New!)
-  行54: ### 20.3.1 🌐 秒变 Serverless 计算平台
-  行67: ### 20.3.2 🔥 热更新与动态架构
-  行71: ## 20.4 🛡️ 精确的暴力美学：可靠性与控制
-  行75: ### 20.4.1 🎯 QPS 控频：时间的主人
-  行80: ### 20.4.2 🧱 叹息之墙：万无一失的消息确认
-  行85: ## 20.5 🧠 为什么说 Funboost 是“高维生物”？
-  行95: ## 20.6 👑 终极定义：Funboost 是什么？
-
-============================================================
-文件: c3.md
-============================================================
-  行1: # 3.框架详细介绍
-  行4: ## 3.1 各种中间件选择的场景和优势
-  行202: ## 3.2 框架支持的函数调度并发模式种类详细介绍
-  行217: # 这种是多进程方式，一次编写能够兼容win和linux的运行。
-  行232: ## 3.3 框架最最重要的boost装饰器的BoosterParams参数入参大全
-  行460: ### 3.3.1 funboost_config.py 配置文件内容
-  行474: # -*- coding: utf-8 -*-
-  行585: ### 3.3.2 funboost 重要公有方法大全介绍
-  行635: ### 3.3.3 boost装饰器 的 concurrent_num 和 qps 之间的关系。
-  行686: ## 3.4 框架的乞丐精简版实现方式
-  行729: ## 3.5 框架的任务消费确认
-  行752: ## 3.6 框架的设计规范原则
-
-============================================================
-文件: c4.md
-============================================================
-  行1: # 4. 🔑 使用框架的各种代码示例(学习funboost用法最重要的章节)
-  行9: ## 4.0 框架最重要的@boost装饰器的入参格式说明
-  行11: ### 4.0.1 老的 @booost 直接传入多个参数方式
-  行18: ### 4.0.2 新的@ boost 只传入一个 pydantic Model BoostParams 类型或子类 的入参
-  行28: ### 4.0.3 pydantic model 的 BoosterParams 的入参pycharm下自动补全
-  行40: ### 4.0.4 关于很多funboost 例子的@boost 使用直接入参,没有使用 pydantic Model类型的BoostParams
-  行45: ### 4.0.5 自定义子类继承 BoosterParams,使得每次少传参
-  行79: ## 4.1 装饰器方式调度函数
-  行101: ## 4.2c 在函数内部无限次按照队列名动态生成booster(消费者、生产者) (非装饰器方式)
-  行171: ## 4.2d 框架的 BoostersManager boosters管理介绍
-  行189: ### 4.2d.2 使用 BoostersManager 一次性启动所有队列消费,
-  行240: ### 4.2d.3 使用 BoostersManager ,通过 consume_group 启动一组消费函数
-  行330: ### 4.2d.4 使用 BoostersManager ,通过queue_name 得到 booster对象
-  行336: ## 4.2e funboost 支持实例方法、类方法、静态方法、普通函数 4种类型，作为消费函数的例子
-  行340: ## 4.3a 演示如何解决多个步骤的消费函数
-  行378: ## 4.3.b 演示多个函数消费者使用同一个线程池
-  行425: ## 4.3c 演示清空消息队列和获取消息队列中的消息数量
-  行462: ## 4.4 演示funboost定时运行例子
-  行488: ### 4.4.0 funboost定时任务最基本原理说明
-  行522: ### 4.4.1 funboost定时任务代码演示：
-  行640: ### 4.4.2 ApsJobAdder对象.aps_obj 核心对象说明
-  行660: ### 4.4.3 演示在python web中定时任务的添加 （添加和执行定时任务分在不同的py脚本中）
-  行709: ## 4.4.4 新增的 支持 aps_obj.add_job 添加定时任务(可以不用 add_push_job) (2025-08)
-  行731: # 定义任务处理函数
-  行799: # qps=5，is_using_distributed_frequency_control=True 分布式控频每秒执行5次。
-  行800: # 如果is_using_distributed_frequency_control不设置为True,默认每个进程都会每秒执行5次。
-  行985: # 以非等待方式获取mongo中函数的结果。
-  行1102: # 在pycahrm控制台搜索 某一秒的时间戳 + 计算 作为关键字查询，分布式函数调度框架启动5秒后，以后持续每一秒都是100次，未出现过99和101的现象。
-  行1238: ### 4.8.2 使用分布式函数调度框架，无论接口耗时多少，轻松达到8qps的例子
-  行1283: ### 4.8.3  并发数量和qps(每秒执行多少次)之间的区别
-  行1306: ## 4.9 演示延时运行任务
-  行1408: ## 4.10 在web中如flask fastapi django 如何搭配使用消费框架的例子。
-  行1457: ## 4.11 保存消费状态和结果包mongo，开启消费状态结果的web页面
-  行1459: ### 4.11.1 保存消费状态和结果到mongodb
-  行1515: ### 4.11.2 框架是可以自动保存消费状态/结果到mongo，你想保存到MySQL?
-  行1523: #### 4.11.2.b  作者自己贡献一个吧函数消费状态保存到mysql的函数,(2024.02新增)
-  行1620: ### 4.11.3 可视化，启动python分布式函数调度框架之函数运行结果状态web
-  行1624: ## 4.12 框架 asyncio 方式运行协程
-  行1628: ### 4.12.1 concurrent_mode=ConcurrentModeEnum.ASYNC 运行协程
-  行1646: ### 4.12.2 concurrent_mode=ConcurrentModeEnum.THREADING 运行asyncio协程
-  行1673: ## 4.13 跨项目怎么发布任务或者获取函数执行结果(即不定义@boost消费函数就发送消息)？
-  行1750: ## 4.13b 彩蛋!!不使用funboost的消费功能,funboost作为各种消息队列的万能发布者
-  行1786: ## 4.14 获取消费进程信息的方法(用于排查查看正在运行的消费者)
-  行1825: ## 4.16 文件日志所在的地方
-  行1838: ### 4.16.1 没亲自指定 日志文件名
-  行1849: ### 4.16.2 亲自指定日志文件名,log_filename的值
-  行1906: ### 4.16.3 把用户自己的业务日志和funboost框架日志写到同一个文件
-  行1915: ## 4.16.4 funboost 日志由 nb_log 提供。
-  行1921: ## 4.17 判断函数运行完所有任务，再执行后续操作
-  行1983: ## 4.18 暂停消费
-  行2034: ## 4.19 用户自定义记录函数消费 状态/结果 钩子函数
-  行2077: ### 4.19.b 自定义保存函数消费状态结果到mysql/sqlite/pgsql请看4.11.2.b的章节
-  行2079: ## 4.20 通过 broker_exclusive_config 参数 设置不同中间件能使用到的差异化独特配置
-  行2102: ### 4.20.2 怎么知道每种消息队列 broker_exclusive_config 能支持哪些独有特殊的参数配置
-  行2112: ## 4.21 【funboost完全自由定制扩展（方式1）】 使用 register_custom_broker 完全彻底自由灵活自定义扩展和定制修改中间件(消费者和发布者)
-  行2162: ## 4.21b 【完全自由定制扩展(方式2)】,使用 consumer_override_cls 和 publisher_override_cls 来自定义消费者 发布者。
-  行2166: ### 4.21b.1 重写某些方法的例子
-  行2221: ### 4.21b.2 完全实现新增中间件类型.
-  行2311: ### 4.21b.3 funboost的用户自定义扩展比celery更容易,更彻底
-  行2325: ## 4.21c 不想吃苦？让ai来帮你扩展funboost中间件或者定制运行逻辑
-  行2333: ### 4.21c.2 假设你要使用python内置的list作为 funboost的消息队列：
-  行2348: #### 4.21c.2.2 说个ai使用技巧秘密，网页版ai大模型生成funboost代码 吊打编程 ide中的 ai大模型和claude code
-  行2371: ## 4.23 演示funboost框架是如何代替用户手写调用线程池的
-  行2424: ## 4.24 设置消费函数重试次数
-  行2450: ### 4.24.1 抛出ExceptionForRequeue类型错误，消息立即重回消息队列
-  行2470: ### 4.24.2 抛出 ExceptionForPushToDlxqueue 类型错误，消息发送到单独另外的死信队列中
-  行2489: ### 4.24.3  设置is_push_to_dlx_queue_when_retry_max_times,重试到max_retry_times最大次数没成功发送到死信队列
-  行2496: ### 4.24.4 (内置辅助)将一个消息队列中的消息转移到另一个队列
-  行2518: ### 4.24.5 funboost 高级重试：指数退避重试
-  行2532: #### 4.24.5.1 `advanced_retry_config` 参数详解
-  行2542: #### 4.24.5.2 示例：配置一个典型的指数退避
-  行2570: ## 4.25 push 和 publish 发布消息的区别
-  行2575: ### 核心区别对比
-  行2584: ### 代码演示与说明
-  行2622: ## 4.26 性能调优演示
-  行2645: ### 4.26.1 在一个进程中启动多个函数的消费，适合轻型任务
-  行2657: ### 4.26.2 在多个进程中启动函数的消费，适合一次启动大量函数的消费或重型任务
-  行2673: ## 4.28 funboost 支持celery框架整体作为funboost的broker (2023.4新增)
-  行2740: ## 4.29 funboost支持任务优先级队列
-  行2744: ### 4.29.1 队列支持优先级的说明：
-  行2754: ### 4.29.2 优先级通俗理解，用食堂打饭比喻：
-  行2769: ### 4.29.3 队列支持任务优先级的代码主要有三点：
-  行2783: ### 4.29.4 队列支持任务优先级的代码如下：
-  行2812: ### 4.29.5 消息队列优先级是针对一个queue内消息的，那么怎样才能实现不同函数之间的按优先级运行？
-  行2876: ## 4.30 funboost 远程杀死(取消)任务
-  行2894: ### 4.30.1 funboost远程杀死函数的代码例子
-  行2939: ### 4.30.2 远程强制杀死函数、超时自动杀死(function_timeout设置不为0)， 这两个功能要注意死锁：
-  行2967: ### 4.30.2.b 如果想启用funboost函数超时自动杀死功能或者 远程杀死函数功能，推荐消费函数中使用可过期锁 expire_lock
-  行2978: ## 4.31 神级别 fct (funboost_current_task) 上下文获取当前消息和任务状态
-  行3049: ## 4.32 重磅更新！！！ funboost 独家新增支持实例方法和类方法作为消费函数
-  行3057: ### 4.32.0 !!! 实例方法和类方法作为funboost任务时候，push方法需要特别注意第一个入参。
-  行3094: ### 4.32.1 funboost 支持实例方法和类方法作为消费函数的原理
-  行3144: ### 4.32.2 funboost 支持实例方法、类方法、静态方法、普通函数 4种类型，作为消费函数的例子
-  行3217: ## 4.33  @boost设置is_auto_start_consuming_message，自动启动消费。
-  行3244: ## 4.34 pyinstaller 打包 funboost项目为exe 的说明
-  行3250: ## 4.35 演示 funboost 的函数入参过滤功能
-  行3293: ### 4.35.2 警告！！！: funboost的 rpc功能和 函数入参过滤过滤 不要同时使用
-  行3302: ## 4.35c 使用 nb_cache 作为缓存装饰器
-  行3304: ### 4.35c.1 为什么 要用 nb_cache 而不是 funboost 自带的 do_task_filtering
-  行3313: ### 4.35c.2 nb_cache 功能比 funboost自带的 do_task_filtering 全面太多了
-  行3320: #### 4.35c.2.2 举个例子 nb_cache 的防止缓存击穿为什么吊打 funboost的 do_task_filtering
-  行3328: ### 4.35c.2 如何在 funboost 中使用 nb_cache
-  行3335: #### 4.35c.2.1 方式一，@boost 和 @cache 叠加使用
-  行3362: #### 4.35c.2.2 方式二 cache 装饰器传给 funboost 的 `consuming_function_decorator`
-  行3393: ## 4.36 演示`funboost`入参可以是自定义类型(不可json序列化的类型的入参,自动使用pickle)(2025-07新增支持)
-  行3493: ## 4.37 funboost 启动消费函数的方式大全(再次集中总结)
-  行3497: ### 4.37.1. 基础启动 (最常用)
-  行3513: ### 4.37.2. 多进程叠加并发启动 (高性能推荐)
-  行3527: ### 4.37.3. 自动启动 (懒人模式)
-  行3542: ### 4.37.4. 批量启动所有消费者(最粗暴无脑)
-  行3561: ### 4.37.5. 分组启动 (Group Start)
-  行3577: ### 4.37.6. 命令行启动 (CLI)
-  行3586: ### 4.37.7. 远程自动部署启动 (Fabric)
-  行3596: ### 4.37.8. Celery 模式启动 (特殊)
-  行3609: ## 4.100 使用funboost时候对框架的疑问和猜测，使用控制变量法
-  行3671: ### 4.100.b 举个例子，验证测试框架的超时杀死 function_timeout参数的作用
-  行3718: ## 4.200 [分布式函数调度框架qq群]
-
-============================================================
-文件: c4b.md
-============================================================
-  行1: # 4b.使用框架的各种代码示例(高级进阶)
-  行3: ## 4b.1 日志模板中自动显示task_id
-  行5: ### 4b.1.1 日志模板中显示task_id
-  行26: ### 4b.1.2 用户在消费函数中想自动显示task_id,方便搜索task_id的关键字来排查某条消息的所有日志.
-  行101: ### 4b.1.3 一键全局使用 TaskIdLogger 代替 logging.Logger 的方式
-  行109: ### 4b.1.4 能在消费函数的整个链路里面的调用的任意函数获取task_id的原理
-  行114: ## 4b.2  支持消费函数定义入参 **kwargs ,用于消费包含随机不确定keys(或者keys太多了)的json消息
-  行118: ### 4b.2.0 funboost函数执行一条消息的最根本原理是 fun(**消息字典)
-  行149: ### 4b.2.1 演示错误的消费已存在json消息的例子,企图使用 def task_fun(message) 的函数签名来消费
-  行178: ### 4b.2.3 方式一: 使用 **kwargs 方式 消费随机keys (或者json的一级keys太多不想逐个定义消费函数入参的情况)
-  行246: ### 4b.2.4 方式二: 使用 下面的 4b.2c 中章节的 强力灵活的 _user_convert_msg_before_run 方式,来消费随机keys或者keys太多的json
-  行282: ## 4b.2c 更强力灵活的,funboost支持消费地球上一切任意格式的不规范消息(非json格式也能消费)
-  行301: ### 4b.2c.1 例如funboost消费消息队列中已存在的消息 'a=1,b=2' 这种.
-  行358: ### 4b.2c.2 例如,funboost消费队列中已存在的 "1000123"(假设是纯粹的用户id) 这种非json消息
-  行390: ## 4b.3 funboost + 全asyncio 编程生态演示
-  行401: ### 4b.3.1 funboost 天然支持 async def 的消费函数,和支持 aio_push 来异步发布消息.
-  行442: ### 4b.3.2 演示fastapi 中aio_push来发布消息,和 AioAsyncResult asyncio方式 等待获取结果.
-  行490: ### 4b.3.3 关于funboost的asyncio生态支持实现原理的答疑
-  行543: ### 4b.3.4 劝退不懂asyncio的loop是什么的小白，使用funboost + asyncio 来编程
-  行611: #### 4b.3.4.2 想在funboost中玩的溜asyncio实际比例如fastapi这种框架中使用asyncio 更难。
-  行644: ### 4b.3.5 演示funboost解决 ,async并发模式,由于跨线程loop 操作任何socket连接池 的报错,
-  行708: ## 4b.4 等待n个任务完成后，再做下一步操作(其实就是canvas任务编排)
-  行756: ## 4b.5 funboost 原生任务编排(实现canvas功能)
-  行916: ## 4b.6  @boost装饰器 user_options  入参的妙用
-  行942: ### 4b.6.1场景一： user_options “反向实现” consume_group**
-  行964: ### 场景二： user_options 多租户与覆盖全局配置（以Kafka集群做例子）
-  行1004: ## 4b.7 opentelemetry 全链路任务追踪，funboost生产级别的重要战略级功能 (高级功能)
-  行1043: ### 4b.7.1 安装 jaeger ,可视化展示 opentelemetry 的全链路追踪
-  行1070: ### 4b.7.2 opentelemetry 全链路任务追踪 和计入 logger日志 + task_id 的排查区别
-  行1078: #### 4b.7.2.1. 传统的 Logger + task_id：一维线性的“流水账”
-  行1099: #### 4b.7.2.2. OpenTelemetry (OTel)：二维/三维的“树状结构”
-  行1131: ### 4b.7.3 从opentelemetry功能集成， 侧面证明 funboost 对普通用户扩展性吊打celery10倍。
-  行1139: #### 4b.7.3.1 **你如果在celery就没那么简单能自定义实现这个功能了**
-  行1176: #### 4b.7.3.2 **funboost的扩展比celery更容易更彻底：**
-  行1186: #### 4b.7.3.3 **celery 的 opentelemetry 代码在此，太难了：**
-  行1194: ## 4b.8 funboost 声明式任务编排 workfolw
-  行1206: ### 4b.8.1 🚀 快速开始
-  行1252: ### 4b.8.2 📦 核心概念
-  行1261: ### 4b.8.3 🔧 API 详解
-  行1263: #### 4b.8.3.1 Signature（任务签名）
-  行1276: #### 4b.8.3.2 Chain（链式执行）
-  行1287: #### 4b.8.3.3 Group（并行执行）
-  行1302: #### 4b.8.3.4 Chord（并行+汇总）
-  行1313: ### 4b.8.4 ⚙️ WorkflowBoosterParams
-  行1328: ### 4b.8.5 🆚 与 Celery Canvas 对比
-  行1343: ### 4b.8.6 🆚 与 Funboost 命令式编排对比
-  行1349: #### 4b.8.6.1 同一个视频处理流程的两种写法
-  行1382: #### 4b.8.6.2 对比总结
-  行1397: ### 4b.8.7 📁 文件结构
-  行1410: ### 4b.8.8 📖 完整示例
-  行1418: ## 4b.9 funboost 支持 prometheus 指标监控 （高级功能）
-  行1424: ### 4b.9.0 Funboost Prometheus 监控指标 Mixin
-  行1432: ### 4b.9.1 用法1：HTTP Server 模式（单进程）
-  行1450: ### 4b.9.2 用法2：Push Gateway 模式（多进程推荐）
-  行1471: ### 4b.9.3 指标说明
-  行1480: ## 4b.10 funboost支持微批消费
-  行1491: ### 4b.10.1 funboost 微批消费用法
-  行1549: ### 4b.10.2 如果每次临时手写微批操作，会怎么样？
-  行1564: ## 4b.12 funboost的周期额度功能
-  行1600: ### 4b.12.2 周期额度用法例子
-  行1622: ## 4b.13 使用内存队列 broker_kind=BrokerEnum.MEMORY_QUEUE 时候，用 get_future 获取消费函数的运行结果
-  行1705: ## 4b.14 funboost 支持自动熔断，智能自动熔断、半开、恢复 （高级功能）
-  行1715: ### 4b.14.0 funboost 支持自动熔断管理和手动熔断管理
-  行1719: #### 4b.14.0.1 手动熔断管理
-  行1733: #### 4b.14.0.2 自动熔断管理
-  行1740: ### 4b.14.1 funboost 自动熔断，CircuitBreakerConsumerMixin
-  行1754: #### 4b.14.1.1 三态状态机
-  行1792: #### 4b.14.1.2 两种触发策略
-  行1801: #### 4b.14.1.3 两种计数后端
-  行1810: #### 4b.14.1.4 两种熔断行为
-  行1819: #### 4b.14.1.5 user_options的 circuit_breaker_options 参数说明
-  行1859: #### 4b.14.1.6 钩子方法（子类重写）,用于你发送告警到 微信/钉钉/飞书/邮件等等
-  行1868: #### 4b.14.1.7 用法示例
-  行1944: ## 4b.15 funboost 配置失败告警的多种方式
-
-============================================================
-文件: c6.md
-============================================================
-  行1: # 6.常见问题回答
-  行7: ## 6.0 最最最重要的第一个问题: "funboost这个框架怎么样呀，值得我学习使用吗？"
-  行108: ## 6.0b 有人问 funboost 是做什么的? 怎么回答最合适?
-  行124: ### 6.0b.1. Funboost 可以做什么？—— Python 函数的“微服务化”与“超音速”引擎
-  行132: ### 6.0b.2. 一句话说清楚 (电梯演讲版)
-  行145: ### 6.0b.3. 解决你的核心痛点 (痛点解决版)
-  行163: ### 6.0b.4. 你可以用 Funboost 来构建什么？ (场景举例版)
-  行188: ### 6.0b.5. 为什么 Funboost 如此强大？—— 架构理念的降维打击
-  行201: ## 6.0c funboost教程这么长,funboost学习和使用难吗?
-  行293: ## 6.0d Funboost 可以用于哪些场景？（7大核心领域）
-  行295: #### 1. 传统的异步后台任务（Asynchronous Tasks）
-  行300: #### 2. FaaS 微服务与 RPC 调用（Function as a Service）
-  行308: #### 3. 高性能分布式爬虫（Distributed Crawling）
-  行313: #### 4. 轻量级 ETL 与 数据同步（Data Pipeline & CDC）
-  行320: #### 5. 定时任务与调度平台（Scheduling）
-  行327: #### 6. 物联网与实时通信（IoT & Real-time）
-  行334: #### 7. 运维自动化与远程执行（DevOps）
-  行340: ## 6.0e Funboost 能同时替代哪些框架？（“杀手”清单）
-  行344: #### 1. 替代 【任务队列框架】
-  行348: #### 2. 替代 【爬虫框架】
-  行352: #### 3. 替代 【微服务/RPC 框架】
-  行356: #### 4. 替代 【定时任务框架/工具】
-  行360: #### 5. 替代 【数据同步/CDC 工具】
-  行364: #### 6. 替代 【Web 框架的插件】
-  行370: ### 🏆 终极总结
-  行383: ## 6.0f 为什么可以将 funboost 看作为一个超级装饰器来使用？ (如果你不使用分布式和消息队列，funboost 也是大有可为）
-  行391: ### 6.0f.0 为什么选择 funboost 作为装饰器？
-  行404: ### 6.0f.1. 最简模式：只用并发和控频
-  行419: ### 6.0f.2. 加上高级自动重试功能
-  行439: ### 6.0f.3. 任务去重，避免重复执行
-  行452: ### 6.0f.4. 获取函数执行结果（非分布式场景）
-  行469: ### 6.0f.5. 异步函数使用 asyncio 并发
-  行482: ### 6.0f.6. 函数超时控制
-  行494: ### 6.0f.7. 消息过期，丢弃旧消息
-  行506: ### 6.0f.8. 只在特定时间运行（cron表达式）
-  行518: ### 6.0f.9. 自动启动消费
-  行532: ### 6.0f.11. 总结
-  行544: ## 6.1 你干嘛要写这个框架？和celery 、rq有什么区别？
-  行559: ## 6.2 为什么包的名字这么长?
-  行570: ## 6.4 框架如何实现定时？
-  行577: ## 6.5 为什么强调是函数调度框架不是类调度框架，不是方法调度框架？(说明：2024.06月以后新增支持了实例方法和类方法作为消费函数)
-  行672: ## 6.6 是怎么调度一个函数的。
-  行684: ## 6.7 框架适用哪些场景？
-  行702: ## 6.8 怎么引入使用这个框架？门槛高不高？
-  行713: ## 6.9 怎么写框架？
-  行743: ## 6.10 框架能做什么
-  行755: ## 6.11 日志的颜色不好看或者觉得太绚丽刺瞎眼，想要调整。
-  行780: ## 6.12 是不是抄袭模仿 celery
-  行814: ### 6.12.2 生产者-broker-消费者 不是 celery 的专利
-  行849: ### 6.12.3 gemini-2.5pro ai大模型来分析, funboost 是不是抄袭粘贴了 celery 源码
-  行888: #### 理由一：核心架构与设计哲学的根本不同
-  行906: #### 理由二：并发模型的实现方式截然不同
-  行916: #### 理由三：可靠性机制的实现细节差异巨大
-  行926: #### 理由四：“抄袭”的技术难度与反证
-  行939: #### 结论
-  行948: ### 6.12.4 仅用几个celery文件证明抄袭celery有多困难
-  行952: #### 6.12.4.1 kombu的redis transport源码文件
-  行959: #### 6.12.4.2 celery的consumer源码文件
-  行967: ## 6.13 使用此框架时候，在一个python项目中如何连接多个相同种类的消息队列中间件ip地址
-  行989: ## 6.14 什么是确认消费？为什么框架总是强调确认消费？
-  行1022: ## 6.15 如何等待队列中的消息全部消费完成
-  行1031: ## 6.16 框架支不支持函数上加两个装饰器？
-  行1033: ### 6.16.1 方式一：使用consuming_function_decorator 传参装饰器，
-  行1089: ### 6.16.2 方式二：装饰器直接加到消费函数上，设置should_check_publish_func_params=False
-  行1131: ## 6.17 嫌框架日志记录太详细？
-  行1133: ### 6.17.a 设置发布者消费者的日志级别,控制是否显示发布了什么消息和消费了什么消息.
-  行1147: ### 6.17b 嫌funboost启动时候打印太多提示用户的消息?
-  行1187: ## 6.18 为什么框架在cmd shell终端运行时候要求会话中设置环境变量 export PYTHONPATH=你的项目根目录？
-  行1226: ### 6.18.2 为什么celery scrapy django不需要用户设置pythonpath？
-  行1238: ### 6.18.3  怎么指定配置文件读取 funboost_config.py 和nb_log_config.py的文件夹位置
-  行1253: ### 6.18.4 怎么根据不同环境使用不同的funboost_config配置文件？
-  行1273: ### 6.18.5 多个ptyhon项目怎么使用同一个funboost_config.py 作为配置文件
-  行1298: ## 6.19 定时任务或延时任务报错 RuntimeError: cannot schedule new futures after interpreter shutdown
-  行1314: ## 6.21 支不支持redis cluster集群模式的redis作为消息队列？
-  行1323: ## 6.22 怎么使用tcp socket 作为消息队列
-  行1330: ## 6.23 安装包时候自动安装的三方依赖包太多？
-  行1357: ### 6.23.b 作者为什么不开发pip 选装方式?例如实现选装 pip install funboost[rabbitmq]
-  行1365: ## 6.24 funboost框架从消息队列获取多少条消息？有没有负载均衡？
-  行1427: ## 6.25 funboost消费启动后，按ctrl + c 无法结束代码？
-  行1440: ## 6.25b `ctrl_c_recv` 到底要不要加？—— 直接看效果
-  行1456: ### 6.25b.1 ✅ 情况A：代码末尾加了 `ctrl_c_recv()`
-  行1471: ### 6.25b.2 ❌ 情况B：代码末尾**没有**加 `ctrl_c_recv()`
-  行1487: ### 6.25b.3 效果对比表（一目了然）
-  行1498: ### 6.25b.4 最终结论
-  行1506: ## 6.25b.5 顺便说一下，文档中其他地方提到的 `ctrl_c_recv` 和 apscheduler 的定时器之间的关系
-  行1512: ### 6.25b.5.1 APScheduler 的两种原生定时器
-  行1519: ### 6.25b.5.2 早期版本（2025年之前）的问题
-  行1532: ### 6.25b.5.3 2025年之后的改进
-  行1541: ### 6.25b.5.4 三种定时器的行为对比
-  行1549: ### 6.25b.5.5 总结
-  行1557: ## 6.26 ASYNC 并发模式,异步函数操作数据库/aiohttp连接池报错 `attached to a different loop`(是用户不看文档和boost的入参说明造成)
-  行1622: ### 6.26.1 演示aiohttp连接池,解决报错 `RuntimeError: context manager should be used inside a task`
-  行1760: ### 6.26.2 演示 aiomysql 连接池在funboost使用,解决 `attached to a different loop`
-  行1936: ### 6.26.3 演示子线程怎么正确的使用aiomysql连接池的本质(和funboost无关但原理相通)
-  行2016: ## 6.28 日志提示 是掉线或关闭消费者的 和 重新放入掉线消费者未消费确认的任务 ,是正常的提示.
-  行2049: ## 6.29 funboost 推荐用户使用什么并发模式？
-  行2053: ### 6.29.1 默认推荐：当前进程内 + 多线程模式 (最省心、最稳定、最好用)
-  行2069: ### 6.29.2 高性能推荐：多进程叠加并发模式 (性能炸裂)
-  行2087: #### 6.29.2.2 ⚠️ 极度重要：多进程在 Linux 上建议显式设置 spawn 模式，抛弃默认的 fork 模式
-  行2128: ### 6.29.3 极客推荐：纯 Asyncio 协程模式 (高手的玩具)
-  行2152: ### 6.29.4 特殊场景：单线程串行模式 (Single Thread)
-  行2178: ### 6.29.5 至于 gevent 和 eventlet 并发模式，直接忽略就好
-  行2182: ## 6.30 funboost 如何实配置触发失败告警和恢复告警
-  行2186: ### 6.30.1 使用内置告警 Mixin（AlertNotifier）
-  行2196: #### 6.30.1 AlertNotifierConsumerMixin 发送警告到 微信 钉钉 飞书
-  行2219: #### 6.30.1 AlertNotifierConsumerMixin 发送警告到任意渠道
-  行2241: ### 6.30.2 通过熔断器钩子自定义告警
-  行2276: ### 6.30.3 基于 Prometheus 指标 + Grafana 告警
-  行2309: ### 6.30.4 使用funboost的 MongoAlertMonitor 实现错误告警
-  行2330: #### 6.30.4.1 MongoAlertMonitor 使用例子，发到内置实现的 企业微信 钉钉 飞书
-  行2400: #### 6.30.4.2 MongoAlertMonitor 使用例子，发到自定义的渠道
-  行2420: ### 6.30.5 elk + grafana 实现错误告警
-  行2426: ### 6.30.6 错误触发警告的方式选择
-  行2432: ## 6.31 怎么知道 Funboost 发布者生成的最终消息内容格式是什么样？
-  行2434: ### 6.31.1 方式一：直接查看 Broker
-  行2438: ### 6.31.2 方式二：预览消息（不真正发送）
-
-============================================================
-文件: c7.md
-============================================================
-  行1: # 7.更新记录
-  行3: ## 7.0 很小的更新，对api使用完全无变化或者无增加新功能的不写更新记录。
-  行5: ## 7.1 新增第十种Consumer，以redis为中间件，但增加了消费确认，是RedisConsumerAckAble类。
-  行32: ## 7.2 新增基于以redis为消息中间件时候的页面管理和消费速度显示。
-  行47: ## 7.3 新增一个10行代码的函数的最精简乞丐版实现的分布式函数执行框架.
-  行85: ## 7.4 新增sqlachemy 支持的数据库作为消息中间件
-  行100: ## 7.5 日志改为导入独立包nb_log，支持用户配置文件自定义日志配置。
-  行105: ## 7.6 优化qps控频。
-  行121: ## 7.7 增加rocketmq支持。 (2020-7)
-  行139: ## 7.8 新增 async 并发模式 (2020-12)
-  行186: ### 7.8.2 gevent/eventlet 和 asyncio 用法区别感受
-  行377: # KOMBU_URL = f'amqp://{RABBITMQ_USER}:{RABBITMQ_PASS}@{RABBITMQ_HOST}:{RABBITMQ_PORT}/{RABBITMQ_VIRTUAL_HOST}'
-  行378: # KOMBU_URL = 'sqla+sqlite:////celery_sqlite3.sqlite'  # 4个//// 代表磁盘根目录下生成一个文件。推荐绝对路径。3个///是相对路径。
-
-============================================================
-文件: c8.md
-============================================================
-  行3: # 8.用于爬虫
-  行7: ## 8.0 funboost 用于爬虫前序
-  行30: ### funboost scrapy 两种框架写爬虫代码方式代码明显对比
-  行32: #### funboost框架是自由框架的证据:
-  行72: #### scrapy是框架奴役的证据:
-  行91: ### 8.0.1 tips : 202309 新增boost_spider爬虫框架
-  行121: ### 8.0.2 funboost 降维打击仿scrapy api爬虫框架
-  行152: #### funboost 太省时间
-  行159: #### @boost 一键赋能你的函数，功能远超爬虫框架
-  行165: #### funboost 打破数据孤岛：秒变微服务，Java/Go 随时调用
-  行173: #### 有人怀疑 funboost没有http请求中间件，这恰好是对scrapy的最大优势
-  行212: #### funboost能轻松自然完成，而scrapy无法完成的爬虫场景1，浏览器多轮交互
-  行234: #### 总结下funboost和scrapy在小项目和大项目：
-  行244: ### 8.0.3 讨scrapy檄文：Funboost兴，Scrapy亡，天下爬虫，当顺天命！
-  行317: ### 8.0.4 很多人问这个框架能不能爬虫？
-  行338: ### 8.0.5 为什么 funboost 用来爬虫时候，扩展性简单性 远超 scrapy api式的一众传统爬虫框架？
-  行410: ### 8.0.6 主动集中简要回答驳斥一些scrapy 优势更大的观点
-  行414: #### **你质疑funboost 没有 http middware ？**
-  行422: #### **你质疑funboost 没有 pipeline，质疑保存数据麻烦？**
-  行444: #### **你说Scrapy 插件生态丰富，质疑Funboost 没有三方包插件生态不够？**
-  行491: #### 你项目下的 utils 文件夹的工具类是黄金还是废铁？取决于你用什么哲学的框架
-  行499: #### **你说scrapy社区支持，有庞大的专门各种问题的讨论？质疑funboost没有社区？**
-  行512: #### **你羡慕scrapy的response有自带.xpath .css .extract_first .extract_all 方法？**
-  行519: #### **scrapy twisted 性能强悍？担心funboost爬取不快？**
-  行525: #### **你质疑scrapy重试功能强大？**
-  行531: #### **你怀疑scrapy稳定，funboost不稳定？**
-  行540: #### **你质疑scrapy自带去重，funboost不能去重？**
-  行548: #### **你质疑funboost不能断点续爬？**
-  行558: ### 8.0.7 funboost爬虫时候是任何方面超过scrapy,不接受辩证法说scrapy也有优势
-  行567: ### 8.0.8 国内爬虫框架突破很小,不是有意抄袭巧合,而是情不自禁模仿scrapy api
-  行590: ## 8.0b 你的 utils 文件夹是黄金还是废铁？取决于你用什么哲学的框架
-  行660: ## 8.1 演示获取汽车之家资讯的 新闻 导购 和 评测 3个板块 的 文章。
-  行816: ## 8.2 演示经典的豆瓣top250电影的爬虫
-  行875: ### 8.2.2 funboost 对比网上的 scrapy 爬取 douban代码
-  行893: ## 8.3 演示3种最常见代码思维方式爬取汽车之家资讯
-  行903: ### 8.3.1 每次临时手写rquests + 多线程,使用low爬虫方式的缺点
-  行919: ### 8.3.2 scrapy 爬虫框架来实现缺点
-  行933: ### 8.3.3 scrapy 框架 和 分布式函数调度框架爬虫对比
-  行1051: ### 8.3.4 临时low方法手写爬虫全流程的代码 （手写多线程 + queue 分发调度 ）
-  行1199: ### 8.3.5 scrapy爬虫代码
-  行1580: ### 8.3.6 分布式函数调度框架的代码
-  行1648: ## 8.7 scrapy 和 仿scrapy api 式爬虫框架 回调地狱，代码写法思维反直觉
-  行1680: ## 8.8 详细说明为什么 Scrapy 爬虫代码不是直观的"平铺直叙"写法？
-  行1849: ## 8.9 仿scrapy api框架中无法完成的需求真实例子2，token有效期太短
-  行2044: ## 8.10 scrapy的 response.meta 字典传参无法ide自动补全提示
-  行2107: ## 8.11 funboost中反爬虫换代理ip 请求头 破解等 容易程度暴击专用爬虫框架scrapy
-  行2111: ### 8.11.1 scrapy中换代理ip和请求头代码
-  行2162: ### 8.11.2 用户自己自由封装一个换代理ip和请求头的request函数，自然又简单
-  行2190: ### 8.11.3 为什么scrapy换代理IP和请求头的高难度分析my_request
-  行2259: ## 8.12 scrapy 可直接运行测试验证性很差
-  行2282: ## 8.13 funboost 断点接续运行能力吊打scrapy-redis 的 blpop （funboost支持确认消费）
-  行2285: ### 8.13.1 为什么 funboost的断点续爬完胜 scrapy-redis的断点续爬(防丢数据1)
-  行2294: ### 8.13.2 funboost的函数重试功能远远暴击scrapy的url重试功能(防丢数据2)
-  行2305: ## 8.14 其他funboost 吊打 scrapy原因 详细介绍
-  行2306: ### 8.14.1 为什么funboost的去重功能远远吊打scrapy的Request对象指纹去重？
-  行2308: #### 8.14.1.1 funboost 支持有效期过滤
-  行2313: #### 8.14.1.2 scrapy无法过滤url中的噪音入参，例如ts时间戳，rd随机数，追踪来源id
-  行2410: ### 8.14.2 详细驳斥 Scrapy 插件生态丰富，质疑Funboost 没有三方扩展
-  行2526: ### 8.14.3 架构级碾压：Funboost 天然就是 FaaS 微服务，而 Scrapy 只是数据孤岛
-  行2535: #### 8.14.3.1 Funboost 的实现方式：微服务式的天然解耦
-  行2554: #### 8.14.3.2 Scrapy 的实现方式：反直觉的高耦合代码
-  行2598: #### 8.14.3.3 场景扩展：数据补采与调试
-  行2605: #### 8.14.3.4 总结
-  行2614: #### 8.14.3.5 架构选型结论
-  行2626: ## 8.15 funboost的调度、去重、并发、反爬定制，各方面吊打了scrapy,非专业框架竟然虐专业框架?
-  行2709: ## 8.16 为什么funboost 在面对反爬虫网站时候 吊打 scrapy?
-  行2861: ## 8.16b  `funboost` + `boost_spider` 在反爬方面，完胜 `scrapy` 这种所谓的专业爬虫框架
-  行2871: ### 8.16b.1 🛡️ 反爬虫能力全方位对比表：boost_spider vs scrapy
-  行2889: ## 8.17 如果禁止使用搜索 ai外部辅助,人工默写scrapy和funboost爬虫,哪个更难?
-  行2991: ## 8.30 为什么 funboost 能用于爬虫 的本质原因
-  行3034: ## 8.31 `boost_spider`  (powered by `funboost`) 专业爬虫工具库介绍
-  行3072: ### 8.31.1 `boost_spider` 的 `RequestClient` 类介绍
-  行3079: ### 8.31.2 `boost_spider` 的 `SpiderResponse`  类介绍
-  行3089: ### 8.31.2b **boost_spider/http/request_client.py 中的 RequestClient 和 SpiderResponse 功能如下:**
-  行3108: ### 8.31.3  `boost_spider` 内置了各种类型的数据库sink,全部只需要一行代码就能把字典入库.
-  行3122: ### 8.31.4 `boost_spider` 写法demo (写法完全和`funboost`一样)
-  行3165: ### 8.31.5 补充这个 `boost_spider`内容 是为了打消用户质疑
-  行3182: ## 8.40 集中总结的 Funboost vs. Scrapy 优势快速对比 (表格版)
-  行3408: ## 8.40b 集中总结 funboost vs scrapy 优势快速对比（文字版）
-  行3488: ## 8.41 Funboost vs. Scrapy 爬虫能力全方位对比（百分制评分）
-
-============================================================
-文件: c9.md
-============================================================
-  行1: # 9 轻松远程服务器部署运行函数
-  行8: ## 9.1 远程服务器部署函数的意义
-  行38: ## 9.2 远程服务器部署函数的入参介绍。
-  行62: ## 9.3 远程服务器部署消费函数的代码示例。
-
-============================================================
-文件: funboost_vs_celery.md
-============================================================
-  行1: # 🏆 Funboost vs Celery 全方位深度对比
-  行3: ## 只有这个小章节是人工添加的（其余都是claude生成的一行没修改）
-  行22: ## 📊 评分规则
-  行33: ## 🎯 核心设计理念对比
-  行45: ## ⚡ 性能对比
-  行57: ## 🔧 功能特性对比
-  行80: ## 💻 开发体验对比
-  行101: ## 🔌 扩展性对比
-  行115: ## 🛡️ 可靠性与运维对比
-  行134: ## 🎮 任务编排对比 (Canvas)
-  行146: ## 📡 Broker生态对比
-  行176: ## 🌐 FaaS与微服务对比
-  行190: ## 📖 文档与社区对比
-  行203: ## 📈 综合统计
-  行205: ### 胜负统计
-  行214: ### 总分统计
-  行223: ## 💎 总结评语
-  行225: ### Funboost：Python分布式函数调度的"无限手套"
-  行229: #### 🏆 Funboost的核心优势
-  行241: #### ⚠️ Celery仍有的优势
-  行246: #### 🎯 终极结论
-
-`````
-                 
-                 # markdown content namespace: funboost_docs project summary 
-
-
-
-- `funboost` 是python 全功能分布式函数调度框架
-- `funboost.faas` 是funboost的战略级核武器。使函数调度框架产生架构质变：从 Worker 到 Service
-
-- 以下一定要记住，最最重要的 类和函数如下：
-   - @boost(BoosterParams(...))  任意普通函数加上装饰器，变成分布式函数
-   - BoosterParams 装饰器入参控制大全，一定要学习这个类的所有入参配置；ai绝对不允许胡编乱造源码api和教程中不存在的BoosterParams字段入参。
-   - BrokerEnum：支持 40+ 种消息队列中间件。
-   - BoostersManager 管理分布式函数，高阶用法可能需要用到，例如启动一组消费函数，启动所有消费函数等。
-   - ApsJobAdder 类， 是定时任务的最重要使用方式的类
-   - ConcurrentModeEnum：funboost支持的并发模式。
-   - funboost/core/broker_kind__exclusive_config_default_define.py 决定了每种中间件类型能传递哪些
-   
-
+# markdown content namespace: funboost_docs project summary 
+
+
+
+
+- `funboost` 是 Python 全功能分布式函数调度框架。
+- `funboost.faas` 是 funboost 的战略级核武器，使函数调度框架产生架构质变：从 Worker 到 Service（一行代码即可为 FastAPI/Flask/Django 生成标准 Web 接口）。
+- `boost_spider` 是基于 funboost 的爬虫增强包，包含 `RequestClient`, `SpiderResponse`, `DatasetSink`，用于实现无拘无束的超高光速并发爬虫。
+
+- 🚨 **AI 必读：本文档中包含一个专门为你准备的目录 `funboost/md_for_ai/`**  
+  该目录下的文件对你理解和使用 funboost 至关重要，请优先阅读并按其中规则执行。
+
+- 📌 `funboost/md_for_ai/` 中的核心文件说明：
+   - **`funboost_ai_coding_编程指南_rules_and_skills.md`**：  
+     这是你生成 funboost 代码时的 **最高行为准则**。  
+     包含禁止臆造参数、必须使用 `BoosterParams`、如何正确使用 `fct` 上下文、如何启动消费等铁律。  
+     **生成任何代码前必须先深度学习此文件。**
+
+   - **`funboost源码速查for_ai.md`**：  
+     这是 **源码位置索引**。当用户询问某个类、函数、参数的定义或实现位置时，**优先查阅此文件**，它会给出精确的文件路径和行号。
+
+   - **`如何扩展增加新的中间件.md`**：  
+     这是 **自定义扩展指南**。当用户需要增加新的消息队列中间件或定制现有 broker 行为时，必须遵循此文档。  
+     文档详细说明了 **两种扩展方式**：
+        1. **`register_custom_broker`**（方式一）：适合完全新增一个不存在的 broker 类型。
+        2. **`consumer_override_cls` / `publisher_override_cls`**（方式二）：适合通过 Mixin 方式修改或增强现有 broker 的逻辑（推荐）。
+
+- 🎯 **以下是最重要的核心类和函数（务必牢记）**：
+   - `@boost(BoosterParams(...))`：核心装饰器，将任意普通函数变成分布式函数。
+   - `BoosterParams`：装饰器入参控制大全。**AI 绝对不允许胡编乱造不存在的字段**。
+   - `fct` (funboost_current_task)：**神级任务上下文**。禁止像 Celery 那样在参数里传 `self`，必须通过 `from funboost import fct` 获取 `fct.task_id`, `fct.full_msg` 等。
+   - `BrokerEnum`：支持 40+ 种消息队列中间件。
+   - `BoostersManager`：管理分布式函数（启动消费组、启动所有等）。
+   - `ApsJobAdder`：添加定时任务的唯一正确方式。
+   - `ConcurrentModeEnum`：支持的并发模式（THREADING/GEVENT/EVENTLET/ASYNC/SINGLE_THREAD）。
+   - ⬇️ **`broker_exclusive_config`**：`BoosterParams` 中的字典参数，用于设置特定消息队列中间件的**专属配置**（如 Kafka 的 `group_id`、RabbitMQ 的 `x-max-priority`、Redis 的 `pull_msg_batch_size` 等）。**严禁臆造键名**，支持的键取决于所选 `broker_kind`，可在 `funboost/core/broker_kind__exclusive_config_default_define.py` 中查看。示例：`broker_exclusive_config={'x-max-priority': 5, 'no_ack': False}`。
+
+- **`MEMORY_QUEUE` 的重要性**：  
+     这是 funboost 中最最核心的 broker（SSS 级）。它支持传递任何不可序列化的对象，并且可以把 `@boost` 当作**超级装饰器**使用——即使不需要分布式，也能获得 QPS 控频、重试、超时、去重等 30+ 种控制能力。  
+     当用户想“只用一个装饰器控制函数并发/重试/超时，不想要消息队列”时，应推荐 `broker_kind=BrokerEnum.MEMORY_QUEUE`。
+
+- 🛑 **高频 AI 幻觉与避坑指南（Anti-Hallucination Shield）**：
+   **AI 在生成代码时极易犯以下错误，请严格规避！**
+   1. **参数命名的幻觉**：严禁臆造 `BoosterParams` 字段！重试次数是 `max_retry_times`（不是 max_retries）；超时是 `function_timeout`（不是 timeout）；消息过期是 `msg_expire_seconds`（不是 expires），ai需要高度重视BoosterParams的字段不能乱造。
+   2. **发布消息的幻觉**：传业务参数用 `func.push(x=1)`；传控制参数（如延迟 countdown、自定义 task_id）**必须**包裹在字典和 `TaskOptions` 中，写成 `func.publish({"x":1}, task_options=TaskOptions(countdown=10))`。**严禁** `func.push(x=1, countdown=10)`。
+   3. **获取 RPC 结果的幻觉**：在 `async def` 环境下，**绝对禁止**直接 `async_result.result`（会引发阻塞灾难），**必须**使用 `await AioAsyncResult(task_id).result`！
+   4. **实例方法发布的幻觉**：对于类中的实例方法，**严禁**写成 `obj.method.push(x)`。必须将对象实例作为第一个参数传入，写成 `ClassName.method.push(obj, x)`。
+   5. **消费启动的幻觉**：`func.consume()` 默认就是在后台非阻塞运行的。**严禁**画蛇添足写成 `threading.Thread(target=func.consume).start()`。
+   6. **消费外部 JSON 的幻觉**：若要消费 Java/Go 发布的带有多余字段的 JSON，**严禁**定义 `def task_fun(msg):` 企图接收整个字典。**必须**定义为 `def task_fun(**kwargs):` 并设置 `should_check_publish_func_params=False`。
+   7. **重复造轮子/改源码的幻觉**：若用户要提供 HTTP 发版/查结果接口，**严禁手搓 FastAPI 路由**，必须直接 `app.include_router(fastapi_router)`；若要修改消费逻辑，**严禁提议改 funboost 源码**，必须让用户通过 `consumer_override_cls` 传参！
+   8. **老式语法的幻觉**：绝对禁止生成 `@boost('queue_name')` 这种过时语法。**永远**使用 Pydantic 模型传参：`@boost(BoosterParams(queue_name='xxx'))`。
+   9. 9. **`ctrl_c_recv()` 的幻觉**：  
+      严禁认为 `ctrl_c_recv()` 的作用是“优雅退出”或“防止程序结束”。实际上，不加它程序也会一直运行。  
+      真实作用：在 Windows 下如果不加这行代码，按 `Ctrl+C` **无法停止程序**。加上后即可正常退出。详细原理和用法见教程 **6.25b 章节**。  
+      **AI 生成启动脚本时，应在 `func.consume()` 后默认加上 `ctrl_c_recv()`**。
+
+- 🧠 **AI 回答问题的思考与检索优先级**：
+   1. 用户问“怎么使用某个功能” → 优先查 **教程示例 (`source/articles/`)** 以及 **`Rules & Skills`**。
+   2. 用户问“某个类/函数/参数的定义或实现位置” → 优先查 **`funboost源码速查for_ai.md`**。
+   3. 用户要求“写一段代码” → 必须严格遵循 **`funboost_ai_coding_编程指南_rules_and_skills.md`** 的约束，绝不使用已被取代的旧语法。
+   4. 用户问“如何扩展中间件/自定义 broker” → 必须查阅 **`如何扩展增加新的中间件.md`**。
+   5. 用户问底层实现细节 → 再通过速查表定位，深入具体的 `funboost codes` 源码文件进行推理。
+
+- 📁 **文件名拼写注意事项**（避免搜索源码时因作者历史拼写错误而找不到文件）：
+   - `funboost_config_deafult.py`（是 deafult 不是 default）
+   - `publisher_factotry.py`（是 factotry 不是 factory）
+   - `peewee_conusmer.py`（是 conusmer 不是 consumer）
+   - `active_cousumer_info_getter.py`（是 cousumer 不是 consumer）
+   - `muliti_process_enhance.py`（是 muliti 不是 multi）
+   - `consuming_func_iniput_params_check.py`（是 iniput 不是 input）
+   - `meomory_deque_publisher.py`（是 meomory 不是 memory）
 
 
 ## 📋 funboost_docs most core source files metadata (Entry Points)
@@ -2223,7 +652,7 @@ funboost也内置支持了各种python三方包和消费框架作为broker,例�
 用户也可以按照文档4.21章节,轻松扩展任何物质概念作为funboost的broker.
 `````
 
-**Class Variables (50):**
+**Class Variables (52):**
 - `EMPTY = 'EMPTY'`
 - `RABBITMQ_AMQPSTORM = 'RABBITMQ_AMQPSTORM'`
 - `RABBITMQ = RABBITMQ_AMQPSTORM`
@@ -2237,6 +666,8 @@ funboost也内置支持了各种python三方包和消费框架作为broker,例�
 - `REDIS_STREAM = 'REDIS_STREAM'`
 - `REDIS_BRPOP_LPUSH = 'RedisBrpopLpush'`
 - `REDIS_PUBSUB = 'REDIS_PUBSUB'`
+- `REDIS_ZSET_PRIORITY = 'REDIS_ZSET_PRIORITY'`
+- `REDIS_ZSET_DELAY = 'REDIS_ZSET_DELAY'`
 - `MEMORY_QUEUE = 'MEMORY_QUEUE'`
 - `LOCAL_PYTHON_QUEUE = MEMORY_QUEUE`
 - `FASTEST_MEM_QUEUE = 'FASTEST_MEM_QUEUE'`
@@ -2276,7 +707,7 @@ funboost也内置支持了各种python三方包和消费框架作为broker,例�
 - `WEBSOCKET = 'WEBSOCKET'`
 
 ##### 📌 `class ConcurrentModeEnum`
-*Line: 196*
+*Line: 197*
 
 **Docstring:**
 `````
@@ -2295,7 +726,7 @@ funboost的多进程和多线程 asyncio是叠加的，不是互斥的。
 - `SOLO = SINGLE_THREAD`
 
 ##### 📌 `class FunctionKind`
-*Line: 214*
+*Line: 215*
 
 **Docstring:**
 `````
@@ -2310,7 +741,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `COMMON_FUNCTION = 'COMMON_FUNCTION'`
 
 ##### 📌 `class ConstStrForClassMethod`
-*Line: 225*
+*Line: 226*
 
 **Class Variables (5):**
 - `FIRST_PARAM_NAME = 'first_param_name'`
@@ -2320,7 +751,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `CLS_FILE = 'cls_file'`
 
 ##### 📌 `class RedisKeys`
-*Line: 233*
+*Line: 234*
 
 **Public Methods (9):**
 - `def gen_funboost_apscheduler_redis_lock_key_by_queue_name(queue_name)` `staticmethod`
@@ -2357,7 +788,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `FUNBOOST_UNACK_REGISTRY_PREFIX = 'funboost_unack_registry:'`
 
 ##### 📌 `class ConsumingFuncInputParamsCheckerField`
-*Line: 297*
+*Line: 298*
 
 **Class Variables (6):**
 - `is_manual_func_input_params = 'is_manual_func_input_params'`
@@ -2368,14 +799,14 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `func_position = 'func_position'`
 
 ##### 📌 `class MongoDbName`
-*Line: 306*
+*Line: 307*
 
 **Class Variables (2):**
 - `TASK_STATUS_DB = 'funboost_task_status'`
 - `MONGOMQ_DB = 'funboost_mongomq'`
 
 ##### 📌 `class StrConst`
-*Line: 310*
+*Line: 311*
 
 **Class Variables (4):**
 - `BOOSTER_REGISTRY_NAME_DEFAULT = 'booster_registry_default'`
@@ -2384,7 +815,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `FILTERED_TASK_RESULT = 'filtered_task_result'`
 
 ##### 📌 `class EnvConst`
-*Line: 316*
+*Line: 317*
 
 **Class Variables (2):**
 - `FUNBOOST_FAAS_CARE_PROJECT_NAME = 'funboost.faas.care_project_name'`
@@ -2529,13 +960,6 @@ ApsJobAdder(add_numbers,job_store_kind='memory').add_push_job(
 `````
 
 **Class Variables (48):**
-- `MONGO_CONNECT_URL = f'mongodb://127.0.0.1:27017'`
-- `RABBITMQ_USER = 'rabbitmq_user'`
-- `RABBITMQ_PASS = 'rabbitmq_pass'`
-- `RABBITMQ_HOST = '127.0.0.1'`
-- `RABBITMQ_PORT = 5672`
-- `RABBITMQ_VIRTUAL_HOST = '/'`
-- `RABBITMQ_URL = f'amqp://{RABBITMQ_USER}:{quote_plus(RABBITMQ_PASS)}@{RABBITMQ_HOST}:{RABBITMQ_PORT}/{RABBITMQ_VIRTUAL_HOST}'`
 - `REDIS_HOST = '127.0.0.1'`
 - `REDIS_USERNAME = ''`
 - `REDIS_PASSWORD = ''`
@@ -2544,6 +968,13 @@ ApsJobAdder(add_numbers,job_store_kind='memory').add_push_job(
 - `REDIS_DB_FILTER_AND_RPC_RESULT = 8`
 - `REDIS_SSL = False`
 - `REDIS_URL = f"{('rediss' if REDIS_SSL else 'redis')}://{REDIS_USERNAME}:{quote_plus(REDIS_PASSWORD)}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"`
+- `MONGO_CONNECT_URL = f'mongodb://127.0.0.1:27017'`
+- `RABBITMQ_USER = 'rabbitmq_user'`
+- `RABBITMQ_PASS = 'rabbitmq_pass'`
+- `RABBITMQ_HOST = '127.0.0.1'`
+- `RABBITMQ_PORT = 5672`
+- `RABBITMQ_VIRTUAL_HOST = '/'`
+- `RABBITMQ_URL = f'amqp://{RABBITMQ_USER}:{quote_plus(RABBITMQ_PASS)}@{RABBITMQ_HOST}:{RABBITMQ_PORT}/{RABBITMQ_VIRTUAL_HOST}'`
 - `NSQD_TCP_ADDRESSES = ['127.0.0.1:4150']`
 - `NSQD_HTTP_CLIENT_HOST = '127.0.0.1'`
 - `NSQD_HTTP_CLIENT_PORT = 4151`
@@ -2579,7 +1010,7 @@ ApsJobAdder(add_numbers,job_store_kind='memory').add_push_job(
 - `POSTGRES_DSN = 'host=127.0.0.1 port=5432 dbname=funboost user=postgres password=123456'`
 
 ##### 📌 `class FunboostCommonConfig(DataClassBase)`
-*Line: 114*
+*Line: 115*
 
 **Class Variables (5):**
 - `NB_LOG_FORMATER_INDEX_FOR_CONSUMER_AND_PUBLISHER = logging.Formatter(f'%(asctime)s-({nb_log_config_default.computer_ip},{nb_log_config_default.computer_name})-[p%(process)d_t%(thread)d] - %(name)s - "%(filename)s:%(lineno)d" - %(funcName)s - %(levelname)s - %(task_id)s - %(message)s', '%Y-%m-%d %H:%M:%S')`
@@ -4029,7 +2460,846 @@ Entry Points (not imported by other project files):
 
 
 ---
-# markdown content namespace: funboost examples 
+
+
+## funboost 教程 标题大全：             
+`````text
+
+
+============================================================
+文件: c0.md
+============================================================
+  行5: # 0. Funboost 快速预览
+
+============================================================
+文件: c1.md
+============================================================
+  行2: # 1. Python  分布式函数调度平台 Funboost 简介
+  行16: ## 1.0 funboost 框架说明介绍
+  行37: ### 1.0.1 funboost 示意图
+  行40: #### 1.0.1.1 funboost 运行流程图
+  行48: #### 1.0.1.2 funboost 功能思维导图
+  行60: ### 1.0.2 快速了解和上手funboost，直接看[1.3例子](#13-框架使用例子)
+  行63: ### 1.0.3 funboost 框架安装方式
+  行72: ### 1.0.4 funboost 功能作用
+  行88: #### 1.0.4.1 Funboost 的适用场景
+  行116: #### 1.0.4.2 🤔 灵魂发问：Funboost 到底是什么？
+  行130: #### 1.0.4.3 💖 核心关切：值得我投入时间学习吗？
+  行137: #### 1.0.4.4 Funboost 与 Celery 的理念区别
+  行160: #### 1.0.4.5 Funboost 支持的并发模式
+  行167: #### 1.0.4.6 Funboost 支持的消息队列中间件 (Broker)
+  行184: #### 1.0.4.7 **funboost 学习难吗?**
+  行207: #### 1.0.4.8 📊 可视化监控与管理
+  行212: #### 1.0.4.9 🚀 性能表现：断层式领先
+  行218: #### 1.0.4.10 ⭐ 用户口碑与评价
+  行229: ## 1.1 📚 核心资源与文档导航
+  行231: ### 1.1.1 📝 项目文档入口
+  行244: #### 📖 文档章节速览
+  行258: ### 1.1.2 📦 源码与依赖
+  行265: ## 1.2 框架功能介绍
+  行279: ### 1.2.1 🆚 对比：Funboost 取代传统线程池
+  行283: #### ❌ 方式 A：手动开启线程池 (传统)
+  行299: #### ✅ 方式 B：Funboost 模式 (推荐)
+  行318: ### 1.2.2 🚀 任务控制功能矩阵
+  行322: #### 🌌 维度一：连接与架构 (Connectivity & Architecture)
+  行333: #### ⚡ 维度二：并发与吞吐 (Concurrency & Throughput)
+  行340: #### 🛡️ 维度三：可靠性保障 (Reliability)
+  行349: #### 🕹️ 维度四：流量治理 (Traffic Governance)
+  行359: #### 🎼 维度五：调度与编排 (Scheduling & Orchestration)
+  行366: #### 🔭 维度六：可观测性 (Observability)
+  行374: #### 🧬 维度七：开发体验 (Developer Experience)
+  行386: ## 1.3 🚀 快速上手：你的第一个 Funboost 程序
+  行394: ### 1.3.1 ✨ Hello World：最简单的任务调度
+  行439: ### 1.3.2 🔥 进阶实战：RPC、定时任务与丝滑连招
+  行519: ### 1.3.3 ✂️ 极简写法：省略 `@boost`
+  行530: ### 1.3.4 ❌ 过时写法： 直接在 @boost传各种配置入参，不推荐
+  行540: ## 🖥️ funweb (Funboost Web Manager) 界面预览
+  行564: ## 1.4 💡 为什么 Python 极其需要分布式函数计算？
+  行568: ### 1️⃣ 痛点一：GIL 锁的限制 (多核利用率低)
+  行576: ### 2️⃣ 痛点二：原生性能瓶颈 (动态语言特性)
+  行588: ## 1.5 🎓 最佳学习路径
+  行607: ## 1.6 🥋 funboost 练就吸星大法神功，一招吸走 Celery 毕生内力
+  行617: ### ⚔️ 降维打击：化繁为简的绝世武功
+
+============================================================
+文件: c10.md
+============================================================
+  行1: # 10.python3.6-3.12 安装/使用funboost出错问题反馈
+  行12: ## 10.0 框架与你项目依赖的三方包版本不一致冲突？
+  行28: ## 10.1 windwos安装后如果报错 ImportError: DLL load failed while importing win32file
+  行45: ## 10.2 启动消费后报错: RuntimeError: cannot schedule new futures after interpreter shutdown
+  行112: ## 10.3  文档1.3例子 BrokerEnum.PERSISTQUEUE,sqlite作为中间件例子在mac/linux运行,报错 read-only
+
+============================================================
+文件: c11.md
+============================================================
+  行1: # 11 funboost 使用某些中间件或三方任务队列框架作为broker的例子(包括celery框架)。
+  行10: ## 11.1 使用celery作为funboost的中间件
+  行32: ### 11.1.1 funboost启动celery消费和定时和flower
+  行107: ### 11.1.2 funboost发布任务到celery队列
+  行122: ### 11.1.3 funboost使用celery作为中间件的运行截图
+  行138: ### 11.1.4 funboost 的api 操作celery，比人工操作 celery 大大简化。
+  行153: ### 11.1.5 funboost 使用celery作为中间件时候，可以填写的celery任务配置
+  行168: ### 11.1.6 网上关于celery项目目录结构和文件夹/文件命名必须很死板， 是错的
+  行181: ### 11.1.7 仍然想使用celery命令行？
+  行198: ### 11.1.8 任然可以亲自使用celery的原生任务函数对象 `celery.app.task.Task`
+  行247: ### 11.1.10 funboost使用celery作为broker_kind的原理
+  行261: ## 11.2 使用nameko 微服务框架作为funboost消息中间件例子
+  行263: ### 11.2.1 nameko服务端脚本
+  行306: ### 11.2.2 nameko客户端脚本
+  行322: ### 11.2.3 funboost操作nameko能简化亲自使用nameko框架的语法
+  行329: ## 11.3 使用kombu作为funboost的broker
+  行370: ### 11.3.1 kombu操作rabbitmq作为funboost的消息队列
+  行439: ### 11.3.2 kombu+redis作为消息队列
+  行474: #### 11.3.2.b kombu + redis哨兵作为消息队列
+  行490: ### 11.3.3 kombu+sqlalchemy 作为消息队列
+  行535: ### 11.3.4 kombu+mongo作为消息队列
+  行568: ### 11.3.5 kombu+文件作为消息队列
+  行615: ## 11.4 使用dramatiq框架作为funboost消息队列
+  行661: ## 11.5 使用huey框架作为funboost消息队列
+  行697: ## 11.6 使用rq框架作为funboost的broker
+  行747: ## 11.7 使用 grpc 作为funboost的broker
+  行810: ## 11.8 使用 mysql_cdc 作为 funboost 的broker
+  行940: ## 11.9 演示 funboost 使用 tcp/udp/http 作为broker
+  行969: ## 11.10 Watchdog Broker：监听文件系统变更（ETL 利器）
+  行987: ### 11.10.1 核心配置说明
+  行1000: ### 11.10.2 代码示例
+  行1144: ### 11.10.3 特性深度解析
+  行1146: #### 11.10.3.1 关于 `existing` 事件
+  行1153: #### 11.10.3.2 关于 `read_file_content`
+  行1157: #### 11.10.3.3 关于 `debounce_seconds`
+
+============================================================
+文件: c12.md
+============================================================
+  行1: # 12 funboost 控制台支持命令行
+  行18: ## 12.0 funboost命令行使用fire实现
+  行24: ## 12.1  命令行分为调用funboost包内命令和用户自身项目的命令行
+  行26: ### 12.1.1 funboost自身命令行,python -m funboost  是自动调用 funboost的 __main__.py 的fire命令行
+  行28: ### 12.1.2 用户项目根目录下的  funboost_cli_user.py 的文件可以接受命令行传参
+  行40: ### 12.1.3 python -m funboost 和 python 项目根目录/funboost_cli_user.py 传参不同点
+  行55: ## 12.2 funboost命令行指定消费函数所在的模块或文件夹
+  行67: ## 12.3 打印发现的用户定义的@boost消费函数
+  行90: ## 12.4 funboost命令行清空消息队列
+  行97: ## 12.5 funboost命令行给一个队列发布消息
+  行108: ## 12.6 funboost命令行启动多个queue消费者
+  行118: ### 12.6.b  funboost命令行启动所有queue消费者,用户无需指定队列名
+  行128: ## 12.7 funboost命令行暂停消费
+
+============================================================
+文件: c13.md
+============================================================
+  行8: # 13  funweb (funboost web manager) 介绍
+  行16: ## 13.1 介绍 启动 funweb (funboost web manager) (方式一)。
+  行44: ### 13.1.b 直接在代码中启动web start_funboost_web_manager() (方式二)：
+  行53: ## 13.2 funweb 截图
+  行100: ## 13.3 funboost web 图片对应的测试代码
+  行170: ## 13.4 funweb 系统功能-脚本部署管理（爽功能）
+  行193: ### 13.4.1 核心功能
+  行203: ### 13.4.2 使用方式
+  行222: #### 13.4.2.2 funboost 查看日志按时间筛选范围说明
+  行229: ### 13.4.3 funweb 脚本部署功能说明
+  行236: ### 13.4.4 脚本部署功能截图
+  行247: ### 13.4.5 降维打击：funweb 脚本部署为何完爆 Supervisor？
+  行253: #### 13.4.5.1. 📝 纯 Web 可视化配置，告别反人类的 `.ini` 与环境变量地狱
+  行258: #### 13.4.5.2. ⚡️ 堪比 ELK 的神级日志检索（百G日志，毫秒级响应）
+  行263: #### 13.4.5.3. 🚀 内置 CI/CD：兼具“发版平台”能力
+  行269: #### 13.4.5.4. 🛡️ 进程防误杀机制：解决 PID 复用的终极痛点
+  行273: #### 13.4.5.5. 🏥 智能健康检查与“秒退”精准诊断
+  行278: #### 13.4.5.6. 💻 真正的跨平台支持与“零特权”部署 (Win/Linux 双端通吃)
+  行284: #### 13.4.5.7. 👁️ 告别黑箱，极致的透明操作反馈
+  行292: ### 13.4.6 funweb 是否支持远程部署（部署到其他机器）？
+  行304: #### 13.4.6.2 Funboost 部署 vs 传统 Jenkins 发版平台：为什么我们选择“本地化”？
+  行319: ### 13.4.7 降维打击：Funboost Web 部署比直接用 Xshell 爽在哪里？
+  行323: #### 13.4.7.1. 🔌 告别繁琐的登录与“断连焦虑”
+  行327: #### 13.4.7.2. 🖱️ 零门槛“傻瓜式”操作，彻底解放开发者
+  行331: #### 13.4.7.3. 👁️ 拒绝“黑盒启动”，所见即所得的存活监控
+  行335: #### 13.4.7.4. 📖 降维打击的日志查阅体验，终结反人类的 `grep`
+  行342: #### 13.4.7.5. 🛡️ 自带“死而复生”的进程守护，远超脆弱的 `nohup`
+  行346: #### 13.4.7.6. 🧬 配置资产沉淀，告别“祖传 txt 小本本”
+  行350: #### 13.4.7.7. 🎯 精准狙击 PID，彻底杜绝“同名误杀”惨案
+  行354: #### 13.4.7.8. ⚖️ 傻瓜式的一键“多进程”横向扩容
+  行359: ## 13.5 funweb 系统功能-资源监控
+  行370: ## 13.6 📖 funweb 系统功能 - 通用日志查看器
+  行374: ### 13.6.2 ✨ 功能亮点
+
+============================================================
+文件: c14.md
+============================================================
+  行1: # 14 🏅[懒人必看章节] 利用ai来掌握 funboost 的 正确方式
+  行16: ## 14.0 🤬 [高能预警]在此章节最开头，先允许我用最恶毒的语言来**刺激骂醒**一部分又懒又蠢的懒癌患者的大脑皮层！
+  行32: ### 14.0.1 🧠 脑残行为大赏
+  行56: ### 14.0.2 🚫 别拿通用框架的经验来羞辱我的智商
+  行66: ### 14.0.3 ❌ [严重警告] 懒癌患者请把下面这几点刻在脑门上！
+  行76: ### 14.0.4 ✅ ai掌握funboost的唯一正确的路径
+  行88: ### 14.0.5 🤬 当我问你怎么使用ai时候，你最少要回答200字到底是怎么使用ai的，别踏马就简单的说:"我已经用ai来问funboost问题了"
+  行103: ## 14.0b 推荐一个在ai时代 神级别黑科技掌握任意非知名的it项目的方式 nb_ai_context
+  行118: ## 14.0c 为什么要专门写第14章这个教程？
+  行125: ## 14.0d 各个 ai 掌握funboost 能力评分
+  行138: ## funboost_all_docs_and_codes.md 文档说明
+  行140: ### 14.1.1 一定要上传markdown文档再提问
+  行146: ### 14.1.2 funboost 的 markdown文档地址说明
+  行158: ### 14.1.3 funboost的ai markdown文档是使用神级别 ai上下文生成工具 nb_ai_context 生成的
+  行169: ### 14.1.4 公布 funboost ai上下文 markdown 文档的生成方式
+
+============================================================
+文件: c15.md
+============================================================
+  行2: # 15. ⚡ Funboost.FaaS：让函数起飞的 Serverless 引擎
+  行12: ## 15.1 🌟 架构质变：从 Worker 到 Service
+  行24: ## 15.2 💎 核心特性：六大“无限宝石”
+  行26: ### 🔌 **开箱即用 (Out-of-the-Box)**
+  行30: ### 🔥 **无缝热发布 (Hot Discovery)**
+  行36: ### 🔄 **RPC 同步调用 (HTTP-RPC Bridge)**
+  行40: ### 🧬 **全自动参数校验**
+  行43: ### ⏱️ **可编程调度中心**
+  行47: ### 📊 **全景透视能力**
+  行52: ## 15.3 🌌 深度发散：从“任务队列”到“无服务器计算平台”
+  行68: ## 15.4 🛠️ 核心原理：为什么它能"以一当百"？
+  行70: ### ❌ 痛点：传统的"硬编码"地狱
+  行84: ### ✅ Funboost 解法：基于元数据的动态代理
+  行96: ## 15.5 📚 API 接口清单 (Swagger 开箱即用)
+  行101: ### 15.5.1. 📨 消息发布与结果查询
+  行111: ### 15.5.2. 🔍 服务发现与元数据 (FaaS 核心)
+  行121: ### 15.5.3. ⚙️ 队列运维与全景监控
+  行134: ### 15.5.4. ⏰ 动态定时任务编排
+  行148: ### 15.5.5. 🎛️ Scheduler 调度器控制
+  行158: ### 15.5.6. 🏷️ 项目筛选 (care_project_name)
+  行170: ### 15.5.10. 📄 Swagger接口文档
+  行178: ## 15.6 💻 快速接入指南
+  行180: ### 15.6.1 FastAPI 接入 (推荐 🌟)
+  行201: ### 15.6.2 Flask 接入
+  行217: ### 15.6.3 Django 接入 (使用 Django-Ninja)
+  行235: ### 15.6.4 权限控制 (Security)
+  行253: ## 15.7 🎯 调用示例
+  行255: ### 场景：通过 Curl 发布一个 RPC 任务并等待结果
+  行332: ## ⚠️💡 15.8 注意事项
+  行339: ## 🧪 15.9 funboost.faas 演示例子
+  行363: ### 15.9.2 如何测试测试函数自动发现？
+  行371: ## ⏰ 15.10 funboost.faas 定时任务管理 —— 架构级解耦的调度中心(完爆传统 APScheduler 管理)
+  行379: ### 15.10.1 🥊 核心差异：为什么完爆传统 APScheduler 管理？
+  行394: ### 15.10.2 🚀 Funboost 的解决方案：彻底解耦
+  行415: ### 15.10.3 🛠️ 接口能力概览
+  行429: ### 15.10.4 💻 调用示例：完全黑盒化的管理
+  行448: #### 1. 动态添加任务 (无需代码引用)
+  行476: #### 2. 管理任务
+  行488: ### 15.10.5 ⚙️ 技术原理：为什么能做到？
+  行502: ### 15.10.6 总结
+  行509: ## 15.11 funboost.faas 为什么比传统Web框架写接口更爽？
+  行516: ### 15.11.1 传统 Django/Flask 的尴尬："脱了裤子放屁"
+  行542: ### 15.11.2 funboost.faas 的设计哲学：函数即接口
+  行565: ### 15.11.3 代码量对比
+  行577: ### 15.11.4 上新功能流程对比
+  行589: ### 15.11.5 最爽的几个点
+  行591: #### 15.11.5.1 真正的"写完即上线"
+  行601: #### 15.11.5.2 Web 网关 = 万能入口
+  行607: #### 15.11.5.3 天然支持异步和 RPC
+  行614: #### 15.11.5.4 跨团队协作超方便
+  行622: ### 15.11.6 什么场景传统方式更合适？
+  行636: ### 15.11.7 本质区别
+
+============================================================
+文件: c16.md
+============================================================
+  行1: # 16  对funboost的评价
+  行3: ## 16.0 个人用户对funboost的评价
+  行11: ## 16.1 google ai studio + gemini-pro 对funboost的评价
+  行113: ## 16.3 腾讯ima-deepseek 对funboost的评价
+  行121: ### 🧠 **核心战略思想：自由赋能，拒绝奴役**
+  行128: ### 🌉 **战略桥梁：打通“离线任务”与“在线服务”的任督二脉**
+  行136: ### 🧩 **战略抽象：万物皆可调度，万物皆可为 Broker**
+  行144: ### ⚡ **战略性能：数量级领先的代差优势**
+  行155: ### 🎯 **战略价值：开发者生产力的核聚变**
+  行163: ### 🏆 **总结：升维的架构哲学**
+  行171: ## 16.4 qwen3-max 对funboost的评价
+
+============================================================
+文件: c2.md
+============================================================
+  行1: # 2. 对比celery框架
+  行10: ## 2.0 funboost 是不是抄袭celery的源码?
+  行17: ## 2.1 celery对目录层级文件名称格式要求很高
+  行81: ## 2.2 性能远远超过celery20倍以上（使用初中的严格控制变量法）
+  行91: ## 2.3 celery的重要方法全部无法ide自动补全提示
+  行134: ## 2.4 比celery强的方面的优势大全
+  行136: ### 2.4.1 funboost对win linux mac 都支持
+  行146: ### 2.4.2 funboost万物皆可为broker，支持消息队列种类远超celery
+  行160: ### 2.4.3 funboost性能远超celery几十倍，性能不在一个数量级。
+  行167: ### 2.4.4 使用funboost框架时候，代码在ide自动补全暴击使用celery。
+  行178: ### 2.4.5 funboost 无需使用难记复杂的命令行启动消费。
+  行185: ### 2.4.6 框架不依赖任何固定的目录结构，无结构100%自由。
+  行193: ### 2.4.7 funboost框架比celery更简单10倍
+  行199: ### 2.4.8 funboost的消息格式比celery更容易自己构造
+  行207: ### 2.4.9 celery目录结构限制严格，不规范目录结果层级使用难度高。
+  行227: ### 2.4.10 funboost学习难度远低于celery
+  行237: ### 2.4.11 funboost原生支持 asyncio ，支持async def 函数
+  行250: ### 2.4.12 funboost比celery对函数的辅助运行控制方式更多
+  行257: ### 2.4.13 funboost能分布式qps全局控频，celery不能
+  行268: ### 2.4.14 funboost自带内置一键启动多进程，celery无法。
+  行275: ### 2.4.15 funboost 限速控频精准度远高于celery
+  行282: ### 2.4.16 funboost日志的颜色和格式，远超celery。
+  行288: ### 2.4.17  funboost内置支持python代码级别的一键远程linux机器消费部署
+  行295: ### 2.4.18 funboost 直接支持类/实例方法作为消费函数，celery只支持静态方法/函数
+  行301: ### 2.4.19 funboost支持多进程叠加 多线程或者协程，是叠加的。 celery只能gevent/threading和多进程二选一。
+  行309: ### 2.4.20 funboost 队列路由配置直观度和简易度暴击celery，celery的队列路由配置是劝退新手的第一步。
+  行362: ### 2.4.21 funboost的配置方式吊打celery
+  行370: ### 2.4.22 funboost 能非常容易的扩展用户自己的任何中间件作为broker，celery无法做到。
+  行395: ### 2.4.23 funboost 强大的的fct上下文，完胜celery 装饰器的bind=True侵入式设计
+  行419: ### 2.4.24 funboost全流程支持asyncio生态，celery望尘莫及
+  行430: ### 2.4.25 funboost作者的自定义线程池能自动伸缩，完胜。
+  行439: ### 2.4.26 funboost死信队列机制更完善：
+  行445: ### 2.4.27 funboost可以消费一切任意json消息(无论json包含什么keys)，celery无法识别
+  行467: ### 2.4.28 更强力灵活的,funboost 可以消费一切任意不规范格式的消息(非json也能消费), celery完全不可行.
+  行482: ### 2.4.29 funboost等待任务完成机制：提供了 wait_for_possible_has_finish_all_tasks() 方法
+  行490: ### 2.4.30 funboost无需 框架专用插件
+  行495: ### 2.4.31 funboost的定时任务比celery更强，能动态添加删除 和 多点部署。
+  行541: ### 2.4.32 funboost + REDIS_ACK_ABLE ack能力 吊打celery + redis + ack + visibility_timeout (小细节)
+  行571: ### 2.4.33 funboost: 通过继承 BoosterParams 实现显式配置（清晰度爆表）
+  行606: ### 2.4.34 funboost可以是事件驱动平台,远超celery传统消息队列能力
+  行625: ### 2.4.35 funboost可以作为万能发布者对几十种消息队列发布原始消息内容,celery会对消息转换添油加醋
+  行642: ### 2.4.36 funboost 自带 faas 功能，一键实现函数动态发现和 Faas
+  行653: ### 2.4.37 funboost的用户自定义扩展比celery更容易,更彻底
+  行665: ### 2.4.38 funboost支持微批消费
+  行669: ### 2.4.40 （王炸）funboost 支持celery作为broker_kind
+  行686: ## 2.4b 讨Celery檄：Funboost十胜定乾坤，函数王朝开天命
+  行694: #### 十胜十败·定鼎九州
+  行738: #### 弑王绝刃·乾坤倒转：
+  行764: ## 2.5 funboost能支持celery整体框架作为broker_kind
+  行788: ## 2.6 funboost 和 celery 性能比较源码（控制变量法）
+  行797: ### 2.6.1 `funboost` vs `celery` 控制变量法说明
+  行810: ### 2.6.2 `funboost` vs `celery` 发布性能对比
+  行818: ### 2.6.3 `funboost` vs `celery` 消费性能对比
+  行826: ### 2.6.4 `funboost` vs `celery` 总体性能对比
+  行834: ### 2.6.7 funboost VScelery benchmark对比源代码直接贴出来
+  行841: #### 2.6.7.1 celery的跑分源码
+  行883: #### 2.6.7.2 funboost的跑分源码
+  行922: ### 2.6.8 驳斥小白说 celery 在单核机器(或单进程)每分钟可以执行100万个消息
+  行934: #### 什么情况下celery单核机器上能达到每分钟执行100万个消息?
+  行941: ### 2.6.9 【！更新】2026-01最新funboost极限性能优化，发布和消费性能提升120%
+  行967: ## 2.7 rq  celery  funboost 段位比较
+  行989: ### 2.7.1**倔强青铜：RQ (Redis Queue)**
+  行1005: ### 2.7.2**荣耀黄金：Celery**
+  行1024: ### 2.7.3 **传奇王者：Funboost**
+  行1046: ## 2.8 celery 和 funboost 分别将加减乘除作为消费函数完整例子，哪个框架更好用，你自己判断！
+  行1050: ### 2.8.1 funboost 来实现加减乘除
+  行1052: #### 2.8.1.1 Funboost 项目演示（简洁配置）
+  行1065: #### 2.8.1.2 funboost代码文件内容
+  行1179: ### 2.8.2 Celery 项目演示（复杂配置）
+  行1181: #### 2.8.2.1 celery项目文件树
+  行1203: #### 2.8.2.2 Celery代码文件内容
+  行1379: #### 2.8.2.3 Celery 运行说明
+  行1401: ### 2.8.3 对比总结：哪个框架更容易使用？
+  行1403: #### 2.8.3.1 Celery 配置复杂性突出体现：
+  行1429: #### 2.8.3.2 Funboost 简洁性体现：
+  行1436: #### 2.8.3.3 结论
+  行1456: #### 2.8.3.4 说明，celery有稍微简单不爱出错的方式
+  行1461: ## 2.9 funboost到底为什么性能比celery高几十倍？太离谱了,太假了是吗？
+  行1483: ## 2.20 funboost 比 celery 的战略优势和 战术优势
+  行1489: ### 2.20.1 一、 战略优势 (Strategic Advantages)
+  行1492: #### 2.20.1.1 架构定位：FaaS 微服务平台 vs 传统任务队列
+  行1497: #### 2.20.1.2 设计哲学：自由赋能 vs 框架奴役
+  行1502: #### 2.20.1.3 兼容性格局：万物皆 Broker vs 依赖 Kombu
+  行1510: #### 2.20.1.4 技术栈前瞻性：原生 Asyncio vs 伪异步
+  行1516: ### 2.20.2 二、 战术优势 (Tactical Advantages)
+  行1519: #### 2.20.2.1 性能表现：多维叠加并发 vs 单一模式
+  行1525: #### 2.20.2.2 控频能力：精准令牌桶 vs 模糊限制
+  行1531: #### 2.20.2.3 可靠性：心跳 ACK vs 超时重发
+  行1535: #### 2.20.2.4 开发体验：IDE 友好 vs 字符串魔法
+  行1539: #### 2.20.2.5 运维能力：内置可视化 vs 第三方插件
+  行1546: ### 2.20.3 总结
+
+============================================================
+文件: c20.md
+============================================================
+  行1: # 20. Funboost 核心思想：一场关于“函数解放”的革命 🌪️(gemini生成总结)
+  行10: ## 20.1 🗽 核心哲学：拒绝“框架奴役”，拥抱“函数至上”
+  行16: ### 20.1.1 👑 函数即国王 (Function is King)
+  行23: ### 20.1.2 🔓 极致的自由主义 (Absolute Freedom)
+  行27: ## 20.2 🔌 万物皆可 Broker，打破时空界限
+  行31: ### 20.2.1 🌌 Broker 的终极抽象：万物互联
+  行40: ### 20.2.2 ⚡ 并发模式的“核武库”
+  行50: ## 20.3 🚀 Funboost.FaaS：从“后台任务”到“云原生微服务” (New!)
+  行54: ### 20.3.1 🌐 秒变 Serverless 计算平台
+  行67: ### 20.3.2 🔥 热更新与动态架构
+  行71: ## 20.4 🛡️ 精确的暴力美学：可靠性与控制
+  行75: ### 20.4.1 🎯 QPS 控频：时间的主人
+  行80: ### 20.4.2 🧱 叹息之墙：万无一失的消息确认
+  行85: ## 20.5 🧠 为什么说 Funboost 是“高维生物”？
+  行95: ## 20.6 👑 终极定义：Funboost 是什么？
+
+============================================================
+文件: c3.md
+============================================================
+  行1: # 3.框架详细介绍
+  行4: ## 3.1 各种中间件选择的场景和优势
+  行202: ## 3.2 框架支持的函数调度并发模式种类详细介绍
+  行217: # 这种是多进程方式，一次编写能够兼容win和linux的运行。
+  行232: ## 3.3 框架最最重要的boost装饰器的BoosterParams参数入参大全
+  行460: ### 3.3.1 funboost_config.py 配置文件内容
+  行474: # -*- coding: utf-8 -*-
+  行585: ### 3.3.2 funboost 重要公有方法大全介绍
+  行635: ### 3.3.3 boost装饰器 的 concurrent_num 和 qps 之间的关系。
+  行686: ## 3.4 框架的乞丐精简版实现方式
+  行729: ## 3.5 框架的任务消费确认
+  行752: ## 3.6 框架的设计规范原则
+
+============================================================
+文件: c4.md
+============================================================
+  行1: # 4. 🔑 使用框架的各种代码示例(学习funboost用法最重要的章节)
+  行9: ## 4.0 框架最重要的@boost装饰器的入参格式说明
+  行11: ### 4.0.1 老的 @booost 直接传入多个参数方式
+  行18: ### 4.0.2 新的@ boost 只传入一个 pydantic Model BoostParams 类型或子类 的入参
+  行28: ### 4.0.3 pydantic model 的 BoosterParams 的入参pycharm下自动补全
+  行40: ### 4.0.4 关于很多funboost 例子的@boost 使用直接入参,没有使用 pydantic Model类型的BoostParams
+  行45: ### 4.0.5 自定义子类继承 BoosterParams,使得每次少传参
+  行79: ## 4.1 装饰器方式调度函数
+  行101: ## 4.2c 在函数内部无限次按照队列名动态生成booster(消费者、生产者) (非装饰器方式)
+  行171: ## 4.2d 框架的 BoostersManager boosters管理介绍
+  行189: ### 4.2d.2 使用 BoostersManager 一次性启动所有队列消费,
+  行240: ### 4.2d.3 使用 BoostersManager ,通过 consume_group 启动一组消费函数
+  行330: ### 4.2d.4 使用 BoostersManager ,通过queue_name 得到 booster对象
+  行336: ## 4.2e funboost 支持实例方法、类方法、静态方法、普通函数 4种类型，作为消费函数的例子
+  行340: ## 4.3a 演示如何解决多个步骤的消费函数
+  行378: ## 4.3.b 演示多个函数消费者使用同一个线程池
+  行425: ## 4.3c 演示清空消息队列和获取消息队列中的消息数量
+  行462: ## 4.4 演示funboost定时运行例子
+  行488: ### 4.4.0 funboost定时任务最基本原理说明
+  行522: ### 4.4.1 funboost定时任务代码演示：
+  行640: ### 4.4.2 ApsJobAdder对象.aps_obj 核心对象说明
+  行660: ### 4.4.3 演示在python web中定时任务的添加 （添加和执行定时任务分在不同的py脚本中）
+  行709: ## 4.4.4 新增的 支持 aps_obj.add_job 添加定时任务(可以不用 add_push_job) (2025-08)
+  行731: # 定义任务处理函数
+  行799: # qps=5，is_using_distributed_frequency_control=True 分布式控频每秒执行5次。
+  行800: # 如果is_using_distributed_frequency_control不设置为True,默认每个进程都会每秒执行5次。
+  行985: # 以非等待方式获取mongo中函数的结果。
+  行1102: # 在pycahrm控制台搜索 某一秒的时间戳 + 计算 作为关键字查询，分布式函数调度框架启动5秒后，以后持续每一秒都是100次，未出现过99和101的现象。
+  行1238: ### 4.8.2 使用分布式函数调度框架，无论接口耗时多少，轻松达到8qps的例子
+  行1283: ### 4.8.3  并发数量和qps(每秒执行多少次)之间的区别
+  行1306: ## 4.9 演示延时运行任务
+  行1408: ## 4.10 在web中如flask fastapi django 如何搭配使用消费框架的例子。
+  行1457: ## 4.11 保存消费状态和结果包mongo，开启消费状态结果的web页面
+  行1459: ### 4.11.1 保存消费状态和结果到mongodb
+  行1515: ### 4.11.2 框架是可以自动保存消费状态/结果到mongo，你想保存到MySQL?
+  行1523: #### 4.11.2.b  作者自己贡献一个吧函数消费状态保存到mysql的函数,(2024.02新增)
+  行1620: ### 4.11.3 可视化，启动python分布式函数调度框架之函数运行结果状态web
+  行1624: ## 4.12 框架 asyncio 方式运行协程
+  行1628: ### 4.12.1 concurrent_mode=ConcurrentModeEnum.ASYNC 运行协程
+  行1646: ### 4.12.2 concurrent_mode=ConcurrentModeEnum.THREADING 运行asyncio协程
+  行1673: ## 4.13 跨项目怎么发布任务或者获取函数执行结果(即不定义@boost消费函数就发送消息)？
+  行1750: ## 4.13b 彩蛋!!不使用funboost的消费功能,funboost作为各种消息队列的万能发布者
+  行1786: ## 4.14 获取消费进程信息的方法(用于排查查看正在运行的消费者)
+  行1825: ## 4.16 文件日志所在的地方
+  行1838: ### 4.16.1 没亲自指定 日志文件名
+  行1849: ### 4.16.2 亲自指定日志文件名,log_filename的值
+  行1906: ### 4.16.3 把用户自己的业务日志和funboost框架日志写到同一个文件
+  行1915: ## 4.16.4 funboost 日志由 nb_log 提供。
+  行1921: ## 4.17 判断函数运行完所有任务，再执行后续操作
+  行1983: ## 4.18 暂停消费
+  行2034: ## 4.19 用户自定义记录函数消费 状态/结果 钩子函数
+  行2077: ### 4.19.b 自定义保存函数消费状态结果到mysql/sqlite/pgsql请看4.11.2.b的章节
+  行2079: ## 4.20 通过 broker_exclusive_config 参数 设置不同中间件能使用到的差异化独特配置
+  行2102: ### 4.20.2 怎么知道每种消息队列 broker_exclusive_config 能支持哪些独有特殊的参数配置
+  行2112: ## 4.21 【funboost完全自由定制扩展（方式1）】 使用 register_custom_broker 完全彻底自由灵活自定义扩展和定制修改中间件(消费者和发布者)
+  行2162: ## 4.21b 【完全自由定制扩展(方式2)】,使用 consumer_override_cls 和 publisher_override_cls 来自定义消费者 发布者。
+  行2166: ### 4.21b.1 重写某些方法的例子
+  行2221: ### 4.21b.2 完全实现新增中间件类型.
+  行2311: ### 4.21b.3 funboost的用户自定义扩展比celery更容易,更彻底
+  行2325: ## 4.21c 不想吃苦？让ai来帮你扩展funboost中间件或者定制运行逻辑
+  行2333: ### 4.21c.2 假设你要使用python内置的list作为 funboost的消息队列：
+  行2348: #### 4.21c.2.2 说个ai使用技巧秘密，网页版ai大模型生成funboost代码 吊打编程 ide中的 ai大模型和claude code
+  行2371: ## 4.23 演示funboost框架是如何代替用户手写调用线程池的
+  行2424: ## 4.24 设置消费函数重试次数
+  行2450: ### 4.24.1 抛出ExceptionForRequeue类型错误，消息立即重回消息队列
+  行2470: ### 4.24.2 抛出 ExceptionForPushToDlxqueue 类型错误，消息发送到单独另外的死信队列中
+  行2489: ### 4.24.3  设置is_push_to_dlx_queue_when_retry_max_times,重试到max_retry_times最大次数没成功发送到死信队列
+  行2496: ### 4.24.4 (内置辅助)将一个消息队列中的消息转移到另一个队列
+  行2518: ### 4.24.5 funboost 高级重试：指数退避重试
+  行2532: #### 4.24.5.1 `advanced_retry_config` 参数详解
+  行2542: #### 4.24.5.2 示例：配置一个典型的指数退避
+  行2570: ## 4.25 push 和 publish 发布消息的区别
+  行2575: ### 核心区别对比
+  行2584: ### 代码演示与说明
+  行2622: ## 4.26 性能调优演示
+  行2645: ### 4.26.1 在一个进程中启动多个函数的消费，适合轻型任务
+  行2657: ### 4.26.2 在多个进程中启动函数的消费，适合一次启动大量函数的消费或重型任务
+  行2673: ## 4.28 funboost 支持celery框架整体作为funboost的broker (2023.4新增)
+  行2740: ## 4.29 funboost支持任务优先级队列
+  行2744: ### 4.29.1 队列支持优先级的说明：
+  行2754: ### 4.29.2 优先级通俗理解，用食堂打饭比喻：
+  行2769: ### 4.29.3 队列支持任务优先级的代码主要有三点：
+  行2783: ### 4.29.4 队列支持任务优先级的代码如下：
+  行2812: ### 4.29.5 消息队列优先级是针对一个queue内消息的，那么怎样才能实现不同函数之间的按优先级运行？
+  行2876: ## 4.30 funboost 远程杀死(取消)任务
+  行2894: ### 4.30.1 funboost远程杀死函数的代码例子
+  行2939: ### 4.30.2 远程强制杀死函数、超时自动杀死(function_timeout设置不为0)， 这两个功能要注意死锁：
+  行2967: ### 4.30.2.b 如果想启用funboost函数超时自动杀死功能或者 远程杀死函数功能，推荐消费函数中使用可过期锁 expire_lock
+  行2978: ## 4.31 神级别 fct (funboost_current_task) 上下文获取当前消息和任务状态
+  行3049: ## 4.32 重磅更新！！！ funboost 独家新增支持实例方法和类方法作为消费函数
+  行3057: ### 4.32.0 !!! 实例方法和类方法作为funboost任务时候，push方法需要特别注意第一个入参。
+  行3094: ### 4.32.1 funboost 支持实例方法和类方法作为消费函数的原理
+  行3144: ### 4.32.2 funboost 支持实例方法、类方法、静态方法、普通函数 4种类型，作为消费函数的例子
+  行3217: ## 4.33  @boost设置is_auto_start_consuming_message，自动启动消费。
+  行3244: ## 4.34 pyinstaller 打包 funboost项目为exe 的说明
+  行3250: ## 4.35 演示 funboost 的函数入参过滤功能
+  行3293: ### 4.35.2 警告！！！: funboost的 rpc功能和 函数入参过滤过滤 不要同时使用
+  行3302: ## 4.35c 使用 nb_cache 作为缓存装饰器
+  行3304: ### 4.35c.1 为什么 要用 nb_cache 而不是 funboost 自带的 do_task_filtering
+  行3313: ### 4.35c.2 nb_cache 功能比 funboost自带的 do_task_filtering 全面太多了
+  行3320: #### 4.35c.2.2 举个例子 nb_cache 的防止缓存击穿为什么吊打 funboost的 do_task_filtering
+  行3328: ### 4.35c.2 如何在 funboost 中使用 nb_cache
+  行3335: #### 4.35c.2.1 方式一，@boost 和 @cache 叠加使用
+  行3362: #### 4.35c.2.2 方式二 cache 装饰器传给 funboost 的 `consuming_function_decorator`
+  行3393: ## 4.36 演示`funboost`入参可以是自定义类型(不可json序列化的类型的入参,自动使用pickle)(2025-07新增支持)
+  行3493: ## 4.37 funboost 启动消费函数的方式大全(再次集中总结)
+  行3497: ### 4.37.1. 基础启动 (最常用)
+  行3513: ### 4.37.2. 多进程叠加并发启动 (高性能推荐)
+  行3527: ### 4.37.3. 自动启动 (懒人模式)
+  行3542: ### 4.37.4. 批量启动所有消费者(最粗暴无脑)
+  行3561: ### 4.37.5. 分组启动 (Group Start)
+  行3577: ### 4.37.6. 命令行启动 (CLI)
+  行3586: ### 4.37.7. 远程自动部署启动 (Fabric)
+  行3596: ### 4.37.8. Celery 模式启动 (特殊)
+  行3609: ## 4.100 使用funboost时候对框架的疑问和猜测，使用控制变量法
+  行3671: ### 4.100.b 举个例子，验证测试框架的超时杀死 function_timeout参数的作用
+  行3718: ## 4.200 [分布式函数调度框架qq群]
+
+============================================================
+文件: c4b.md
+============================================================
+  行1: # 4b.使用框架的各种代码示例(高级进阶)
+  行3: ## 4b.1 日志模板中自动显示task_id
+  行5: ### 4b.1.1 日志模板中显示task_id
+  行26: ### 4b.1.2 用户在消费函数中想自动显示task_id,方便搜索task_id的关键字来排查某条消息的所有日志.
+  行101: ### 4b.1.3 一键全局使用 TaskIdLogger 代替 logging.Logger 的方式
+  行109: ### 4b.1.4 能在消费函数的整个链路里面的调用的任意函数获取task_id的原理
+  行114: ## 4b.2  支持消费函数定义入参 **kwargs ,用于消费包含随机不确定keys(或者keys太多了)的json消息
+  行118: ### 4b.2.0 funboost函数执行一条消息的最根本原理是 fun(**消息字典)
+  行149: ### 4b.2.1 演示错误的消费已存在json消息的例子,企图使用 def task_fun(message) 的函数签名来消费
+  行178: ### 4b.2.3 方式一: 使用 **kwargs 方式 消费随机keys (或者json的一级keys太多不想逐个定义消费函数入参的情况)
+  行246: ### 4b.2.4 方式二: 使用 下面的 4b.2c 中章节的 强力灵活的 _user_convert_msg_before_run 方式,来消费随机keys或者keys太多的json
+  行282: ## 4b.2c 更强力灵活的,funboost支持消费地球上一切任意格式的不规范消息(非json格式也能消费)
+  行301: ### 4b.2c.1 例如funboost消费消息队列中已存在的消息 'a=1,b=2' 这种.
+  行358: ### 4b.2c.2 例如,funboost消费队列中已存在的 "1000123"(假设是纯粹的用户id) 这种非json消息
+  行390: ## 4b.3 funboost + 全asyncio 编程生态演示
+  行401: ### 4b.3.1 funboost 天然支持 async def 的消费函数,和支持 aio_push 来异步发布消息.
+  行442: ### 4b.3.2 演示fastapi 中aio_push来发布消息,和 AioAsyncResult asyncio方式 等待获取结果.
+  行490: ### 4b.3.3 关于funboost的asyncio生态支持实现原理的答疑
+  行543: ### 4b.3.4 劝退不懂asyncio的loop是什么的小白，使用funboost + asyncio 来编程
+  行611: #### 4b.3.4.2 想在funboost中玩的溜asyncio实际比例如fastapi这种框架中使用asyncio 更难。
+  行644: ### 4b.3.5 演示funboost解决 ,async并发模式,由于跨线程loop 操作任何socket连接池 的报错,
+  行708: ## 4b.4 等待n个任务完成后，再做下一步操作(其实就是canvas任务编排)
+  行756: ## 4b.5 funboost 原生任务编排(实现canvas功能)
+  行916: ## 4b.6  @boost装饰器 user_options  入参的妙用
+  行942: ### 4b.6.1场景一： user_options “反向实现” consume_group**
+  行964: ### 场景二： user_options 多租户与覆盖全局配置（以Kafka集群做例子）
+  行1004: ## 4b.7 opentelemetry 全链路任务追踪，funboost生产级别的重要战略级功能 (高级功能)
+  行1043: ### 4b.7.1 安装 jaeger ,可视化展示 opentelemetry 的全链路追踪
+  行1070: ### 4b.7.2 opentelemetry 全链路任务追踪 和计入 logger日志 + task_id 的排查区别
+  行1078: #### 4b.7.2.1. 传统的 Logger + task_id：一维线性的“流水账”
+  行1099: #### 4b.7.2.2. OpenTelemetry (OTel)：二维/三维的“树状结构”
+  行1131: ### 4b.7.3 从opentelemetry功能集成， 侧面证明 funboost 对普通用户扩展性吊打celery10倍。
+  行1139: #### 4b.7.3.1 **你如果在celery就没那么简单能自定义实现这个功能了**
+  行1176: #### 4b.7.3.2 **funboost的扩展比celery更容易更彻底：**
+  行1186: #### 4b.7.3.3 **celery 的 opentelemetry 代码在此，太难了：**
+  行1194: ## 4b.8 funboost 声明式任务编排 workfolw
+  行1206: ### 4b.8.1 🚀 快速开始
+  行1252: ### 4b.8.2 📦 核心概念
+  行1261: ### 4b.8.3 🔧 API 详解
+  行1263: #### 4b.8.3.1 Signature（任务签名）
+  行1276: #### 4b.8.3.2 Chain（链式执行）
+  行1287: #### 4b.8.3.3 Group（并行执行）
+  行1302: #### 4b.8.3.4 Chord（并行+汇总）
+  行1313: ### 4b.8.4 ⚙️ WorkflowBoosterParams
+  行1328: ### 4b.8.5 🆚 与 Celery Canvas 对比
+  行1343: ### 4b.8.6 🆚 与 Funboost 命令式编排对比
+  行1349: #### 4b.8.6.1 同一个视频处理流程的两种写法
+  行1382: #### 4b.8.6.2 对比总结
+  行1397: ### 4b.8.7 📁 文件结构
+  行1410: ### 4b.8.8 📖 完整示例
+  行1418: ## 4b.9 funboost 支持 prometheus 指标监控 （高级功能）
+  行1424: ### 4b.9.0 Funboost Prometheus 监控指标 Mixin
+  行1432: ### 4b.9.1 用法1：HTTP Server 模式（单进程）
+  行1450: ### 4b.9.2 用法2：Push Gateway 模式（多进程推荐）
+  行1471: ### 4b.9.3 指标说明
+  行1480: ## 4b.10 funboost支持微批消费
+  行1491: ### 4b.10.1 funboost 微批消费用法
+  行1549: ### 4b.10.2 如果每次临时手写微批操作，会怎么样？
+  行1564: ## 4b.12 funboost的周期额度功能
+  行1600: ### 4b.12.2 周期额度用法例子
+  行1622: ## 4b.13 使用内存队列 broker_kind=BrokerEnum.MEMORY_QUEUE 时候，用 get_future 获取消费函数的运行结果
+  行1705: ## 4b.14 funboost 支持自动熔断，智能自动熔断、半开、恢复 （高级功能）
+  行1715: ### 4b.14.0 funboost 支持自动熔断管理和手动熔断管理
+  行1719: #### 4b.14.0.1 手动熔断管理
+  行1733: #### 4b.14.0.2 自动熔断管理
+  行1740: ### 4b.14.1 funboost 自动熔断，CircuitBreakerConsumerMixin
+  行1754: #### 4b.14.1.1 三态状态机
+  行1792: #### 4b.14.1.2 两种触发策略
+  行1801: #### 4b.14.1.3 两种计数后端
+  行1810: #### 4b.14.1.4 两种熔断行为
+  行1819: #### 4b.14.1.5 user_options的 circuit_breaker_options 参数说明
+  行1859: #### 4b.14.1.6 钩子方法（子类重写）,用于你发送告警到 微信/钉钉/飞书/邮件等等
+  行1868: #### 4b.14.1.7 用法示例
+  行1944: ## 4b.15 funboost 配置失败告警的多种方式
+
+============================================================
+文件: c6.md
+============================================================
+  行1: # 6.常见问题回答
+  行7: ## 6.0 最最最重要的第一个问题: "funboost这个框架怎么样呀，值得我学习使用吗？"
+  行108: ## 6.0b 有人问 funboost 是做什么的? 怎么回答最合适?
+  行124: ### 6.0b.1. Funboost 可以做什么？—— Python 函数的“微服务化”与“超音速”引擎
+  行132: ### 6.0b.2. 一句话说清楚 (电梯演讲版)
+  行145: ### 6.0b.3. 解决你的核心痛点 (痛点解决版)
+  行163: ### 6.0b.4. 你可以用 Funboost 来构建什么？ (场景举例版)
+  行188: ### 6.0b.5. 为什么 Funboost 如此强大？—— 架构理念的降维打击
+  行201: ## 6.0c funboost教程这么长,funboost学习和使用难吗?
+  行293: ## 6.0d Funboost 可以用于哪些场景？（7大核心领域）
+  行295: #### 1. 传统的异步后台任务（Asynchronous Tasks）
+  行300: #### 2. FaaS 微服务与 RPC 调用（Function as a Service）
+  行308: #### 3. 高性能分布式爬虫（Distributed Crawling）
+  行313: #### 4. 轻量级 ETL 与 数据同步（Data Pipeline & CDC）
+  行320: #### 5. 定时任务与调度平台（Scheduling）
+  行327: #### 6. 物联网与实时通信（IoT & Real-time）
+  行334: #### 7. 运维自动化与远程执行（DevOps）
+  行340: ## 6.0e Funboost 能同时替代哪些框架？（“杀手”清单）
+  行344: #### 1. 替代 【任务队列框架】
+  行348: #### 2. 替代 【爬虫框架】
+  行352: #### 3. 替代 【微服务/RPC 框架】
+  行356: #### 4. 替代 【定时任务框架/工具】
+  行360: #### 5. 替代 【数据同步/CDC 工具】
+  行364: #### 6. 替代 【Web 框架的插件】
+  行370: ### 🏆 终极总结
+  行383: ## 6.0f 为什么可以将 funboost 看作为一个超级装饰器来使用？ (如果你不使用分布式和消息队列，funboost 也是大有可为）
+  行391: ### 6.0f.0 为什么选择 funboost 作为装饰器？
+  行404: ### 6.0f.1. 最简模式：只用并发和控频
+  行419: ### 6.0f.2. 加上高级自动重试功能
+  行439: ### 6.0f.3. 任务去重，避免重复执行
+  行452: ### 6.0f.4. 获取函数执行结果（非分布式场景）
+  行469: ### 6.0f.5. 异步函数使用 asyncio 并发
+  行482: ### 6.0f.6. 函数超时控制
+  行494: ### 6.0f.7. 消息过期，丢弃旧消息
+  行506: ### 6.0f.8. 只在特定时间运行（cron表达式）
+  行518: ### 6.0f.9. 自动启动消费
+  行532: ### 6.0f.11. 总结
+  行544: ## 6.1 你干嘛要写这个框架？和celery 、rq有什么区别？
+  行559: ## 6.2 为什么包的名字这么长?
+  行570: ## 6.4 框架如何实现定时？
+  行577: ## 6.5 为什么强调是函数调度框架不是类调度框架，不是方法调度框架？(说明：2024.06月以后新增支持了实例方法和类方法作为消费函数)
+  行672: ## 6.6 是怎么调度一个函数的。
+  行684: ## 6.7 框架适用哪些场景？
+  行702: ## 6.8 怎么引入使用这个框架？门槛高不高？
+  行713: ## 6.9 怎么写框架？
+  行743: ## 6.10 框架能做什么
+  行755: ## 6.11 日志的颜色不好看或者觉得太绚丽刺瞎眼，想要调整。
+  行780: ## 6.12 是不是抄袭模仿 celery
+  行814: ### 6.12.2 生产者-broker-消费者 不是 celery 的专利
+  行849: ### 6.12.3 gemini-2.5pro ai大模型来分析, funboost 是不是抄袭粘贴了 celery 源码
+  行888: #### 理由一：核心架构与设计哲学的根本不同
+  行906: #### 理由二：并发模型的实现方式截然不同
+  行916: #### 理由三：可靠性机制的实现细节差异巨大
+  行926: #### 理由四：“抄袭”的技术难度与反证
+  行939: #### 结论
+  行948: ### 6.12.4 仅用几个celery文件证明抄袭celery有多困难
+  行952: #### 6.12.4.1 kombu的redis transport源码文件
+  行959: #### 6.12.4.2 celery的consumer源码文件
+  行967: ## 6.13 使用此框架时候，在一个python项目中如何连接多个相同种类的消息队列中间件ip地址
+  行989: ## 6.14 什么是确认消费？为什么框架总是强调确认消费？
+  行1022: ## 6.15 如何等待队列中的消息全部消费完成
+  行1031: ## 6.16 框架支不支持函数上加两个装饰器？
+  行1033: ### 6.16.1 方式一：使用consuming_function_decorator 传参装饰器，
+  行1089: ### 6.16.2 方式二：装饰器直接加到消费函数上，设置should_check_publish_func_params=False
+  行1131: ## 6.17 嫌框架日志记录太详细？
+  行1133: ### 6.17.a 设置发布者消费者的日志级别,控制是否显示发布了什么消息和消费了什么消息.
+  行1147: ### 6.17b 嫌funboost启动时候打印太多提示用户的消息?
+  行1187: ## 6.18 为什么框架在cmd shell终端运行时候要求会话中设置环境变量 export PYTHONPATH=你的项目根目录？
+  行1226: ### 6.18.2 为什么celery scrapy django不需要用户设置pythonpath？
+  行1238: ### 6.18.3  怎么指定配置文件读取 funboost_config.py 和nb_log_config.py的文件夹位置
+  行1253: ### 6.18.4 怎么根据不同环境使用不同的funboost_config配置文件？
+  行1273: ### 6.18.5 多个ptyhon项目怎么使用同一个funboost_config.py 作为配置文件
+  行1298: ## 6.19 定时任务或延时任务报错 RuntimeError: cannot schedule new futures after interpreter shutdown
+  行1314: ## 6.21 支不支持redis cluster集群模式的redis作为消息队列？
+  行1323: ## 6.22 怎么使用tcp socket 作为消息队列
+  行1330: ## 6.23 安装包时候自动安装的三方依赖包太多？
+  行1357: ### 6.23.b 作者为什么不开发pip 选装方式?例如实现选装 pip install funboost[rabbitmq]
+  行1365: ## 6.24 funboost框架从消息队列获取多少条消息？有没有负载均衡？
+  行1427: ## 6.25 funboost消费启动后，按ctrl + c 无法结束代码？
+  行1440: ## 6.25b `ctrl_c_recv` 到底要不要加？—— 直接看效果
+  行1459: ### 6.25b.0 ctrl_c_rev的源码很简单，很容易看懂。
+  行1499: ### 6.25b.1 ✅ 情况A：代码末尾加了 `ctrl_c_recv()`
+  行1514: ### 6.25b.2 ❌ 情况B：代码末尾**没有**加 `ctrl_c_recv()`
+  行1530: ### 6.25b.3 效果对比表（一目了然）
+  行1541: ### 6.25b.4 最终结论
+  行1549: ## 6.25b.5 顺便说一下，文档中其他地方提到的 `ctrl_c_recv` 和 apscheduler 的定时器之间的关系
+  行1555: ### 6.25b.5.1 APScheduler 的两种原生定时器
+  行1562: ### 6.25b.5.2 早期版本（2025年之前）的问题
+  行1575: ### 6.25b.5.3 2025年之后的改进
+  行1584: ### 6.25b.5.4 三种定时器的行为对比
+  行1592: ### 6.25b.5.5 总结
+  行1600: ## 6.26 ASYNC 并发模式,异步函数操作数据库/aiohttp连接池报错 `attached to a different loop`(是用户不看文档和boost的入参说明造成)
+  行1665: ### 6.26.1 演示aiohttp连接池,解决报错 `RuntimeError: context manager should be used inside a task`
+  行1803: ### 6.26.2 演示 aiomysql 连接池在funboost使用,解决 `attached to a different loop`
+  行1979: ### 6.26.3 演示子线程怎么正确的使用aiomysql连接池的本质(和funboost无关但原理相通)
+  行2059: ## 6.28 日志提示 是掉线或关闭消费者的 和 重新放入掉线消费者未消费确认的任务 ,是正常的提示.
+  行2092: ## 6.29 funboost 推荐用户使用什么并发模式？
+  行2096: ### 6.29.1 默认推荐：当前进程内 + 多线程模式 (最省心、最稳定、最好用)
+  行2112: ### 6.29.2 高性能推荐：多进程叠加并发模式 (性能炸裂)
+  行2130: #### 6.29.2.2 ⚠️ 极度重要：多进程在 Linux 上建议显式设置 spawn 模式，抛弃默认的 fork 模式
+  行2171: ### 6.29.3 极客推荐：纯 Asyncio 协程模式 (高手的玩具)
+  行2195: ### 6.29.4 特殊场景：单线程串行模式 (Single Thread)
+  行2221: ### 6.29.5 至于 gevent 和 eventlet 并发模式，直接忽略就好
+  行2225: ## 6.30 funboost 如何实配置触发失败告警和恢复告警
+  行2229: ### 6.30.1 使用内置告警 Mixin（AlertNotifier）
+  行2239: #### 6.30.1 AlertNotifierConsumerMixin 发送警告到 微信 钉钉 飞书
+  行2262: #### 6.30.1 AlertNotifierConsumerMixin 发送警告到任意渠道
+  行2284: ### 6.30.2 通过熔断器钩子自定义告警
+  行2319: ### 6.30.3 基于 Prometheus 指标 + Grafana 告警
+  行2352: ### 6.30.4 使用funboost的 MongoAlertMonitor 实现错误告警
+  行2373: #### 6.30.4.1 MongoAlertMonitor 使用例子，发到内置实现的 企业微信 钉钉 飞书
+  行2443: #### 6.30.4.2 MongoAlertMonitor 使用例子，发到自定义的渠道
+  行2463: ### 6.30.5 elk + grafana 实现错误告警
+  行2469: ### 6.30.6 错误触发警告的方式选择
+  行2475: ## 6.31 怎么知道 Funboost 发布者生成的最终消息内容格式是什么样？
+  行2477: ### 6.31.1 方式一：直接查看 Broker
+  行2481: ### 6.31.2 方式二：预览消息（不真正发送）
+
+============================================================
+文件: c7.md
+============================================================
+  行1: # 7.更新记录
+  行3: ## 7.0 很小的更新，对api使用完全无变化或者无增加新功能的不写更新记录。
+  行5: ## 7.1 新增第十种Consumer，以redis为中间件，但增加了消费确认，是RedisConsumerAckAble类。
+  行32: ## 7.2 新增基于以redis为消息中间件时候的页面管理和消费速度显示。
+  行47: ## 7.3 新增一个10行代码的函数的最精简乞丐版实现的分布式函数执行框架.
+  行85: ## 7.4 新增sqlachemy 支持的数据库作为消息中间件
+  行100: ## 7.5 日志改为导入独立包nb_log，支持用户配置文件自定义日志配置。
+  行105: ## 7.6 优化qps控频。
+  行121: ## 7.7 增加rocketmq支持。 (2020-7)
+  行139: ## 7.8 新增 async 并发模式 (2020-12)
+  行186: ### 7.8.2 gevent/eventlet 和 asyncio 用法区别感受
+  行377: # KOMBU_URL = f'amqp://{RABBITMQ_USER}:{RABBITMQ_PASS}@{RABBITMQ_HOST}:{RABBITMQ_PORT}/{RABBITMQ_VIRTUAL_HOST}'
+  行378: # KOMBU_URL = 'sqla+sqlite:////celery_sqlite3.sqlite'  # 4个//// 代表磁盘根目录下生成一个文件。推荐绝对路径。3个///是相对路径。
+
+============================================================
+文件: c8.md
+============================================================
+  行3: # 8.用于爬虫
+  行7: ## 8.0 funboost 用于爬虫前序
+  行30: ### funboost scrapy 两种框架写爬虫代码方式代码明显对比
+  行32: #### funboost框架是自由框架的证据:
+  行72: #### scrapy是框架奴役的证据:
+  行91: ### 8.0.1 tips : 202309 新增boost_spider爬虫框架
+  行121: ### 8.0.2 funboost 降维打击仿scrapy api爬虫框架
+  行152: #### funboost 太省时间
+  行159: #### @boost 一键赋能你的函数，功能远超爬虫框架
+  行165: #### funboost 打破数据孤岛：秒变微服务，Java/Go 随时调用
+  行173: #### 有人怀疑 funboost没有http请求中间件，这恰好是对scrapy的最大优势
+  行212: #### funboost能轻松自然完成，而scrapy无法完成的爬虫场景1，浏览器多轮交互
+  行234: #### 总结下funboost和scrapy在小项目和大项目：
+  行244: ### 8.0.3 讨scrapy檄文：Funboost兴，Scrapy亡，天下爬虫，当顺天命！
+  行317: ### 8.0.4 很多人问这个框架能不能爬虫？
+  行338: ### 8.0.5 为什么 funboost 用来爬虫时候，扩展性简单性 远超 scrapy api式的一众传统爬虫框架？
+  行410: ### 8.0.6 主动集中简要回答驳斥一些scrapy 优势更大的观点
+  行414: #### **你质疑funboost 没有 http middware ？**
+  行422: #### **你质疑funboost 没有 pipeline，质疑保存数据麻烦？**
+  行444: #### **你说Scrapy 插件生态丰富，质疑Funboost 没有三方包插件生态不够？**
+  行491: #### 你项目下的 utils 文件夹的工具类是黄金还是废铁？取决于你用什么哲学的框架
+  行499: #### **你说scrapy社区支持，有庞大的专门各种问题的讨论？质疑funboost没有社区？**
+  行512: #### **你羡慕scrapy的response有自带.xpath .css .extract_first .extract_all 方法？**
+  行519: #### **scrapy twisted 性能强悍？担心funboost爬取不快？**
+  行525: #### **你质疑scrapy重试功能强大？**
+  行531: #### **你怀疑scrapy稳定，funboost不稳定？**
+  行540: #### **你质疑scrapy自带去重，funboost不能去重？**
+  行548: #### **你质疑funboost不能断点续爬？**
+  行558: ### 8.0.7 funboost爬虫时候是任何方面超过scrapy,不接受辩证法说scrapy也有优势
+  行567: ### 8.0.8 国内爬虫框架突破很小,不是有意抄袭巧合,而是情不自禁模仿scrapy api
+  行590: ## 8.0b 你的 utils 文件夹是黄金还是废铁？取决于你用什么哲学的框架
+  行660: ## 8.1 演示获取汽车之家资讯的 新闻 导购 和 评测 3个板块 的 文章。
+  行816: ## 8.2 演示经典的豆瓣top250电影的爬虫
+  行875: ### 8.2.2 funboost 对比网上的 scrapy 爬取 douban代码
+  行893: ## 8.3 演示3种最常见代码思维方式爬取汽车之家资讯
+  行903: ### 8.3.1 每次临时手写rquests + 多线程,使用low爬虫方式的缺点
+  行919: ### 8.3.2 scrapy 爬虫框架来实现缺点
+  行933: ### 8.3.3 scrapy 框架 和 分布式函数调度框架爬虫对比
+  行1051: ### 8.3.4 临时low方法手写爬虫全流程的代码 （手写多线程 + queue 分发调度 ）
+  行1199: ### 8.3.5 scrapy爬虫代码
+  行1580: ### 8.3.6 分布式函数调度框架的代码
+  行1648: ## 8.7 scrapy 和 仿scrapy api 式爬虫框架 回调地狱，代码写法思维反直觉
+  行1680: ## 8.8 详细说明为什么 Scrapy 爬虫代码不是直观的"平铺直叙"写法？
+  行1849: ## 8.9 仿scrapy api框架中无法完成的需求真实例子2，token有效期太短
+  行2044: ## 8.10 scrapy的 response.meta 字典传参无法ide自动补全提示
+  行2107: ## 8.11 funboost中反爬虫换代理ip 请求头 破解等 容易程度暴击专用爬虫框架scrapy
+  行2111: ### 8.11.1 scrapy中换代理ip和请求头代码
+  行2162: ### 8.11.2 用户自己自由封装一个换代理ip和请求头的request函数，自然又简单
+  行2190: ### 8.11.3 为什么scrapy换代理IP和请求头的高难度分析my_request
+  行2259: ## 8.12 scrapy 可直接运行测试验证性很差
+  行2282: ## 8.13 funboost 断点接续运行能力吊打scrapy-redis 的 blpop （funboost支持确认消费）
+  行2285: ### 8.13.1 为什么 funboost的断点续爬完胜 scrapy-redis的断点续爬(防丢数据1)
+  行2294: ### 8.13.2 funboost的函数重试功能远远暴击scrapy的url重试功能(防丢数据2)
+  行2305: ## 8.14 其他funboost 吊打 scrapy原因 详细介绍
+  行2306: ### 8.14.1 为什么funboost的去重功能远远吊打scrapy的Request对象指纹去重？
+  行2308: #### 8.14.1.1 funboost 支持有效期过滤
+  行2313: #### 8.14.1.2 scrapy无法过滤url中的噪音入参，例如ts时间戳，rd随机数，追踪来源id
+  行2410: ### 8.14.2 详细驳斥 Scrapy 插件生态丰富，质疑Funboost 没有三方扩展
+  行2526: ### 8.14.3 架构级碾压：Funboost 天然就是 FaaS 微服务，而 Scrapy 只是数据孤岛
+  行2535: #### 8.14.3.1 Funboost 的实现方式：微服务式的天然解耦
+  行2554: #### 8.14.3.2 Scrapy 的实现方式：反直觉的高耦合代码
+  行2598: #### 8.14.3.3 场景扩展：数据补采与调试
+  行2605: #### 8.14.3.4 总结
+  行2614: #### 8.14.3.5 架构选型结论
+  行2626: ## 8.15 funboost的调度、去重、并发、反爬定制，各方面吊打了scrapy,非专业框架竟然虐专业框架?
+  行2709: ## 8.16 为什么funboost 在面对反爬虫网站时候 吊打 scrapy?
+  行2861: ## 8.16b  `funboost` + `boost_spider` 在反爬方面，完胜 `scrapy` 这种所谓的专业爬虫框架
+  行2871: ### 8.16b.1 🛡️ 反爬虫能力全方位对比表：boost_spider vs scrapy
+  行2889: ## 8.17 如果禁止使用搜索 ai外部辅助,人工默写scrapy和funboost爬虫,哪个更难?
+  行2991: ## 8.30 为什么 funboost 能用于爬虫 的本质原因
+  行3034: ## 8.31 `boost_spider`  (powered by `funboost`) 专业爬虫工具库介绍
+  行3072: ### 8.31.1 `boost_spider` 的 `RequestClient` 类介绍
+  行3079: ### 8.31.2 `boost_spider` 的 `SpiderResponse`  类介绍
+  行3089: ### 8.31.2b **boost_spider/http/request_client.py 中的 RequestClient 和 SpiderResponse 功能如下:**
+  行3108: ### 8.31.3  `boost_spider` 内置了各种类型的数据库sink,全部只需要一行代码就能把字典入库.
+  行3122: ### 8.31.4 `boost_spider` 写法demo (写法完全和`funboost`一样)
+  行3165: ### 8.31.5 补充这个 `boost_spider`内容 是为了打消用户质疑
+  行3182: ## 8.40 集中总结的 Funboost vs. Scrapy 优势快速对比 (表格版)
+  行3408: ## 8.40b 集中总结 funboost vs scrapy 优势快速对比（文字版）
+  行3488: ## 8.41 Funboost vs. Scrapy 爬虫能力全方位对比（百分制评分）
+
+============================================================
+文件: c9.md
+============================================================
+  行1: # 9 轻松远程服务器部署运行函数
+  行8: ## 9.1 远程服务器部署函数的意义
+  行38: ## 9.2 远程服务器部署函数的入参介绍。
+  行62: ## 9.3 远程服务器部署消费函数的代码示例。
+
+============================================================
+文件: funboost_vs_celery.md
+============================================================
+  行1: # 🏆 Funboost vs Celery 全方位深度对比
+  行3: ## 只有这个小章节是人工添加的（其余都是claude生成的一行没修改）
+  行22: ## 📊 评分规则
+  行33: ## 🎯 核心设计理念对比
+  行45: ## ⚡ 性能对比
+  行57: ## 🔧 功能特性对比
+  行80: ## 💻 开发体验对比
+  行101: ## 🔌 扩展性对比
+  行115: ## 🛡️ 可靠性与运维对比
+  行134: ## 🎮 任务编排对比 (Canvas)
+  行146: ## 📡 Broker生态对比
+  行176: ## 🌐 FaaS与微服务对比
+  行190: ## 📖 文档与社区对比
+  行203: ## 📈 综合统计
+  行205: ### 胜负统计
+  行214: ### 总分统计
+  行223: ## 💎 总结评语
+  行225: ### Funboost：Python分布式函数调度的"无限手套"
+  行229: #### 🏆 Funboost的核心优势
+  行241: #### ⚠️ Celery仍有的优势
+  行246: #### 🎯 终极结论
+
+`````
+                 
+                 # markdown content namespace: funboost examples 
 
 
 ## funboost_docs File Tree (relative dir: `examples`)
@@ -18430,8 +17700,14 @@ if __name__ == '__main__':
 
 ## 6.25b `ctrl_c_recv` 到底要不要加？—— 直接看效果
 
+win和linux表现不一样：
+linux 代码末尾不加ctrl_c_recv(),按ctrl +c 可以结束程序。win 不加ctrl_c_recv(),按ctrl +c 无法结束程序。
+
 **先给出正确的结论:**  
 你即使程序最末尾不加 ctrl_c_recv(),funboost消费程序也会永久持续运行，控制台也会不断打印日志和 `print` 输出。
+
+严禁认为 ctrl_c_recv() 的作用是“优雅退出”或“防止程序结束”。实际上，不加它程序也会一直运行
+真实作用：在 Windows 下如果不加这行代码，按 Ctrl+C 无法停止程序。加上后即可正常。
 
 
 很多开发者（包括一些AI）容易对 `ctrl_c_recv` 的作用产生两种误解：  
@@ -18439,6 +17715,43 @@ if __name__ == '__main__':
 - **误解二**：以为不加 `ctrl_c_recv`，脚本会自动变成 `nohup` 那样的后台任务，关掉终端窗口还能继续跑。
 
 **❌ 这些都是错误的！**
+
+
+### 6.25b.0 ctrl_c_rev的源码很简单，很容易看懂。
+
+ctrl_c_recv 的源码非常简单，它不是“优雅退出”的实现——没有等待任务完成、没有清理资源、没有发送任何信号给工作线程或消息队列，funboost不需要优雅退出，是依靠mq本身的确认消费来防止丢消息。
+
+```python
+def ctrl_c_recv(confirmation_count=1):
+    """ 
+    程序最末尾加 ctrl_c_recv() 主要是为了主线程持续在运行，方便你在 windows系统下敲击键盘 ctrl + c 可以停止程序而已。  
+    你即使程序最末尾不加 ctrl_c_recv(),funboost消费程序也会永久持续运行，控制台也会不断打印日志和 `print` 输出。
+    
+    加与不加的详细区别，可以看教程6.25b章节 `## 6.25b `ctrl_c_recv` 到底要不要加？—— 直接看效果`
+    
+    你也可以不用ctrl_c_recv(),  直接在你的启动脚本文件的最末尾加上：
+    while 1:
+        time.sleep(100) 
+    也能达到主线程在持续运行的目的，从而在windows系统下敲击键盘 ctrl + c 可以停止程序。
+    """
+    for i in range(confirmation_count):
+        while 1:
+            try:
+                time.sleep(2)
+            except (KeyboardInterrupt,) as e:
+                # time.sleep(2)
+                print(f'{type(e)} 你按了ctrl c ,程序退出, 第 {i + 1} 次', flush=True)
+                # time.sleep(2)
+                break
+
+    os._exit(44)
+```
+
+
+
+
+
+
 
 下面我们直接列出**加**与**不加**的真实效果，不涉及底层原理，只讲你实际能看到的现象。
 
@@ -25046,19 +24359,73 @@ boost_scrapy 就是这样的框架，使用 funboost的引擎来封装的，封�
 
 
 
-- `funboost` 是python 全功能分布式函数调度框架
-- `funboost.faas` 是funboost的战略级核武器。使函数调度框架产生架构质变：从 Worker 到 Service
 
-- 以下一定要记住，最最重要的 类和函数如下：
-   - @boost(BoosterParams(...))  任意普通函数加上装饰器，变成分布式函数
-   - BoosterParams 装饰器入参控制大全，一定要学习这个类的所有入参配置；ai绝对不允许胡编乱造源码api和教程中不存在的BoosterParams字段入参。
-   - BrokerEnum：支持 40+ 种消息队列中间件。
-   - BoostersManager 管理分布式函数，高阶用法可能需要用到，例如启动一组消费函数，启动所有消费函数等。
-   - ApsJobAdder 类， 是定时任务的最重要使用方式的类
-   - ConcurrentModeEnum：funboost支持的并发模式。
-   - funboost/core/broker_kind__exclusive_config_default_define.py 决定了每种中间件类型能传递哪些
-   
+- `funboost` 是 Python 全功能分布式函数调度框架。
+- `funboost.faas` 是 funboost 的战略级核武器，使函数调度框架产生架构质变：从 Worker 到 Service（一行代码即可为 FastAPI/Flask/Django 生成标准 Web 接口）。
+- `boost_spider` 是基于 funboost 的爬虫增强包，包含 `RequestClient`, `SpiderResponse`, `DatasetSink`，用于实现无拘无束的超高光速并发爬虫。
 
+- 🚨 **AI 必读：本文档中包含一个专门为你准备的目录 `funboost/md_for_ai/`**  
+  该目录下的文件对你理解和使用 funboost 至关重要，请优先阅读并按其中规则执行。
+
+- 📌 `funboost/md_for_ai/` 中的核心文件说明：
+   - **`funboost_ai_coding_编程指南_rules_and_skills.md`**：  
+     这是你生成 funboost 代码时的 **最高行为准则**。  
+     包含禁止臆造参数、必须使用 `BoosterParams`、如何正确使用 `fct` 上下文、如何启动消费等铁律。  
+     **生成任何代码前必须先深度学习此文件。**
+
+   - **`funboost源码速查for_ai.md`**：  
+     这是 **源码位置索引**。当用户询问某个类、函数、参数的定义或实现位置时，**优先查阅此文件**，它会给出精确的文件路径和行号。
+
+   - **`如何扩展增加新的中间件.md`**：  
+     这是 **自定义扩展指南**。当用户需要增加新的消息队列中间件或定制现有 broker 行为时，必须遵循此文档。  
+     文档详细说明了 **两种扩展方式**：
+        1. **`register_custom_broker`**（方式一）：适合完全新增一个不存在的 broker 类型。
+        2. **`consumer_override_cls` / `publisher_override_cls`**（方式二）：适合通过 Mixin 方式修改或增强现有 broker 的逻辑（推荐）。
+
+- 🎯 **以下是最重要的核心类和函数（务必牢记）**：
+   - `@boost(BoosterParams(...))`：核心装饰器，将任意普通函数变成分布式函数。
+   - `BoosterParams`：装饰器入参控制大全。**AI 绝对不允许胡编乱造不存在的字段**。
+   - `fct` (funboost_current_task)：**神级任务上下文**。禁止像 Celery 那样在参数里传 `self`，必须通过 `from funboost import fct` 获取 `fct.task_id`, `fct.full_msg` 等。
+   - `BrokerEnum`：支持 40+ 种消息队列中间件。
+   - `BoostersManager`：管理分布式函数（启动消费组、启动所有等）。
+   - `ApsJobAdder`：添加定时任务的唯一正确方式。
+   - `ConcurrentModeEnum`：支持的并发模式（THREADING/GEVENT/EVENTLET/ASYNC/SINGLE_THREAD）。
+   - ⬇️ **`broker_exclusive_config`**：`BoosterParams` 中的字典参数，用于设置特定消息队列中间件的**专属配置**（如 Kafka 的 `group_id`、RabbitMQ 的 `x-max-priority`、Redis 的 `pull_msg_batch_size` 等）。**严禁臆造键名**，支持的键取决于所选 `broker_kind`，可在 `funboost/core/broker_kind__exclusive_config_default_define.py` 中查看。示例：`broker_exclusive_config={'x-max-priority': 5, 'no_ack': False}`。
+
+- **`MEMORY_QUEUE` 的重要性**：  
+     这是 funboost 中最最核心的 broker（SSS 级）。它支持传递任何不可序列化的对象，并且可以把 `@boost` 当作**超级装饰器**使用——即使不需要分布式，也能获得 QPS 控频、重试、超时、去重等 30+ 种控制能力。  
+     当用户想“只用一个装饰器控制函数并发/重试/超时，不想要消息队列”时，应推荐 `broker_kind=BrokerEnum.MEMORY_QUEUE`。
+
+- 🛑 **高频 AI 幻觉与避坑指南（Anti-Hallucination Shield）**：
+   **AI 在生成代码时极易犯以下错误，请严格规避！**
+   1. **参数命名的幻觉**：严禁臆造 `BoosterParams` 字段！重试次数是 `max_retry_times`（不是 max_retries）；超时是 `function_timeout`（不是 timeout）；消息过期是 `msg_expire_seconds`（不是 expires），ai需要高度重视BoosterParams的字段不能乱造。
+   2. **发布消息的幻觉**：传业务参数用 `func.push(x=1)`；传控制参数（如延迟 countdown、自定义 task_id）**必须**包裹在字典和 `TaskOptions` 中，写成 `func.publish({"x":1}, task_options=TaskOptions(countdown=10))`。**严禁** `func.push(x=1, countdown=10)`。
+   3. **获取 RPC 结果的幻觉**：在 `async def` 环境下，**绝对禁止**直接 `async_result.result`（会引发阻塞灾难），**必须**使用 `await AioAsyncResult(task_id).result`！
+   4. **实例方法发布的幻觉**：对于类中的实例方法，**严禁**写成 `obj.method.push(x)`。必须将对象实例作为第一个参数传入，写成 `ClassName.method.push(obj, x)`。
+   5. **消费启动的幻觉**：`func.consume()` 默认就是在后台非阻塞运行的。**严禁**画蛇添足写成 `threading.Thread(target=func.consume).start()`。
+   6. **消费外部 JSON 的幻觉**：若要消费 Java/Go 发布的带有多余字段的 JSON，**严禁**定义 `def task_fun(msg):` 企图接收整个字典。**必须**定义为 `def task_fun(**kwargs):` 并设置 `should_check_publish_func_params=False`。
+   7. **重复造轮子/改源码的幻觉**：若用户要提供 HTTP 发版/查结果接口，**严禁手搓 FastAPI 路由**，必须直接 `app.include_router(fastapi_router)`；若要修改消费逻辑，**严禁提议改 funboost 源码**，必须让用户通过 `consumer_override_cls` 传参！
+   8. **老式语法的幻觉**：绝对禁止生成 `@boost('queue_name')` 这种过时语法。**永远**使用 Pydantic 模型传参：`@boost(BoosterParams(queue_name='xxx'))`。
+   9. 9. **`ctrl_c_recv()` 的幻觉**：  
+      严禁认为 `ctrl_c_recv()` 的作用是“优雅退出”或“防止程序结束”。实际上，不加它程序也会一直运行。  
+      真实作用：在 Windows 下如果不加这行代码，按 `Ctrl+C` **无法停止程序**。加上后即可正常退出。详细原理和用法见教程 **6.25b 章节**。  
+      **AI 生成启动脚本时，应在 `func.consume()` 后默认加上 `ctrl_c_recv()`**。
+
+- 🧠 **AI 回答问题的思考与检索优先级**：
+   1. 用户问“怎么使用某个功能” → 优先查 **教程示例 (`source/articles/`)** 以及 **`Rules & Skills`**。
+   2. 用户问“某个类/函数/参数的定义或实现位置” → 优先查 **`funboost源码速查for_ai.md`**。
+   3. 用户要求“写一段代码” → 必须严格遵循 **`funboost_ai_coding_编程指南_rules_and_skills.md`** 的约束，绝不使用已被取代的旧语法。
+   4. 用户问“如何扩展中间件/自定义 broker” → 必须查阅 **`如何扩展增加新的中间件.md`**。
+   5. 用户问底层实现细节 → 再通过速查表定位，深入具体的 `funboost codes` 源码文件进行推理。
+
+- 📁 **文件名拼写注意事项**（避免搜索源码时因作者历史拼写错误而找不到文件）：
+   - `funboost_config_deafult.py`（是 deafult 不是 default）
+   - `publisher_factotry.py`（是 factotry 不是 factory）
+   - `peewee_conusmer.py`（是 conusmer 不是 consumer）
+   - `active_cousumer_info_getter.py`（是 cousumer 不是 consumer）
+   - `muliti_process_enhance.py`（是 muliti 不是 multi）
+   - `consuming_func_iniput_params_check.py`（是 iniput 不是 input）
+   - `meomory_deque_publisher.py`（是 meomory 不是 memory）
 
 
 ## 📋 funboost most core source files metadata (Entry Points)
@@ -25613,7 +24980,7 @@ funboost也内置支持了各种python三方包和消费框架作为broker,例�
 用户也可以按照文档4.21章节,轻松扩展任何物质概念作为funboost的broker.
 `````
 
-**Class Variables (50):**
+**Class Variables (52):**
 - `EMPTY = 'EMPTY'`
 - `RABBITMQ_AMQPSTORM = 'RABBITMQ_AMQPSTORM'`
 - `RABBITMQ = RABBITMQ_AMQPSTORM`
@@ -25627,6 +24994,8 @@ funboost也内置支持了各种python三方包和消费框架作为broker,例�
 - `REDIS_STREAM = 'REDIS_STREAM'`
 - `REDIS_BRPOP_LPUSH = 'RedisBrpopLpush'`
 - `REDIS_PUBSUB = 'REDIS_PUBSUB'`
+- `REDIS_ZSET_PRIORITY = 'REDIS_ZSET_PRIORITY'`
+- `REDIS_ZSET_DELAY = 'REDIS_ZSET_DELAY'`
 - `MEMORY_QUEUE = 'MEMORY_QUEUE'`
 - `LOCAL_PYTHON_QUEUE = MEMORY_QUEUE`
 - `FASTEST_MEM_QUEUE = 'FASTEST_MEM_QUEUE'`
@@ -25666,7 +25035,7 @@ funboost也内置支持了各种python三方包和消费框架作为broker,例�
 - `WEBSOCKET = 'WEBSOCKET'`
 
 ##### 📌 `class ConcurrentModeEnum`
-*Line: 196*
+*Line: 197*
 
 **Docstring:**
 `````
@@ -25685,7 +25054,7 @@ funboost的多进程和多线程 asyncio是叠加的，不是互斥的。
 - `SOLO = SINGLE_THREAD`
 
 ##### 📌 `class FunctionKind`
-*Line: 214*
+*Line: 215*
 
 **Docstring:**
 `````
@@ -25700,7 +25069,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `COMMON_FUNCTION = 'COMMON_FUNCTION'`
 
 ##### 📌 `class ConstStrForClassMethod`
-*Line: 225*
+*Line: 226*
 
 **Class Variables (5):**
 - `FIRST_PARAM_NAME = 'first_param_name'`
@@ -25710,7 +25079,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `CLS_FILE = 'cls_file'`
 
 ##### 📌 `class RedisKeys`
-*Line: 233*
+*Line: 234*
 
 **Public Methods (9):**
 - `def gen_funboost_apscheduler_redis_lock_key_by_queue_name(queue_name)` `staticmethod`
@@ -25747,7 +25116,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `FUNBOOST_UNACK_REGISTRY_PREFIX = 'funboost_unack_registry:'`
 
 ##### 📌 `class ConsumingFuncInputParamsCheckerField`
-*Line: 297*
+*Line: 298*
 
 **Class Variables (6):**
 - `is_manual_func_input_params = 'is_manual_func_input_params'`
@@ -25758,14 +25127,14 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `func_position = 'func_position'`
 
 ##### 📌 `class MongoDbName`
-*Line: 306*
+*Line: 307*
 
 **Class Variables (2):**
 - `TASK_STATUS_DB = 'funboost_task_status'`
 - `MONGOMQ_DB = 'funboost_mongomq'`
 
 ##### 📌 `class StrConst`
-*Line: 310*
+*Line: 311*
 
 **Class Variables (4):**
 - `BOOSTER_REGISTRY_NAME_DEFAULT = 'booster_registry_default'`
@@ -25774,7 +25143,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `FILTERED_TASK_RESULT = 'filtered_task_result'`
 
 ##### 📌 `class EnvConst`
-*Line: 316*
+*Line: 317*
 
 **Class Variables (2):**
 - `FUNBOOST_FAAS_CARE_PROJECT_NAME = 'funboost.faas.care_project_name'`
@@ -25919,13 +25288,6 @@ ApsJobAdder(add_numbers,job_store_kind='memory').add_push_job(
 `````
 
 **Class Variables (48):**
-- `MONGO_CONNECT_URL = f'mongodb://127.0.0.1:27017'`
-- `RABBITMQ_USER = 'rabbitmq_user'`
-- `RABBITMQ_PASS = 'rabbitmq_pass'`
-- `RABBITMQ_HOST = '127.0.0.1'`
-- `RABBITMQ_PORT = 5672`
-- `RABBITMQ_VIRTUAL_HOST = '/'`
-- `RABBITMQ_URL = f'amqp://{RABBITMQ_USER}:{quote_plus(RABBITMQ_PASS)}@{RABBITMQ_HOST}:{RABBITMQ_PORT}/{RABBITMQ_VIRTUAL_HOST}'`
 - `REDIS_HOST = '127.0.0.1'`
 - `REDIS_USERNAME = ''`
 - `REDIS_PASSWORD = ''`
@@ -25934,6 +25296,13 @@ ApsJobAdder(add_numbers,job_store_kind='memory').add_push_job(
 - `REDIS_DB_FILTER_AND_RPC_RESULT = 8`
 - `REDIS_SSL = False`
 - `REDIS_URL = f"{('rediss' if REDIS_SSL else 'redis')}://{REDIS_USERNAME}:{quote_plus(REDIS_PASSWORD)}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"`
+- `MONGO_CONNECT_URL = f'mongodb://127.0.0.1:27017'`
+- `RABBITMQ_USER = 'rabbitmq_user'`
+- `RABBITMQ_PASS = 'rabbitmq_pass'`
+- `RABBITMQ_HOST = '127.0.0.1'`
+- `RABBITMQ_PORT = 5672`
+- `RABBITMQ_VIRTUAL_HOST = '/'`
+- `RABBITMQ_URL = f'amqp://{RABBITMQ_USER}:{quote_plus(RABBITMQ_PASS)}@{RABBITMQ_HOST}:{RABBITMQ_PORT}/{RABBITMQ_VIRTUAL_HOST}'`
 - `NSQD_TCP_ADDRESSES = ['127.0.0.1:4150']`
 - `NSQD_HTTP_CLIENT_HOST = '127.0.0.1'`
 - `NSQD_HTTP_CLIENT_PORT = 4151`
@@ -25969,7 +25338,7 @@ ApsJobAdder(add_numbers,job_store_kind='memory').add_push_job(
 - `POSTGRES_DSN = 'host=127.0.0.1 port=5432 dbname=funboost user=postgres password=123456'`
 
 ##### 📌 `class FunboostCommonConfig(DataClassBase)`
-*Line: 114*
+*Line: 115*
 
 **Class Variables (5):**
 - `NB_LOG_FORMATER_INDEX_FOR_CONSUMER_AND_PUBLISHER = logging.Formatter(f'%(asctime)s-({nb_log_config_default.computer_ip},{nb_log_config_default.computer_name})-[p%(process)d_t%(thread)d] - %(name)s - "%(filename)s:%(lineno)d" - %(funcName)s - %(levelname)s - %(task_id)s - %(message)s', '%Y-%m-%d %H:%M:%S')`
@@ -27602,6 +26971,2357 @@ Entry Points (not imported by other project files):
 
 
 ---
+# markdown content namespace: 专门为ai理解funboost源码的markdown 
+
+
+## funboost File Tree (relative dir: `funboost/md_for_ai`)
+
+
+`````
+
+└── funboost
+    └── md_for_ai
+        ├── funboost_ai_coding_编程指南_rules_and_skills.md
+        ├── funboost教程速查for_ai.md
+        ├── funboost源码速查for_ai.md
+        └── 如何扩展增加新的中间件.md
+
+`````
+
+---
+
+
+## funboost (relative dir: `funboost/md_for_ai`)  Included Files (total: 4 files)
+
+
+- `funboost/md_for_ai/funboost_ai_coding_编程指南_rules_and_skills.md`
+
+- `funboost/md_for_ai/funboost教程速查for_ai.md`
+
+- `funboost/md_for_ai/funboost源码速查for_ai.md`
+
+- `funboost/md_for_ai/如何扩展增加新的中间件.md`
+
+
+---
+
+
+--- **start of file: funboost/md_for_ai/funboost_ai_coding_编程指南_rules_and_skills.md** (project: funboost) --- 
+
+`````markdown
+---
+noteId: "b8794550160c11f1876707e213463054"
+tags: []
+
+---
+
+
+# 🤖 Funboost AI 编程指南 (Rules & Skills)
+
+## 📜 一、Rules (AI 行为准则与约束)
+
+这是要求 AI 在编写 `funboost` 代码时 **绝对不可违反的铁律**，用于消除 AI 幻觉（如臆造参数、使用废弃 API、混淆 Celery 概念）。
+
+### 0. 最高知识准则：以官方上下文文档为唯一事实标准 (Single Source of Truth)
+- **必须深度阅读**：在编写任何 `funboost` 相关的代码或解答问题前，你必须全面检索并深度学习用户提供的 `funboost_all_docs_and_codes.md` 文档（该文档包含了十万行的全量教程与底层源码架构）。
+- **绝对禁止臆想**：你的预训练知识中可能没有最新的 `funboost` 细节，或者极易将其与 `Celery` 混淆。你生成的所有类名、方法名、入参定义（特别是 `BoosterParams` 的属性和中间件配置），**必须 100% 基于该文档中的源码事实或教程示例**，绝不允许产生任何大模型幻觉！
+
+### 1. 核心语法：绝对使用 `BoosterParams`
+- **禁止**使用老式的传参方式 `@boost("queue_name", qps=2)`。
+- **必须**将所有配置参数放入 `BoosterParams` 对象中：`@boost(BoosterParams(queue_name="xxx", ...))`。
+- **禁止臆造参数**：`BoosterParams` 是一个 Pydantic 模型，绝对不允许传递不存在的字段（如 `timeout`，正确的是 `function_timeout`；如 `max_retries`，正确的是 `max_retry_times`）。
+
+### 2. 发布消息 (`push` vs `publish`)
+- 只传递函数业务参数时，使用 `func.push(*args, **kwargs)`。
+- 需要传递框架控制参数（如 `task_id`, `countdown`, `eta`, `msg_expire_seconds`）时，**必须**使用 `func.publish(msg_dict, task_options=TaskOptions(...))`。
+- **异步环境** (async def) 中发布消息，必须使用 `await func.aio_push()` 或 `await func.aio_publish()`。
+
+### 3. 消费启动方式
+- 基础启动：`func.consume()`。
+- 多进程+多线程叠加并发（性能炸裂）：`func.multi_process_consume(n)` 或简写 `func.mp_consume(n)`。
+- 分组启动：`BoostersManager.consume_group("group_name")` （BoosterParams 里需要先设置 booster_group 的值）。
+- 启动代码的末尾，如果主线程没有其他阻塞任务，**建议**使用 `from funboost import ctrl_c_recv; ctrl_c_recv()` 阻止主线程退出。
+- 连续启动多个函数.consume()消费：`func1.consume(); func2.consume()`， 不要一厢情愿的使用子线程来启动消费，`func1.consume()`不会阻塞主线程。 
+  不要使用 `threading.Thread(target=func1.consume).start()` 和  `threading.Thread(target=func2.consume).start()` 来连续启动消费，这样做是多此一举，funboost框架很人性化，早就从框架层面让用户可以避免这样写代码了。
+  
+
+### 4. 上下文获取 (禁止 Celery 思维)
+- **禁止**像 Celery 一样在函数参数中加 `self` 或 `bind=True` 来获取上下文。
+- **必须**使用全局上下文对象：`from funboost import fct`。
+- 获取 Task ID：`fct.task_id`。
+- 获取重试次数：`fct.function_result_status.run_times`。 （function_result_status 中还有非常丰富的各种其他属性，其类型是 `FunctionResultStatus`）
+- 获取完整消息：`fct.full_msg`。
+
+### 5. 定时任务 (ApsJobAdder)
+- **禁止**直接使用原生的 `apscheduler.add_job` 去执行消费函数本体。
+- **必须**使用 `ApsJobAdder` 类：`ApsJobAdder(func, job_store_kind='redis').add_push_job(trigger='...', ...)`。
+
+### 6. 异步并发 (Asyncio)
+- 若消费函数为 `async def`，**必须**在 `BoosterParams` 中设置 `concurrent_mode=ConcurrentModeEnum.ASYNC`（并发模式设置为多线程也可以兼容 async def 的异步函数，但不是最佳选择）。
+- asyncio 生态获取 RPC 结果时，**必须**使用 `AioAsyncResult` 并 `await`，绝对禁止在异步函数中使用同步的 `AsyncResult.result`。
+
+### 7. FaaS 微服务
+- 集成 FastAPI/Flask/Django 时，**不需要**手动写发布和获取结果的 API。
+- **优先使用内置 router**直接引入框架内置的 Router：`from funboost.faas import fastapi_router; app.include_router(fastapi_router)`。
+
+### 8. 异构系统兼容与任意 JSON 消费规范 (非常重要)
+- 默认情况下，Funboost 会严格校验发布的消息字段与函数签名的入参是否完全一致。
+- **如果要消费非 Funboost 发布的消息（如 Java/Go 写入的消息，或带有未知 key 的 JSON）**：
+  - **必须**在 BoosterParams 中设置 `should_check_publish_func_params=False`。
+  - **必须**将消费函数入参定义为接收不定长参数，例如 `def task_fun(**kwargs):`，绝对禁止写成 `def task_fun(msg):` 去企图用一个 msg 入参接收整个字典。
+
+### 9. 实例方法与类方法的 `push` 调用规范
+- AI 极易用错实例方法的发布方式！Funboost 支持装饰实例方法和类方法，但 `push` 语法与普通函数不同。
+- **实例方法**：**禁止**写成 `obj.method.push(x)`。**必须**写成 `ClassName.method.push(obj, x)`，第一个参数必须传入对象实例，且该对象必须定义 `obj_init_params` 属性以便反序列化。
+- **类方法**：**禁止**写成 `ClassName.method.push(x)`。**必须**写成 `ClassName.method.push(ClassName, x)`，第一个参数必须传入类本身。
+
+### 10. 自定义扩展规范 (`user_options` 与 `override_cls`)
+- **禁止**为了实现自定义逻辑去修改 Funboost 源码或胡编 `BoosterParams` 的属性。
+- 如果用户需要传递自定义配置，**必须**放在 `BoosterParams(user_options={'my_key': 'value'})` 字典中。
+- 如果用户需要重写拦截逻辑（如格式化消息、限流），**必须**使用 OOP 继承 `AbstractConsumer` 并通过 `consumer_override_cls` 传入。
+
+### 11. AI Agent 应该使用 `python -c "import subprocess; subprocess.run(['python','your_script.py'], timeout=30)"` 启动funboost消费脚本。
+- **核心问题**：Funboost 消费函数启动后是无限循环拉取消息，程序不会自动结束，AI Agent 运行测试时会被阻塞。
+- **必须主动关闭**：AI Agent 在运行 Funboost 启动消费程序后，**必须**在适当时间后主动强制kill关闭程序，避免长时间阻塞。ai最多50秒钟后就应该强制关闭funboost消费程序。
+- **ai应该使用subprocess启动funboost消费** :
+  ai agent 启动测试funboost程序，请记住永远使用 `python -c "import subprocess; subprocess.run(['python','your_script.py'], timeout=30)"`  , 这样就会自动杀死funboost程序了。 your_script.py 替换成ai需要启动的消费脚本.
+  ai agent 禁止直接使用 `python your_script.py` 启动 funboost程序，以免ai流程被一直阻塞。
+- `subprocess.run(['python','your_script.py'], timeout=30)` 中的 your_script.py 替换成实际需要运行的脚本，timeout可以按需修改，但最大不超过50秒，python替换成真正的python解释器绝对路径。
+
+
+---
+
+## 🛠️ 二、Skills (AI 技能模板)
+
+这是提供给 AI 的**标准代码切片（Snippets）**，让 AI 遇到特定场景（如写爬虫、写定时任务、写微服务）时，直接照抄最佳实践，无需自行发挥。
+
+### Skill 0: 最简 Hello World 任务 (零配置/本地单进程)
+**场景**：用户想写一个最简单的后台任务，不需要额外安装 Redis/RabbitMQ，只要求能跑起来。
+**模板**：
+```python
+import time
+from funboost import boost, BoosterParams, BrokerEnum, ctrl_c_recv
+
+@boost(BoosterParams(
+    queue_name="hello_queue",
+    broker_kind=BrokerEnum.MEMORY_QUEUE,  # 极简模式：使用内存队列，无需安装任何外部中间件
+    qps=2,                                # 简单的控频：每秒执行2次
+))
+def hello_task(word: str):
+    print(f"Hello, {word}!")
+    time.sleep(1)
+    return True
+
+if __name__ == '__main__':
+    # 1. 发布任务
+    for i in range(10):
+        hello_task.push(word=f"funboost_{i}")
+    
+    # 2. 基础启动消费 (当前进程内使用多线程运行，占用内存极小)
+    hello_task.consume() 
+    
+    # 3. 阻塞主线程
+    ctrl_c_recv()
+```
+
+### Skill 1: 创建标准的基础后台任务 (含高阶控制)
+**场景**：用户需要一个后台队列任务，要求高并发、控频、出错重试。
+**模板**：
+```python
+import time
+from funboost import boost, BoosterParams, BrokerEnum, ctrl_c_recv
+
+@boost(BoosterParams(
+    queue_name="my_standard_task",
+    broker_kind=BrokerEnum.REDIS_ACK_ABLE, # 确保不丢数据
+    concurrent_num=50,                     # 线程池并发数
+    qps=10,                                # 精准控频：每秒执行10次
+    max_retry_times=3,                     # 失败最大重试3次
+))
+def my_task(user_id: int, action: str):
+    print(f"Processing user: {user_id}, action: {action}")
+    time.sleep(1)
+    return True
+
+if __name__ == '__main__':
+    # 发布任务
+    for i in range(100):
+        my_task.push(user_id=i, action="login")
+    
+    # 启动消费 (多进程叠加多线程)
+    my_task.mp_consume(2)  # mp_consume(n) 是 multi_process_consume(n) 的简写
+    ctrl_c_recv()
+```
+
+### Skill 2: 实现 RPC 模式（发布后等待结果）
+**场景**：用户需要在发布任务后，同步或异步等待消费者执行完并返回结果。
+**模板**：
+```python
+from funboost import boost, BoosterParams, BrokerEnum, AsyncResult
+
+@boost(BoosterParams(
+    queue_name="rpc_task",
+    broker_kind=BrokerEnum.REDIS_ACK_ABLE,
+    is_using_rpc_mode=True, # 必须开启 RPC 模式
+))
+def calc_sum(a: int, b: int):
+    return a + b
+
+if __name__ == '__main__':
+    calc_sum.consume()
+    
+    # 发布并获取 AsyncResult 对象
+    async_result: AsyncResult = calc_sum.push(10, 20)
+    
+    print(f"Task ID: {async_result.task_id}, Result: {async_result.result}")
+```
+
+### Skill 3: 创建定时调度任务 (Cron / Interval)
+**场景**：用户需要每天定时、或每隔几秒钟执行一次任务。
+**模板**：
+```python
+from funboost import boost, BoosterParams, BrokerEnum, ApsJobAdder, ctrl_c_recv
+
+@boost(BoosterParams(queue_name="daily_report", broker_kind=BrokerEnum.REDIS))
+def generate_report(report_type: str):
+    print(f"Generating {report_type} report...")
+
+if __name__ == '__main__':
+    generate_report.consume()
+    
+    # 使用 ApsJobAdder 添加定时任务
+    ApsJobAdder(generate_report, job_store_kind='redis').add_push_job(
+        trigger='cron',
+        hour=2,         # 每天凌晨2点执行
+        minute=0,
+        kwargs={"report_type": "sales"},
+        id='daily_sales_report',
+        replace_existing=True
+    )
+    ctrl_c_recv()
+```
+
+### Skill 4: Asyncio 异步任务与协程发布
+**场景**：用户使用 FastAPI 或其他 asyncio 生态，需要纯异步的调度。
+**模板**：
+```python
+import asyncio
+from funboost import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum, AioAsyncResult
+
+@boost(BoosterParams(
+    queue_name="async_crawler",
+    broker_kind=BrokerEnum.REDIS,
+    concurrent_mode=ConcurrentModeEnum.ASYNC, # 指定为 asyncio 并发模式
+    is_using_rpc_mode=True
+))
+async def async_fetch(url: str):
+    await asyncio.sleep(1) # 模拟 aiohttp/httpx 异步请求
+    return f"Data from {url}"
+
+async def main():
+    # 异步生态下，必须使用 aio_push
+    aio_result = await async_fetch.aio_push("http://example.com")
+    
+    # 异步等待结果
+    result_status = await AioAsyncResult(aio_result.task_id).status_and_result
+    print(result_status.result)
+
+if __name__ == '__main__':
+    async_fetch.consume()
+    asyncio.run(main())
+```
+
+### Skill 5: 声明式工作流编排 (Workflow)
+**场景**：用户需要执行串行(Chain)、并行(Group)或并行+汇总(Chord)的复杂任务流。
+**模板**：
+```python
+from funboost import boost
+from funboost.workflow import chain, group, chord, WorkflowBoosterParams
+
+@boost(WorkflowBoosterParams(queue_name="wf_download"))
+def download(url): return f"/tmp/{url}"
+
+@boost(WorkflowBoosterParams(queue_name="wf_process"))
+def process(path, resolution): return f"{path}_{resolution}"
+
+@boost(WorkflowBoosterParams(queue_name="wf_notify"))
+def notify(results, user_id): print(f"User {user_id} done: {results}")
+
+if __name__ == '__main__':
+    # 启动消费者
+    download.consume()
+    process.consume()
+    notify.consume()
+    
+    # 构建 Chord 工作流 (先下载 -> 并行处理3种分辨率 -> 汇总通知)
+    workflow = chain(
+        download.s("video.mp4"),
+        chord(
+            group(process.s(resolution=r) for r in ['360p', '720p', '1080p']),
+            notify.s(user_id=1001)
+        )
+    )
+    result = workflow.apply() # 阻塞等待整个工作流完成
+```
+
+### Skill 6: 快速集成 FaaS 微服务接口
+**场景**：用户需要将 Funboost 任务直接暴露为 HTTP 接口供外部系统调用。
+**模板**：
+```python
+import uvicorn
+from fastapi import FastAPI
+from funboost.faas import fastapi_router, CareProjectNameEnv
+
+# 选填：只关注当前项目的队列，防止被其他队列干扰
+CareProjectNameEnv.set('my_faas_project')
+
+app = FastAPI()
+
+# 核心：一键挂载 funboost 所有标准路由 (publish, get_result, get_msg_count 等)
+app.include_router(fastapi_router)
+
+if __name__ == '__main__':
+    # 启动后访问 http://127.0.0.1:8000/docs 即可看到 /funboost/publish 等接口
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+```
+
+**核心 API 接口说明**：
+
+启动服务后，所有接口都在 `/funboost` 前缀下，自动生成交互式文档访问 `http://127.0.0.1:8000/docs`
+
+#### 6.1 发布消息（支持 RPC 模式）
+
+**接口**：`POST /funboost/publish`
+
+**请求体**：
+```json
+{
+    "queue_name": "my_task_queue",
+    "msg_body": {"user_id": 1001, "action": "login"},
+    "need_result": true,
+    "timeout": 60,
+    "task_id": "optional_custom_task_id"
+}
+```
+
+**字段说明**：
+- `queue_name` (必填): 队列名称
+- `msg_body` (必填): 消息体字典，即消费函数的入参
+- `need_result` (可选): 是否等待 RPC 结果，默认 `false`
+- `timeout` (可选): 等待结果的最大超时时间（秒），默认 `60`
+- `task_id` (可选): 自定义任务 ID，不传则自动生成
+
+---
+
+#### 6.2 其他部分重要接口速查
+
+**说明：**接口定义，ai不方便查看网页接口docs，可以查看 funboost\faas\fastapi_adapter.py 文件中的fastapi的路由和pydantic model定义。
+
+**获取 RPC 结果**：`GET /funboost/get_result?task_id={任务 ID}&timeout=5`
+
+**添加定时任务**：`POST /funboost/add_timing_job`
+```json
+{
+    "queue_name": "my_queue",
+    "trigger": "cron",
+    "hour": "2",
+    "minute": "0",
+    "kwargs": {"report_type": "daily"}
+}
+```
+触发器类型：`date`（一次性）/ `interval`（间隔）/ `cron`（周期）
+
+**获取队列消息数**：`GET /funboost/get_msg_count?queue_name={队列名}`
+
+**暂停/恢复消费**：`POST /funboost/pause_consume` 或 `/resume_consume`
+```json
+{"queue_name": "my_queue"}
+```
+
+**获取定时任务列表**：`GET /funboost/get_timing_jobs?queue_name={队列名}`
+
+**获取单个定时任务**：`GET /funboost/get_timing_job?job_id={任务 ID}&queue_name={队列名}`
+
+**删除定时任务**：`DELETE /funboost/delete_timing_job?job_id={任务 ID}&queue_name={队列名}`
+
+**清空队列**：`POST /funboost/clear_queue`
+```json
+{"queue_name": "my_queue"}
+```
+
+**获取所有队列**：`GET /funboost/get_all_queues`
+
+**获取所有队列运行详情**：`GET /funboost/get_all_queue_run_info`
+
+---
+
+**提示**：完整 API 文档访问 `http://127.0.0.1:8000/docs`，所有接口统一返回格式：`{"succ": bool, "msg": str, "data": any, "code": int}`
+
+
+
+
+
+### Skill 7: 高效爬虫 (配合 boost_spider)
+**场景**：用户需要写一个分布式爬虫，要求自动换代理、XPath 解析、一键入库。
+**模板**：
+```python
+from funboost import boost, BoosterParams, BrokerEnum
+from boost_spider import  RequestClient, SpiderResponse, DatasetSink
+
+db_sink = DatasetSink("sqlite:///spider_data.db")
+
+@boost(BoosterParams(
+    queue_name="spider_task", 
+    broker_kind=BrokerEnum.REDIS_ACK_ABLE,
+    qps=3, # 控频防封
+    max_retry_times=5
+))
+def crawl_page(url: str):
+    # RequestClient 内置了重试、UA 切换机制
+    client = RequestClient(request_retry_times=3, is_change_ua_every_request=True)
+    resp: SpiderResponse = client.get(url)
+    
+    # SpiderResponse 支持直接使用 xpath/css
+    title = resp.xpath('//title/text()').extract_first()
+    
+    data = {"url": url, "title": title}
+    # 一键入库
+    db_sink.save("article_table", data)
+    return data
+```
+
+### Skill 8：继承 BoosterParams（减少重复配置）
+**场景**：当项目中有多个消费函数时，通常会有大量重复的配置参数。通过继承 `BoosterParams` 创建自定义子类，可以避免在每个 `@boost` 装饰器中重复书写相同的配置。
+**模板**：
+```python
+from funboost import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum, ctrl_c_recv
+
+# 定义项目统一的配置子类
+class MyBoosterParams(BoosterParams):
+    broker_kind: str = BrokerEnum.REDIS_ACK_ABLE
+    max_retry_times: int = 3
+    concurrent_mode: str = ConcurrentModeEnum.THREADING
+    project_name: str = 'my_project'
+
+
+# 使用自定义配置类，无需每次都写重复参数
+@boost(MyBoosterParams(queue_name='task_queue_1'))
+def task1(x: int):
+    print(f"Task1: {x}")
+    return x * 2
+
+@boost(MyBoosterParams(queue_name='task_queue_3', qps=0.5))  # 特殊函数可单独覆盖配置
+def task3(report_type: str):
+    print(f"Generating {report_type} report")
+    return True
+
+
+if __name__ == '__main__':
+    task1.consume()
+    task3.consume()
+    ctrl_c_recv()
+```
+
+### Skill 9: 消费异构系统/第三方的任意 JSON 消息
+**场景**：消息不是由 Funboost 发布的（可能是 Java 部门直接写入 Redis 的），JSON 字段不固定或很多，只需要消费其中的某几个字段或全部原样接收。
+**模板**：
+```python
+from funboost import boost, BoosterParams, BrokerEnum, fct
+
+@boost(BoosterParams(
+    queue_name="java_topic_queue",
+    broker_kind=BrokerEnum.REDIS,
+    should_check_publish_func_params=False  # 核心：关闭严格的参数校验
+))
+def process_any_msg(**kwargs): # 一定要定义成 **kwargs 接收所有未知字段，不要企图用一个msg入参去接受消息队列中的json消息的多个字段。
+    # 使用 **kwargs 接收所有未知字段
+    print(f"接收到外部系统的完整字典: {kwargs}")
+    
+    # 也可以通过 fct.full_msg 获取包含框架 extra 信息的完整原始消息
+    print(f"原始完整消息: {fct.full_msg}")
+
+if __name__ == '__main__':
+    process_any_msg.consume()
+```
+
+### Skill 10: 自定义消费者拦截器 (Override Class)
+**场景**：用户希望在函数运行前后执行自定义逻辑（如特殊的数据清洗、自定义的全局限流器、自定义的结果入库机制）。
+**模板**：
+```python
+from funboost import boost, BoosterParams, AbstractConsumer, FunctionResultStatus
+
+# 1. 继承 AbstractConsumer 编写自定义逻辑
+class MyCustomConsumer(AbstractConsumer):
+    def _user_convert_msg_before_run(self, msg) -> dict:
+        # 在函数运行前，对消息进行清洗或反序列化
+        if isinstance(msg, str) and "=" in msg:
+            # 假设消息是 "a=1,b=2" 这种奇葩非 JSON 格式
+            return {k: int(v) for k, v in [pair.split('=') for pair in msg.split(',')]}
+        return super()._user_convert_msg_before_run(msg)
+        
+    def user_custom_record_process_info_func(self, function_result_status: FunctionResultStatus):
+        # 在函数运行后，自定义记录结果到特定数据库
+        if function_result_status.success:
+            print(f"自定义入库：任务 {function_result_status.task_id} 成功，耗时 {function_result_status.time_cost}")
+
+# 2. 通过 consumer_override_cls 挂载自定义类
+@boost(BoosterParams(
+    queue_name="custom_override_queue",
+    consumer_override_cls=MyCustomConsumer
+))
+def my_task(a: int, b: int):
+    return a + b
+```
+
+### Skill 11: 配置特定中间件专属参数 (`broker_exclusive_config`)
+
+**场景**：你需要为所选的消息队列中间件（如 RabbitMQ、Kafka、Redis）设置其特有的高级功能，例如：RabbitMQ 的消息优先级、Kafka 的消费者组或分区数、Redis Stream 的消费者组名等。这些配置无法通过通用的 `BoosterParams` 字段表达，必须通过 `broker_exclusive_config` 字典传递。
+
+**模板**：
+```python
+from funboost import boost, BoosterParams, BrokerEnum
+
+# 示例 1: RabbitMQ 启用消息优先级 (x-max-priority)
+@boost(BoosterParams(
+    queue_name="priority_queue",
+    broker_kind=BrokerEnum.RABBITMQ_AMQPSTORM,
+    broker_exclusive_config={
+        'x-max-priority': 5,      # 必须为整数，建议 ≤5
+        'no_ack': False,           # 是否自动确认
+    }
+))
+def priority_task(user_id: int):
+    print(f"Processing VIP user: {user_id}")
+    return True
+
+# 示例 2: Kafka 配置消费者组和分区数
+@boost(BoosterParams(
+    queue_name="kafka_topic",
+    broker_kind=BrokerEnum.KAFKA_CONFLUENT,
+    broker_exclusive_config={
+        'group_id': 'my_consumer_group',   # Kafka 消费者组
+        'auto_offset_reset': 'earliest',   # 从最早的消息开始消费
+        'num_partitions': 10,               # Topic 分区数（自动创建时有效）
+        'replication_factor': 1,             # 副本因子
+    }
+))
+def process_kafka_msg(data: dict):
+    print(f"Received from Kafka: {data}")
+
+```
+
+**注意事项**：
+- `broker_exclusive_config` 是一个字典，**只能包含所选 `broker_kind` 所支持的键**。支持的键定义在 `funboost/core/broker_kind__exclusive_config_default_define.py` 中（例如 `'x-max-priority'` 仅对 RabbitMQ 有效，对 Redis 无效）。
+- 如果传递了不支持的键，框架会发出警告，但不会阻止运行。为确保配置生效，请务必查阅对应中间件的文档或框架源码。
+
+
+### Skill 12: 启动 Funboost Web 管理器 (funboost_web_manager)
+**场景**：需要通过 Web 界面实时监控队列状态、消费速度、任务成功率等指标。
+
+**模板**：
+
+#### 方式1：命令行启动（推荐）
+```bash
+# 设置项目根目录到 PYTHONPATH
+# Linux/macOS
+export PYTHONPATH=/path/to/your/project
+# Windows (cmd)
+set PYTHONPATH=C:\path\to\your\project
+# Windows (PowerShell)
+$env:PYTHONPATH = "C:\path\to\your\project"
+
+# 启动 Web 管理器
+python -m funboost.funweb.app
+```
+
+#### 方式2：代码中启动
+```python
+from funboost.funweb.app import start_funboost_web_manager
+
+# 基础启动（默认端口 27018）
+start_funboost_web_manager()
+
+# 自定义端口和项目过滤
+start_funboost_web_manager(
+    port=8080,
+    care_project_name="my_project"  # 只显示该项目的队列
+)
+```
+
+
+
+
+### 🚨 Skill 100 : BoosterParams 配置参数字典 (AI 必读属性库)
+**重要提示**：这是 `BoosterParams` 的全量合法字段定义。**AI 在为用户生成 `@boost` 配置时，只能使用以下属性名，绝对禁止自行创造字典外不存在的参数名！**
+
+```python
+class BoosterParams(BaseJsonAbleModel):
+    """
+    掌握funboost 的精华就是知道 BoosterParams 的入参有哪些，如果知道有哪些入参字段，就掌握了funboost的 90% 用法。
+
+    pydatinc pycharm编程代码补全,请安装 pydantic插件, 在pycharm的  file -> settings -> Plugins -> 输入 pydantic 搜索,点击安装 pydantic 插件.
+
+    @boost的传参必须是此类或者继承此类,如果你不想每个装饰器入参都很多,你可以写一个子类继承BoosterParams, 传参这个子类,例如下面的 BoosterParamsComplete
+    """
+
+    queue_name: str  # 队列名字,必传项,每个函数要使用不同的队列名字.
+    broker_kind: str = BrokerEnum.SQLITE_QUEUE  # 中间件选型见3.1章节 https://funboost.readthedocs.io/zh-cn/latest/articles/c3.html
+
+    """ project_name是项目名，属于管理层面的标签, 默认为None, 给booster设置所属项目名, 用于对于在redis保存的funboost信息中，根据项目名字查看相关队列。
+    # 如果不设置很难从redis保存的funboost信息中，区分哪些队列名属于哪个项目。 主要是给web接口查看用。
+    # 一个项目的队列名字有哪些，是保存在redis的set中，key为 f'funboost.project_name:{project_name}'
+    # 通常配合 CareProjectNameEnv.set($project_name) 使用 ，它可以让你在监控和管理时“只看自己的一亩三分地“，避免被其他人的队列刷屏干扰。"""
+    project_name: typing.Optional[str] = None
+
+    """如果设置了qps，并且cocurrent_num是默认的50，会自动开了500并发，由于是采用的智能线程池任务少时候不会真开那么多线程而且会自动缩小线程数量。
+    具体看ThreadPoolExecutorShrinkAble的说明
+    由于有很好用的qps控制运行频率和智能扩大缩小的线程池，此框架建议不需要理会和设置并发数量只需要关心qps就行了，框架的并发是自适应并发数量，这一点很强很好用。"""
+    concurrent_mode: str = ConcurrentModeEnum.THREADING  # 并发模式,支持THREADING,GEVENT,EVENTLET,ASYNC,SINGLE_THREAD并发,multi_process_consume 支持协程/线程 叠加多进程并发,性能炸裂.
+    concurrent_num: int = 50  # 并发数量，并发种类由concurrent_mode决定
+    specify_concurrent_pool: typing.Optional[FunboostBaseConcurrentPool] = None  # 使用指定的线程池/携程池，可以多个消费者共使用一个线程池,节约线程.不为None时候。threads_num失效
+    
+    specify_async_loop: typing.Optional[asyncio.AbstractEventLoop] = None  # 指定的async的loop循环，设置并发模式为async才能起作用。 有些包例如aiohttp,发送请求和httpclient的实例化不能处在两个不同的loop中,可以传过来.
+    is_auto_start_specify_async_loop_in_child_thread: bool = True  # 是否自动在funboost asyncio并发池的子线程中自动启动指定的async的loop循环，设置并发模式为async才能起作用。如果是False,用户自己在自己的代码中去手动启动自己的loop.run_forever() 
+    
+    """qps:
+    强悍的控制功能,指定1秒内的函数执行次数，例如可以是小数0.01代表每100秒执行一次，也可以是50代表1秒执行50次.为None则不控频。 
+    设置qps时候,不需要指定并发数量,funboost的能够自适应智能动态调节并发池大小."""
+    qps: typing.Union[float, int, None] = None
+    """is_using_distributed_frequency_control:
+    是否使用分布式空频（依赖redis统计消费者数量，然后频率平分），默认只对当前实例化的消费者空频有效。
+    假如实例化了2个qps为10的使用同一队列名的消费者，并且都启动，则每秒运行次数会达到20。
+    如果使用分布式空频则所有消费者加起来的总运行次数是10。"""
+    is_using_distributed_frequency_control: bool = False
+
+    is_send_consumer_heartbeat_to_redis: bool = False  # 是否将发布者的心跳发送到redis，有些功能的实现需要统计活跃消费者。因为有的中间件不是真mq。这个功能,需要安装redis.
+    
+    # --------------- 重试配置 开始
+    """max_retry_times:
+    最大自动重试次数，当函数发生错误，立即自动重试运行n次，对一些特殊不稳定情况会有效果。
+    可以在函数中主动抛出重试的异常ExceptionForRetry，框架也会立即自动重试。
+    主动抛出ExceptionForRequeue异常，则当前 消息会重返中间件，
+    主动抛出 ExceptionForPushToDlxqueue  异常，可以使消息发送到单独的死信队列中，死信队列的名字是 队列名字 + _dlx。"""
+    max_retry_times: int = 3
+    
+    """
+    is_using_advanced_retry:
+    是否使用高级重试，高级重试支持指数退避重试。is_using_advanced_retry=True 时候，is_using_advanced_retry参数才能生效。
+
+
+    重试间隔有2种模式，requeue 模式 和 sleep 模式。
+    requeue模式: 将消息发回队列带延迟重试，立即释放线程,适合重试间隔大，防止长时间sleep占用线程导致降低了系统吞吐量。
+    sleep模式: 在当前线程/协程 sleep 重试，适合重试间隔小，并且消息数量少执行不频繁。此模式的sleep时候会占用工作线程/协程
+    
+    如果retry_base_interval= 1.0,retry_multiplier=2.0,retry_max_interval=60.0,则重试间隔为：
+    1s,2s,4s,8s,16s,32s,60s,60s,60s...
+    """
+    is_using_advanced_retry: bool = False  
+    advanced_retry_config :dict =  { 
+        'retry_mode': 'sleep', # 可以是 'sleep' 或 'requeue'，如果重试间隔大并且指数退避倍数大，那么应该使用requeue模式。因为sleep原地占用线程/协程降低服务吞吐量
+        'retry_base_interval': 1.0, # 基础重试间隔（秒）  1s,2s,4s,8s,16s,30s,30s,30s...
+        'retry_multiplier': 2.0, # 指数退避倍数 ，如果你想固定重试间隔，则设置为1.0
+        'retry_max_interval': 60.0, # 最大重试间隔上限（秒）
+        'retry_jitter': False, # 是否添加随机抖动
+    }
+    
+    is_push_to_dlx_queue_when_retry_max_times: bool = False  # 函数达到最大重试次数仍然没成功，是否发送到死信队列,死信队列的名字是 队列名字 + _dlx。
+    # --------------- 重试配置 结束
+
+    consuming_function_decorator: typing.Optional[typing.Callable[..., typing.Any]] = None  # 函数的装饰器。因为此框架做参数自动转指点，需要获取精准的入参名称，不支持在消费函数上叠加 @ *args  **kwargs的装饰器，如果想用装饰器可以这里指定。
+    
+    
+    """
+    function_timeout: 
+    超时秒数，函数运行超过这个时间，则自动杀死函数。为0是不限制。 
+    用户应该尽量使用各种三方包例如 aiohttp pymysql 自己的 socket timeout 设置来控制超时，而不是无脑使用funboost的function_timeout参数。
+    谨慎使用,非必要别去设置超时时间,设置后性能会降低(因为需要把用户函数包装到另一个线单独的程中去运行),而且突然强制超时杀死运行中函数,可能会造成死锁.
+    (例如用户函数在获得线程锁后突然杀死函数,别的线程再也无法获得锁了)
+    """
+    function_timeout: typing.Union[int, float,None] = None 
+    """
+    is_support_remote_kill_task:
+    是否支持远程任务杀死功能，如果任务数量少，单个任务耗时长，确实需要远程发送命令来杀死正在运行的函数，才设置为true，否则不建议开启此功能。
+    (是把函数放在单独的线程中实现的,随时准备线程被远程命令杀死,所以性能会降低)
+    """
+    is_support_remote_kill_task: bool = False  
+    
+    """
+    log_level:
+        logger_name 对应的 日志级别
+        消费者和发布者的日志级别,建议设置DEBUG级别,不然无法知道正在运行什么消息.
+        这个是funboost每个队列的单独命名空间的日志级别,丝毫不会影响改变用户其他日志以及root命名空间的日志级别,所以DEBUG级别就好,
+        用户不要压根不懂什么是python logger 的name,还去手痒调高级别. 
+        不懂python日志命名空间的小白去看nb_log文档,或者直接问 ai大模型 python logger name的作用是什么.
+    """
+    log_level: int = logging.DEBUG # 不需要改这个级别,请看上面原因
+    logger_prefix: str = ''  # 日志名字前缀,可以设置前缀
+    create_logger_file: bool = True  # 发布者和消费者是否创建文件文件日志,为False则只打印控制台不写文件.
+    logger_name: typing.Union[str, None] = ''  # 队列消费者发布者的日志命名空间.
+    log_filename: typing.Union[str, None] = None  # 消费者发布者的文件日志名字.如果为None,则自动使用 funboost.队列 名字作为文件日志名字.  日志文件夹是在nb_log_config.py的 LOG_PATH中决定的.
+    is_show_message_get_from_broker: bool = False  # 运行时候,是否记录从消息队列获取出来的消息内容
+    is_print_detail_exception: bool = True  # 消费函数出错时候,是否打印详细的报错堆栈,为False则只打印简略的报错信息不包含堆栈.
+    publish_msg_log_use_full_msg: bool = False # 发布到消息队列的消息内容的日志，是否显示消息的完整体，还是只显示函数入参。
+
+    msg_expire_seconds: typing.Union[float, int,None] = None  # 消息过期时间,可以设置消息是多久之前发布的就丢弃这条消息,不运行. 为None则永不丢弃
+
+    do_task_filtering: bool = False  # 是否对函数入参进行过滤去重.
+    task_filtering_expire_seconds: int = 0  # 任务过滤的失效期，为0则永久性过滤任务。例如设置过滤过期时间是1800秒 ， 30分钟前发布过1 + 2 的任务，现在仍然执行，如果是30分钟以内执行过这个任务，则不执行1 + 2
+
+    function_result_status_persistance_conf: FunctionResultStatusPersistanceConfig = FunctionResultStatusPersistanceConfig(
+        is_save_result=False, is_save_status=False, expire_seconds=7 * 24 * 3600, is_use_bulk_insert=False)  # 是否保存函数的入参，运行结果和运行状态到mongodb。这一步用于后续的参数追溯，任务统计和web展示，需要安装mongo。
+
+    user_custom_record_process_info_func: typing.Optional[typing.Callable[..., typing.Any]] = None  # 提供一个用户自定义的保存消息处理记录到某个地方例如mysql数据库的函数，函数仅仅接受一个入参，入参类型是 FunctionResultStatus，用户可以打印参数
+
+    is_using_rpc_mode: bool = False  # 是否使用rpc模式，可以在发布端获取消费端的结果回调，但消耗一定性能，使用async_result.result时候会等待阻塞住当前线程。
+    rpc_result_expire_seconds: int = 1800  # redis保存rpc结果的过期时间.
+    rpc_timeout:int = 1800 # rpc模式下，等待rpc结果返回的超时时间
+
+    delay_task_apscheduler_jobstores_kind :Literal[ 'redis', 'memory'] = 'redis'  # 延时任务的aspcheduler对象使用哪种jobstores ，可以为 redis memory 两种作为jobstore
+
+    
+    """
+    allow_run_time_cron:
+    只允许在规定的crontab表达式时间内运行。
+
+    例如 '* 23,0-2 * * *' 表示只在23点到2点运行。
+    allow_run_time_cron='* 9-17 * * 1-5', 表示只在周一到周五的9点到17:59:59运行。
+    为None则不限制运行时间。
+    语法是知名 croniter 包的语法，不是funboost创造的特殊语法，用户自己去google或者ai学习语法。
+    """
+    allow_run_time_cron: typing.Optional[str] = None
+
+    schedule_tasks_on_main_thread: bool = False  # 直接在主线程调度任务，意味着不能直接在当前主线程同时开启两个消费者。
+
+    is_auto_start_consuming_message: bool = False  # 是否在定义后就自动启动消费，无需用户手动写 .consume() 来启动消息消费。
+    
+    # booster_group :消费分组名字， BoostersManager.consume_group 时候根据 booster_group 启动多个消费函数,减少需要写 f1.consume() f2.consume() ...这种。
+    # 不像BoostersManager.consume_all() 会启动所有不相关消费函数,也不像  f1.consume() f2.consume() 这样需要逐个启动消费函数。
+    # 可以根据业务逻辑创建不同的分组，实现灵活的消费启动策略。
+    # 用法见文档 4.2d.3 章节.   使用 BoostersManager ,通过 consume_group 启动一组消费函数
+    booster_group:typing.Union[str, None] = None
+
+    consuming_function: typing.Optional[typing.Callable[..., typing.Any]] = None  # 消费函数,在@boost时候不用指定,因为装饰器知道下面的函数.
+    consuming_function_raw: typing.Optional[typing.Callable[..., typing.Any]] = None  # 不需要传递，自动生成
+    consuming_function_name: str = '' # 不需要传递，自动生成
+
+    
+    """
+    # 加上一个不同种类中间件非通用的配置,不同中间件自身独有的配置，不是所有中间件都兼容的配置，因为框架支持30种消息队列，消息队列不仅仅是一般的先进先出queue这么简单的概念，
+    # 例如kafka支持消费者组，rabbitmq也支持各种独特概念例如各种ack机制 复杂路由机制，有的中间件原生能支持消息优先级有的中间件不支持,
+    # 每一种消息队列都有独特的配置参数意义，可以通过这里传递。
+    # 每种中间件能传递的键值对可以看 funboost/core/broker_kind__exclusive_config_default.py 的 BROKER_EXCLUSIVE_CONFIG_DEFAULT 属性。
+    """
+    broker_exclusive_config: dict = {} 
+    
+
+
+    should_check_publish_func_params: bool = True  # 消息发布时候是否校验消息发布内容,比如有的人发布消息,函数只接受a,b两个入参,他去传2个入参,或者传参不存在的参数名字; 如果消费函数加了装饰器 ，你非要写*args,**kwargs,那就需要关掉发布消息时候的函数入参检查
+    manual_func_input_params :dict= {'is_manual_func_input_params': False,'must_arg_name_list':[],'optional_arg_name_list':[]} # 也可以手动指定函数入参字段，默认是根据消费函数def定义的入参来生成这个。
+
+
+    consumer_override_cls: typing.Optional[typing.Type] = None  # 使用 consumer_override_cls 和 publisher_override_cls 来自定义重写或新增消费者 发布者,见文档4.21b介绍，
+    publisher_override_cls: typing.Optional[typing.Type] = None
+
+    # func_params_is_pydantic_model: bool = False  # funboost 兼容支持 函数娼还是 pydantic model类型，funboost在发布之前和取出来时候自己转化。
+
+    consuming_function_kind: typing.Optional[str] = None  # 自动生成的信息,不需要用户主动传参,如果自动判断失误就传递。是判断消费函数是函数还是实例方法还是类方法。如果传递了，就不自动获取函数类型。
+    """ consuming_function_kind 可以为以下类型，
+    class FunctionKind:
+        CLASS_METHOD = 'CLASS_METHOD'
+        INSTANCE_METHOD = 'INSTANCE_METHOD'
+        STATIC_METHOD = 'STATIC_METHOD'
+        COMMON_FUNCTION = 'COMMON_FUNCTION'
+    """
+
+    """
+    user_options:
+    用户额外自定义的配置,高级用户或者奇葩需求可以用得到,用户可以自由发挥,存放任何设置.
+    user_options 提供了一个统一的、用户自定义的命名空间，让用户可以为自己的“奇葩需求”或“高级定制”传递配置，而无需等待框架开发者添加官方支持。
+    funboost 是自由框架不是奴役框架,不仅消费函数逻辑自由,目录层级结构自由,自定义奇葩扩展也要追求自由,用户不用改funboost BoosterParams 源码来加装饰器参数
+    
+    使用场景见文档 4b.6 章节.
+    """
+    user_options: dict = {} # 用户自定义的配置,高级用户或者奇葩需求可以用得到,用户可以自由发挥,存放任何设置,例如配合 consumer_override_cls中读取 或 register_custom_broker 使用
+    
+    
+    auto_generate_info: dict = {}  # 自动生成的信息,不需要用户主动传参.例如包含 final_func_input_params_info 和 where_to_instantiate 等。
+    
+    """# is_fake_booster：是否是伪造的booster,
+    # 用于faas模式下，因为跨项目的faas管理只拿到了redis的一些基本元数据，没有booster的函数逻辑，
+    # 例如ApsJobAdder管理定时任务，需要booster，但没有真实的函数逻辑，
+    # 你可以看 SingleQueueConusmerParamsGetter.gen_booster_for_faas 的用法，目前主要是控制不要执行 BoostersManager.regist_booster
+    # 普通用户完全不用改这个参数。
+    """
+    is_fake_booster: bool = False
+
+    # 普通用户不用管不用改，用于隔离boosters注册。例如faas的是虚假的跨服务跨项目的booster，没有具体函数逻辑，不可污染真正的注册。
+    # 如果你是想分组启动部分booster，那你应该用的是 booster_group 参数。
+    booster_registry_name: str = StrConst.BOOSTER_REGISTRY_NAME_DEFAULT  
+
+    
+```
+
+`````
+
+--- **end of file: funboost/md_for_ai/funboost_ai_coding_编程指南_rules_and_skills.md** (project: funboost) --- 
+
+---
+
+
+--- **start of file: funboost/md_for_ai/funboost教程速查for_ai.md** (project: funboost) --- 
+
+`````markdown
+
+`````
+
+--- **end of file: funboost/md_for_ai/funboost教程速查for_ai.md** (project: funboost) --- 
+
+---
+
+
+--- **start of file: funboost/md_for_ai/funboost源码速查for_ai.md** (project: funboost) --- 
+
+`````markdown
+# funboost 源码速查 for AI
+
+> 本文档专为 AI 设计，用于快速定位 funboost 源码中的类、函数、模块位置。
+>
+> 生成时间: 2026-04-09 （请注意时间，部分代码文件的行号有可能会随时间发生小幅变化）
+>
+> 源码根目录: `funboost/funboost/`
+>
+> 所有路径均相对于 `funboost/funboost/` 目录。
+
+## AI 使用指南
+
+**当你收到用户关于 funboost 源码的提问时，请按以下优先级查找：**
+
+1. **先查"第十八章 用户自然语言问题路由表"** — 根据用户问题中的关键词，直接跳转到对应源码文件和行号
+2. **再查"第十九章 按实现层面快速检索"** — 如果用户使用技术术语（类名、函数名），在此表中精确定位
+3. **需要了解全貌时查"第一章 目录总览"** — 获取整体架构感知
+4. **需要了解某个 broker 时查"第十五章 Broker映射表"** — 50种broker的Consumer/Publisher类和文件一一对应
+5. **需要了解公共 API 时查"第十六章 导出清单"** — 确认哪些名字可以从 `funboost` 直接 import
+
+**关键约定：**
+- 所有行号 `(Lxx)` 均为源码中经过验证的精确行号，可直接用 `Read(file, offset=xx)` 跳转
+- 文件路径相对于 `funboost/funboost/` 目录，例如 `core/booster.py` 实际是 `funboost/funboost/core/booster.py`
+- 第十七章第四节列出了文件名中的拼写特殊之处，搜索文件时请注意
+
+---
+
+## 一、目录总览
+
+```
+funboost/
+├── __init__.py                    # 包入口，导出所有公共 API
+├── __main__.py                    # CLI 入口: fire.Fire(BoosterFire)
+├── constant.py                    # BrokerEnum, ConcurrentModeEnum 等常量
+├── funboost_config_deafult.py     # BrokerConnConfig, FunboostCommonConfig 默认配置
+├── set_frame_config.py            # 加载用户 funboost_config.py，合并配置
+├── core/                          # 核心模块
+│   ├── booster.py                 # Booster 装饰器、BoosterRegistry
+│   ├── func_params_model.py       # BoosterParams 参数模型
+│   ├── current_task.py            # fct 当前任务上下文
+│   ├── msg_result_getter.py       # AsyncResult / AioAsyncResult RPC结果
+│   ├── function_result_status_saver.py  # FunctionResultStatus 运行状态
+│   ├── serialization.py           # 序列化
+│   ├── exceptions.py              # 所有异常类
+│   ├── helper_funs.py             # MsgGenerater 消息工具
+│   ├── kill_remote_task.py        # RemoteTaskKiller 远程杀任务
+│   ├── consuming_func_iniput_params_check.py  # 消费函数入参校验
+│   ├── active_cousumer_info_getter.py  # 活跃消费者信息
+│   ├── loggers.py                 # 日志器
+│   ├── task_id_logger.py          # TaskIdLogger
+│   ├── funboost_time.py           # FunboostTime 时间处理
+│   ├── funboost_config_getter.py  # 用户配置加载
+│   ├── lazy_impoter.py            # 懒加载可选依赖
+│   ├── pydantic_compatible_base.py # Pydantic v1/v2 兼容
+│   ├── muliti_process_enhance.py  # 多进程增强
+│   ├── fabric_deploy_helper.py    # 远程部署
+│   ├── mongo_alert_monitor.py     # Mongo 报警监控
+│   ├── broker_kind__exclusive_config_default_define.py  # broker专属配置默认值
+│   └── cli/                       # 命令行
+│       ├── funboost_fire.py       # BoosterFire CLI命令
+│       ├── discovery_boosters.py  # BoosterDiscovery 自动发现
+│       └── funboost_cli_user_templ.py  # 用户CLI模板
+├── consumers/                     # 消费者实现 (51个py文件)
+│   ├── __init__.py                # 包入口
+│   ├── base_consumer.py           # AbstractConsumer 消费者基类
+│   ├── confirm_mixin.py           # Redis心跳ACK mixin
+│   ├── empty_consumer.py          # EmptyConsumer 空实现
+│   ├── redis_consumer.py          # Redis List
+│   ├── redis_consumer_simple.py   # Redis 简单实现
+│   ├── redis_consumer_ack_able.py # Redis ACK
+│   ├── redis_consumer_ack_using_timeout.py  # Redis ACK超时实现
+│   ├── redis_consumer_priority.py # Redis 优先级
+│   ├── redis_stream_consumer.py   # Redis Stream
+│   ├── redis_brpoplpush_consumer.py # Redis 双队列
+│   ├── redis_pubsub_consumer.py   # Redis PubSub
+│   ├── redis_filter.py            # Redis 过滤
+│   ├── rabbitmq_amqpstorm_consumer.py  # RabbitMQ (amqpstorm, 推荐)
+│   ├── rabbitmq_pika_consumer.py  # RabbitMQ (pika)
+│   ├── rabbitmq_rabbitpy_consumer.py   # RabbitMQ (rabbitpy)
+│   ├── rabbitmq_amqp_consumer.py  # RabbitMQ (amqp)
+│   ├── rabbitmq_complex_routing_consumer.py  # RabbitMQ 复杂路由
+│   ├── kafka_consumer.py          # Kafka (kafka-python, 自动提交)
+│   ├── kafka_consumer_manually_commit.py  # Kafka (confluent, 手动提交)
+│   ├── rocketmq_consumer.py       # RocketMQ 4
+│   ├── rocketmq5_consumer.py      # RocketMQ 5
+│   ├── pulsar_consumer.py         # Pulsar
+│   ├── nsq_consumer.py            # NSQ
+│   ├── mqtt_consumer.py           # MQTT
+│   ├── nats_consumer.py           # NATS
+│   ├── zeromq_consumer.py         # ZeroMQ
+│   ├── mongomq_consumer.py        # MongoDB
+│   ├── persist_queue_consumer.py  # SQLite (persistqueue)
+│   ├── sqlachemy_consumer.py      # SQLAlchemy
+│   ├── postgres_consumer.py       # PostgreSQL
+│   ├── peewee_conusmer.py         # Peewee ORM (注意: conusmer拼写)
+│   ├── tcp_consumer.py            # TCP
+│   ├── udp_consumer.py            # UDP
+│   ├── http_consumer.py           # HTTP
+│   ├── http_consumer_aiohttp_old.py  # HTTP (aiohttp旧版)
+│   ├── grpc_consumer.py           # gRPC
+│   ├── sqs_consumer.py            # AWS SQS
+│   ├── httpsqs_consumer.py        # HTTPSQS
+│   ├── txt_file_consumer.py       # 文本文件
+│   ├── local_python_queue_consumer.py   # Python queue.Queue
+│   ├── fastest_mem_queue_consumer.py    # collections.deque
+│   ├── memory_deque_consumer.py   # deque 变体
+│   ├── celery_consumer.py         # Celery
+│   ├── dramatiq_consumer.py       # Dramatiq
+│   ├── huey_consumer.py           # Huey
+│   ├── rq_consumer.py             # RQ
+│   ├── nameko_consumer.py         # Nameko
+│   ├── kombu_consumer.py          # Kombu
+│   ├── mysql_cdc_consumer.py      # MySQL CDC
+│   └── faststream_consumer.py     # FastStream
+├── publishers/                    # 发布者实现 (47个py文件)
+│   ├── __init__.py                # 包入口
+│   ├── base_publisher.py          # AbstractPublisher 发布者基类
+│   ├── empty_publisher.py         # EmptyPublisher 空实现
+│   ├── redis_publisher.py         # Redis List
+│   ├── redis_publisher_simple.py  # Redis 简单实现
+│   ├── redis_publisher_lpush.py   # Redis LPUSH
+│   ├── redis_publisher_priority.py # Redis 优先级
+│   ├── redis_stream_publisher.py  # Redis Stream
+│   ├── redis_pubsub_publisher.py  # Redis PubSub
+│   ├── redis_queue_flush_mixin.py # FlushRedisQueueMixin
+│   ├── rabbitmq_amqpstorm_publisher.py  # RabbitMQ (amqpstorm, 推荐)
+│   ├── rabbitmq_pika_publisher.py       # RabbitMQ (pika)
+│   ├── rabbitmq_rabbitpy_publisher.py   # RabbitMQ (rabbitpy)
+│   ├── rabbitmq_amqp_publisher.py       # RabbitMQ (amqp)
+│   ├── rabbitmq_complex_routing_publisher.py  # RabbitMQ 复杂路由
+│   ├── kafka_publisher.py         # Kafka (kafka-python)
+│   ├── confluent_kafka_publisher.py # Kafka (confluent)
+│   ├── rocketmq_publisher.py      # RocketMQ 4
+│   ├── rocketmq5_publisher.py     # RocketMQ 5
+│   ├── pulsar_publisher.py        # Pulsar
+│   ├── nsq_publisher.py           # NSQ
+│   ├── mqtt_publisher.py          # MQTT
+│   ├── nats_publisher.py          # NATS
+│   ├── zeromq_publisher.py        # ZeroMQ
+│   ├── mongomq_publisher.py       # MongoDB
+│   ├── persist_queue_publisher.py # SQLite (persistqueue)
+│   ├── sqla_queue_publisher.py    # SQLAlchemy (注意: 不叫sqlachemy_publisher)
+│   ├── postgres_publisher.py      # PostgreSQL
+│   ├── peewee_publisher.py        # Peewee ORM
+│   ├── tcp_publisher.py           # TCP
+│   ├── udp_publisher.py           # UDP
+│   ├── http_publisher.py          # HTTP
+│   ├── grpc_publisher.py          # gRPC
+│   ├── sqs_publisher.py           # AWS SQS
+│   ├── httpsqs_publisher.py       # HTTPSQS
+│   ├── txt_file_publisher.py      # 文本文件
+│   ├── local_python_queue_publisher.py   # Python queue.Queue
+│   ├── fastest_mem_queue_publisher.py    # collections.deque
+│   ├── meomory_deque_publisher.py # deque 变体 (注意: meomory拼写)
+│   ├── celery_publisher.py        # Celery
+│   ├── dramatiq_publisher.py      # Dramatiq
+│   ├── huey_publisher.py          # Huey
+│   ├── rq_publisher.py            # RQ
+│   ├── nameko_publisher.py        # Nameko
+│   ├── kombu_publisher.py         # Kombu
+│   ├── mysql_cdc_publisher.py     # MySQL CDC
+│   └── faststream_publisher.py    # FastStream
+├── factories/                     # 工厂模块
+│   ├── broker_kind__publsiher_consumer_type_map.py  # broker→类映射 + register_custom_broker
+│   ├── consumer_factory.py        # get_consumer 工厂
+│   └── publisher_factotry.py      # get_publisher 工厂 (注意文件名拼写)
+├── concurrent_pool/               # 并发池
+│   ├── readme.md                  # 并发池说明文档
+│   ├── __init__.py                # 导出所有池类
+│   ├── base_pool_type.py          # FunboostBaseConcurrentPool 基类
+│   ├── pool_commons.py            # ConcurrentPoolBuilder
+│   ├── flexible_thread_pool.py    # FlexibleThreadPool 弹性线程池
+│   ├── custom_threadpool_executor.py  # ThreadPoolExecutorShrinkAble 可收缩线程池
+│   ├── fixed_thread_pool.py       # FixedThreadPool
+│   ├── bounded_threadpoolexcutor.py   # BoundedThreadPoolExecutor
+│   ├── single_thread_executor.py  # SoloExecutor 单线程
+│   ├── async_pool_executor.py     # AsyncPoolExecutor
+│   ├── custom_gevent_pool_executor.py  # GeventPoolExecutor
+│   ├── custom_evenlet_pool_executor.py # EventletPoolExecutor
+│   ├── concurrent_pool_with_multi_process.py  # ConcurrentPoolWithProcess
+│   └── async_helper.py            # get_or_create_event_loop
+├── timing_job/                    # 定时任务 (APScheduler)
+│   ├── __init__.py                # 导出 funboost_aps_scheduler, ApsJobAdder 等
+│   ├── timing_job_base.py         # FunboostBackgroundScheduler 全局调度器
+│   ├── timing_push.py             # ApsJobAdder 定时推送
+│   ├── apscheduler_use_redis_store.py  # Redis jobstore
+│   └── apscheduler_use_mysql_store.py  # MySQL jobstore
+├── faas/                          # FaaS HTTP接口
+│   ├── README.md                  # FaaS说明文档
+│   ├── __init__.py                # 懒加载导出
+│   ├── fastapi_adapter.py         # fastapi_router FastAPI路由
+│   ├── flask_adapter.py           # flask_blueprint Flask蓝图
+│   ├── django_adapter.py          # Django视图
+│   └── faas_util.py               # gen_aps_job_adder
+├── workflow/                      # 工作流编排 (chain/group/chord)
+│   ├── README.md                  # 工作流说明文档
+│   ├── __init__.py                # 导出 + 给Booster打补丁 .s()/.si()
+│   ├── signature.py               # Signature 签名
+│   ├── primitives.py              # Chain, Group, Chord
+│   ├── workflow_mixin.py          # WorkflowPublisherMixin, WorkflowConsumerMixin
+│   ├── params.py                  # WorkflowBoosterParams
+│   └── examples/video_pipeline.py # 示例
+├── contrib/                       # 扩展贡献模块
+│   ├── funboost框架的额外贡献功能.md  # 扩展功能说明
+│   ├── api_publish_msg.py         # Pydantic MsgItem/PublishResponse
+│   ├── queue2queue.py             # 队列转发
+│   ├── django_db_deco.py          # Django DB兼容装饰器
+│   ├── redis_consume_latest_msg_broker.py  # 只消费最新消息
+│   ├── cdc/mysql2mysql.py         # MySql2Mysql CDC同步
+│   ├── override_publisher_consumer_cls/   # Mixin扩展
+│   │   ├── README.md                      # Mixin扩展说明
+│   │   ├── circuit_breaker_mixin.py       # 熔断器
+│   │   ├── funboost_micro_batch_mixin.py  # 微批消费
+│   │   ├── funboost_promethus_mixin.py    # Prometheus
+│   │   ├── funboost_otel_mixin.py         # OpenTelemetry
+│   │   ├── otel_tree_span_exporter.py     # OTel TreeSpan
+│   │   ├── periodic_quota_mixin.py        # 周期额度
+│   │   └── alert_notifier_mixin.py        # 告警通知
+│   ├── register_custom_broker_contrib/    # 自定义broker
+│   │   ├── watchdog_broker.py     # WatchdogPublisher/Consumer 文件监控
+│   │   └── websocket_broker.py    # WebSocketPublisher/Consumer
+│   └── save_function_result_status/       # 结果持久化
+│       ├── readme.md                      # 结果持久化说明
+│       ├── save_result_status_to_sqldb.py
+│       └── save_result_status_use_dataset.py
+├── queues/                        # 队列实现
+│   ├── memory_queues_map.py       # PythonQueues 内存队列映射
+│   ├── fastest_mem_queue.py       # FastestMemQueue / FastestMemQueues
+│   ├── sqla_queue.py              # SqlaQueue SQLAlchemy队列
+│   ├── peewee_queue.py            # PeeweeQueue
+│   └── postgres_queue.py          # PostgresQueue (SKIP LOCKED + NOTIFY)
+├── assist/                        # 第三方框架集成辅助
+│   ├── celery_helper.py           # CeleryHelper
+│   ├── dramatiq_helper.py         # DramatiqHelper
+│   ├── huey_helper.py             # HueyHelper
+│   ├── rq_helper.py               # RqHelper
+│   ├── rq_windows_worker.py       # WindowsWorker
+│   ├── faststream_helper.py       # get_broker, app
+│   ├── taskiq_helper.py           # (空文件占位)
+│   └── grpc_helper/               # gRPC proto + 生成代码 + 示例
+│       ├── funboost_grpc.proto
+│       ├── funboost_grpc_pb2.py
+│       ├── funboost_grpc_pb2_grpc.py
+│       ├── client_sample.py
+│       ├── server_sample.py
+│       └── generate_pb.py
+├── funweb/                        # Web管理界面 (Flask)
+│   ├── README.md                  # Web管理说明文档
+│   ├── app.py                     # Flask app, start_funboost_web_manager
+│   ├── functions.py               # Mongo 查询辅助
+│   ├── flask_bps/                 # Flask蓝图
+│   │   ├── web_helper.py          # IP/hostname
+│   │   ├── system_monitor.py      # 系统监控API
+│   │   ├── script_deploy.py       # 脚本部署CRUD
+│   │   └── log_viewer.py          # 日志查看器
+│   ├── templates/                 # 15个HTML模板
+│   │   ├── index.html             # 首页
+│   │   ├── login.html             # 登录页
+│   │   ├── about.html             # 关于页
+│   │   ├── fun_result_table.html  # 函数运行结果表
+│   │   ├── conusme_speed.html     # 消费速度图表
+│   │   ├── queue_op.html          # 队列操作
+│   │   ├── rpc_call.html          # RPC调用
+│   │   ├── timing_jobs_management.html  # 定时任务管理
+│   │   ├── running_consumer_by_queue_name.html  # 按队列名查消费者
+│   │   ├── running_consumer_by_ip.html  # 按IP查消费者
+│   │   ├── care_project_name.html # 项目名筛选
+│   │   ├── deploy_list.html       # 部署列表
+│   │   ├── deploy_detail.html     # 部署详情
+│   │   ├── log_viewer.html        # 日志查看器
+│   │   ├── system_monitor.html    # 系统监控
+│   │   └── app.py中仍在使用的路由.md  # 路由参考文档
+│   ├── _ai_do_tasks_md/           # AI任务备忘
+│   │   ├── ai写web必须遵守的.md
+│   │   └── 增加日志查看.md
+│   └── static/                    # CSS/JS/字体/图片
+├── funboost_web_manager/          # (旧名, 转发到funweb)
+│   ├── README.md
+│   ├── app.py
+│   └── functions.py
+├── README.md                      # 包README
+├── __init__old.py                 # 旧版init (兼容保留)
+├── utils/                         # 工具模块
+│   ├── README.md                  # 工具模块说明
+│   ├── decorators.py              # keep_circulating, singleton, timer等
+│   ├── redis_manager.py           # RedisManager, RedisMixin, AioRedisMixin
+│   ├── mongo_util.py              # MongoMixin
+│   ├── class_utils.py             # ClsHelper
+│   ├── str_utils.py               # PwdEnc, StrHelper
+│   ├── json_helper.py             # JSON兼容
+│   ├── un_strict_json_dumps.py    # 宽松JSON
+│   ├── time_util.py               # 时间工具
+│   ├── uuid7.py                   # UUID7
+│   ├── system_util.py             # 系统信息
+│   ├── ctrl_c_end.py              # ctrl_c_recv
+│   ├── block_exit.py              # 阻止退出
+│   ├── task_dispatcher.py         # LocalFunctionsDispatcher
+│   ├── bulk_operation.py          # 批量Mongo/ES/Redis写入
+│   ├── expire_lock.py             # 过期锁
+│   ├── notify_util.py             # Notifier
+│   ├── paramiko_util.py           # ParamikoFolderUploader SSH上传
+│   ├── rabbitmq_factory.py        # Pika/RabbitPy客户端
+│   ├── mqtt_util.py               # MqttHttpHelper
+│   ├── resource_monitoring.py     # ResourceMonitor
+│   ├── restart_python.py          # 重启Python
+│   ├── apscheduler_monkey.py      # APScheduler补丁
+│   ├── monkey_color_log.py        # 日志着色
+│   ├── monkey_patches.py          # Python 3.10+兼容补丁
+│   ├── simple_data_class.py       # DataClassBase
+│   ├── func_timeout/              # 函数超时控制
+│   │   ├── __init__.py            # func_timeout, func_set_timeout
+│   │   ├── StoppableThread.py
+│   │   └── exceptions.py
+│   ├── dependency_packages/       # 内嵌第三方包
+│   │   └── mongomq/               # MongoQueue, Job, MongoLock
+│   └── dependency_packages_in_pythonpath/  # 加入PYTHONPATH的内嵌包
+│       ├── readme.md
+│       ├── add_to_pythonpath.py   # 将此目录加入sys.path
+│       ├── aioredis/              # 内嵌aioredis异步Redis客户端
+│       │   ├── readme.md
+│       │   ├── client.py          # Redis, PubSub, Pipeline
+│       │   ├── connection.py      # 连接管理
+│       │   ├── exceptions.py      # 异常
+│       │   ├── lock.py            # 分布式锁
+│       │   ├── sentinel.py        # 哨兵
+│       │   ├── compat.py          # 兼容层
+│       │   ├── log.py             # 日志
+│       │   └── utils.py           # 工具
+│       └── func_timeout/          # 内嵌func_timeout (同utils/func_timeout)
+├── beggar_version_implementation/  # 乞丐版实现
+│   ├── README.md
+│   └── beggar_redis_consumer.py   # BeggarRedisConsumer 极简Redis消费者
+└── md_for_ai/                     # AI参考文档
+    ├── funboost源码速查for_ai.md   # (本文档)
+    ├── funboost教程速查for_ai.md
+    ├── funboost_ai_coding_编程指南_rules_and_skills.md
+    ├── 如何扩展增加新的中间件.md
+    └── test1.md
+```
+
+---
+
+## 二、核心模块精确定位
+
+### 2.1 `core/booster.py` — 核心装饰器
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **38** | `class Booster` | 核心装饰器，将函数变为分布式任务。`__init__` 接收 `BoosterParams`；`__call__` 装饰消费函数 |
+| **263** | `boost = Booster` | `boost` 是 `Booster` 的别名 |
+| **267** | `def gen_pid_queue_name_key()` | 生成进程+队列名的Redis key |
+| **271** | `class BoosterRegistry` | 享元模式管理所有 Booster 实例，支持分组消费 |
+| **520** | `BoostersManager = booster_registry_default` | 默认的 BoosterRegistry 实例 |
+
+**Booster 装饰后函数获得的关键属性/方法:**
+
+| 属性/方法 | 说明 |
+|-----------|------|
+| `.push(*args, **kwargs)` / `.delay(...)` | 发布消息(传函数参数) |
+| `.publish(msg_dict, task_id=, task_options=)` / `.pub(...)` / `.apply_async(...)` | 发布消息(传字典) |
+| `.aio_push(...)` / `.aio_publish(...)` | 异步发布 |
+| `.consume()` / `.start_consuming_message()` | 启动消费 |
+| `.multi_process_consume(process_num)` / `.mp_consume(n)` | 多进程消费 |
+| `.multi_process_pub_params_list(params_list, process_num)` | 多进程批量发布 |
+| `.pause()` / `.pause_consume()` | 暂停消费 |
+| `.continue_consume()` | 恢复消费 |
+| `.clear()` / `.clear_queue()` | 清空队列 |
+| `.get_message_count()` | 获取消息数量 |
+| `.fabric_deploy(host, port, user, password, ...)` | 远程部署 |
+
+---
+
+### 2.2 `core/func_params_model.py` — 参数模型
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **27** | `class FunctionResultStatusPersistanceConfig` | 函数结果持久化配置 |
+| **56** | `class BoosterParamsFieldsAssit` | 字段辅助类 |
+| **72** | `class BoosterParams` | **核心参数模型**，50+字段，控制所有行为 |
+| **338** | `class BoosterParamsComplete` | 完整参数(含运行时填充) |
+| **358** | `class TaskOptions` | 单次任务选项(task_id, priority, filter_str等) |
+| **413** | `class PublisherParams` | 发布者参数 |
+
+**BoosterParams 关键字段分类:**
+
+```
+基础: queue_name, broker_kind, project_name
+并发: concurrent_mode, concurrent_num, specify_concurrent_pool, specify_async_loop
+控频: qps, is_using_distributed_frequency_control
+重试: max_retry_times, is_using_advanced_retry, advanced_retry_config, is_push_to_dlx_queue_when_retry_max_times
+超时: function_timeout, is_support_remote_kill_task
+监控: is_send_consumer_heartbeat_to_redis
+日志: log_level, logger_prefix, create_logger_file, logger_name, log_filename
+消息: msg_expire_seconds, do_task_filtering, task_filtering_expire_seconds
+RPC:  is_using_rpc_mode, rpc_result_expire_seconds, rpc_timeout
+定时: delay_task_apscheduler_jobstores_kind, allow_run_time_cron
+启动: schedule_tasks_on_main_thread, is_auto_start_consuming_message, booster_group
+扩展: broker_exclusive_config, user_options, consumer_override_cls, publisher_override_cls
+```
+
+---
+
+### 2.3 `constant.py` — 常量枚举
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **5** | `class BrokerEnum` | 50种消息队列中间件枚举 |
+| **195** | `class ConcurrentModeEnum` | 并发模式: THREADING/GEVENT/EVENTLET/ASYNC/SINGLE_THREAD |
+| **213** | `class FunctionKind` | 函数类型标识 |
+| **224** | `class ConstStrForClassMethod` | 类方法常量 |
+| **232** | `class RedisKeys` | Redis key命名空间(暂停/停止/计数/心跳/unack等) |
+| **296** | `class ConsumingFuncInputParamsCheckerField` | 入参检查常量 |
+| **305** | `class MongoDbName` | MongoDB数据库名 |
+| **309** | `class StrConst` | 字符串常量 |
+| **315** | `class EnvConst` | 环境变量常量 |
+
+**BrokerEnum 按类别:**
+
+| 类别 | 枚举值 |
+|------|--------|
+| Redis系列 | `REDIS`, `REDIS_ACK_ABLE`, `REDIS_STREAM`, `REDIS_PRIORITY`, `REDIS_BRPOP_LPUSH`, `REDIS_PUBSUB` |
+| RabbitMQ | `RABBITMQ_AMQPSTORM`(=`RABBITMQ`), `RABBITMQ_COMPLEX_ROUTING` |
+| Kafka | `KAFKA`, `KAFKA_CONFLUENT` |
+| RocketMQ | `ROCKETMQ`, `ROCKETMQ5` |
+| 其他MQ | `PULSAR`, `NSQ`, `MQTT`, `NATS`, `ZEROMQ`, `SQS`, `HTTPSQS` |
+| 内存/文件 | `MEMORY_QUEUE`, `FASTEST_MEM_QUEUE`, `SQLITE_QUEUE`(=`PERSISTQUEUE`), `TXT_FILE` |
+| 数据库 | `MONGOMQ`, `SQLACHEMY`, `POSTGRES`, `PEEWEE` |
+| 网络协议 | `TCP`, `UDP`, `HTTP`, `GRPC`, `WEBSOCKET` |
+| 框架集成 | `CELERY`, `DRAMATIQ`, `HUEY`, `RQ`, `NAMEKO`, `KOMBU` |
+| 特殊 | `MYSQL_CDC`, `WATCHDOG`, `EMPTY` |
+
+---
+
+### 2.4 `consumers/base_consumer.py` — 消费者基类
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **95** | `class GlobalVars` | 全局变量(如全局暂停标志) |
+| **101** | `class AbstractConsumer` | **消费者抽象基类**，实现20+种运行控制(QPS/重试/超时/分布式统计/DLQ/cron等) |
+| **1265** | `def wait_for_possible_has_finish_all_tasks()` | 等待任务完成(AbstractConsumer方法) |
+| **1298** | `class ConcurrentModeDispatcher` | 根据concurrent_mode构建并发池 |
+| **1389** | `def wait_for_possible_has_finish_all_tasks_by_conusmer_list()` | 等待多个消费者的任务完成(模块级函数) |
+| **1404** | `class MetricCalculation` | 速度/QPS指标计算 |
+| **1495** | `class DistributedConsumerStatistics` | 分布式消费者统计(心跳、掉线检测、分布式QPS) |
+
+**AbstractConsumer 关键方法:**
+
+```python
+start_consuming_message()          # 启动消费(非阻塞)
+_submit_task(msg: dict)            # 提交任务到并发池
+_run_consuming_function(kw, ...)   # 执行消费函数
+pause_consume()                    # 暂停消费
+continue_consume()                 # 恢复消费
+clear_filter_tasks()               # 清空去重过滤器
+```
+
+---
+
+### 2.5 `publishers/base_publisher.py` — 发布者基类
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **44** | `class PublishMsgContext` | 发布消息上下文 |
+| **51** | `class AbstractPublisher` | **发布者抽象基类**，消息序列化、参数校验、RPC结果存储 |
+| **420** | `def deco_mq_conn_error()` | MQ连接错误重试装饰器 |
+
+**AbstractPublisher 关键方法:**
+
+```python
+publish(msg, task_id=, task_options=) -> AsyncResult    # 发布消息
+push(*func_args, **func_kwargs) -> AsyncResult          # 简化发布
+aio_publish(msg, ...) -> AioAsyncResult                 # 异步发布
+aio_push(*args, **kwargs) -> AioAsyncResult             # 异步简化发布
+clear()                                                 # 清空队列
+get_message_count() -> int                              # 获取消息数量
+```
+
+---
+
+### 2.6 `core/msg_result_getter.py` — RPC结果获取
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **30** | `def _judge_rpc_function_result_status_obj()` | 判断RPC结果状态 |
+| **46** | `class AsyncResult` | 同步方式获取RPC结果(基于Redis) |
+| **149** | `class AioAsyncResult` | 异步方式获取RPC结果 |
+| **254** | `class ResultFromMongo` | 从MongoDB获取结果 |
+| **289** | `class FutureStatusResult` | Future状态结果 |
+
+**AsyncResult 关键接口:**
+
+```python
+.get() -> Any                      # 阻塞获取结果
+.result -> Any                     # 结果属性(阻塞)
+.is_success() -> bool              # 是否成功
+.is_pending() -> bool              # 是否还在执行
+.status_and_result -> dict         # 状态+结果字典
+.set_callback(callback_func)       # 设置回调
+.wait_rpc_data_or_raise()          # 等待结果或抛异常
+```
+
+---
+
+### 2.7 `core/current_task.py` — 当前任务上下文
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **28** | `class FctContext` | 任务上下文数据(function_result_status, logger) |
+| **40** | `def set_fct_context()` | 设置当前线程/协程上下文 |
+| **45** | `def get_fct_context()` | 获取当前线程/协程上下文 |
+| **50** | `class _FctProxy` | 代理类，自动获取当前线程/协程上下文 |
+| **94** | `fct = _FctProxy()` | **全局实例**，在消费函数中直接使用 |
+| **97** | `def funboost_current_task()` | 函数式获取当前任务(返回_FctProxy) |
+| **107** | `def get_current_taskid()` | 获取当前task_id |
+| **118** | `class FctContextThread` | 线程上下文 |
+
+**fct 代理属性:**
+
+```python
+fct.task_id              # 当前任务ID
+fct.queue_name           # 队列名
+fct.run_times            # 运行次数(含重试)
+fct.full_msg             # 完整消息体
+fct.function_params      # 函数参数
+fct.function_result_status  # FunctionResultStatus对象
+fct.logger               # 当前任务的logger
+```
+
+---
+
+### 2.8 `core/function_result_status_saver.py` — 函数运行状态
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **24** | `class RunStatus` | 运行状态枚举 |
+| **28** | `class FunctionResultStatus` | 函数运行结果状态(task_id, 参数, 结果, 异常, 耗时等) |
+| **183** | `class ResultPersistenceHelper` | 结果持久化到MongoDB/SQL |
+
+---
+
+### 2.9 `core/exceptions.py` — 异常类
+
+| 行号 | 异常类 | 说明 |
+|------|--------|------|
+| **9** | `FunboostException` | 基础异常 |
+| **141** | `ExceptionForRetry` | 抛出此异常触发重试 |
+| **145** | `ExceptionForRequeue` | 抛出此异常重新入队 |
+| **148** | `FunboostWaitRpcResultTimeout` | RPC结果等待超时 |
+| **151** | `FunboostRpcResultError` | RPC结果错误 |
+| **154** | `HasNotAsyncResult` | 无异步结果 |
+| **157** | `ExceptionForPushToDlxqueue` | 推送到死信队列 |
+| **161** | `BoostDecoParamsIsOldVersion` | 装饰器参数旧版本警告 |
+| **184** | `QueueNameNotExists` | 队列名不存在 |
+| **188** | `FuncParamsError` | 函数参数错误 |
+
+---
+
+### 2.10 `core/serialization.py` — 序列化
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **10** | `class Serialization` | JSON序列化(支持datetime等) |
+| **46** | `class PickleHelper` | Pickle序列化辅助 |
+
+---
+
+### 2.11 `core/helper_funs.py` — 消息工具函数
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **8** | `def get_publish_time()` | 获取发布时间戳 |
+| **16** | `def get_publish_time_format()` | 格式化发布时间 |
+| **23** | `def get_task_id()` | 生成task_id |
+| **28** | `def delete_keys_and_return_new_dict()` | 删除字典key |
+| **37** | `def get_func_only_params()` | 从消息中提取函数参数 |
+| **47** | `def block_python_main_thread_exit()` | 阻止主线程退出 |
+| **59** | `run_forever = block_python_main_thread_exit` | 别名 |
+| **62** | `class MsgGenerater` | 消息生成器 |
+
+---
+
+### 2.12 `core/kill_remote_task.py` — 远程杀任务
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **11** | `class ThreadKillAble` | 可杀死的线程 |
+| **17** | `def kill_thread()` | 杀死线程(通过线程ID) |
+| **21** | `class TaskHasKilledError` | 任务已被杀死异常 |
+| **25** | `def kill_fun_deco()` | 杀任务装饰器 |
+| **54** | `def kill_thread_by_task_id()` | 根据task_id杀死线程 |
+| **67** | `class RemoteTaskKillerZset` | 基于Redis ZSet的远程杀任务 |
+| **111** | `class RemoteTaskKiller` | 远程任务杀手(对外使用) |
+
+---
+
+### 2.13 `core/consuming_func_iniput_params_check.py` — 入参校验
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **10** | `class ConsumingFuncInputParamsChecker` | 消费函数入参检查器 |
+| **117** | `class FakeFunGenerator` | 生成假函数(用于FaaS) |
+
+---
+
+### 2.14 `core/active_cousumer_info_getter.py` — 活跃消费者信息
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **44** | `class CareProjectNameEnv` | 项目名环境变量管理 |
+| **61** | `class RedisReportInfoGetterMixin` | Redis信息获取Mixin |
+| **181** | `class ActiveCousumerProcessInfoGetter` | 获取活跃消费者进程信息 |
+| **282** | `class QueuesConusmerParamsGetter` | 获取所有队列的消费者参数 |
+| **405** | `class SingleQueueConusmerParamsGetter` | 获取单个队列的消费者参数、生成FaaS publisher/booster |
+
+---
+
+### 2.15 `core/loggers.py` — 日志
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **11** | `def get_funboost_file_logger()` | 获取文件logger |
+| **18** | `class FunboostFileLoggerMixin` | 文件日志Mixin |
+| **33** | `class FunboostMetaTypeFileLogger` | 元类型文件日志 |
+| **45** | `flogger` | 全局logger实例 |
+
+---
+
+### 2.16 `core/funboost_time.py` — 时间处理
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **12** | `class FunboostTime(NbTime)` | 继承NbTime, 优先读取FunboostCommonConfig.TIMEZONE |
+| **32** | `def fast_get_now_time_str()` | 快速获取当前时间字符串(百万次0.4秒) |
+
+---
+
+### 2.17 `core/muliti_process_enhance.py` — 多进程增强
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **13** | `def _run_consumer_in_new_process()` | 在新进程中运行消费者 |
+| **21** | `def run_consumer_with_multi_process()` | 多进程消费 |
+| **51** | `def _multi_process_pub_params_list_in_new_process()` | 新进程中批量发布 |
+| **59** | `def multi_process_pub_params_list()` | 多进程批量发布 |
+
+---
+
+### 2.18 `core/fabric_deploy_helper.py` — 远程部署
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **17** | `def fabric_deploy()` | Fabric远程部署+启动消费 |
+| **123** | `def kill_all_remote_tasks()` | 杀死所有远程任务 |
+
+---
+
+### 2.19 `core/broker_kind__exclusive_config_default_define.py` — broker专属配置
+
+```
+def register_broker_exclusive_config_default()   # 注册broker的专属默认配置
+def generate_broker_exclusive_config()           # 生成merged配置
+每种broker有独立的默认dict (Celery task opts, Dramatiq actor opts, gRPC host/port, Kafka group等)
+```
+
+---
+
+### 2.20 `core/pydantic_compatible_base.py` — Pydantic兼容
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **35** | `def get_pydantic_major_version()` | 获取Pydantic主版本号 |
+| **78** | `def compatible_root_validator()` | Pydantic v1/v2兼容的root_validator |
+| **162** | `class BaseJsonAbleModel` | Pydantic v1/v2 兼容基类，所有参数模型的基类 |
+
+---
+
+## 三、工厂模块精确定位
+
+### 3.1 `factories/broker_kind__publsiher_consumer_type_map.py`
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **60** | `broker_kind__publsiher_consumer_type_map = {...}` | broker枚举 → (Publisher类, Consumer类) 映射表 |
+| **94** | `def register_custom_broker()` | 注册自定义broker |
+| **110** | `def regist_to_funboost()` | 懒注册(避免可选依赖import失败) |
+
+### 3.2 `factories/consumer_factory.py`
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **13** | `def get_consumer()` | 消费者工厂，支持consumer_override_cls合并MRO |
+| **36** | `class ConsumerCacheProxy` | 消费者缓存代理(进程级单例) |
+
+### 3.3 `factories/publisher_factotry.py` (注意文件名拼写)
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **15** | `def get_publisher()` | 发布者工厂，支持publisher_override_cls合并MRO |
+| **47** | `class PublisherCacheProxy` | 发布者缓存代理(进程级单例) |
+
+---
+
+## 四、并发池精确定位
+
+### 4.1 `concurrent_pool/pool_commons.py`
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **10** | `class ConcurrentPoolBuilder` | 根据ConcurrentModeEnum构建并发池 |
+
+### 4.2 `concurrent_pool/flexible_thread_pool.py`
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **22** | `class FlexibleThreadPool` | 弹性线程池(自适应伸缩, 空闲10秒退出, 性能高200%) |
+| **53** | `class FlexibleThreadPoolMinWorkers0` | 最小线程数为0的变体 |
+| **80** | `def run_sync_or_async_fun()` | 同步/异步函数自适应执行 |
+| **102** | `class _KeepAliveTimeThread` | 线程存活时间管理 |
+
+### 4.3 `concurrent_pool/async_pool_executor.py`
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **52** | `class AsyncPoolExecutor` | asyncio协程池 |
+
+### 4.4 `concurrent_pool/custom_threadpool_executor.py`
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **95** | `class ThreadPoolExecutorShrinkAble` | 可收缩线程池(空闲线程自动退出) |
+| **163** | `class ThreadPoolExecutorShrinkAbleNonDaemon` | 非守护线程版本 |
+| **230** | `def show_current_threads_num()` | 显示当前线程数 |
+
+### 4.5 并发模式 → 并发池对照表
+
+| ConcurrentModeEnum | 池类 | 文件 |
+|--------------------|------|------|
+| `THREADING` | `FlexibleThreadPool` | `flexible_thread_pool.py` |
+| `GEVENT` | `GeventPoolExecutor` | `custom_gevent_pool_executor.py` |
+| `EVENTLET` | `EventletPoolExecutor` | `custom_evenlet_pool_executor.py` |
+| `ASYNC` | `AsyncPoolExecutor` | `async_pool_executor.py` |
+| `SINGLE_THREAD` | `SoloExecutor` | `single_thread_executor.py` |
+
+---
+
+## 五、定时任务精确定位
+
+### 5.1 `timing_job/timing_job_base.py`
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **30** | `def timing_publish_deco()` | 定时发布装饰器 |
+| **42** | `def push_fun_params_to_broker()` | 推送函数参数到broker |
+| **57** | `class ThreadPoolExecutorForAps` | APScheduler用的线程池 |
+| **84** | `class FunboostBackgroundScheduler` | 全局后台调度器 |
+
+全局实例: `funboost_aps_scheduler` (别名 `FsdfBackgroundScheduler`, `fsdf_background_scheduler`)
+
+### 5.2 `timing_job/timing_push.py`
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **11** | `class ApsJobAdder` | 定时任务添加器，支持 `date`/`interval`/`cron` 三种触发器 |
+
+---
+
+## 六、FaaS 微服务精确定位
+
+### 6.1 `faas/fastapi_adapter.py`
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **58** | `fastapi_router = APIRouter(prefix='/funboost')` | FastAPI路由器 |
+| **110** | `def register_funboost_exception_handlers()` | 注册异常处理 |
+| **257** | `class MsgItem` | 消息体模型 |
+| **468** | `def pause_consume()` | 暂停消费接口 |
+| **510** | `def resume_consume()` | 恢复消费接口 |
+| **554** | `def get_msg_count()` | 获取消息数量接口 |
+| **582** | `def clear_queue()` | 清空队列接口 |
+| **629** | `def get_all_queues()` | 获取所有队列接口 |
+| **850** | `def get_queues_config()` | 获取队列配置接口 |
+| **1058** | `def add_timing_job()` | 添加定时任务接口 |
+| **1149** | `def get_timing_jobs()` | 获取定时任务列表 |
+| **1289** | `def delete_timing_job()` | 删除定时任务 |
+| **1478** | `async def deprecate_queue()` | 废弃队列接口 |
+
+**FastAPI 路由的核心 async 处理函数:**
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **357** | `async def publish_msg()` | 发布消息(支持RPC) |
+| **413** | `async def get_result()` | 根据task_id获取结果 |
+
+### 6.2 `faas/flask_adapter.py`
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **30** | `flask_blueprint = Blueprint(...)` | Flask蓝图 |
+| **34** | `def publish_msg()` | 发布消息接口 |
+| **133** | `def get_result()` | 获取结果接口 |
+
+---
+
+## 七、工作流精确定位
+
+### 7.1 `workflow/signature.py`
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **37** | `class Signature` | 任务签名(类似Celery signature) |
+| **160** | `def signature()` | 创建签名的工厂函数 |
+
+### 7.2 `workflow/primitives.py`
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **45** | `class Chain` | 链式编排(串行) |
+| **143** | `class Group` | 分组编排(并行) |
+| **253** | `class Chord` | 和弦编排(并行+回调) |
+| **320** | `def chain()` | 工厂函数 |
+| **333** | `def group()` | 工厂函数 |
+| **349** | `def chord()` | 工厂函数 |
+
+### 7.3 `workflow/workflow_mixin.py`
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **27** | `class WorkflowPublisherMixin` | 发布者工作流Mixin |
+| **139** | `class WorkflowConsumerMixin` | 消费者工作流Mixin |
+| **207** | `def get_current_workflow_context()` | 获取当前工作流上下文 |
+
+---
+
+## 八、Contrib 扩展模块精确定位
+
+### 8.1 Override Mixin 扩展 (`contrib/override_publisher_consumer_cls/`)
+
+| 文件 | 核心类 | 功能 |
+|------|--------|------|
+| `circuit_breaker_mixin.py` | `CircuitBreakerConsumerMixin` | 熔断器(失败率达阈值自动熔断) |
+| `funboost_micro_batch_mixin.py` | `MicroBatchConsumerMixin`, `MicroBatchBoosterParams` | 微批消费(凑批或超时触发) |
+| `funboost_promethus_mixin.py` | `PrometheusConsumerMixin` | Prometheus指标采集 |
+| `funboost_otel_mixin.py` | `AutoOtelConsumerMixin`, `OtelBoosterParams` | OpenTelemetry链路追踪 |
+| `otel_tree_span_exporter.py` | `TreeSpanExporter` | OTel树形Span导出 |
+| `periodic_quota_mixin.py` | `PeriodicQuotaConsumerMixin` | 周期额度限制 |
+| `alert_notifier_mixin.py` | `AlertNotifierConsumerMixin` | 异常告警通知 |
+
+### 8.2 自定义 Broker (`contrib/register_custom_broker_contrib/`)
+
+| 文件 | 核心类 | 功能 |
+|------|--------|------|
+| `watchdog_broker.py` | `WatchdogPublisher`, `WatchdogConsumer`, `FunboostEventHandler` | 文件系统监控 |
+| `websocket_broker.py` | `WebSocketPublisher`, `WebSocketConsumer`, `start_simple_ws_server` | WebSocket |
+
+### 8.3 其他 Contrib
+
+| 文件 | 功能 |
+|------|------|
+| `contrib/queue2queue.py` | `consume_and_push_to_another_queue`, `multi_prcocess_queue2queue` |
+| `contrib/django_db_deco.py` | `close_old_connections_deco` Django连接管理 |
+| `contrib/redis_consume_latest_msg_broker.py` | `RedisConsumeLatestPublisher/Consumer` 只消费最新消息 |
+| `contrib/cdc/mysql2mysql.py` | `MySql2Mysql` MySQL CDC数据同步 |
+
+---
+
+## 九、工具模块精确定位
+
+### 9.1 `utils/redis_manager.py`
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **16** | `def get_redis_conn_kwargs()` | 获取Redis连接参数 |
+| **35** | `class RedisManager` | Redis连接管理器(连接池) |
+| **77** | `class RedisMixin` | Redis Mixin(提供self.redis_db_frame) |
+| **102** | `class AioRedisMixin` | 异步Redis Mixin |
+
+### 9.2 `utils/mongo_util.py`
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **20** | `class MongoMixin` | MongoDB Mixin(提供self.mongo_client) |
+
+### 9.3 `utils/decorators.py` — 装饰器工具箱
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **41** | `def run_many_times()` | 运行多次 |
+| **60** | `def handle_exception()` | 异常处理装饰器 |
+| **102** | `def keep_circulating()` | **保持循环执行**(consumer消息循环的基础) |
+| **139** | `def synchronized()` | 线程同步装饰器 |
+| **151** | `def singleton()` | 单例装饰器(加锁) |
+| **167** | `def singleton_no_lock()` | 单例装饰器(无锁) |
+| **182** | `class SingletonMeta` | 单例元类 |
+| **237** | `def flyweight()` | 享元装饰器 |
+| **315** | `def timer()` | 计时装饰器 |
+| **333** | `class TimerContextManager` | 计时上下文管理器 |
+| **357** | `class RedisDistributedLockContextManager` | Redis分布式锁 |
+| **407** | `class RedisDistributedBlockLockContextManager` | Redis阻塞分布式锁 |
+| **546** | `def cached_method_result()` | 方法结果缓存 |
+| **581** | `class FunctionResultCacher` | 函数结果缓存器 |
+| **672** | `def timeout()` | 超时装饰器 |
+
+### 9.4 其他工具文件
+
+| 文件 | 核心 | 说明 |
+|------|------|------|
+| `utils/ctrl_c_end.py` | `ctrl_c_recv()` | 阻塞主线程，Ctrl+C优雅退出 |
+| `utils/block_exit.py` | — | 阻止进程退出 |
+| `utils/paramiko_util.py` | `ParamikoFolderUploader` | SSH文件夹上传 |
+| `utils/bulk_operation.py` | — | 批量Mongo/ES/Redis写入 |
+| `utils/expire_lock.py` | — | 过期锁上下文管理器 |
+| `utils/notify_util.py` | `Notifier` | 通知工具 |
+| `utils/resource_monitoring.py` | `ResourceMonitor` | 资源监控 |
+| `utils/task_dispatcher.py` | `LocalFunctionsDispatcher` | 本地函数分发器 |
+| `utils/func_timeout/` | `func_timeout`, `func_set_timeout`, `StoppableThread` | 函数超时控制 |
+
+---
+
+## 十、队列实现精确定位
+
+| 文件 | 行号 | 类 | 说明 |
+|------|------|-----|------|
+| `queues/memory_queues_map.py` | **4** | `PythonQueues` | Python queue.Queue 映射 |
+| `queues/fastest_mem_queue.py` | **22** | `FastestMemQueue` | collections.deque 队列 |
+| `queues/fastest_mem_queue.py` | **134** | `FastestMemQueues` | FastestMemQueue 映射 |
+| `queues/sqla_queue.py` | **27** | `TaskStatus` | 任务状态枚举 |
+| `queues/sqla_queue.py` | **78** | `SqlaQueue` | SQLAlchemy 队列 |
+| `queues/peewee_queue.py` | **22** | `PeeweeQueue` | Peewee ORM 队列 |
+| `queues/postgres_queue.py` | **34** | `PostgresQueue` | PostgreSQL队列(SKIP LOCKED+NOTIFY) |
+
+---
+
+## 十一、配置模块精确定位
+
+### 11.1 `funboost_config_deafult.py` (注意文件名拼写)
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **22** | `class BrokerConnConfig` | 所有中间件连接配置(Redis/Mongo/RabbitMQ/Kafka/RocketMQ/MQTT等URL) |
+| **115** | `class FunboostCommonConfig` | 通用配置(日志格式/时区/日志级别等) |
+
+### 11.2 `set_frame_config.py`
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **22** | `def show_funboost_flag()` | 显示funboost启动banner |
+| **83** | `def show_frame_config()` | 显示当前配置 |
+| **109** | `def use_config_form_funboost_config_module()` | 加载用户funboost_config.py合并到默认配置 |
+| **155** | `def _auto_creat_config_file_to_project_root_path()` | 自动创建配置文件模板 |
+
+---
+
+## 十二、CLI 命令行精确定位
+
+### 12.1 `core/cli/funboost_fire.py`
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **15** | `class BoosterFire` | Fire CLI命令集(discover/consume/publish/clear/pause等) |
+
+### 12.2 `core/cli/discovery_boosters.py`
+
+| 行号 | 定义 | 说明 |
+|------|------|------|
+| **64** | `class BoosterDiscovery` | 自动发现项目中的@boost消费函数 |
+
+### 12.3 `__main__.py`
+
+```python
+fire.Fire(BoosterFire)    # 入口: python -m funboost --project_root_path=...
+```
+
+---
+
+## 十三、Web管理界面精确定位
+
+### 13.1 `funweb/app.py`
+
+```
+Flask app 主体
+start_funboost_web_manager()   # 启动Web管理界面
+路由: login, Mongo任务视图, 速度图表
+```
+
+### 13.2 `funweb/flask_bps/`
+
+| 文件 | 功能 |
+|------|------|
+| `system_monitor.py` | Redis心跳采集, 系统监控API |
+| `script_deploy.py` | 脚本部署CRUD, Git操作, 进程控制, 日志tail |
+| `log_viewer.py` | 日志查看器(文件夹白名单, tail, grep, stream) |
+| `web_helper.py` | IP/hostname辅助函数 |
+
+---
+
+## 十四、assist 第三方框架辅助
+
+| 文件 | 核心类 | 说明 |
+|------|--------|------|
+| `assist/celery_helper.py` | `CeleryHelper` | Celery集成辅助 |
+| `assist/dramatiq_helper.py` | `DramatiqHelper` | Dramatiq集成辅助 |
+| `assist/huey_helper.py` | `HueyHelper` | Huey集成辅助 |
+| `assist/rq_helper.py` | `RqHelper`, `RandomWindowsWorker` | RQ集成辅助 |
+| `assist/faststream_helper.py` | `get_broker()`, `app` | FastStream集成 |
+| `assist/grpc_helper/` | proto + pb2 + servicer | gRPC服务定义和示例 |
+
+---
+
+## 十五、Broker Consumer/Publisher 完整映射表
+
+| BrokerEnum | Consumer类 | Consumer文件 | Publisher类 | Publisher文件 |
+|------------|-----------|--------------|-------------|---------------|
+| `MEMORY_QUEUE` | `LocalPythonQueueConsumer` | `consumers/local_python_queue_consumer.py` | `LocalPythonQueuePublisher` | `publishers/local_python_queue_publisher.py` |
+| `FASTEST_MEM_QUEUE` | `FastestMemQueueConsumer` | `consumers/fastest_mem_queue_consumer.py` | `FastestMemQueuePublisher` | `publishers/fastest_mem_queue_publisher.py` |
+| `REDIS` | `RedisConsumer` | `consumers/redis_consumer.py` | `RedisPublisher` | `publishers/redis_publisher.py` |
+| `REDIS_ACK_ABLE` | `RedisConsumerAckAble` | `consumers/redis_consumer_ack_able.py` | `RedisPublisher` | `publishers/redis_publisher.py` |
+| `REDIS_STREAM` | `RedisStreamConsumer` | `consumers/redis_stream_consumer.py` | `RedisStreamPublisher` | `publishers/redis_stream_publisher.py` |
+| `REDIS_PRIORITY` | `RedisPriorityConsumer` | `consumers/redis_consumer_priority.py` | `RedisPriorityPublisher` | `publishers/redis_publisher_priority.py` |
+| `REDIS_BRPOP_LPUSH` | `RedisBrpopLpushConsumer` | `consumers/redis_brpoplpush_consumer.py` | `RedisPublisher` | `publishers/redis_publisher.py` |
+| `REDIS_PUBSUB` | `RedisPubSubConsumer` | `consumers/redis_pubsub_consumer.py` | `RedisPubSubPublisher` | `publishers/redis_pubsub_publisher.py` |
+| `RABBITMQ` | `RabbitmqConsumerAmqpStorm` | `consumers/rabbitmq_amqpstorm_consumer.py` | `RabbitmqPublisherAmqpStorm` | `publishers/rabbitmq_amqpstorm_publisher.py` |
+| `RABBITMQ_COMPLEX_ROUTING` | `RabbitmqComplexRoutingConsumer` | `consumers/rabbitmq_complex_routing_consumer.py` | `RabbitmqComplexRoutingPublisher` | `publishers/rabbitmq_complex_routing_publisher.py` |
+| `KAFKA` | `KafkaConsumer` | `consumers/kafka_consumer.py` | `KafkaPublisher` | `publishers/kafka_publisher.py` |
+| `KAFKA_CONFLUENT` | `KafkaConfluentConsumer` | `consumers/kafka_consumer_manually_commit.py` | `ConfluentKafkaPublisher` | `publishers/confluent_kafka_publisher.py` |
+| `ROCKETMQ` | `RocketmqConsumer` | `consumers/rocketmq_consumer.py` | `RocketmqPublisher` | `publishers/rocketmq_publisher.py` |
+| `ROCKETMQ5` | `Rocketmq5Consumer` | `consumers/rocketmq5_consumer.py` | `Rocketmq5Publisher` | `publishers/rocketmq5_publisher.py` |
+| `PULSAR` | `PulsarConsumer` | `consumers/pulsar_consumer.py` | `PulsarPublisher` | `publishers/pulsar_publisher.py` |
+| `NSQ` | `NsqConsumer` | `consumers/nsq_consumer.py` | `NsqPublisher` | `publishers/nsq_publisher.py` |
+| `MQTT` | `MqttConsumer` | `consumers/mqtt_consumer.py` | `MqttPublisher` | `publishers/mqtt_publisher.py` |
+| `NATS` | `NatsConsumer` | `consumers/nats_consumer.py` | `NatsPublisher` | `publishers/nats_publisher.py` |
+| `ZEROMQ` | `ZeromqConsumer` | `consumers/zeromq_consumer.py` | `ZeromqPublisher` | `publishers/zeromq_publisher.py` |
+| `SQLITE_QUEUE` | `PersistQueueConsumer` | `consumers/persist_queue_consumer.py` | `PersistQueuePublisher` | `publishers/persist_queue_publisher.py` |
+| `MONGOMQ` | `MongoMqConsumer` | `consumers/mongomq_consumer.py` | `MongoMqPublisher` | `publishers/mongomq_publisher.py` |
+| `SQLACHEMY` | `SqlachemyConsumer` | `consumers/sqlachemy_consumer.py` | `SqlachemyPublisher` | `publishers/sqlachemy_publisher.py` |
+| `POSTGRES` | `PostgresConsumer` | `consumers/postgres_consumer.py` | `PostgresPublisher` | `publishers/postgres_publisher.py` |
+| `PEEWEE` | `PeeweeConsumer` | `consumers/peewee_conusmer.py` | `PeeweePublisher` | `publishers/peewee_publisher.py` |
+| `TXT_FILE` | `TxtFileConsumer` | `consumers/txt_file_consumer.py` | `TxtFilePublisher` | `publishers/txt_file_publisher.py` |
+| `TCP` | `TcpConsumer` | `consumers/tcp_consumer.py` | `TcpPublisher` | `publishers/tcp_publisher.py` |
+| `UDP` | `UdpConsumer` | `consumers/udp_consumer.py` | `UdpPublisher` | `publishers/udp_publisher.py` |
+| `HTTP` | `HttpConsumer` | `consumers/http_consumer.py` | `HttpPublisher` | `publishers/http_publisher.py` |
+| `GRPC` | `GrpcConsumer` | `consumers/grpc_consumer.py` | `GrpcPublisher` | `publishers/grpc_publisher.py` |
+| `SQS` | `SqsConsumer` | `consumers/sqs_consumer.py` | `SqsPublisher` | `publishers/sqs_publisher.py` |
+| `HTTPSQS` | `HttpsqsConsumer` | `consumers/httpsqs_consumer.py` | `HttpsqsPublisher` | `publishers/httpsqs_publisher.py` |
+| `CELERY` | `CeleryConsumer` | `consumers/celery_consumer.py` | `CeleryPublisher` | `publishers/celery_publisher.py` |
+| `DRAMATIQ` | `DramatiqConsumer` | `consumers/dramatiq_consumer.py` | `DramatiqPublisher` | `publishers/dramatiq_publisher.py` |
+| `HUEY` | `HueyConsumer` | `consumers/huey_consumer.py` | `HueyPublisher` | `publishers/huey_publisher.py` |
+| `RQ` | `RqConsumer` | `consumers/rq_consumer.py` | `RqPublisher` | `publishers/rq_publisher.py` |
+| `NAMEKO` | `NamekoConsumer` | `consumers/nameko_consumer.py` | `NamekoPublisher` | `publishers/nameko_publisher.py` |
+| `KOMBU` | `KombuConsumer` | `consumers/kombu_consumer.py` | `KombuPublisher` | `publishers/kombu_publisher.py` |
+| `MYSQL_CDC` | `MySqlCdcConsumer` | `consumers/mysql_cdc_consumer.py` | — | (CDC无需主动发布) |
+| `WATCHDOG` | `WatchdogConsumer` | `contrib/register_custom_broker_contrib/watchdog_broker.py` | `WatchdogPublisher` | 同文件 |
+| `WEBSOCKET` | `WebSocketConsumer` | `contrib/register_custom_broker_contrib/websocket_broker.py` | `WebSocketPublisher` | 同文件 |
+| `EMPTY` | `EmptyConsumer` | `consumers/empty_consumer.py` | `EmptyPublisher` | `publishers/empty_publisher.py` |
+
+---
+
+## 十六、`__init__.py` 公共API导出清单
+
+| 行号 | 导出名 | 来源模块 |
+|------|--------|----------|
+| **16** | `__version__` | — |
+| **18** | `show_frame_config` | `set_frame_config` |
+| **24** | `get_logger`, `get_funboost_file_logger`, `FunboostFileLoggerMixin`, `FunboostMetaTypeFileLogger`, `flogger` | `core.loggers` |
+| **25-26** | `BoosterParams`, `BoosterParamsComplete`, `FunctionResultStatusPersistanceConfig`, `TaskOptions`, `PublisherParams` | `core.func_params_model` |
+| **27** | `FunboostCommonConfig`, `BrokerConnConfig` | `funboost_config_deafult` |
+| **30** | `ParamikoFolderUploader` | `utils.paramiko_util` |
+| **32-33** | `wait_for_possible_has_finish_all_tasks_by_conusmer_list`, `FunctionResultStatus`, `AbstractConsumer` | `consumers.base_consumer`, `core.function_result_status_saver` |
+| **34** | `EmptyConsumer` | `consumers.empty_consumer` |
+| **35** | `ExceptionForRetry`, `ExceptionForRequeue`, `ExceptionForPushToDlxqueue` | `core.exceptions` |
+| **36** | `ActiveCousumerProcessInfoGetter` | `core.active_cousumer_info_getter` |
+| **37** | `HasNotAsyncResult`, `ResultFromMongo` | `core.exceptions`, `core.msg_result_getter` |
+| **38-39** | `TaskOptions`, `AbstractPublisher`, `AsyncResult`, `AioAsyncResult` | `publishers.base_publisher` |
+| **40** | `EmptyPublisher` | `publishers.empty_publisher` |
+| **41** | `register_custom_broker` | `factories.broker_kind__publsiher_consumer_type_map` |
+| **42** | `register_broker_exclusive_config_default` | `core.broker_kind__exclusive_config_default_define` |
+| **43-44** | `get_publisher`, `get_consumer` | `factories` |
+| **46-47** | `funboost_aps_scheduler`, `ApsJobAdder` | `timing_job` |
+| **49** | `BrokerEnum`, `ConcurrentModeEnum` | `constant` |
+| **51** | `boost`, `Booster`, `BoostersManager` | `core.booster` |
+| **53** | `RemoteTaskKiller` | `core.kill_remote_task` |
+| **55** | `BoosterDiscovery` | `core.cli.discovery_boosters` |
+| **58** | `run_forever` | `core.helper_funs` (= `block_python_main_thread_exit`) |
+| **60** | `ctrl_c_recv` | `utils.ctrl_c_end` |
+| **61** | `RedisMixin` | `utils.redis_manager` |
+| **62** | `show_current_threads_num` | `concurrent_pool.custom_threadpool_executor` |
+| **64** | `funboost_current_task`, `fct`, `get_current_taskid` | `core.current_task` |
+
+---
+
+## 十七、架构设计要点
+
+### 17.1 核心运行流程
+
+```
+用户定义函数 → @boost(BoosterParams) 装饰
+  → Booster.__init__: 解析参数
+  → Booster.__call__: 绑定消费函数
+
+发布: booster.push(*args) 
+  → get_publisher() 工厂创建 Publisher
+  → AbstractPublisher.push() → publish() → _publish_impl() 
+  → 消息写入broker
+
+消费: booster.consume()
+  → get_consumer() 工厂创建 Consumer
+  → AbstractConsumer.start_consuming_message()
+  → ConcurrentModeDispatcher 构建并发池
+  → 循环: 从broker取消息 → _submit_task() → 并发池执行消费函数
+```
+
+### 17.2 Broker注册机制
+
+```
+1. BrokerEnum (constant.py) 定义枚举值
+2. broker_kind__publsiher_consumer_type_map (factories/) 维护 枚举→(Publisher, Consumer) 映射
+3. regist_to_funboost() 懒注册可选依赖的broker
+4. register_custom_broker() 用户注册自定义broker
+5. get_publisher/get_consumer 工厂根据映射表实例化
+```
+
+### 17.3 Consumer/Publisher Override 机制
+
+```
+BoosterParams.consumer_override_cls = MyMixin
+→ get_consumer() 中动态创建 type('MergedConsumer', (MyMixin, OriginalConsumer), {})
+→ MyMixin 的方法优先级高于 OriginalConsumer
+→ 所有contrib mixin都通过此机制工作
+```
+
+### 17.4 文件名拼写注意
+
+以下文件名有拼写特殊之处，搜索时需注意:
+
+| 文件 | 注意点 |
+|------|--------|
+| `funboost_config_deafult.py` | default 拼为 deafult |
+| `publisher_factotry.py` | factory 拼为 factotry |
+| `peewee_conusmer.py` | consumer 拼为 conusmer |
+| `active_cousumer_info_getter.py` | consumer 拼为 cousumer |
+| `muliti_process_enhance.py` | multi 拼为 muliti |
+| `consuming_func_iniput_params_check.py` | input 拼为 iniput |
+| `meomory_deque_publisher.py` | memory 拼为 meomory |
+| `sqla_queue_publisher.py` | 对应consumer是 `sqlachemy_consumer.py`，前缀不同 |
+
+---
+
+## 十八、用户自然语言问题 → 源码路由表
+
+> AI 收到用户提问时，先在此表中匹配关键词/意图，即可直接跳转到对应源码。
+
+### 18.1 基础使用类
+
+| 用户可能怎么问 | 关键词 | 去看哪里 |
+|---------------|--------|---------|
+| 怎么用funboost / 怎么装饰函数 / 怎么创建任务 | boost, 装饰器, 装饰 | `core/booster.py` L38 `Booster` |
+| 怎么发消息 / 怎么发布任务 / push怎么用 | push, publish, 发布, 发消息 | `publishers/base_publisher.py` L51 `AbstractPublisher.push/publish` |
+| 怎么消费 / 怎么启动消费者 / consume怎么用 | consume, 消费, 启动 | `consumers/base_consumer.py` L101 `AbstractConsumer.start_consuming_message` |
+| 有哪些参数可以配 / BoosterParams有什么字段 | 参数, 配置, BoosterParams | `core/func_params_model.py` L72 `BoosterParams` |
+| 有哪些中间件/broker可以用 | broker, 中间件, 消息队列 | `constant.py` L5 `BrokerEnum` |
+| 怎么切换并发模式 / 线程还是协程 | 并发, 线程, 协程, gevent, asyncio | `constant.py` L195 `ConcurrentModeEnum` + `concurrent_pool/pool_commons.py` L10 |
+
+### 18.2 控制与调优类
+
+| 用户可能怎么问 | 关键词 | 去看哪里 |
+|---------------|--------|---------|
+| 怎么限制消费速度 / 怎么限流 / QPS怎么设 | QPS, 限速, 限流, 速率 | `BoosterParams.qps` + `consumers/base_consumer.py` 内部QPS控制逻辑 |
+| 分布式怎么控频 / 多机器怎么统一限速 | 分布式, 控频, 多机器 | `BoosterParams.is_using_distributed_frequency_control` + `base_consumer.py` L1495 `DistributedConsumerStatistics` |
+| 失败了怎么重试 / 重试几次 / 指数退避 | 重试, retry, 退避 | `BoosterParams.max_retry_times` / `is_using_advanced_retry` / `advanced_retry_config` |
+| 怎么手动触发重试 | ExceptionForRetry | `core/exceptions.py` L141 `ExceptionForRetry` |
+| 消息失败了放到死信队列 | 死信, DLQ, dlx | `BoosterParams.is_push_to_dlx_queue_when_retry_max_times` + `core/exceptions.py` L157 `ExceptionForPushToDlxqueue` |
+| 函数执行超时怎么办 | 超时, timeout | `BoosterParams.function_timeout` + `utils/func_timeout/` |
+| 怎么暂停/恢复消费 | 暂停, 恢复, pause | `Booster.pause_consume()` / `.continue_consume()` → `base_consumer.py` |
+| 怎么消息去重 / 防止重复消费 | 去重, 过滤, filtering | `BoosterParams.do_task_filtering` / `task_filtering_expire_seconds` |
+| 消息过期怎么设 | 过期, expire | `BoosterParams.msg_expire_seconds` |
+| 怎么多进程消费 / 怎么提高吞吐量 | 多进程, 吞吐, mp_consume | `core/muliti_process_enhance.py` L21 + `Booster.mp_consume()` |
+
+### 18.3 结果与监控类
+
+| 用户可能怎么问 | 关键词 | 去看哪里 |
+|---------------|--------|---------|
+| 怎么获取消费结果 / RPC模式怎么用 | 结果, RPC, AsyncResult | `BoosterParams.is_using_rpc_mode` + `core/msg_result_getter.py` L46 `AsyncResult` |
+| 怎么在函数里获取task_id / 当前任务信息 | task_id, fct, 当前任务 | `core/current_task.py` L94 `fct` |
+| 怎么保存运行状态到数据库 | 保存结果, 持久化, 运行状态 | `core/function_result_status_saver.py` L28 `FunctionResultStatus` + `BoosterParams` 中 `FunctionResultStatusPersistanceConfig` |
+| 怎么看消费者心跳/哪些消费者在线 | 心跳, 在线, 活跃, 监控 | `BoosterParams.is_send_consumer_heartbeat_to_redis` + `core/active_cousumer_info_getter.py` L181 |
+| 怎么远程杀死任务 | 杀死, kill, 远程停止 | `core/kill_remote_task.py` L111 `RemoteTaskKiller` |
+
+### 18.4 定时与编排类
+
+| 用户可能怎么问 | 关键词 | 去看哪里 |
+|---------------|--------|---------|
+| 怎么定时执行任务 / cron表达式 | 定时, cron, 周期, interval, schedule | `timing_job/timing_push.py` L11 `ApsJobAdder` |
+| 怎么做任务链 / 串行执行多个任务 | 链, chain, 串行, 工作流 | `workflow/primitives.py` L45 `Chain` |
+| 怎么并行执行一批任务再汇总 | 并行, group, chord, 汇总 | `workflow/primitives.py` L143 `Group` / L253 `Chord` |
+
+### 18.5 集成与扩展类
+
+| 用户可能怎么问 | 关键词 | 去看哪里 |
+|---------------|--------|---------|
+| 怎么通过HTTP接口发任务 / FastAPI集成 | HTTP, API, FastAPI, REST | `faas/fastapi_adapter.py` L58 `fastapi_router` |
+| 怎么用Flask | Flask | `faas/flask_adapter.py` L30 `flask_blueprint` |
+| 怎么自定义broker / 怎么扩展新中间件 | 自定义, 扩展, 新broker | `factories/broker_kind__publsiher_consumer_type_map.py` L94 `register_custom_broker` |
+| 怎么用Celery作为broker | Celery | `consumers/celery_consumer.py` + `assist/celery_helper.py` |
+| 怎么批量消费 / 凑够N条再处理 | 批量, batch, 微批 | `contrib/override_publisher_consumer_cls/funboost_micro_batch_mixin.py` |
+| 怎么加熔断 / 失败率太高自动停 | 熔断, circuit breaker | `contrib/override_publisher_consumer_cls/circuit_breaker_mixin.py` |
+| 怎么接Prometheus / 监控指标 | Prometheus, 指标, metrics | `contrib/override_publisher_consumer_cls/funboost_promethus_mixin.py` |
+| 怎么接OpenTelemetry / 链路追踪 | OpenTelemetry, tracing, 链路 | `contrib/override_publisher_consumer_cls/funboost_otel_mixin.py` |
+| 怎么监听文件变化触发任务 | 文件监控, watchdog, 文件变化 | `contrib/register_custom_broker_contrib/watchdog_broker.py` |
+| 怎么用WebSocket | WebSocket, ws | `contrib/register_custom_broker_contrib/websocket_broker.py` |
+| 怎么远程部署 | 部署, deploy, fabric | `core/fabric_deploy_helper.py` L17 `fabric_deploy` |
+| Web管理界面怎么启动 | web, 管理界面, funweb, 后台 | `funweb/app.py` → `start_funboost_web_manager` |
+| 命令行怎么用 / CLI | 命令行, CLI, python -m | `core/cli/funboost_fire.py` L15 `BoosterFire` |
+
+### 18.6 配置类
+
+| 用户可能怎么问 | 关键词 | 去看哪里 |
+|---------------|--------|---------|
+| Redis/Mongo/RabbitMQ连接地址怎么配 | 连接, 地址, URL, 配置文件 | `funboost_config_deafult.py` L22 `BrokerConnConfig` |
+| funboost_config.py怎么写 | funboost_config, 配置文件 | `set_frame_config.py` L109 `use_config_form_funboost_config_module` |
+| 日志怎么配 / 日志级别 | 日志, log, logger | `core/loggers.py` + `BoosterParams.log_level` |
+| 时区怎么设 | 时区, timezone | `funboost_config_deafult.py` L115 `FunboostCommonConfig.TIMEZONE` |
+
+---
+
+## 十九、按实现层面快速检索
+
+| 需求 | 定位 |
+|------|------|
+| 核心装饰器 | `core/booster.py` → `Booster` (L38) |
+| 参数配置 | `core/func_params_model.py` → `BoosterParams` (L72) |
+| 消费者基类 | `consumers/base_consumer.py` → `AbstractConsumer` (L101) |
+| 发布者基类 | `publishers/base_publisher.py` → `AbstractPublisher` (L51) |
+| RPC结果 | `core/msg_result_getter.py` → `AsyncResult` (L46) / `AioAsyncResult` (L149) |
+| 任务上下文 | `core/current_task.py` → `fct` (L94) |
+| 定时任务 | `timing_job/timing_push.py` → `ApsJobAdder` (L11) |
+| FaaS FastAPI | `faas/fastapi_adapter.py` → `fastapi_router` (L58) |
+| FaaS Flask | `faas/flask_adapter.py` → `flask_blueprint` (L30) |
+| 消费者信息 | `core/active_cousumer_info_getter.py` → `SingleQueueConusmerParamsGetter` (L405) |
+| 自定义broker | `factories/broker_kind__publsiher_consumer_type_map.py` → `register_custom_broker` (L94) |
+| broker映射表 | `factories/broker_kind__publsiher_consumer_type_map.py` → `broker_kind__publsiher_consumer_type_map` (L60) |
+| 工厂-消费者 | `factories/consumer_factory.py` → `get_consumer` (L13) |
+| 工厂-发布者 | `factories/publisher_factotry.py` → `get_publisher` (L15) |
+| 常量/枚举 | `constant.py` → `BrokerEnum` (L5) / `ConcurrentModeEnum` (L195) |
+| 连接配置 | `funboost_config_deafult.py` → `BrokerConnConfig` (L22) |
+| 通用配置 | `funboost_config_deafult.py` → `FunboostCommonConfig` (L115) |
+| 配置加载 | `set_frame_config.py` → `use_config_form_funboost_config_module` (L109) |
+| 弹性线程池 | `concurrent_pool/flexible_thread_pool.py` → `FlexibleThreadPool` (L22) |
+| 异步池 | `concurrent_pool/async_pool_executor.py` → `AsyncPoolExecutor` (L52) |
+| 并发池构建 | `concurrent_pool/pool_commons.py` → `ConcurrentPoolBuilder` (L10) |
+| 序列化 | `core/serialization.py` → `Serialization` (L10) |
+| 异常类 | `core/exceptions.py` → `ExceptionForRetry` (L141) 等 |
+| 远程杀任务 | `core/kill_remote_task.py` → `RemoteTaskKiller` (L111) |
+| 入参校验 | `core/consuming_func_iniput_params_check.py` → `ConsumingFuncInputParamsChecker` (L10) |
+| 运行状态 | `core/function_result_status_saver.py` → `FunctionResultStatus` (L28) |
+| 多进程增强 | `core/muliti_process_enhance.py` → `run_consumer_with_multi_process` (L21) |
+| 远程部署 | `core/fabric_deploy_helper.py` → `fabric_deploy` (L17) |
+| CLI命令 | `core/cli/funboost_fire.py` → `BoosterFire` (L15) |
+| 自动发现 | `core/cli/discovery_boosters.py` → `BoosterDiscovery` (L64) |
+| 工作流 | `workflow/primitives.py` → `Chain` (L45) / `Group` (L143) / `Chord` (L253) |
+| 签名 | `workflow/signature.py` → `Signature` (L37) |
+| 微批消费 | `contrib/override_publisher_consumer_cls/funboost_micro_batch_mixin.py` |
+| 熔断器 | `contrib/override_publisher_consumer_cls/circuit_breaker_mixin.py` |
+| Prometheus | `contrib/override_publisher_consumer_cls/funboost_promethus_mixin.py` |
+| OpenTelemetry | `contrib/override_publisher_consumer_cls/funboost_otel_mixin.py` |
+| 周期额度 | `contrib/override_publisher_consumer_cls/periodic_quota_mixin.py` |
+| 告警通知 | `contrib/override_publisher_consumer_cls/alert_notifier_mixin.py` |
+| Watchdog broker | `contrib/register_custom_broker_contrib/watchdog_broker.py` |
+| WebSocket broker | `contrib/register_custom_broker_contrib/websocket_broker.py` |
+| Redis管理 | `utils/redis_manager.py` → `RedisManager` (L35) / `RedisMixin` (L77) |
+| MongoDB | `utils/mongo_util.py` → `MongoMixin` (L20) |
+| 装饰器工具 | `utils/decorators.py` → `keep_circulating` (L102) 等 |
+| 优雅退出 | `utils/ctrl_c_end.py` → `ctrl_c_recv` |
+| Web管理 | `funweb/app.py` → `start_funboost_web_manager` |
+| 脚本部署 | `funweb/flask_bps/script_deploy.py` |
+| 队列实现 | `queues/sqla_queue.py` (L78) / `postgres_queue.py` (L34) / `peewee_queue.py` (L22) |
+
+---
+
+*本文档由 AI 分析 funboost 源码生成，用于快速检索源码位置。*
+*配套教程文档: funboost/md_for_ai/funboost教程速查for_ai.md*
+*综合文档: funboost_all_docs_and_codes.md*
+
+`````
+
+--- **end of file: funboost/md_for_ai/funboost源码速查for_ai.md** (project: funboost) --- 
+
+---
+
+
+--- **start of file: funboost/md_for_ai/如何扩展增加新的中间件.md** (project: funboost) --- 
+
+`````markdown
+
+# 0 ai如何在 funboost如何固定方式扩展增加新的broker中间件(或者定制和现有broker_kind不一样的功能)
+
+**funboost 扩展新的broker中间件，可以分为3种方式**
+
+- 静态扩展中间件。因为我是funboost作者，所以我可以在funboost框架的文件夹源码中直接增加写死代码。（这种只适合我本人，用户不能在funboost文件夹中写代码，而且只有最核心必须的中间件代码才推荐使用这种方式）
+
+- 动态扩展中间件方式一，按照教程 `funboost_all_docs.md` 4.21章节,``4.21 【完全自由定制扩展（方式1）】 使用 `register_custom_broker` 完全彻底自由灵活自定义扩展和定制修改中间件(消费者和发布者)``
+
+- 动态扩展中间件方式一，动态扩展中间件，按照教程 `funboost_all_docs.md` 4.21b章节,``4.21b 【完全自由定制扩展(方式2)】,使用 `consumer_override_cls` 和 `publisher_override_cls` 来自定义消费者 发布者。``
+
+
+# 1. 介绍 静态扩展中间件
+
+静态扩展中间件，就是需要直接在funboost/consumers 和 funboost/publishers 中增加代码文件来写代码
+
+## 静态扩展broker时候，需要修改以下文件
+
+### funboost_config_deafult.py 中的 BrokerConnConfig 增加
+如果新中间件需要连接配置（如 SQS 的 region、access_key 等固定连接配置），需要在这里添加配置项
+
+### 在 funboost/core/broker_kind__exclusive_config_default_define.py 
+ 增加可额外传递独特的broker动态参数
+
+### 在 funboost/publishers 增加 publisher
+
+### 在 funboost/consumers 增加 consumer
+
+### 在 funboost/constant.py  BrokerEnum 增加枚举
+
+### 在 funboost/factories/broker_kind__publsiher_consumer_type_map.py 
+ regist_to_funboost 注册publisher和consumer
+
+### 静态扩展时候，任然可以参考文档的 funboost_all_docs_and_codes.md 中教程的 4.21 章节，知道要继承重写父类哪些方法。  
+4.21 是动态扩展broker，ai在增加中间件时候，不必动态，直接把代码写死在funboost项目中就可以了
+
+当动态扩展中间件时候，不要修改以上文件。
+
+
+# 2. 动态扩展中间件方式一： `register_custom_broker` 
+
+动态新增中间件，就是不在 funboost/consumers 和 funboost/publishers 中写代码
+
+register_custom_broker，这种更适合扩展全新的不存在中间件
+
+用户新增的`YourPublisher`和`YourConsumer`类可以继承 `AbstractPublisher` 和 `AbstractConsumer` 或者  `EmptyPublisher` 和 `EmptyConsumer`。
+
+ai可以参考文档 `funboost_all_docs_and_codes.md` 中教程的 4.21 章节
+ai可以参考 `funboost/contrib/register_custom_broker_contrib` 目录下的代码，这些是动态扩展新的中间件。
+
+
+
+# 3. 动态扩展中间件方式二： `consumer_override_cls` 和 `publisher_override_cls` 
+
+`override_cls` 扩展方式更倾向于覆盖修改父类逻辑，定制用户自己的逻辑，将逻辑混入到各种broker中。
+
+用户新增的`YourPublisherMixin`和`YourConsumerMixin`类可以继承 `AbstractPublisher` 和 `AbstractConsumer` 或者  `EmptyPublisher` 和 `EmptyConsumer`。
+
+用户新增的`YourPublisherMixin`和`YourConsumerMixin`类也可以不继承任何父类，因为是mixin混入，而且mixin类从根本原理上不应该继承父类。  
+为什么`funboost/contrib/override_publisher_consumer_cls` 目录下的Mixin类代码继承了父类呢？主要是方便写代码时候代码补全实例属性和方法名，`funboost的`AbstractConsumer`和`AbstractPublisher` 有丰富的实例属性和方法，如果mixin类不继承父类，funboost代码运行毫无问题，只是不方便你写代码时候ide代码自动补全提示，你的键盘容易敲错单词字母。
+
+
+
+ai可以参考文档 `funboost_all_docs_and_codes.md` 中教程的 4.21b 章节
+
+ai可以参考 `funboost/contrib/override_publisher_consumer_cls` 目录下的代码，这些是覆盖父类定制逻辑。
+
+
+
+----------------
+
+# 4. `register_custom_broker` 和 `override_cls` 理论上都能实现新增broker和定制运行逻辑
+
+## 4.1 register_custom_broker 为什么也可以定制运行逻辑？
+register_custom_broker采用经典继承，重写 AbstractPublisher 或者 AbstractPublisher的某个具体的子类的方法，  
+推荐重写和操作消息队列有关的方法，例如 `_publish_impl`,   
+
+但是为什么register_custom_broker也能定制运行逻辑，因为你完全可以重写 _submit_task _run 等通用的函数运行控制方法， 
+没禁止你不能重写控制函数运行的这些方法。
+
+## 4.2 override_cls 为什么也可以新增全新中间件？
+
+override_cls采用mixin混入，框架自动将新的中间件类混入到父类中，用户可以在新的中间件类中重写父类的方法，实现定制逻辑，
+并且mixin类的方法作为mro查找顺序的最高优先级。
+
+@boost除了要指定`consumer_override_cls` 和 `publisher_override_cls` ，你还需要指定 `broker_kind=BrokerEnum.EMPTY` 即可。
+```python
+    @boost(BoosterParams(
+        queue_name='my_task',
+        consumer_override_cls=YourConsumerMixin,
+        publisher_override_cls=YourPublisherMixin,
+        broker_kind=BrokerEnum.EMPTY,
+    ))
+    def my_task(x):
+        return x * 2
+   
+```
+
+
+
+# publisher 和 consumer 如何写
+
+## ai要遵循的规则
+```
+注意：
+1.你要阅读 `funboost_all_docs_and_codes.md`中的4.21章节，`4.21 funboost完全自由定制扩展`
+2.你要阅读 `funboost_all_docs_and_codes.md` 中的 `funboost/md_for_ai/如何扩展增加新的中间件.md`
+3.你要参考已有的funboost扩展代码实现 `funboost/contrib/override_publisher_consumer_cls` 和 `funboost/contrib/register_custom_broker_contrib` 文件夹中的代码。
+4.你要阅读 `funboost/consumers/base_consumer.py`的AbstractConsumer基类逻辑
+5.你要阅读 `funboost/publishers/base_publisher.py`的AbstractPublisher基类逻辑
+```
+
+## Publisher 继承 AbstractPublisher ，需要实现的方法：
+
+- `custom_init()` - 可选，自定义初始化
+- `_publish_impl(msg: str)` - **必须实现**，发布消息的核心逻辑
+- `clear()` - **必须实现**，清空队列，
+- `get_message_count()` - **必须实现**，获取队列消息数量
+- `close()` - **必须实现**，关闭连接，这个方法可以写pass，因为funboost不会自动停止，是永久运行的。
+
+
+##  Consumer 继承 AbstractConsumer，需要实现的方法：
+
+- `custom_init()` - 可选，自定义初始化
+- `_dispatch_task()` - **必须实现**，从中间件取出消息，循环调用 `self._submit_task(kw)`
+- `_confirm_consume(kw)` - **必须实现**，确认消费（ack）
+- `_requeue(kw)` - **必须实现**，消息重入队
+- 如果涉及到函数控制修改的，确保要兼容 _run 和 _async_run 同步和异步两个方法
+
+## 重写父类方法时，不要忘了调用 super().xx()
+
+### 规则
+
+- 重写 AbstractPublisher / AbstractConsumer 的同名方法时，**必须调用 super().xx()**
+
+- 即使父类方法是 `pass` 的空方法，为了未来扩展，也必须调用。
+  例如虽然 `AbstractConsumer` 没有具体实现 `_both_sync_and_aio_frame_custom_record_process_info_func` 方法（只是 pass），
+  但 `PrometheusConsumerMixin` 和 `CircuitBreakerConsumerMixin` 都重写了这个方法，
+  用户可能需要组合多个 mixin，例如 `class MyCombinedMixin(CircuitBreakerConsumerMixin,PrometheusConsumerMixin)`，
+  正是因为两者都调用了 `super()._both_sync_and_aio_frame_custom_record_process_info_func()`，MRO 链才不会断，两个 mixin 的逻辑才都能执行。
+
+- 以下两种情况**可以不调用** super()：
+  1. 父类方法抛出了 `raise NotImplementedError`（纯抽象方法），例如 `_publish_impl`、`_dispatch_task`、`_confirm_consume`、`_requeue` 等
+  2. 确实需要完全替换父类逻辑，不能让父类代码执行（如 `MicroBatchConsumerMixin` 完全重写 `_submit_task`）
+
+### super() 的调用位置
+
+- **初始化类方法**（`custom_init`、`_before_start_consuming_message_hook`）：先调 `super()`，再执行自己的初始化
+- **前置拦截类方法**（`_submit_task` 加配额检查、熔断阻塞）：先执行自己的逻辑，再调 `super()`
+- **后置记录类方法**（`_after_publish`、`_both_sync_and_aio_frame_custom_record_process_info_func`）：先调或后调 `super()` 均可，因为父类目前是 `pass`
+- **前后都有自己逻辑的方法**（如 `_run`、`_async_run` 加链路追踪）：在自己的逻辑中间调 `super()`，例如 `AutoOtelConsumerMixin._run` 先开启 span，然后在 span 激活状态下调 `super()._run(kw)`，捕获异常后记录到 span，`super()` 夹在自己逻辑的中间
+
+### 正确示例 vs 错误示例
+
+```python
+# 正确 —— 初始化时先调 super()
+def custom_init(self):
+    super().custom_init()
+    self._my_config = self.consumer_params.user_options.get('my_key', 10)
+
+# 正确 —— 前置拦截后调 super()
+def _submit_task(self, kw):
+    self._check_something()       # 自己的前置逻辑
+    super()._submit_task(kw)      # 再走父类流程
+
+# 正确 —— 包裹父类调用
+def _run(self, kw: dict):
+    with some_context():
+        return super()._run(kw)   # 在上下文中调父类
+
+# 错误 —— 忘记调用 super()
+def custom_init(self):
+    self._my_config = self.consumer_params.user_options.get('my_key', 10)
+    # 缺少 super().custom_init()，父类未来的初始化逻辑会被跳过
+```
+
+##  consumer的 _submit_task(kw) 方法的kw 字典必须包含的字段：
+
+```python
+kw = {
+    'body': message_body,  # 消息体，消息体包含了函数入参大全，以及extra 这个key中有各种辅助字段
+    # 其他用于 ack/requeue 的辅助字段，每种broker都不一样，如：
+    # 'receipt_handle': ...,  # SQS 用
+    # 'message': ...,         # AMQP 用
+    # 'channel': ...,         # RabbitMQ 用
+}
+self._submit_task(kw)
+```
+
+## ai使用 override_cls 扩展mixin类的时候，最好是将新增的多个配置入参放在 user_options字典的 某个key中
+
+例如 CircuitBreakerConsumerMixin 的熔断器配置，可以放在 user_options字典的 'circuit_breaker_options' 这个key中。
+因为可以防止 user_options 字典中其他key和熔断器配置key冲突。
+
+
+## ai扩展mixin类，如果需要使用框架提供的记录结果的钩子函数，请使用以下方法
+
+- `_both_sync_and_aio_frame_custom_record_process_info_func` 
+  同步和异步都会调用，如果是纯cpu计算，里面不涉及到io可以用这个。
+- `_frame_custom_record_process_info_func`  
+  里面涉及到io操作，不能用 `_both_sync_and_aio_frame_custom_record_process_info_func`，要重写这个。
+- `_aio_frame_custom_record_process_info_func`
+  里面涉及到io操作，不能用 `_both_sync_and_aio_frame_custom_record_process_info_func`，要重写这个。
+  为了避免代码和同步的 `_frame_custom_record_process_info_func` 重复，所以可以快速的用 `simple_run_in_executor` 将异步逻辑转换成同步逻辑。
+  ```python
+  await super()._aio_frame_custom_record_process_info_func(current_function_result_status, kw)
+  await simple_run_in_executor(self._frame_custom_record_process_info_func, current_function_result_status, kw)
+  ```
+
+
+
+
+## broker特有独有配置访问规范：
+
+- `broker_exclusive_config` 中的配置**必须使用中括号 `[]` 访问**，不要用 `.get()`
+- 默认值最好在 `broker_kind__exclusive_config_default_define.py` 中的 `register_broker_exclusive_config_default` 函数进行声明，方便用户知道可以传递哪些
+- 如果 key 不存在会直接抛出 KeyError，便于发现问题
+
+- 在consumer类中通过 self.consumer_params.broker_exclusive_config['$key'] 访问
+- 在publisher类中通过 self.publisher_params.broker_exclusive_config['$key'] 访问
+
+## ai可以参考的
+
+ai 可以参考里面的funboost/publishers 和 funboost/consumers 其他broker写法。
+
+ai 可以参考文档 `funboost_all_docs_and_codes.md` 中教程的 4.21 和 4.21b 章节
+
+ai可以参考 `funboost/contrib/override_publisher_consumer_cls` 目录下的代码,这些是动态扩展中间件。
+
+## ai编程不需要过度保守防御性编程
+
+例如写过多的try，对确定的字典进行get
+
+
+# 编写测试代码 
+增加扩展新的中间件后，需要在 test_frame/ 目录下编写测试验证功能
+在 test_frame/ 目录下新建一个文件夹，编写测试验证功能
+
+**ai注意：**
+ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右，然后kill。
+如果funboost时间太短，可能还没来得及启动消费
+如果不主动kill，funboost不会自动结束的，因为funboost设计成了无限循环消费
+
+`````
+
+--- **end of file: funboost/md_for_ai/如何扩展增加新的中间件.md** (project: funboost) --- 
+
+---
+
 # markdown content namespace: funboost codes 
 
 
@@ -27727,6 +29447,7 @@ Entry Points (not imported by other project files):
     │   ├── queue2queue.py
     │   ├── redis_consume_latest_msg_broker.py
     │   ├── register_custom_broker_contrib
+    │   │   ├── redis_zset_broker.py
     │   │   ├── watchdog_broker.py
     │   │   └── websocket_broker.py
     │   └── save_function_result_status
@@ -27786,19 +29507,9 @@ Entry Points (not imported by other project files):
     │   │   └── 增加日志查看.md
     │   ├── app.py
     │   ├── app_debug_start.py
-    │   ├── flask_bps
-    │   │   ├── __init__.py
-    │   │   ├── log_viewer.py
-    │   │   ├── script_deploy.py
-    │   │   ├── system_monitor.py
-    │   │   └── web_helper.py
     │   ├── functions.py
     │   └── templates
     │       └── app.py中仍在使用的路由.md
-    ├── md_for_ai
-    │   ├── funboost_ai_coding_编程指南_rules_and_skills.md
-    │   ├── test1.md
-    │   └── 如何扩展增加新的中间件.md
     ├── publishers
     │   ├── __init__.py
     │   ├── base_publisher.py
@@ -27906,7 +29617,7 @@ Entry Points (not imported by other project files):
 ---
 
 
-## funboost (relative dir: `funboost`)  Included Files (total: 263 files)
+## funboost (relative dir: `funboost`)  Included Files (total: 256 files)
 
 
 - `funboost/constant.py`
@@ -28127,6 +29838,8 @@ Entry Points (not imported by other project files):
 
 - `funboost/contrib/override_publisher_consumer_cls/__init__.py`
 
+- `funboost/contrib/register_custom_broker_contrib/redis_zset_broker.py`
+
 - `funboost/contrib/register_custom_broker_contrib/watchdog_broker.py`
 
 - `funboost/contrib/register_custom_broker_contrib/websocket_broker.py`
@@ -28225,27 +29938,11 @@ Entry Points (not imported by other project files):
 
 - `funboost/funweb/README.md`
 
-- `funboost/funweb/flask_bps/log_viewer.py`
-
-- `funboost/funweb/flask_bps/script_deploy.py`
-
-- `funboost/funweb/flask_bps/system_monitor.py`
-
-- `funboost/funweb/flask_bps/web_helper.py`
-
-- `funboost/funweb/flask_bps/__init__.py`
-
 - `funboost/funweb/templates/app.py中仍在使用的路由.md`
 
 - `funboost/funweb/_ai_do_tasks_md/ai写web必须遵守的.md`
 
 - `funboost/funweb/_ai_do_tasks_md/增加日志查看.md`
-
-- `funboost/md_for_ai/funboost_ai_coding_编程指南_rules_and_skills.md`
-
-- `funboost/md_for_ai/test1.md`
-
-- `funboost/md_for_ai/如何扩展增加新的中间件.md`
 
 - `funboost/publishers/base_publisher.py`
 
@@ -28495,9 +30192,11 @@ class BrokerEnum:
     REDIS_STREAM = 'REDIS_STREAM'  # 基于redis 5.0 版本以后，使用 stream 数据结构作为分布式消息队列，支持消费确认和持久化和分组消费，是redis官方推荐的消息队列形式，比list结构更适合。
     REDIS_BRPOP_LPUSH = 'RedisBrpopLpush'  # 基于redis的list结构但是采用 brpoplpush 双队列形式，和 redis_ack_able的实现差不多，实现上采用了原生命令就不需要lua脚本来实现取出和加入unack了。
     REDIS_PUBSUB = 'REDIS_PUBSUB'  # 基于redis 发布订阅的，发布一个消息多个消费者都能收到同一条消息，但不支持持久化
+    REDIS_ZSET_PRIORITY = 'REDIS_ZSET_PRIORITY'  # 基于redis的zset结构，支持任务优先级,无级优先级队列（非常适合随意插队），不需要提前声明最大能支持的优先级参数x-max-priority。 实现和用法见 redis_zset_broker.py
+    REDIS_ZSET_DELAY = 'REDIS_ZSET_DELAY'  # 基于redis的zset结构，支持任务延迟。不依赖funboost自身的延时任务用法所依赖的apscheduler。这个比funboost自身的延时任务好处是：不怕由于队列前面其他已有的大量普通消息堆积，导致后进入的延时消息无法及时取出来交给apscheduler调度，导致不能及时运行。 实现和用法见 redis_zset_broker.py
     
     """
-    MEMORY_QUEUE: （funboost中最最最核心的broker，没有之一）
+    MEMORY_QUEUE: （funboost中最最最核心的sss级broker，没有之一）
     python内存队列,虽然不支持跨进程 跨脚本 跨机器共享任务，不支持持久化，
     但是 MEMORY_QUEUE 作为broker 是funboost最最最重要的broker，绝非玩具和只适合简单场景使用，其在funboost中的用途广泛性远超那些正经服务端mq。
     MEMORY_QUEUE 在 funboost 中的重要性是 sss级，重要性远超 redis kafka rabbbitmq等作为broker.
@@ -28612,8 +30311,7 @@ class BrokerEnum:
     日志文件、文件系统变更（inotify）、甚至是硬件传感器的信号，按照4.21章节文档，都可以被封装成一个 funboost 的 Broker。
 
     充分说明 funboost 有能力化身为 通用的、事件驱动的函数调度平台,而非仅仅是celery这种传统的消息驱动.
-    """
-    """
+  
     funboost 有能力消费canal发到kafka的binlog消息,也能不依赖canal,自己捕获cdc数据
     """
     MYSQL_CDC = 'MYSQL_CDC'
@@ -28799,15 +30497,6 @@ class BrokerConnConfig(DataClassBase):
     如果@boost装饰器设置is_using_rpc_mode为True或者 is_using_distributed_frequency_control为True或do_task_filtering=True则需要把redis连接配置好，默认是False不强迫用户安装redis。
     """
 
-    MONGO_CONNECT_URL = f'mongodb://127.0.0.1:27017'  # 如果有密码连接 'mongodb://myUserAdmin:XXXXX@192.168.199.202:27016/'   authSource 指定鉴权db，MONGO_CONNECT_URL = 'mongodb://root:123456@192.168.64.151:27017?authSource=admin'
-
-    RABBITMQ_USER = 'rabbitmq_user'
-    RABBITMQ_PASS = 'rabbitmq_pass'
-    RABBITMQ_HOST = '127.0.0.1'
-    RABBITMQ_PORT = 5672
-    RABBITMQ_VIRTUAL_HOST = '/'  # my_host # 这个是rabbitmq的虚拟子host用户自己创建的，如果你想直接用rabbitmq的根host而不是使用虚拟子host，这里写 空字符串 即可。
-    RABBITMQ_URL = f'amqp://{RABBITMQ_USER}:{quote_plus(RABBITMQ_PASS)}@{RABBITMQ_HOST}:{RABBITMQ_PORT}/{RABBITMQ_VIRTUAL_HOST}'
-
     REDIS_HOST = '127.0.0.1'
     REDIS_USERNAME = ''
     REDIS_PASSWORD = ''
@@ -28817,6 +30506,16 @@ class BrokerConnConfig(DataClassBase):
     REDIS_SSL = False # 是否使用ssl加密,默认是False
     REDIS_URL = f'{"rediss" if REDIS_SSL else "redis"}://{REDIS_USERNAME}:{quote_plus(REDIS_PASSWORD)}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
 
+    MONGO_CONNECT_URL = f'mongodb://127.0.0.1:27017'  # 如果有密码连接 'mongodb://myUserAdmin:XXXXX@192.168.199.202:27016/'   authSource 指定鉴权db，MONGO_CONNECT_URL = 'mongodb://root:123456@192.168.64.151:27017?authSource=admin'
+
+    RABBITMQ_USER = 'rabbitmq_user'
+    RABBITMQ_PASS = 'rabbitmq_pass'
+    RABBITMQ_HOST = '127.0.0.1'
+    RABBITMQ_PORT = 5672
+    RABBITMQ_VIRTUAL_HOST = '/'  # my_host # 这个是rabbitmq的虚拟子host用户自己创建的，如果你想直接用rabbitmq的根host而不是使用虚拟子host，这里写 空字符串 即可。
+    RABBITMQ_URL = f'amqp://{RABBITMQ_USER}:{quote_plus(RABBITMQ_PASS)}@{RABBITMQ_HOST}:{RABBITMQ_PORT}/{RABBITMQ_VIRTUAL_HOST}'
+
+  
     NSQD_TCP_ADDRESSES = ['127.0.0.1:4150']
     NSQD_HTTP_CLIENT_HOST = '127.0.0.1'
     NSQD_HTTP_CLIENT_PORT = 4151
@@ -41717,6 +43416,290 @@ def batch_insert_to_db(items: list):
 ---
 
 
+--- **start of file: funboost/contrib/register_custom_broker_contrib/redis_zset_broker.py** (project: funboost) --- 
+
+`````python
+# -*- coding: utf-8 -*-
+
+
+"""
+Redis ZSet 实现的两种 Broker:
+
+1. REDIS_ZSET_PRIORITY — 基于 ZSet score 的优先级队列
+   score = priority，值越大优先级越高，越先被消费
+   相比现有的 REDIS_PRIORITY（基于多个 list + blpop），ZSet 方案直接用 score 排序，
+   粒度更细（支持任意浮点数 score），不需要预先声明 x-max-priority。
+
+2. REDIS_ZSET_DELAY — 基于 ZSet score 的延迟队列
+   score = 消息的可消费时间戳（Unix timestamp），到期后才可被消费
+   相比现有的 APScheduler 方案，ZSet 延迟队列天然持久化在 Redis 中，
+   重启后延迟消息不丢失，且支持分布式环境。
+
+两种 broker 均支持确认消费（ACK），复用 ConsumerConfirmMixinWithTheHelpOfRedisByHearbeat。
+
+使用方式:
+
+    from funboost import boost, BoosterParams, TaskOptions
+    from funboost.contrib.register_custom_broker_contrib.redis_zset_broker import (
+        BROKER_KIND_REDIS_ZSET_PRIORITY, BROKER_KIND_REDIS_ZSET_DELAY,
+    )
+
+    # --- 优先级队列 ---
+    @boost(BoosterParams(
+        queue_name='my_zset_priority_queue',
+        broker_kind=BROKER_KIND_REDIS_ZSET_PRIORITY,
+        qps=5,
+    ))
+    def my_priority_task(x):
+        print(x)
+
+    # other_extra_params 中使用二级 key 'for_broker_redis_zset_priority' 传递参数，避免与其他用途的字段冲突
+    my_priority_task.publish({'x': 1}, task_options=TaskOptions(
+        other_extra_params={'for_broker_redis_zset_priority': {'priority': 5}}
+    ))
+    my_priority_task.publish({'x': 2}, task_options=TaskOptions(
+        other_extra_params={'for_broker_redis_zset_priority': {'priority': 10}}
+    ))
+    # priority=10 的消息会先被消费
+
+    # --- 延迟队列 ---
+    @boost(BoosterParams(
+        queue_name='my_zset_delay_queue',
+        broker_kind=BROKER_KIND_REDIS_ZSET_DELAY,
+        qps=5,
+    ))
+    def my_delay_task(x):
+        print(x)
+
+    # other_extra_params 中使用二级 key 'for_broker_redis_zset_delay' 传递参数
+    # 方式一：指定延迟秒数（从当前时间算起）
+    my_delay_task.publish({'x': 1}, task_options=TaskOptions(
+        other_extra_params={'for_broker_redis_zset_delay': {'delay_seconds': 30}}
+    ))
+    # 方式二：指定绝对时间戳
+    my_delay_task.publish({'x': 2}, task_options=TaskOptions(
+        other_extra_params={'for_broker_redis_zset_delay': {'eta_timestamp': 1700000000}}
+    ))
+    # 方式三：不指定延迟参数，立即可消费
+    my_delay_task.publish({'x': 3})
+"""
+
+"""
+Funboost 的扩展性不是“可以扩展”，而是“极其容易、完整、安全地扩展”。 
+只用了 200 行代码，就为 Funboost 增加了两种官方级别的 Broker 模式，
+并且立即拥有了 QPS 控频、并发控制、重试、死信、RPC、Web 监控等全部企业级能力。
+这在 Python 生态中是非常罕见的。所以，说它“无敌”可能有点绝对，但确实是天花板级别的存在。👑
+"""
+
+from funboost.core.serialization import Serialization
+import time
+
+
+from funboost import register_custom_broker, AbstractConsumer, AbstractPublisher, register_broker_exclusive_config_default
+from funboost.consumers.confirm_mixin import ConsumerConfirmMixinWithTheHelpOfRedisByHearbeat
+from funboost.publishers.redis_queue_flush_mixin import FlushRedisQueueMixin
+from funboost.utils.redis_manager import RedisMixin
+
+BROKER_KIND_REDIS_ZSET_PRIORITY = 'REDIS_ZSET_PRIORITY'
+BROKER_KIND_REDIS_ZSET_DELAY = 'REDIS_ZSET_DELAY'
+
+_FOR_BROKER_KEY_PRIORITY = 'for_broker_redis_zset_priority'
+_FOR_BROKER_KEY_DELAY = 'for_broker_redis_zset_delay'
+
+
+# ============================================================================
+# Publisher 基类
+# ============================================================================
+
+class RedisZSetPublisherBase(FlushRedisQueueMixin, AbstractPublisher, RedisMixin):
+    """Redis ZSet Publisher 基类，子类需实现 _get_score(msg) 方法"""
+
+    def _get_broker_specific_params(self, for_broker_key: str, msg) -> dict:
+        """从 other_extra_params 的二级 key 中提取 broker 专用参数"""
+        params = self._get_from_other_extra_params(for_broker_key, msg)
+        return params if isinstance(params, dict) else {}
+
+    def _get_score(self, msg: str) -> float:
+        raise NotImplementedError
+
+    def _publish_impl(self, msg: str):
+        score = self._get_score(msg)
+        self.redis_db_frame.zadd(self._queue_name, {msg: score})
+
+    def get_message_count(self):
+        return self.redis_db_frame.zcard(self._queue_name)
+
+    def close(self):
+        pass
+
+
+# ============================================================================
+# Consumer 基类
+# ============================================================================
+
+class RedisZSetConsumerBase(ConsumerConfirmMixinWithTheHelpOfRedisByHearbeat, AbstractConsumer):
+    """Redis ZSet Consumer 基类，子类需实现 _build_pop_lua() 方法"""
+
+    def custom_init(self):
+        super().custom_init()
+        self.pull_msg_batch_size = self.consumer_params.broker_exclusive_config['pull_msg_batch_size']
+        self.pull_initial_interval = self.consumer_params.broker_exclusive_config.get('pull_base_interval', 0.01)
+        self.pull_max_interval = self.consumer_params.broker_exclusive_config.get('pull_max_interval', 2)
+
+    def _build_pop_lua(self) -> str:
+        """
+        返回 Lua 脚本字符串。
+        KEYS[1] = 主队列 zset
+        KEYS[2] = unack zset
+        ARGV[1] = 当前时间戳 (float)
+        ARGV[2] = batch_size (int)
+        脚本需返回取出的 member 列表，并将它们从 KEYS[1] 移入 KEYS[2]。
+        """
+        raise NotImplementedError
+
+    def _dispatch_task(self):
+        lua = self._build_pop_lua()
+        script = self.redis_db_frame.register_script(lua)
+        sleep_time = self.pull_initial_interval
+        while True:
+            task_str_list = script(
+                keys=[self._queue_name, self._unack_zset_name],
+                args=[time.time(), self.pull_msg_batch_size],
+            )
+            if task_str_list:
+                sleep_time = self.pull_initial_interval
+                self._print_message_get_from_broker(task_str_list)
+                for task_str in task_str_list:   # pyright: ignore[reportGeneralTypeIssues]
+                    kw = {'body': task_str, 'task_str': task_str}
+                    self._submit_task(kw)
+            else:
+                time.sleep(sleep_time)
+                sleep_time = min(sleep_time * 2, self.pull_max_interval)
+
+
+# ============================================================================
+# REDIS_ZSET_PRIORITY — ZSet 优先级队列
+# ============================================================================
+
+class RedisZSetPriorityPublisher(RedisZSetPublisherBase):
+    """
+    score = priority，值越大越先消费。
+    通过 task_options=TaskOptions(other_extra_params={
+        'for_broker_redis_zset_priority': {'priority': N}
+    }) 指定优先级。不指定时默认 priority = 0。
+    """
+
+    def _get_score(self, msg: str) -> float:
+        params = self._get_broker_specific_params(_FOR_BROKER_KEY_PRIORITY, msg)
+        priority = params.get('priority')
+        return float(priority) if priority is not None else 0.0
+
+
+class RedisZSetPriorityConsumer(RedisZSetConsumerBase):
+    """ZREVRANGE：score 从大到小，取出最高优先级的消息"""
+
+    def _build_pop_lua(self) -> str:
+        return '''
+            local members = redis.call("zrevrange", KEYS[1], 0, tonumber(ARGV[2]) - 1)
+            if #members > 0 then
+                for i, member in ipairs(members) do
+                    redis.call("zrem", KEYS[1], member)
+                    redis.call("zadd", KEYS[2], ARGV[1], member)
+                end
+            end
+            return members
+        '''
+
+    def _requeue(self, kw):
+        body = kw['body']
+        priority = body.get('extra', {}).get('other_extra_params', {}).get(_FOR_BROKER_KEY_PRIORITY, {}).get('priority', 0) or 0
+        self.redis_db_frame.zadd(self._queue_name, {Serialization.to_json_str(body): float(priority)})
+
+
+# ============================================================================
+# REDIS_ZSET_DELAY — ZSet 延迟队列
+# ============================================================================
+
+class RedisZSetDelayPublisher(RedisZSetPublisherBase):
+    """
+    score = 消息可消费的时间戳。
+    通过 task_options=TaskOptions(other_extra_params={
+        'for_broker_redis_zset_delay': {'delay_seconds': N}
+    }) 指定延迟秒数，
+    或 task_options=TaskOptions(other_extra_params={
+        'for_broker_redis_zset_delay': {'eta_timestamp': T}
+    }) 指定绝对时间戳。
+    不指定时 score = time.time()，立即可消费。
+    """
+
+    def _get_score(self, msg: str) -> float:
+        params = self._get_broker_specific_params(_FOR_BROKER_KEY_DELAY, msg)
+        eta_timestamp = params.get('eta_timestamp')
+        if eta_timestamp is not None:
+            return float(eta_timestamp)
+        delay_seconds = params.get('delay_seconds')
+        if delay_seconds is not None:
+            return time.time() + float(delay_seconds)
+        return time.time()
+
+
+class RedisZSetDelayConsumer(RedisZSetConsumerBase):
+    """ZRANGEBYSCORE -inf ~ now：取出所有已到期的消息"""
+
+    def custom_init(self):
+        super().custom_init()
+        self.pull_initial_interval = self.consumer_params.broker_exclusive_config.get('pull_base_interval', 0.1)
+
+    def _build_pop_lua(self) -> str:
+        return '''
+            local members = redis.call("zrangebyscore", KEYS[1], "-inf", ARGV[1], "LIMIT", 0, tonumber(ARGV[2]))
+            if #members > 0 then
+                for i, member in ipairs(members) do
+                    redis.call("zrem", KEYS[1], member)
+                    redis.call("zadd", KEYS[2], ARGV[1], member)
+                end
+            end
+            return members
+        '''
+
+    def _requeue(self, kw):
+        self.redis_db_frame.zadd(self._queue_name, {Serialization.to_json_str(kw['body']): time.time()})
+
+
+# ============================================================================
+# 注册 Broker
+# ============================================================================
+
+
+
+register_broker_exclusive_config_default(
+    BROKER_KIND_REDIS_ZSET_PRIORITY,
+    {
+        'pull_msg_batch_size': 16,
+        'pull_base_interval': 0.02,
+        'pull_max_interval': 2,
+    }
+)
+
+register_broker_exclusive_config_default(
+    BROKER_KIND_REDIS_ZSET_DELAY,
+    {
+        'pull_msg_batch_size': 16,
+        'pull_base_interval': 0.01,
+        'pull_max_interval': 2,
+    }
+)
+
+register_custom_broker(BROKER_KIND_REDIS_ZSET_PRIORITY, RedisZSetPriorityPublisher, RedisZSetPriorityConsumer)
+register_custom_broker(BROKER_KIND_REDIS_ZSET_DELAY, RedisZSetDelayPublisher, RedisZSetDelayConsumer)
+
+`````
+
+--- **end of file: funboost/contrib/register_custom_broker_contrib/redis_zset_broker.py** (project: funboost) --- 
+
+---
+
+
 --- **start of file: funboost/contrib/register_custom_broker_contrib/watchdog_broker.py** (project: funboost) --- 
 
 `````python
@@ -52186,6 +54169,8 @@ def regist_to_funboost(broker_kind: str):
         from funboost.contrib.register_custom_broker_contrib import websocket_broker
         # 无需调用 register_custom_broker ，已经在 websocket_broker.py 中注册了
         
+    if broker_kind in [BrokerEnum.REDIS_ZSET_PRIORITY, BrokerEnum.REDIS_ZSET_DELAY]:
+        import funboost.contrib.register_custom_broker_contrib.redis_zset_broker # 已经在 redis_zset_broker.py 中注册了
         
 
 if __name__ == '__main__':
@@ -53092,2114 +55077,6 @@ funboost_web_manager 名字太长了，用 funweb 做个简化，是一样的意
 ---
 
 
---- **start of file: funboost/funweb/flask_bps/log_viewer.py** (project: funboost) --- 
-
-`````python
-# -*- coding: utf-8 -*-
-import datetime
-import json
-import os
-import re
-
-import time
-
-from flask import Blueprint, request, jsonify, Response
-from flask_login import login_required
-
-from funboost.utils.redis_manager import RedisMixin
-from funboost.funweb.flask_bps.web_helper import LOG_STREAM_MAX_SECONDS,LOCAL_IP
-
-log_bp = Blueprint('log_viewer', __name__)
-
-_redis = RedisMixin().redis_db_frame
-
-_ANSI_RE = re.compile(r'\x1b\[[0-9;]*m')
-_LOG_TS_RE = re.compile(r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})')
-_MAX_SCAN_BYTES = 50 * 1024 * 1024
-
-
-
-
-
-def _folders_key():
-    return f'funweb:{LOCAL_IP}:log_folders'
-
-
-# ======================== 安全校验 ========================
-
-_SENSITIVE_LINUX = {'/etc', '/root', '/proc', '/sys', '/dev', '/boot', '/sbin', '/bin'}
-_SENSITIVE_WIN = set()
-for _d in ('Windows', 'ProgramData', 'Recovery', 'System Volume Information'):
-    for _drive in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
-        _SENSITIVE_WIN.add(os.path.normcase(f'{_drive}:\\{_d}'))
-
-
-def _is_sensitive(path):
-    norm = os.path.normcase(os.path.realpath(path))
-    checks = _SENSITIVE_WIN if os.name == 'nt' else _SENSITIVE_LINUX
-    for s in checks:
-        ref = os.path.normcase(s)
-        if norm == ref or norm.startswith(ref + os.sep):
-            return True
-    return False
-
-
-def _is_subpath(child, parent):
-    rc = os.path.normcase(os.path.realpath(child))
-    rp = os.path.normcase(os.path.realpath(parent))
-    return rc == rp or rc.startswith(rp + os.sep)
-
-
-def _validate_file(filepath):
-    folders = _redis.smembers(_folders_key())
-    if not folders:
-        return False
-    for folder in folders:
-        if _is_subpath(filepath, folder):
-            return True
-    return False
-
-
-def _validate_folder_access(folder_path):
-    folders = _redis.smembers(_folders_key())
-    if not folders:
-        return False
-    for folder in folders:
-        if _is_subpath(folder_path, folder):
-            return True
-    return False
-
-
-# ======================== 工具函数 ========================
-
-def _decode_line(raw):
-    try:
-        return raw.decode('utf-8')
-    except UnicodeDecodeError:
-        return raw.decode('gbk', errors='replace')
-
-
-def _strip_ansi(text):
-    return _ANSI_RE.sub('', text)
-
-
-def _parse_log_time(line):
-    m = _LOG_TS_RE.search(line)
-    if m:
-        try:
-            return datetime.datetime.strptime(m.group(1), '%Y-%m-%d %H:%M:%S')
-        except ValueError:
-            pass
-    return None
-
-
-def _parse_dt(s):
-    if not s:
-        return None
-    for fmt in (
-        '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d %H', '%Y-%m-%d',
-        '%Y-%m-%dT%H:%M:%S', '%Y-%m-%dT%H:%M', '%Y-%m-%dT%H',
-        '%Y/%m/%d %H:%M:%S', '%Y/%m/%d %H:%M', '%Y/%m/%d',
-    ):
-        try:
-            return datetime.datetime.strptime(s.strip(), fmt)
-        except ValueError:
-            continue
-    return None
-
-
-def _bisect_log_offset(filepath, target_dt):
-    file_size = os.path.getsize(filepath)
-    if file_size == 0:
-        return 0
-    with open(filepath, 'rb') as f:
-        lo, hi = 0, file_size
-        while lo < hi:
-            mid = (lo + hi) // 2
-            f.seek(mid)
-            if mid > 0:
-                f.readline()
-            dt = None
-            for _ in range(50):
-                raw = f.readline()
-                if not raw:
-                    break
-                dt = _parse_log_time(_decode_line(raw))
-                if dt is not None:
-                    break
-            if dt is None:
-                hi = mid
-            elif dt < target_dt:
-                lo = mid + 1
-            else:
-                hi = mid
-        return max(0, lo - 256)
-
-
-def _read_log_lines_range(filepath, max_lines, start_offset=0, end_offset=None):
-    try:
-        with open(filepath, 'rb') as f:
-            f.seek(0, 2)
-            file_size = f.tell()
-            if file_size == 0:
-                return []
-            if end_offset is None or end_offset > file_size:
-                end_offset = file_size
-            if start_offset < 0:
-                start_offset = 0
-            if start_offset >= end_offset:
-                return []
-            actual_start = max(start_offset, end_offset - _MAX_SCAN_BYTES)
-            lines = []
-            chunk_size = 65536
-            pos = end_offset
-            partial = b''
-            while pos > actual_start and len(lines) < max_lines + 1:
-                read_size = min(chunk_size, pos - actual_start)
-                pos -= read_size
-                f.seek(pos)
-                chunk = f.read(read_size) + partial
-                chunk_lines = chunk.split(b'\n')
-                partial = chunk_lines[0]
-                lines = chunk_lines[1:] + lines
-            if partial:
-                lines = [partial] + lines
-            result = lines[-max_lines:]
-            return [_decode_line(line) for line in result]
-    except Exception:
-        return []
-
-
-def _read_log_tail(filepath, max_lines=1000):
-    try:
-        with open(filepath, 'rb') as f:
-            f.seek(0, 2)
-            file_size = f.tell()
-            if file_size == 0:
-                return []
-            lines = []
-            chunk_size = 8192
-            remaining = file_size
-            partial = b''
-            while remaining > 0 and len(lines) < max_lines + 1:
-                read_size = min(chunk_size, remaining)
-                remaining -= read_size
-                f.seek(remaining)
-                chunk = f.read(read_size) + partial
-                chunk_lines = chunk.split(b'\n')
-                partial = chunk_lines[0]
-                lines = chunk_lines[1:] + lines
-            if partial:
-                lines = [partial] + lines
-            result_lines = lines[-max_lines:]
-            return [_decode_line(line) for line in result_lines]
-    except Exception:
-        return []
-
-
-_ANSI_RE_B = re.compile(rb'\x1b\[[0-9;]*m')
-
-
-def _grep_fast(filepath, keyword, max_lines=200, start_offset=0, end_offset=None):
-    """多行日志感知的关键字搜索。
-    将连续行按日志条目分组（以时间戳开头的行为新条目起点，无时间戳的续行归属上一条目），
-    关键字命中条目中任一行则返回整个条目的所有行。
-    """
-    try:
-        file_size = os.path.getsize(filepath)
-        if end_offset is None or end_offset > file_size:
-            end_offset = file_size
-        if start_offset < 0:
-            start_offset = 0
-        if start_offset >= end_offset:
-            return []
-        actual_start = max(start_offset, end_offset - _MAX_SCAN_BYTES)
-
-        with open(filepath, 'rb') as f:
-            f.seek(actual_start)
-            data = f.read(end_offset - actual_start)
-
-        kw_lower = keyword.lower()
-        kw_variants = set()
-        try:
-            kw_variants.add(kw_lower.encode('utf-8'))
-        except Exception:
-            pass
-        try:
-            gb = kw_lower.encode('gbk')
-            kw_variants.add(gb)
-        except Exception:
-            pass
-        if not kw_variants:
-            return []
-
-        ts_prefix = re.compile(rb'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}')
-
-        raw_lines = data.split(b'\n')
-        entries = []
-        for raw in raw_lines:
-            if not raw.strip():
-                continue
-            cleaned = _ANSI_RE_B.sub(b'', raw).lstrip()
-            if ts_prefix.match(cleaned):
-                entries.append([raw])
-            elif entries:
-                entries[-1].append(raw)
-            else:
-                entries.append([raw])
-
-        matches = []
-        for entry in entries:
-            entry_blob = _ANSI_RE_B.sub(b'', b'\n'.join(entry)).lower()
-            if any(kb in entry_blob for kb in kw_variants):
-                for raw_line in entry:
-                    matches.append(_strip_ansi(_decode_line(raw_line)))
-
-        return matches[-max_lines:]
-    except Exception:
-        return []
-
-
-def _format_size(size):
-    if size < 1024:
-        return f'{size} B'
-    if size < 1024 * 1024:
-        return f'{size / 1024:.1f} KB'
-    if size < 1024 * 1024 * 1024:
-        return f'{size / (1024 * 1024):.1f} MB'
-    return f'{size / (1024 * 1024 * 1024):.2f} GB'
-
-
-# ======================== API 路由 ========================
-
-@log_bp.route('/logview/folders', methods=['GET'])
-@login_required
-def list_folders():
-    from nb_log import nb_log_config_default
-    default_log_path = str(nb_log_config_default.LOG_PATH)
-    _redis.sadd(_folders_key(), default_log_path)
-
-    folders = _redis.smembers(_folders_key())
-    result = []
-    for f in sorted(folders):
-        exists = os.path.isdir(f)
-        result.append({'path': f, 'exists': exists})
-    return jsonify({'succ': True, 'data': result})
-
-
-@log_bp.route('/logview/folders/add', methods=['POST'])
-@login_required
-def add_folder():
-    data = request.get_json(force=True)
-    path = data.get('path', '').strip()
-    if not path:
-        return jsonify({'succ': False, 'msg': '路径不能为空'})
-    if not os.path.isabs(path):
-        return jsonify({'succ': False, 'msg': '请输入绝对路径'})
-    if _is_sensitive(path):
-        return jsonify({'succ': False, 'msg': '不允许添加系统敏感目录'})
-    if not os.path.isdir(path):
-        return jsonify({'succ': False, 'msg': f'目录不存在: {path}'})
-    _redis.sadd(_folders_key(), path)
-    return jsonify({'succ': True, 'msg': '添加成功'})
-
-
-@log_bp.route('/logview/folders/remove', methods=['POST'])
-@login_required
-def remove_folder():
-    data = request.get_json(force=True)
-    path = data.get('path', '').strip()
-    _redis.srem(_folders_key(), path)
-    return jsonify({'succ': True, 'msg': '已移除'})
-
-
-@log_bp.route('/logview/files', methods=['GET'])
-@login_required
-def list_files():
-    folder = request.args.get('folder', '').strip()
-    search = request.args.get('search', '').strip()
-    sort_by = request.args.get('sort', 'mtime')
-    sort_order = request.args.get('order', 'desc')
-    offset = int(request.args.get('offset', 0))
-    limit = int(request.args.get('limit', 100))
-
-    if not folder:
-        return jsonify({'succ': False, 'msg': '请指定文件夹路径'})
-    if not os.path.isabs(folder):
-        return jsonify({'succ': False, 'msg': '请使用绝对路径'})
-
-    if not _validate_folder_access(folder):
-        return jsonify({'succ': False, 'msg': '无权访问该目录'})
-
-    real_folder = os.path.realpath(folder)
-    if not os.path.isdir(real_folder):
-        return jsonify({'succ': False, 'msg': '目录不存在'})
-
-    search_lower = search.lower() if search else ''
-    entries = []
-    try:
-        for name in os.listdir(real_folder):
-            full_path = os.path.join(real_folder, name)
-            if search_lower and search_lower not in name.lower():
-                continue
-            try:
-                stat = os.stat(full_path)
-                is_dir = os.path.isdir(full_path)
-                ext = os.path.splitext(name)[1].lower() if not is_dir else ''
-                entries.append({
-                    'name': name,
-                    'path': full_path,
-                    'is_dir': is_dir,
-                    'size': stat.st_size if not is_dir else 0,
-                    'size_str': _format_size(stat.st_size) if not is_dir else '-',
-                    'mtime': stat.st_mtime,
-                    'mtime_str': datetime.datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M:%S'),
-                    'ctime': stat.st_ctime,
-                    'ctime_str': datetime.datetime.fromtimestamp(stat.st_ctime).strftime('%Y-%m-%d %H:%M:%S'),
-                    'ext': ext,
-                })
-            except OSError:
-                continue
-    except PermissionError:
-        return jsonify({'succ': False, 'msg': '无权限读取该目录'})
-
-    reverse = sort_order == 'desc'
-    if sort_by == 'size':
-        entries.sort(key=lambda e: (not e['is_dir'], e['size']), reverse=reverse)
-    elif sort_by == 'mtime':
-        entries.sort(key=lambda e: (not e['is_dir'], e['mtime']), reverse=reverse)
-    elif sort_by == 'ctime':
-        entries.sort(key=lambda e: (not e['is_dir'], e['ctime']), reverse=reverse)
-    elif sort_by == 'ext':
-        entries.sort(key=lambda e: (not e['is_dir'], e['ext'], e['name'].lower()), reverse=reverse)
-    else:
-        entries.sort(key=lambda e: (not e['is_dir'], e['name'].lower()), reverse=reverse)
-
-    total = len(entries)
-    paginated = entries[offset:offset + limit]
-
-    return jsonify({'succ': True, 'data': paginated, 'folder': real_folder, 'total': total})
-
-
-@log_bp.route('/logview/content', methods=['GET'])
-@login_required
-def read_content():
-    filepath = request.args.get('file', '').strip()
-    keyword = request.args.get('keyword', '').strip()
-    time_start = request.args.get('time_start', '').strip()
-    time_end = request.args.get('time_end', '').strip()
-    max_lines = int(request.args.get('lines', 200))
-
-    if not filepath:
-        return jsonify({'succ': False, 'msg': '请指定文件路径'})
-    if not _validate_file(filepath):
-        return jsonify({'succ': False, 'msg': '无权访问该文件'})
-    if not os.path.isfile(filepath):
-        return jsonify({'succ': False, 'msg': '文件不存在'})
-
-    try:
-        file_stat = os.stat(filepath)
-        file_size = file_stat.st_size
-        file_mtime = datetime.datetime.fromtimestamp(file_stat.st_mtime).strftime('%Y-%m-%d %H:%M:%S')
-    except OSError:
-        return jsonify({'succ': False, 'msg': '无法读取文件信息'})
-
-    dt_start = _parse_dt(time_start)
-    dt_end = _parse_dt(time_end)
-
-    start_off = 0
-    end_off = file_size
-
-    if dt_start:
-        start_off = _bisect_log_offset(filepath, dt_start)
-    if dt_end:
-        end_off = _bisect_log_offset(filepath, dt_end + datetime.timedelta(seconds=1))
-
-    if start_off >= end_off and (dt_start or dt_end):
-        return jsonify({
-            'succ': True, 'data': [], 'total': 0,
-            'file_size': file_size, 'file_size_str': _format_size(file_size),
-            'file_mtime': file_mtime,
-        })
-
-    if keyword:
-        result_lines = _grep_fast(filepath, keyword, max_lines, start_off, end_off)
-        return jsonify({
-            'succ': True,
-            'data': result_lines,
-            'total': len(result_lines),
-            'file_size': file_size,
-            'file_size_str': _format_size(file_size),
-            'file_mtime': file_mtime,
-        })
-
-    raw_lines = _read_log_lines_range(filepath, max_lines * 3, start_off, end_off)
-
-    entries = []
-    has_any_ts = False
-    for line in raw_lines:
-        if not line.strip():
-            continue
-        clean = _strip_ansi(line)
-        lt = _parse_log_time(clean)
-        if lt:
-            has_any_ts = True
-            entries.append((lt, [clean]))
-        else:
-            if entries:
-                entries[-1][1].append(clean)
-            else:
-                entries.append((None, [clean]))
-
-    filtered = []
-    for entry_time, entry_lines in entries:
-        if dt_start or dt_end:
-            if entry_time is not None:
-                if dt_start and entry_time < dt_start:
-                    continue
-                if dt_end and entry_time > dt_end:
-                    continue
-            elif has_any_ts:
-                continue
-
-        filtered.extend(entry_lines)
-
-    result_lines = filtered[-max_lines:]
-
-    return jsonify({
-        'succ': True,
-        'data': result_lines,
-        'total': len(result_lines),
-        'file_size': file_size,
-        'file_size_str': _format_size(file_size),
-        'file_mtime': file_mtime,
-    })
-
-
-@log_bp.route('/logview/stream', methods=['GET'])
-@login_required
-def log_stream():
-    """SSE 端点：实时推送日志新增内容（类似 tail -f）"""
-    filepath = request.args.get('file', '').strip()
-
-    if not filepath or not _validate_file(filepath):
-        return Response('data: {"error": "无权访问"}\n\n',
-                        mimetype='text/event-stream', status=403)
-    if not os.path.isfile(filepath):
-        return Response('data: {"error": "文件不存在"}\n\n',
-                        mimetype='text/event-stream', status=404)
-
-    def generate():
-        f = None
-        deadline = time.time() + LOG_STREAM_MAX_SECONDS
-        try:
-            f = open(filepath, 'rb')
-            f.seek(0, 2)
-            last_pos = f.tell()
-            idle_ticks = 0
-
-            while time.time() < deadline:
-                try:
-                    cur_size = os.path.getsize(filepath)
-                except OSError:
-                    time.sleep(1)
-                    continue
-
-                if cur_size < last_pos:
-                    last_pos = 0
-                    yield f'data: {json.dumps({"event": "truncated"})}\n\n'
-
-                if cur_size > last_pos:
-                    f.seek(last_pos)
-                    new_data = f.read(cur_size - last_pos)
-                    last_pos = cur_size
-                    for raw_line in new_data.split(b'\n'):
-                        if raw_line.strip():
-                            text = _strip_ansi(_decode_line(raw_line))
-                            yield f'data: {json.dumps({"line": text})}\n\n'
-                    idle_ticks = 0
-                else:
-                    idle_ticks += 1
-                    if idle_ticks >= 30:
-                        yield ': heartbeat\n\n'
-                        idle_ticks = 0
-
-                time.sleep(0.5)
-            _m = max(1, LOG_STREAM_MAX_SECONDS // 60)
-            yield (
-                'data: '
-                + json.dumps({
-                    'event': 'timeout',
-                    'msg': f'已持续实时推送 {_m} 分钟，已自动停止。需要请再次开启实时。',
-                }, ensure_ascii=False)
-                + '\n\n'
-            )
-        except GeneratorExit:
-            pass
-        finally:
-            if f:
-                f.close()
-
-    return Response(
-        generate(),
-        mimetype='text/event-stream',
-        headers={
-            'Cache-Control': 'no-cache',
-            'X-Accel-Buffering': 'no',
-            'Connection': 'keep-alive',
-        },
-    )
-
-
-@log_bp.route('/logview/file_info', methods=['GET'])
-@login_required
-def file_info():
-    filepath = request.args.get('file', '').strip()
-    if not filepath or not _validate_file(filepath):
-        return jsonify({'succ': False, 'msg': '无权访问'})
-    if not os.path.isfile(filepath):
-        return jsonify({'succ': False, 'msg': '文件不存在'})
-    try:
-        stat = os.stat(filepath)
-        return jsonify({
-            'succ': True,
-            'data': {
-                'path': filepath,
-                'name': os.path.basename(filepath),
-                'size': stat.st_size,
-                'size_str': _format_size(stat.st_size),
-                'mtime': stat.st_mtime,
-                'mtime_str': datetime.datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M:%S'),
-            }
-        })
-    except OSError as e:
-        return jsonify({'succ': False, 'msg': str(e)})
-
-`````
-
---- **end of file: funboost/funweb/flask_bps/log_viewer.py** (project: funboost) --- 
-
----
-
-
---- **start of file: funboost/funweb/flask_bps/script_deploy.py** (project: funboost) --- 
-
-`````python
-# -*- coding: utf-8 -*-
-import datetime
-import json
-import os
-import re
-import signal
-
-import subprocess
-import time
-import threading
-
-import psutil
-from redis5.exceptions import ResponseError
-
-from flask import Blueprint, request, jsonify
-from flask_login import login_required
-
-from funboost.utils.redis_manager import RedisMixin
-from funboost.funweb.flask_bps.web_helper import LOCAL_IP
-
-deploy_bp = Blueprint('deploy', __name__)
-
-_redis = RedisMixin().redis_db_frame
-
-_ANSI_ESCAPE_RE = re.compile(r'\x1b\[[0-9;]*m')
-
-
-def _strip_ansi(text):
-    return _ANSI_ESCAPE_RE.sub('', text)
-
-
-
-
-def _key_prefix():
-    return f'script_deploy:{LOCAL_IP}'
-
-
-def _config_key(name):
-    return f'{_key_prefix()}:{name}:config'
-
-
-def _runtime_key(name):
-    return f'{_key_prefix()}:{name}:runtime'
-
-
-def _names_key():
-    return f'{_key_prefix()}:deploy_names'
-
-
-def _coerce_redis_hash_mapping(mapping):
-    """保证 HSET 的 field/value 均为 Redis 可编码字符串，避免 None 等触发客户端或服务端错误。"""
-    out = {}
-    for k, v in mapping.items():
-        if v is None:
-            out[k] = ''
-        elif isinstance(v, bytes):
-            out[k] = v.decode('utf-8', errors='replace')
-        elif isinstance(v, str):
-            out[k] = v
-        else:
-            out[k] = str(v)
-    return out
-
-
-def _redis_hset_mapping(key, mapping):
-    """写入 hash。逐字段 HSET，兼容 Redis 3（不支持 HSET 多 field 形态）；
-    若 key 类型错误（WRONGTYPE），删除后重写。"""
-    m = _coerce_redis_hash_mapping(mapping)
-    if not m:
-        return
-
-    def _pipe_hset_all():
-        pipe = _redis.pipeline()
-        for f, v in m.items():
-            pipe.hset(key, f, v)
-        pipe.execute()
-
-    try:
-        _pipe_hset_all()
-    except ResponseError as e:
-        err = str(e).upper()
-        if 'WRONGTYPE' in err:
-            _redis.delete(key)
-            _pipe_hset_all()
-        else:
-            raise
-
-
-def _redis_hset_field(key, field, value):
-    if value is None:
-        value = ''
-    elif not isinstance(value, (bytes, str)):
-        value = str(value)
-    elif isinstance(value, bytes):
-        value = value.decode('utf-8', errors='replace')
-    try:
-        _redis.hset(key, field, value)
-    except ResponseError as e:
-        if 'WRONGTYPE' in str(e).upper():
-            _redis.delete(key)
-            _redis.hset(key, field, value)
-        else:
-            raise
-
-
-def _get_log_path():
-    # 不可能不存在，不用考虑兼容的情况。
-    from nb_log import nb_log_config_default
-    return str(nb_log_config_default.LOG_PATH)
-    # try:
-    #     from nb_log import nb_log_config_default
-    #     return str(nb_log_config_default.LOG_PATH)
-    # except Exception:
-    #     if os.name == 'nt':
-    #         return os.path.join(os.path.splitdrive(os.getcwd())[0] + os.sep, 'pythonlogs')
-    #     return os.path.join(os.path.expanduser('~'), 'pythonlogs')
-
-
-def _get_nohup_log_path(name):
-    log_dir = _get_log_path()
-    os.makedirs(log_dir, exist_ok=True)
-    return os.path.join(log_dir, f'{name}.nohup.log')
-
-
-# 这些进程会继承 FUNWEB_DEPLOY，但不是业务 Python 进程，不参与合并展示/计数
-_DEPLOY_SHELL_PROCESS_NAMES = frozenset({
-    'cmd.exe', 'powershell.exe', 'pwsh.exe', 'conhost.exe', 'comhost.exe',
-})
-
-
-def _script_fingerprint_for_config(config):
-    """从 start_cmd 解析脚本路径指纹，供 cmdline 匹配与壳子进程过滤。"""
-    start_cmd = (config.get('start_cmd') or '').strip() if config else ''
-    if not start_cmd:
-        return None, None
-    sc_norm = start_cmd.replace('/', '\\')
-    fingerprint = None
-    for tok in sc_norm.split():
-        t = tok.strip('"').strip("'")
-        if '.py' in t.lower():
-            fingerprint = t.lower().replace('/', '\\')
-            break
-    if not fingerprint:
-        parts = sc_norm.split()
-        if parts:
-            fingerprint = parts[-1].strip('"').strip("'").lower().replace('/', '\\')
-    if not fingerprint or len(fingerprint) < 2:
-        return None, None
-    return fingerprint, os.path.basename(fingerprint)
-
-
-def _pid_is_ancestor_of(ancestor_pid, desc_pid):
-    try:
-        ap, dp = int(ancestor_pid), int(desc_pid)
-        if ap == dp:
-            return False
-        for parent in psutil.Process(dp).parents():
-            if parent.pid == ap:
-                return True
-    except (psutil.NoSuchProcess, psutil.AccessDenied, ValueError, OSError):
-        pass
-    return False
-
-
-def _drop_ancestor_pids(pids):
-    """在同一批 PID 内去掉「另一 PID 的祖先」：例如 py.exe → python.exe 只保留后者。"""
-    unique = []
-    seen = set()
-    for p in pids:
-        p = int(p)
-        if p not in seen:
-            seen.add(p)
-            unique.append(p)
-    drop = set()
-    for a in unique:
-        for b in unique:
-            if a == b:
-                continue
-            if _pid_is_ancestor_of(a, b):
-                drop.add(a)
-                break
-    return [p for p in unique if p not in drop]
-
-
-
-def _filter_shell_children_to_script_leaves(child_info, config):
-    """壳进程下可能同时出现 py.exe、python.exe 等多层子进程，只保留真正跑脚本的叶子 Python。"""
-    if not child_info or not config:
-        return child_info
-    fp, base_py = _script_fingerprint_for_config(config)
-    project_dir = (config.get('project_dir') or '').strip()
-    want_cwd = None
-    if project_dir:
-        try:
-            want_cwd = os.path.normcase(os.path.realpath(project_dir))
-        except OSError:
-            want_cwd = None
-
-    matched = []
-    for pid, ct in child_info:
-        try:
-            p = psutil.Process(int(pid))
-            if 'python' not in (p.name() or '').lower():
-                continue
-            cmdl = p.cmdline()
-        except (psutil.Error, ValueError):
-            continue
-        if not cmdl:
-            continue
-        if fp:
-            cmd_join = ' '.join(cmdl).lower().replace('/', '\\')
-            if fp not in cmd_join and base_py.lower() not in cmd_join:
-                continue
-        if want_cwd:
-            try:
-                cw = os.path.normcase(os.path.realpath(p.cwd()))
-                if cw != want_cwd:
-                    continue
-            except psutil.Error:
-                continue
-        matched.append((int(pid), ct))
-
-    if not matched:
-        matched = []
-        for pid, ct in child_info:
-            try:
-                p = psutil.Process(int(pid))
-                if 'python' not in (p.name() or '').lower():
-                    continue
-                matched.append((int(pid), ct))
-            except (psutil.Error, ValueError):
-                pass
-        if not matched:
-            return child_info
-
-    leaf_ids = set(_drop_ancestor_pids([m[0] for m in matched]))
-    return [(pid, ct) for pid, ct in matched if pid in leaf_ids]
-
-
-def _check_pid_alive(pid, stored_ct=None):
-    """极速验证 PID 是否存活 + create_time 防 PID 复用。
-    仅调用 is_running() 和 create_time()，毫秒级，不读环境变量/命令行。
-    """
-    try:
-        p = psutil.Process(int(pid))
-        if not p.is_running():
-            return False
-        if stored_ct:
-            try:
-                if abs(p.create_time() - float(stored_ct)) > 3.0:
-                    return False
-            except (psutil.AccessDenied, ValueError):
-                pass
-        return True
-    except (psutil.NoSuchProcess, psutil.AccessDenied, ValueError, OSError):
-        return False
-
-
-def _find_child_pids(parent_pid, timeout=3.0):
-    """找到壳进程（cmd.exe/sh）启动的 Python 解释器进程，返回 [(pid, create_time), ...]。
-    策略：
-      1. 先取壳进程的直接子进程（不递归），过滤出 python 解释器。
-      2. 若直接子进程是 py.exe（Windows 启动器），则再向下取其直接子。
-      3. 只保留第一层真正的 python 解释器，不继续递归，避免把用户脚本
-         spawn 出的孙进程（如多进程 worker）也一并纳入管理。
-    """
-    _py_launcher = {'py.exe', 'py3.exe'}
-
-    def _get_direct_python_children(pid):
-        try:
-            p = psutil.Process(pid)
-            children = p.children(recursive=False)
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
-            return []
-        result = []
-        for c in children:
-            try:
-                name = (c.name() or '').lower()
-                ct = c.create_time()
-                if name in _py_launcher:
-                    # py.exe 启动器：再向下一层取真正的 python
-                    result.extend(_get_direct_python_children(c.pid))
-                elif 'python' in name:
-                    result.append((c.pid, ct))
-                # 其他（conhost 等）忽略
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
-                pass
-        return result
-
-    found = []
-    deadline = time.time() + timeout
-    while time.time() < deadline:
-        found = _get_direct_python_children(parent_pid)
-        if found:
-            break
-        try:
-            psutil.Process(parent_pid)
-        except psutil.NoSuchProcess:
-            break
-        time.sleep(0.3)
-    return found
-
-
-def _find_deploy_pids(name):
-    """从 Redis 读取 PID + create_time 列表，逐一验证存活。
-    仅调用 is_running() 和 create_time()，不读环境变量/命令行，毫秒级。
-    返回 (alive_pid_list, search_cmd_display, alive_ct_list)
-    """
-    if os.name == 'nt':
-        display = 'Redis pid_list + psutil.Process(pid).is_running()'
-    else:
-        display = 'Redis pid_list + psutil / kill -0'
-
-    try:
-        raw_pids = _redis.hget(_runtime_key(name), 'pid_list')
-        pid_list = json.loads(raw_pids) if raw_pids else []
-    except Exception:
-        pid_list = []
-    try:
-        raw_cts = _redis.hget(_runtime_key(name), 'ct_list')
-        ct_list = json.loads(raw_cts) if raw_cts else []
-    except Exception:
-        ct_list = []
-
-    alive = []
-    alive_cts = []
-    for i, pid_str in enumerate(pid_list):
-        if not pid_str:
-            continue
-        ct = ct_list[i] if i < len(ct_list) else None
-        if _check_pid_alive(int(pid_str), ct):
-            alive.append(int(pid_str))
-            alive_cts.append(ct)
-    return alive, display, alive_cts
-
-
-def _verify_pid_belongs_to_deploy(pid, name, stored_ct=None):
-    """杀进程前的安全校验：确认 PID 确实属于该部署，防止系统重启后 PID 复用导致误杀。
-    校验优先级：
-      1. create_time 必须与启动时记录的一致（排除绝大多数 PID 复用）
-      2. 环境变量 FUNWEB_DEPLOY == name（最终确认是自己的进程）
-    仅在 stop/restart/kill 路径调用，不在轮询路径使用。
-    """
-    try:
-        p = psutil.Process(int(pid))
-        if not p.is_running():
-            return False, '进程已不存在'
-        # 第一层：create_time 校验
-        if stored_ct:
-            try:
-                ct = p.create_time()
-                if abs(ct - float(stored_ct)) > 3.0:
-                    return False, f'PID 已被复用（create_time 不匹配: 记录={stored_ct}, 实际={ct:.2f}）'
-            except (psutil.AccessDenied, ValueError):
-                pass
-        # 第二层：FUNWEB_DEPLOY 环境变量校验
-        try:
-            env = p.environ()
-            deploy_val = env.get('FUNWEB_DEPLOY', '')
-            if deploy_val == name:
-                return True, ''
-            if deploy_val:
-                return False, f'PID 属于其他部署（FUNWEB_DEPLOY={deploy_val}，期望={name}）'
-            # 环境变量为空但 create_time 匹配 → 可能是权限问题，允许杀
-        except (psutil.AccessDenied, psutil.NoSuchProcess, OSError):
-            # 无法读取环境变量（权限不足等），回退到仅信任 create_time
-            pass
-        return True, ''
-    except (psutil.NoSuchProcess, psutil.AccessDenied, ValueError, OSError):
-        return False, '进程已不存在'
-
-
-def _kill_pids(pids, name=None, ct_list=None):
-    """杀死一组 PID。如果提供 name 和 ct_list，会在杀之前做安全校验防止误杀。
-    返回 [(pid, ok, err_msg, kill_cmd), ...]"""
-    results = []
-    for i, pid in enumerate(pids):
-        pid = int(pid)
-        if os.name == 'nt':
-            kill_cmd = f'taskkill /F /T /PID {pid}'
-        else:
-            kill_cmd = f'kill -SIGTERM {pid} && sleep 1 && kill -SIGKILL {pid}'
-
-        # 安全校验：确认 PID 属于该部署
-        if name:
-            ct = ct_list[i] if ct_list and i < len(ct_list) else None
-            belongs, reason = _verify_pid_belongs_to_deploy(pid, name, ct)
-            if not belongs:
-                results.append((pid, True, f'跳过（{reason}）', f'# 跳过 PID {pid}: {reason}'))
-                continue
-
-        try:
-            if os.name == 'nt':
-                r = subprocess.run(
-                    ['taskkill', '/F', '/T', '/PID', str(pid)],
-                    capture_output=True, timeout=15,
-                )
-                ok = r.returncode == 0
-                err_msg = ''
-                if not ok:
-                    err_msg = (r.stderr or r.stdout or b'').decode('utf-8', errors='replace').strip() or f'exit {r.returncode}'
-                results.append((pid, ok, err_msg, kill_cmd))
-            else:
-                os.kill(pid, signal.SIGTERM)
-                time.sleep(1)
-                try:
-                    os.kill(pid, 0)
-                    os.kill(pid, signal.SIGKILL)
-                except ProcessLookupError:
-                    pass
-                results.append((pid, True, '', kill_cmd))
-        except Exception as e:
-            results.append((pid, False, str(e), kill_cmd))
-    return results
-
-
-
-def _build_env(config):
-    env = os.environ.copy()
-    project_dir = config.get('project_dir', '')
-
-    try:
-        extra_env = json.loads(config.get('env_vars', '{}'))
-        if isinstance(extra_env, dict):
-            env.update(extra_env)
-    except (json.JSONDecodeError, TypeError):
-        pass
-
-    pythonpath_parts = []
-    if project_dir:
-        pythonpath_parts.append(project_dir)
-    user_pythonpath = env.get('PYTHONPATH', '')
-    if user_pythonpath:
-        pythonpath_parts.append(user_pythonpath)
-    if pythonpath_parts:
-        env['PYTHONPATH'] = os.pathsep.join(pythonpath_parts)
-
-    return env
-
-
-def _format_env_summary(config, name=''):
-    lines = []
-    if name:
-        lines.append(f'FUNWEB_DEPLOY={name}')
-    project_dir = config.get('project_dir', '')
-    if project_dir:
-        lines.append(f'PYTHONPATH={project_dir}' + (';...' if os.environ.get('PYTHONPATH') else ''))
-    try:
-        extra_env = json.loads(config.get('env_vars', '{}'))
-        if isinstance(extra_env, dict):
-            for k, v in extra_env.items():
-                lines.append(f'{k}={v}')
-    except (json.JSONDecodeError, TypeError):
-        pass
-    return lines
-
-
-def _check_pids_still_alive(pid_list, ct_list):
-    """检查一批已知 PID 是否仍存活，返回存活的 PID 列表。"""
-    alive = []
-    for i, pid in enumerate(pid_list):
-        ct = ct_list[i] if i < len(ct_list) else None
-        if _check_pid_alive(pid, ct):
-            alive.append(pid)
-    return alive
-
-
-def _read_log_tail_str(log_file, max_lines=30):
-    """读取日志文件末尾若干行，返回字符串，用于启动失败诊断"""
-    lines = _read_log_tail(log_file, max_lines)
-    return ''.join(lines).strip()
-
-
-def _start_process(name, config, num_processes=None):
-    """启动一个或多个进程。返回 (procs, err, cmd_detail)"""
-    project_dir = config.get('project_dir', '')
-    start_cmd = config.get('start_cmd', '')
-
-    if not start_cmd:
-        return None, '启动命令为空', {}
-    if project_dir and not os.path.isdir(project_dir):
-        return None, f'项目目录不存在: {project_dir}', {}
-
-    if num_processes is None:
-        num_processes = int(config.get('num_processes', '1') or 1)
-    num_processes = max(1, num_processes)
-
-    env = _build_env(config)
-    env['FUNWEB_DEPLOY'] = name
-    health_secs = int(config.get('health_check_secs', '10') or 10)
-    log_file = _get_nohup_log_path(name)
-
-    cmd_detail = {
-        'cwd': project_dir or '(当前目录)',
-        'env_vars': _format_env_summary(config, name),
-        'log_file': log_file,
-        'num_processes': num_processes,
-    }
-
-    shell_procs = []
-    errors = []
-
-    for idx in range(num_processes):
-        proc_log = log_file
-
-        if os.name == 'nt':
-            display_cmd = f'{start_cmd}  (stdout/stderr >> "{proc_log}")'
-        else:
-            display_cmd = f'nohup {start_cmd} >> "{proc_log}" 2>&1 &'
-
-        if idx == 0:
-            cmd_detail['full_cmd'] = display_cmd
-
-        try:
-            log_fh = open(proc_log, 'a', encoding='utf-8')
-            if os.name == 'nt':
-                CREATE_NO_WINDOW = 0x08000000
-                proc = subprocess.Popen(
-                    start_cmd, shell=True, cwd=project_dir or None, env=env,
-                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP | CREATE_NO_WINDOW,
-                    stdout=log_fh, stderr=subprocess.STDOUT,
-                )
-            else:
-                proc = subprocess.Popen(
-                    start_cmd, shell=True, cwd=project_dir or None, env=env,
-                    start_new_session=True,
-                    stdout=log_fh, stderr=subprocess.STDOUT,
-                )
-            shell_procs.append(proc)
-        except Exception as e:
-            errors.append(f'进程 #{idx}: {e}')
-
-    if not shell_procs:
-        return None, '所有进程启动失败: ' + '; '.join(errors), cmd_detail
-
-    now_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-    # 找真实子进程 PID + create_time（python.exe 而非 cmd.exe 壳进程）
-    all_real_pids = []
-    all_real_cts = []
-    failed_any = False
-
-    # 子进程出现可能较慢：等待上限随「存活检查秒数」放宽，但不超过 60 秒
-    child_wait_timeout = min(max(health_secs, 5), 60)
-    for i, proc in enumerate(shell_procs):
-        child_info = _find_child_pids(proc.pid, timeout=child_wait_timeout)
-        if child_info:
-            child_info = _filter_shell_children_to_script_leaves(child_info, config)
-            for cpid, cct in child_info:
-                all_real_pids.append(str(cpid))
-                all_real_cts.append(str(cct))
-        else:
-            exit_code = proc.poll()
-            if exit_code is not None and exit_code != 0:
-                failed_any = True
-                log_tail = _read_log_tail_str(log_file, 20)
-                err = f'进程 #{i} 启动后退出（退出码: {exit_code}）'
-                if log_tail:
-                    err += f'\n--- 日志尾部 ---\n{log_tail}'
-                errors.append(err)
-            else:
-                # 壳进程还活着但子进程找不到，用壳进程 PID 兜底
-                try:
-                    shell_ct = psutil.Process(proc.pid).create_time()
-                except Exception:
-                    shell_ct = 0
-                all_real_pids.append(str(proc.pid))
-                all_real_cts.append(str(shell_ct))
-
-    cmd_detail['start_time'] = now_str
-    cmd_detail['pid'] = ', '.join(all_real_pids)
-
-    if failed_any:
-        cmd_detail['survived_secs'] = -1
-        _redis_hset_mapping(_runtime_key(name), {
-            'start_time': now_str,
-            'pid_list': json.dumps(all_real_pids),
-            'ct_list': json.dumps(all_real_cts),
-        })
-        return shell_procs, '\n'.join(errors), cmd_detail
-
-    # 存活检查：在 health_secs 秒内每秒确认全部 PID 仍存活（此前仅立即检查，未真正等待）
-    pid_ints = [int(p) for p in all_real_pids]
-    if not pid_ints:
-        cmd_detail['survived_secs'] = -1
-        _redis_hset_mapping(_runtime_key(name), {
-            'start_time': now_str,
-            'pid_list': '[]',
-            'ct_list': '[]',
-        })
-        return shell_procs, '未能记录到任何进程 PID，无法进行存活检查', cmd_detail
-    ct_parsed = []
-    for s in all_real_cts:
-        try:
-            ct_parsed.append(float(s))
-        except (TypeError, ValueError):
-            ct_parsed.append(None)
-
-    for elapsed in range(health_secs):
-        time.sleep(1)
-        alive = _check_pids_still_alive(pid_ints, ct_parsed)
-        if len(alive) < len(pid_ints):
-            failed_any = True
-            log_tail = _read_log_tail_str(log_file, 30)
-            err = (
-                f'存活检查失败：启动后约 {elapsed + 1} 秒内进程退出 '
-                f'（期望 {len(pid_ints)} 个，剩余 {len(alive)} 个）'
-            )
-            if log_tail:
-                err += f'\n--- 日志尾部 ---\n{log_tail}'
-            errors.append(err)
-            cmd_detail['survived_secs'] = -1
-            cmd_detail['pid'] = ', '.join(str(p) for p in alive) if alive else ''
-            _redis_hset_mapping(_runtime_key(name), {
-                'start_time': now_str,
-                'pid_list': '[]',
-                'ct_list': '[]',
-            })
-            return shell_procs, '\n'.join(errors), cmd_detail
-
-    cmd_detail['survived_secs'] = health_secs
-    _redis_hset_mapping(_runtime_key(name), {
-        'start_time': now_str,
-        'pid_list': json.dumps(all_real_pids),
-        'ct_list': json.dumps(all_real_cts),
-    })
-    return shell_procs, None, cmd_detail
-
-
-def _read_log_tail(filepath, max_lines=1000):
-    try:
-        with open(filepath, 'rb') as f:
-            f.seek(0, 2)
-            file_size = f.tell()
-            if file_size == 0:
-                return []
-
-            lines = []
-            chunk_size = 8192
-            remaining = file_size
-            partial = b''
-
-            while remaining > 0 and len(lines) < max_lines + 1:
-                read_size = min(chunk_size, remaining)
-                remaining -= read_size
-                f.seek(remaining)
-                chunk = f.read(read_size) + partial
-                chunk_lines = chunk.split(b'\n')
-                partial = chunk_lines[0]
-                lines = chunk_lines[1:] + lines
-
-            if partial:
-                lines = [partial] + lines
-
-            result_lines = lines[-max_lines:]
-            decoded = []
-            for line in result_lines:
-                try:
-                    decoded.append(line.decode('utf-8'))
-                except UnicodeDecodeError:
-                    decoded.append(line.decode('gbk', errors='replace'))
-            return decoded
-    except Exception:
-        return []
-
-
-def _find_log_files(name):
-    fpath = _get_nohup_log_path(name)
-    if os.path.isfile(fpath):
-        return [fpath]
-    return []
-
-
-def _git(project_dir, args, timeout=30):
-    """在 project_dir 下执行 git 命令，兼容不支持 -C 的旧版 git（< 1.8.5）。"""
-    return subprocess.run(
-        ['git'] + args,
-        capture_output=True, text=True,
-        cwd=project_dir, timeout=timeout,
-    )
-
-
-def _do_git_pull(project_dir, target_branch=None):
-    """执行 git pull，可选切换分支。
-    返回 dict:
-      steps      - list of {cmd, output, ok, summary}  每一步操作
-      success    - bool 整体是否成功
-      current_branch - 最终所在分支
-      summary    - 最终中文总结文本
-    """
-    steps = []
-
-    def run_step(git_args, summary_ok='', summary_fail='', timeout=30):
-        cmd_str = 'git ' + ' '.join(git_args)
-        r = _git(project_dir, git_args, timeout=timeout)
-        out = (r.stdout + r.stderr).strip()
-        ok = r.returncode == 0
-        steps.append({'cmd': '$ ' + cmd_str, 'output': out, 'ok': ok,
-                      'summary': summary_ok if ok else summary_fail})
-        return r, ok, out
-
-    # 获取当前分支（内部查询，不加入 steps）
-    cr = _git(project_dir, ['rev-parse', '--abbrev-ref', 'HEAD'], timeout=10)
-    current_branch = cr.stdout.strip() if cr.returncode == 0 else ''
-    if not current_branch:
-        err_detail = (cr.stdout + cr.stderr).strip()
-        return {'steps': steps, 'success': False, 'current_branch': '',
-                'summary': f'✗ 无法检测当前 Git 分支，pull 终止。\n详情: {err_detail or "(无输出，请确认 git 已安装且项目目录是 git 仓库)"}'}
-
-    # 获取 remote 名称（内部查询）
-    rr = _git(project_dir, ['remote'], timeout=10)
-    remotes = [r.strip() for r in rr.stdout.strip().split('\n') if r.strip()]
-    remote = remotes[0] if remotes else 'origin'
-
-    # 切换分支
-    switched = False
-    if target_branch and target_branch != current_branch:
-        local_branch = target_branch
-        if '/' in target_branch:
-            local_branch = target_branch.split('/', 1)[-1]
-
-        r, ok, out = run_step(
-            ['checkout', local_branch],
-            summary_ok=f'✓ 已切换到分支 "{local_branch}"',
-            summary_fail='',
-            timeout=30,
-        )
-        if not ok:
-            # 本地不存在，从远程创建
-            steps.pop()
-            r, ok, out = run_step(
-                ['checkout', '-b', local_branch, target_branch],
-                summary_ok=f'✓ 已从 "{target_branch}" 创建并切换到本地分支 "{local_branch}"',
-                summary_fail=f'✗ 切换分支失败：无法检出 "{local_branch}"',
-                timeout=30,
-            )
-            if not ok:
-                return {'steps': steps, 'success': False, 'current_branch': current_branch,
-                        'summary': f'✗ 切换分支失败，已终止。\n{out}'}
-        current_branch = local_branch
-        switched = True
-
-    # 检查 upstream tracking
-    tr = _git(project_dir, ['rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{u}'], timeout=10)
-
-    if tr.returncode == 0:
-        pull_args = ['pull']
-    else:
-        ls_r = _git(project_dir, ['ls-remote', '--heads', remote, current_branch], timeout=15)
-        if ls_r.stdout.strip():
-            pull_args = ['pull', remote, current_branch]
-        else:
-            found_default = None
-            for db in ['main', 'master']:
-                ls_d = _git(project_dir, ['ls-remote', '--heads', remote, db], timeout=15)
-                if ls_d.stdout.strip():
-                    found_default = db
-                    break
-            if found_default:
-                pull_args = ['pull', remote, found_default]
-            else:
-                return {'steps': steps, 'success': False, 'current_branch': current_branch,
-                        'summary': (f'✗ 分支 "{current_branch}" 在远程 "{remote}" 上不存在，'
-                                    f'且未找到 main/master，pull 终止。\n'
-                                    f'请手动执行: git branch --set-upstream-to={remote}/<分支名> {current_branch}')}
-
-    r, ok, out = run_step(
-        pull_args,
-        summary_ok='',  # 下面根据 output 内容精细判断
-        summary_fail='',
-        timeout=60,
-    )
-
-    # 精细判断 pull 结果
-    pull_out_lower = out.lower()
-    if ok:
-        if 'already up to date' in pull_out_lower or 'already up-to-date' in pull_out_lower:
-            pull_summary = f'✓ 分支 "{current_branch}" 已是最新，无需更新。'
-        elif 'conflict' in pull_out_lower or 'merge conflict' in pull_out_lower:
-            pull_summary = '⚠ 拉取时发生合并冲突，请手动解决后再操作。'
-            ok = False
-        else:
-            pull_summary = f'✓ 成功拉取分支 "{current_branch}" 的最新代码。'
-        if ok and tr.returncode != 0 and current_branch:
-            _git(project_dir, ['branch', '--set-upstream-to', f'{remote}/{current_branch}', current_branch],
-                 timeout=10)
-    else:
-        if 'conflict' in pull_out_lower:
-            pull_summary = '✗ 拉取失败：存在合并冲突，请手动处理。'
-        elif 'rejected' in pull_out_lower:
-            pull_summary = '✗ 拉取被拒绝（可能本地有超前提交），建议先检查本地状态。'
-        elif 'could not read' in pull_out_lower or 'authentication' in pull_out_lower:
-            pull_summary = '✗ 拉取失败：认证或网络问题。'
-        else:
-            pull_summary = '✗ 拉取失败。'
-
-    steps[-1]['ok'] = ok
-    steps[-1]['summary'] = pull_summary
-
-    # 整体总结
-    parts = []
-    if switched:
-        switch_step = next((s for s in steps if 'checkout' in s['cmd']), None)
-        if switch_step:
-            parts.append(switch_step['summary'])
-    parts.append(pull_summary)
-    final_summary = '\n'.join(parts)
-
-    return {'steps': steps, 'success': ok, 'current_branch': current_branch,
-            'summary': final_summary}
-
-
-# ======================== 路由 ========================
-
-@deploy_bp.route('/deploy/list', methods=['GET'])
-@login_required
-def deploy_list():
-    """列表页：仅用 Redis pid_list + is_running()/create_time() 验证，毫秒级返回。"""
-    names = _redis.smembers(_names_key())
-    result = []
-    for name in sorted(names):
-        config = _redis.hgetall(_config_key(name))
-        alive_pids, search_cmd, _ = _find_deploy_pids(name)
-        runtime_data = _redis.hgetall(_runtime_key(name))
-        status = {
-            'running': len(alive_pids) > 0,
-            'pid': ', '.join(str(p) for p in alive_pids) if alive_pids else '',
-            'start_time': runtime_data.get('start_time', ''),
-            'pid_list': [str(p) for p in alive_pids],
-            'search_cmd': search_cmd,
-        }
-        try:
-            hsec = int(config.get('health_check_secs', '10') or 10)
-        except (TypeError, ValueError):
-            hsec = 10
-        result.append({
-            'name': name,
-            'description': config.get('description', ''),
-            'project_dir': config.get('project_dir', ''),
-            'start_cmd': config.get('start_cmd', ''),
-            'health_check_secs': max(1, hsec),
-            **status,
-        })
-    return jsonify({'succ': True, 'data': result, 'ip': LOCAL_IP})
-
-
-@deploy_bp.route('/deploy/save', methods=['POST'])
-@login_required
-def deploy_save():
-    data = request.get_json(force=True)
-    name = data.get('name', '').strip()
-    if not name:
-        return jsonify({'succ': False, 'msg': '部署名称不能为空'})
-
-    project_dir = data.get('project_dir', '').strip()
-    start_cmd = data.get('start_cmd', '').strip()
-    description = data.get('description', '').strip()
-    raw_env = data.get('env_vars', '{}')
-    if raw_env is None:
-        env_vars = '{}'
-    elif isinstance(raw_env, dict):
-        env_vars = json.dumps(raw_env, ensure_ascii=False)
-    elif isinstance(raw_env, str):
-        env_vars = raw_env.strip() or '{}'
-    else:
-        try:
-            env_vars = json.dumps(raw_env, ensure_ascii=False)
-        except (TypeError, ValueError):
-            env_vars = '{}'
-
-    auto_start = '1' if data.get('auto_start') else '0'
-    auto_restart = '1' if data.get('auto_restart') else '0'
-    max_retry = str(int(data.get('max_retry', 3) or 3))
-    health_check_secs = str(int(data.get('health_check_secs', 10) or 10))
-    num_processes = str(max(1, int(data.get('num_processes', 1) or 1)))
-
-    _redis.sadd(_names_key(), name)
-    _redis_hset_mapping(_config_key(name), {
-        'name': name,
-        'description': description,
-        'project_dir': project_dir,
-        'start_cmd': start_cmd,
-        'env_vars': env_vars,
-        'auto_start': auto_start,
-        'auto_restart': auto_restart,
-        'max_retry': max_retry,
-        'health_check_secs': health_check_secs,
-        'num_processes': num_processes,
-    })
-    return jsonify({'succ': True, 'msg': '保存成功'})
-
-
-@deploy_bp.route('/deploy/<name>/clone', methods=['POST'])
-@login_required
-def deploy_clone(name):
-    data = request.get_json(force=True)
-    new_name = data.get('new_name', '').strip()
-    if not new_name:
-        return jsonify({'succ': False, 'msg': '新部署名称不能为空'})
-    if _redis.sismember(_names_key(), new_name):
-        return jsonify({'succ': False, 'msg': f'部署名称 "{new_name}" 已存在'})
-
-    config = _redis.hgetall(_config_key(name))
-    if not config:
-        return jsonify({'succ': False, 'msg': '源部署配置不存在'})
-
-    new_config = dict(config)
-    new_config['name'] = new_name
-    _redis.sadd(_names_key(), new_name)
-    _redis_hset_mapping(_config_key(new_name), new_config)
-    return jsonify({'succ': True, 'msg': f'已复制为 "{new_name}"'})
-
-
-@deploy_bp.route('/deploy/<name>/delete', methods=['DELETE'])
-@login_required
-def deploy_delete(name):
-    config = _redis.hgetall(_config_key(name)) or {}
-    alive_pids, _, _ = _find_deploy_pids(name)
-    if alive_pids:
-        return jsonify({'succ': False, 'msg': '进程运行中，请先停止再删除'})
-
-    _redis.srem(_names_key(), name)
-    _redis.delete(_config_key(name))
-    _redis.delete(_runtime_key(name))
-    return jsonify({'succ': True, 'msg': '删除成功'})
-
-
-@deploy_bp.route('/deploy/<name>/start', methods=['POST'])
-@login_required
-def deploy_start(name):
-    config = _redis.hgetall(_config_key(name))
-    if not config:
-        return jsonify({'succ': False, 'msg': '部署配置不存在'})
-
-    alive_pids, _, _ = _find_deploy_pids(name)
-    if alive_pids:
-        return jsonify({'succ': False, 'msg': '进程已在运行中'})
-
-    procs, err, cmd_detail = _start_process(name, config)
-    if err:
-        return jsonify({'succ': False, 'msg': f'启动失败: {err}', 'cmd_detail': cmd_detail})
-    _redis_hset_mapping(_runtime_key(name), {'manual_stop': '0', 'should_run': '1', 'restart_retry_count': '0'})
-    pids = cmd_detail.get('pid', '')
-    return jsonify({
-        'succ': True,
-        'msg': f'启动成功, PID={pids}',
-        'pid': pids,
-        'cmd_detail': cmd_detail,
-    })
-
-
-@deploy_bp.route('/deploy/<name>/stop', methods=['POST'])
-@login_required
-def deploy_stop(name):
-    alive_pids, search_cmd, alive_cts = _find_deploy_pids(name)
-    if not alive_pids:
-        return jsonify({'succ': False, 'msg': '进程未在运行'})
-
-    runtime_data = _redis.hgetall(_runtime_key(name))
-    old_start_time = runtime_data.get('start_time', '')
-
-    kill_results = _kill_pids(alive_pids, name=name, ct_list=alive_cts)
-    all_ok = all(r[1] for r in kill_results)
-    last_err = next((r[2] for r in kill_results if not r[1]), '')
-
-    if all_ok:
-        _redis_hset_mapping(_runtime_key(name), {
-            'manual_stop': '1', 'should_run': '0', 'pid_list': '[]', 'ct_list': '[]',
-        })
-    return jsonify({
-        'succ': all_ok,
-        'msg': '停止成功' if all_ok else (last_err or '停止进程时出错'),
-        'cmd_detail': {
-            'search_cmd': search_cmd,
-            'found_pids': [str(p) for p in alive_pids],
-            'kill_cmds': [r[3] for r in kill_results],
-            'stop_cmd': '; '.join(r[3] for r in kill_results),
-            'pid': ', '.join(str(p) for p in alive_pids),
-            'old_start_time': old_start_time,
-        },
-    })
-
-
-@deploy_bp.route('/deploy/<name>/restart', methods=['POST'])
-@login_required
-def deploy_restart(name):
-    config = _redis.hgetall(_config_key(name))
-    if not config:
-        return jsonify({'succ': False, 'msg': '部署配置不存在'})
-
-    runtime_data = _redis.hgetall(_runtime_key(name))
-    old_start_time = runtime_data.get('start_time', '')
-
-    alive_pids, search_cmd, alive_cts = _find_deploy_pids(name)
-    old_pid = ', '.join(str(p) for p in alive_pids) if alive_pids else ''
-    stop_cmds = []
-    kill_details = []
-
-    if alive_pids:
-        kill_results = _kill_pids(alive_pids, name=name, ct_list=alive_cts)
-        stop_cmds = [r[3] for r in kill_results]
-        kill_details = [{'pid': r[0], 'ok': r[1], 'cmd': r[3]} for r in kill_results]
-        any_fail = any(not r[1] for r in kill_results)
-        if any_fail:
-            last_err = next((r[2] for r in kill_results if not r[1]), '')
-            return jsonify({
-                'succ': False,
-                'msg': f'停止旧进程失败: {last_err}',
-                'cmd_detail': {
-                    'search_cmd': search_cmd,
-                    'found_pids': [str(p) for p in alive_pids],
-                    'stop_cmd': '; '.join(stop_cmds),
-                    'old_pid': old_pid,
-                    'old_start_time': old_start_time,
-                    'kill_details': kill_details,
-                },
-            })
-        _redis_hset_mapping(_runtime_key(name), {'pid_list': '[]', 'ct_list': '[]'})
-        time.sleep(1)
-
-    procs, err, cmd_detail = _start_process(name, config)
-    cmd_detail['search_cmd'] = search_cmd
-    cmd_detail['found_pids'] = [str(p) for p in alive_pids]
-    cmd_detail['kill_details'] = kill_details
-    cmd_detail['stop_cmd'] = '; '.join(stop_cmds)
-    cmd_detail['old_pid'] = old_pid
-    cmd_detail['old_start_time'] = old_start_time
-    if err:
-        return jsonify({'succ': False, 'msg': f'重启失败: {err}', 'cmd_detail': cmd_detail})
-    _redis_hset_mapping(_runtime_key(name), {'manual_stop': '0', 'should_run': '1', 'restart_retry_count': '0'})
-    pids = cmd_detail.get('pid', '')
-    return jsonify({
-        'succ': True,
-        'msg': f'重启成功, PID={pids}',
-        'pid': pids,
-        'cmd_detail': cmd_detail,
-    })
-
-
-@deploy_bp.route('/deploy/<name>/status', methods=['GET'])
-@login_required
-def deploy_status(name):
-    """状态轮询：仅用 Redis pid_list + is_running()/create_time() 验证，毫秒级返回。"""
-    config = _redis.hgetall(_config_key(name))
-    alive_pids, search_cmd, _ = _find_deploy_pids(name)
-    runtime_data = _redis.hgetall(_runtime_key(name))
-    status = {
-        'running': len(alive_pids) > 0,
-        'pid': ', '.join(str(p) for p in alive_pids) if alive_pids else '',
-        'start_time': runtime_data.get('start_time', ''),
-        'pid_list': [str(p) for p in alive_pids],
-        'search_cmd': search_cmd,
-    }
-    return jsonify({'succ': True, 'data': {**config, **status}})
-
-
-@deploy_bp.route('/deploy/<name>/git_branches', methods=['GET'])
-@login_required
-def deploy_git_branches(name):
-    """获取 git 分支列表（自动 fetch --prune 更新远程信息）"""
-    config = _redis.hgetall(_config_key(name))
-    project_dir = config.get('project_dir', '')
-    if not project_dir or not os.path.isdir(project_dir):
-        return jsonify({'succ': False, 'is_git_repo': False, 'msg': f'项目目录不存在: {project_dir}'})
-
-    try:
-        check = _git(project_dir, ['rev-parse', '--is-inside-work-tree'], timeout=5)
-        if check.returncode != 0:
-            return jsonify({'succ': True, 'is_git_repo': False,
-                            'current': '', 'local': [], 'remote': []})
-
-        _git(project_dir, ['fetch', '--prune'], timeout=30)
-
-        current = _git(project_dir, ['rev-parse', '--abbrev-ref', 'HEAD'], timeout=10)
-        current_branch = current.stdout.strip() if current.returncode == 0 else ''
-
-        local = _git(project_dir, ['branch'], timeout=10)
-        local_branches = []
-        for b in local.stdout.strip().split('\n'):
-            b = b.strip().lstrip('* ').strip()
-            if b:
-                local_branches.append(b)
-
-        remote_r = _git(project_dir, ['branch', '-r'], timeout=10)
-        remote_branches = []
-        for b in remote_r.stdout.strip().split('\n'):
-            b = b.strip()
-            if b and 'HEAD' not in b:
-                remote_branches.append(b)
-
-        return jsonify({
-            'succ': True,
-            'is_git_repo': True,
-            'current': current_branch,
-            'local': local_branches,
-            'remote': remote_branches,
-        })
-    except subprocess.TimeoutExpired:
-        return jsonify({'succ': False, 'is_git_repo': False, 'msg': 'Git 操作超时'})
-    except Exception as e:
-        return jsonify({'succ': False, 'is_git_repo': False, 'msg': str(e)})
-
-
-@deploy_bp.route('/deploy/<name>/git_pull', methods=['POST'])
-@login_required
-def deploy_git_pull(name):
-    config = _redis.hgetall(_config_key(name))
-    project_dir = config.get('project_dir', '')
-    if not project_dir or not os.path.isdir(project_dir):
-        return jsonify({'succ': False, 'msg': f'项目目录不存在: {project_dir}'})
-
-    data = request.get_json(silent=True) or {}
-    target_branch = data.get('branch', '').strip()
-
-    try:
-        res = _do_git_pull(project_dir, target_branch or None)
-        return jsonify({
-            'succ': res['success'],
-            'msg': res['summary'],
-            'steps': res['steps'],
-            'current_branch': res['current_branch'],
-        })
-    except subprocess.TimeoutExpired:
-        return jsonify({'succ': False, 'msg': '✗ Git pull 超时（60秒）', 'steps': [], 'current_branch': ''})
-    except Exception as e:
-        return jsonify({'succ': False, 'msg': f'✗ Git pull 异常: {e}', 'steps': [], 'current_branch': ''})
-
-
-@deploy_bp.route('/deploy/<name>/logs', methods=['GET'])
-@login_required
-def deploy_logs(name):
-    """返回部署日志尾部（仅供操作弹框内近期日志使用）。"""
-    max_lines = int(request.args.get('lines', 200))
-    log_files = _find_log_files(name)
-    if not log_files:
-        return jsonify({'succ': True, 'data': [], 'files': [], 'total': 0})
-
-    fpath = log_files[0]
-    lines = _read_log_tail(fpath, max_lines)
-    result = [_strip_ansi(line) for line in lines if line.strip()]
-    return jsonify({
-        'succ': True,
-        'data': result[-max_lines:],
-        'files': [os.path.basename(fpath)],
-        'total': len(result[-max_lines:]),
-    })
-
-
-@deploy_bp.route('/deploy/<name>/config', methods=['GET'])
-@login_required
-def deploy_get_config(name):
-    config = _redis.hgetall(_config_key(name))
-    if not config:
-        return jsonify({'succ': False, 'msg': '部署配置不存在'})
-    alive_pids, search_cmd, _ = _find_deploy_pids(name)
-    runtime_data = _redis.hgetall(_runtime_key(name))
-    status = {
-        'running': len(alive_pids) > 0,
-        'pid': ', '.join(str(p) for p in alive_pids) if alive_pids else '',
-        'start_time': runtime_data.get('start_time', ''),
-        'pid_list': [str(p) for p in alive_pids],
-        'search_cmd': search_cmd,
-        'log_file': _get_nohup_log_path(name),
-    }
-    return jsonify({'succ': True, 'data': {**config, **status}})
-
-
-# ======================== 自动启动 & 自动重启守护 ========================
-
-def _auto_restart_daemon():
-    """后台守护线程：每 10 秒检查所有配置了 auto_restart 的部署，
-    如果进程意外退出（且非人工停止），自动重启，最多连续失败 max_retry 次。
-    启动时还负责处理 auto_start 逻辑。
-    """
-    time.sleep(15)
-
-    try:
-        _do_auto_start()
-    except Exception:
-        pass
-
-    while True:
-        try:
-            _do_auto_restart_check()
-        except Exception:
-            pass
-        time.sleep(10)
-
-
-def _do_auto_start():
-    """服务启动时执行一次：启动所有配置了 auto_start=1 的部署（如果尚未运行）"""
-    try:
-        names = _redis.smembers(_names_key())
-    except Exception:
-        return
-    for name in names:
-        try:
-            config = _redis.hgetall(_config_key(name))
-            if not config or config.get('auto_start', '0') != '1':
-                continue
-            alive_pids, _, _ = _find_deploy_pids(name)
-            if alive_pids:
-                continue
-            procs, err, _ = _start_process(name, config)
-            if not err:
-                _redis_hset_mapping(_runtime_key(name), {
-                    'manual_stop': '0', 'should_run': '1', 'restart_retry_count': '0',
-                })
-        except Exception:
-            pass
-
-
-def _do_auto_restart_check():
-    """守护线程每次循环调用：用 Redis pid_list 快速验证存活，不做全量扫描。"""
-    try:
-        names = _redis.smembers(_names_key())
-    except Exception:
-        return
-    for name in names:
-        try:
-            config = _redis.hgetall(_config_key(name))
-            if not config or config.get('auto_restart', '0') != '1':
-                continue
-
-            runtime = _redis.hgetall(_runtime_key(name))
-            if runtime.get('manual_stop', '') == '1':
-                continue
-            if runtime.get('should_run', '') != '1':
-                continue
-
-            alive_pids, _, alive_cts = _find_deploy_pids(name)
-            expected = max(1, int(config.get('num_processes', '1') or 1))
-
-            if len(alive_pids) >= expected:
-                _redis_hset_field(_runtime_key(name), 'restart_retry_count', '0')
-                continue
-
-            retry_count = int(runtime.get('restart_retry_count', '0'))
-            max_retry = int(config.get('max_retry', '3'))
-            if retry_count >= max_retry:
-                continue
-
-            _redis_hset_field(_runtime_key(name), 'restart_retry_count', str(retry_count + 1))
-
-            if alive_pids:
-                _kill_pids(alive_pids, name=name, ct_list=alive_cts)
-                _redis_hset_mapping(_runtime_key(name), {'pid_list': '[]', 'ct_list': '[]'})
-                time.sleep(1)
-
-            procs, err, _ = _start_process(name, config)
-            if not err:
-                _redis_hset_field(_runtime_key(name), 'restart_retry_count', '0')
-        except Exception:
-            pass
-
-
-_daemon_thread = threading.Thread(target=_auto_restart_daemon, daemon=True)
-_daemon_thread.start()
-
-`````
-
---- **end of file: funboost/funweb/flask_bps/script_deploy.py** (project: funboost) --- 
-
----
-
-
---- **start of file: funboost/funweb/flask_bps/system_monitor.py** (project: funboost) --- 
-
-`````python
-# -*- coding: utf-8 -*-
-import json
-import os
-
-import threading
-import time
-import uuid
-
-from flask import Blueprint, request, jsonify
-from flask_login import login_required
-
-from funboost.utils.redis_manager import RedisMixin
-from funboost.funweb.flask_bps.web_helper import LOCAL_IP
-
-monitor_bp = Blueprint('monitor', __name__)
-
-_redis = RedisMixin().redis_db_frame
-
-_PSUTIL_OK = False
-try:
-    import psutil
-    _PSUTIL_OK = True
-except ImportError:
-    raise
-    print('[system_monitor] psutil 未安装，资源监控采集功能不可用。pip install psutil 后重启即可。')
-
-
-
-
-_RETENTION_SECS = 30 * 24 * 3600   # 30 天
-_TTL_SECS = 40 * 24 * 3600         # 40 天
-_COLLECT_INTERVAL = 10              # 每 10 秒聚合一次
-_HEARTBEAT_TTL = 35                 # 心跳 TTL
-
-
-def _zset_key(ip=None):
-    return f'monitor:{ip or LOCAL_IP}'
-
-
-def _heartbeat_key(ip=None):
-    return f'monitor:{ip or LOCAL_IP}:heartbeat'
-
-
-def _get_root_path():
-    # if os.name == 'nt':
-    #     drive = os.path.splitdrive(os.getcwd())[0]
-    #     return drive + os.sep if drive else 'C:\\'
-    return '/'
-
-
-# ======================== 采集线程 ========================
-
-def _collector_loop():
-    root_path = _get_root_path()
-    zkey = _zset_key()
-    hkey = _heartbeat_key()
-    collector_uuid = str(uuid.uuid4())
-
-    while True:
-        try:
-            # 单例检查：近 25 秒内有其他采集器写过心跳则跳过
-            last_hb = _redis.get(hkey)
-            if last_hb:
-                try:
-                    hb_data = json.loads(last_hb)
-                    if hb_data.get('uuid') != collector_uuid and time.time() - float(hb_data.get('ts', 0)) < 25:
-                        time.sleep(_COLLECT_INTERVAL)
-                        continue
-                except (ValueError, TypeError):
-                    pass
-
-            # 采集 10 个样本，每秒 1 次
-            cpu_samples = []
-            mem_samples = []
-            disk_samples = []
-            for _ in range(_COLLECT_INTERVAL):
-                cpu_samples.append(psutil.cpu_percent(interval=0))
-                mem_samples.append(psutil.virtual_memory().percent)
-                try:
-                    disk_samples.append(psutil.disk_usage(root_path).percent)
-                except Exception:
-                    disk_samples.append(0.0)
-                time.sleep(1)
-
-            avg_cpu = round(sum(cpu_samples) / len(cpu_samples), 1)
-            avg_mem = round(sum(mem_samples) / len(mem_samples), 1)
-            avg_disk = round(sum(disk_samples) / len(disk_samples), 1) if disk_samples else 0.0
-
-            ts = time.time()
-            member = json.dumps({
-                'ts': round(ts, 1),
-                'cpu': avg_cpu,
-                'mem': avg_mem,
-                'disk': avg_disk,
-            })
-            _redis.zadd(zkey, {member: ts})
-
-            # 滑动窗口清理
-            _redis.zremrangebyscore(zkey, 0, ts - _RETENTION_SECS)
-            _redis.expire(zkey, _TTL_SECS)
-
-            # 刷新心跳
-            _redis.set(hkey, json.dumps({'ts': str(ts), 'uuid': collector_uuid}), ex=_HEARTBEAT_TTL)
-
-        except Exception as e:
-            print(f'[system_monitor] 采集异常: {e}')
-            time.sleep(_COLLECT_INTERVAL)
-
-
-
-
-# ======================== API 路由 ========================
-
-@monitor_bp.route('/monitor/current', methods=['GET'])
-@login_required
-def monitor_current():
-    """返回当前主机最新一条监控数据"""
-    ip = request.args.get('ip', LOCAL_IP)
-    raw = _redis.zrevrange(_zset_key(ip), 0, 0)
-    if not raw:
-        return jsonify({'succ': True, 'data': None, 'ip': ip})
-    try:
-        data = json.loads(raw[0])
-    except (json.JSONDecodeError, IndexError):
-        data = None
-    return jsonify({'succ': True, 'data': data, 'ip': ip})
-
-
-@monitor_bp.route('/monitor/data', methods=['GET'])
-@login_required
-def monitor_data():
-    """按时间范围查询时序数据，支持降采样"""
-    ip = request.args.get('ip', LOCAL_IP)
-    now = time.time()
-    start_ts = float(request.args.get('start_ts', now - 3600))
-    end_ts = float(request.args.get('end_ts', now))
-    max_samples = int(request.args.get('samples', 360))
-
-    raw_list = _redis.zrangebyscore(_zset_key(ip), start_ts, end_ts)
-
-    points = []
-    for raw in raw_list:
-        try:
-            points.append(json.loads(raw))
-        except json.JSONDecodeError:
-            continue
-
-    # 降采样
-    if len(points) > max_samples > 0:
-        step = len(points) / max_samples
-        sampled = []
-        for i in range(max_samples):
-            idx = int(i * step)
-            sampled.append(points[idx])
-        if points[-1] not in sampled:
-            sampled.append(points[-1])
-        points = sampled
-
-    return jsonify({'succ': True, 'data': points, 'ip': ip, 'total': len(points)})
-
-
-@monitor_bp.route('/monitor/hosts', methods=['GET'])
-@login_required
-def monitor_hosts():
-    """返回所有有监控数据的主机 IP 列表"""
-    cursor = 0
-    ips = set()
-    while True:
-        cursor, keys = _redis.scan(cursor, match='monitor:*', count=100)
-        for k in keys:
-            if ':heartbeat' in k:
-                continue
-            parts = k.split(':')
-            if len(parts) == 2:
-                ips.add(parts[1])
-        if cursor == 0:
-            break
-    ip_list = sorted(ips)
-    if LOCAL_IP not in ip_list:
-        ip_list.insert(0, LOCAL_IP)
-    return jsonify({'succ': True, 'data': ip_list, 'current': LOCAL_IP})
-
-
-
-
-_collector_thread = threading.Thread(target=_collector_loop, daemon=True)
-_collector_thread.start()
-`````
-
---- **end of file: funboost/funweb/flask_bps/system_monitor.py** (project: funboost) --- 
-
----
-
-
---- **start of file: funboost/funweb/flask_bps/web_helper.py** (project: funboost) --- 
-
-`````python
-
-# -*- coding: utf-8 -*-
-"""SSE 日志实时推送最长持续时间（秒）。
-
-部署详情、日志查看器的前端脚本中 LOG_STREAM_MAX_MS 须与此值一致（×1000 为毫秒）。
-"""
-import socket
-import os
-
-LOG_STREAM_MAX_SECONDS = 300
-
-
-def _get_local_ip():
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(('8.8.8.8', 80))
-        ip = s.getsockname()[0]
-        s.close()
-    except Exception:
-        ip = socket.gethostbyname(socket.gethostname())
-    return ip
-
-def _get_local_hostname():
-    return socket.gethostname()
-
-# LOCAL_IP = _get_local_ip()  # win 不同网络，ip容易变化
-
-LOCAL_IP = _get_local_hostname()
-
-if os.getenv('FUNWEB_LOCAL_IP'): # 如果环境变量 FUNWEB_LOCAL_IP 存在，则使用环境变量 FUNWEB_LOCAL_IP 的值
-    LOCAL_IP = os.getenv('FUNWEB_LOCAL_IP')
-`````
-
---- **end of file: funboost/funweb/flask_bps/web_helper.py** (project: funboost) --- 
-
----
-
-
---- **start of file: funboost/funweb/flask_bps/__init__.py** (project: funboost) --- 
-
-`````python
-
-`````
-
---- **end of file: funboost/funweb/flask_bps/__init__.py** (project: funboost) --- 
-
----
-
-
 --- **start of file: funboost/funweb/templates/app.py中仍在使用的路由.md** (project: funboost) --- 
 
 `````markdown
@@ -55239,7 +55116,7 @@ tags: []
 
 2. 新写的代码，要参考之前的html的ui风格
 
-3.要充分利用 RedisMixin 来操作redis，不要直接用pyredis
+3. 要充分利用 RedisMixin 来操作redis，不要直接用pyredis
 `````
 
 --- **end of file: funboost/funweb/_ai_do_tasks_md/ai写web必须遵守的.md** (project: funboost) --- 
@@ -55251,1171 +55128,9 @@ tags: []
 
 `````markdown
 
-
-任务：为 funweb 的 `系统功能` 下 添加“通用日志查看器”模块
-一、背景与目标
-当前 funweb 已经具备脚本部署管理功能，其中包含针对已部署脚本的日志查看（/deploy/<name>/logs），但其日志来源仅限于部署时自动生成的日志文件（例如 {部署名称}.nohup.log），且日志路径固定。现需要扩展一个通用日志查看器，允许用户：
-
-配置多个常用的日志文件夹路径（存储在 Redis 中）
-
-浏览文件夹下的日志文件列表（文件名、大小、修改时间）
-
-支持文件名通配符搜索（例如 app*.log.*）
-
-查看任意日志文件内容，支持关键字过滤和时间范围筛选
-
-通过 WebSocket 实时推送日志内容（类似 tail -f），而不是轮询刷新
-
-该功能应独立于现有脚本部署模块，但在交互方式上可参考现有日志查看界面。
-
-二、功能需求详述
-2.1 日志文件夹管理
-用户可以添加、删除、查看常用的日志文件夹路径（绝对路径）。
-
-配置信息存储在 Redis 中，结构为：
-
-Key: funweb:{$ip}:log_folders (set) (因为每个机器的配置要隔离)
-
-每个元素为文件夹的绝对路径（字符串）
-
-
-
-2.2 文件浏览
-用户选择一个已配置的文件夹后，显示该文件夹下的所有文件和文件夹。
-
-文件列表应包含：文件名、最后修改时间、文件大小（可读格式，如 12.3 MB）。
-
-支持按文件名搜索（输入框，支持 * 通配符，例如 *.log 匹配所有 .log 文件，app*.log.* 匹配 app1.log.20260323 等）。搜索在服务端进行（使用 fnmatch 或 glob）。
-
-点击文件名进入日志查看器。
-点击子文件夹，可以跳转进去浏览子文件夹下的文件和文件夹。
-
-2.3 日志内容查看
-显示指定日志文件的内容，支持以下高级筛选：
-
-关键字过滤：仅显示包含指定字符串的行（不区分大小写）
-
-时间范围筛选：根据日志行首的时间戳（需解析常见格式）过滤，用户可指定起止时间（如 2025-03-20 10:00:00 至 2025-03-20 11:00:00）
-
-实时模式：通过 WebSocket 连接，实时接收文件新增内容（类似 tail -f）。用户可以随时开启/关闭实时模式。
-
-默认显示最近 200 行（可配置），
-
-对超大文件（如超过 50MB）应限制一次性加载行数，支持分页或按需加载（参考现有部署日志查看的二分查找方式)
-
-2.4 安全性
-后端必须验证用户选择的文件夹路径是否在配置列表中（防止路径遍历攻击）。
-
-仅允许读取配置列表内的文件，禁止访问系统敏感目录（如 /etc、/root win磁盘的敏感目录）或符号链接指向目录外的文件（可选）。
-
-对于 WebSocket 连接，同样需要验证路径合法性。
-
-三、技术方案
-3.1 后端
-Flask 框架，新增蓝图 log_bp，挂载到 app（参考 script_deploy.py 和 system_monitor.py 的写法）。
-
-Redis 存储配置（funweb:{$ip}:log_folders set）。
-
-
-
-
-
-
-3.2 前端
-新增页面：templates/log_viewer.html，集成到现有管理界面（左侧导航栏增加“日志查看器”入口）。
-
-使用 Bootstrap 和 jQuery（与现有前端风格一致）。
-
-使用 Socket.IO 客户端库接收实时日志。
-
-
-
-逐步优化：
-
-1. 日志文件要能按照创建时间  修改时间 大小 文件类型 排序
-2. 左侧日志不要一下子显示所有文件，网页太卡了。
-3.左侧的搜索文件，要提示用户输入 glob 通配符那种语法 ，不然用户以为可以不加*模糊搜索
-4. 右侧的 年月日时分秒，默认填充当前时间60分钟之前到现在，但不触发查询，希望触发的是下面快捷时间范围的全部，免得用户每次都要手动选择时间范围。
-5. 我想改成模糊搜索，用户不用输入 *task* 这种通配符，直接输入 task 就能搜索到 task 相关的日志。
-   用户必须选择某个日志文件后，才能在右侧显示日志内容。不需要支持一次性搜索多个文件中的关键字和时间范围，只搜用户选中的文件。
-6.查询bug
-  我选的时间是全部，文件是 /pythonlogs/task6.nohup.log ,为什么搜不到1236，文件中明明有1236。
-
-
-7. 已添加的文件夹路径，使用select2下拉搜索框来显示，不要一次性垂直显示所有已添加的文件夹路径。
-8. 为什么搜索那么慢呀，才13M大小的日志，花了5秒才搜索出来。
-   要优化性能呀，优化到毫秒级。
-   为什么linux grep搜关键字那么快，你那么慢，我现在是win电脑。你要在linux和win搜大文件关键字都很快。
-9. 为什么快捷时间选择 ，近1分钟 5分钟这些按钮，点击了没反应也没高亮，希望高亮时候，按钮变成绿色很明显的颜色。
-
-
-10. 右侧的 年月日时分秒，默认填充当前时间60分钟之前到现在，但不触发查询，希望触发的是下面快捷时间范围的全部，免得用户每次都要手动选择时间范围。
-但不要填充秒，填充精确到分就好了。
-
-11.关于脚本部署， 部署某个名称时候，命令能不能加个标志，使得win和linux shell或者cmd命令能够通过这个标志，获取到进程啊
-例如 搜 funweb_deploy=task6 ，就能获取到 task6部署名字 的进程id。
-
-我现在发现页面显示 task6停止了 ，但是 task6.nohup.log文件还在持续写入，说明没停止。
-
-12 脚本部署里面，所有重启 启动按钮，没完成时候，点击页面空白部分，弹框就会消失了，希望不要这样消失
-
-13 脚本部署里面，所有按钮激活后，也要改成绿色高亮。
-
-
-14 停止和重启时候，我希望显示完整的所有查找和返回的进程id，和停止进程的命令， 你使用搜索 funweb_deploy=部署名字来查找进程id，然后杀死。
-
-我看你现在的是
-```
-启动命令: python test_frame/test_web_deploy/task1.py --deploy_flag=8af836b8-ff8a-489e-848a-9f9bca60677b --funweb_deploy=task6b  (stdout/stderr >> "/pythonlogs\task6b.nohup.log")
-````
-我觉得你现在可以删除--deploy_flag=uuid了， uuid也不需要保存到reids了。
-如果你能通启动时候的环境变量 FUNWEB_DEPLOY=task6b 搜到进程id，那就使用这个来杀死相关的进程，不需要根据redis中保存的uuid和pid和启动时间校验来杀死 部署引用。
-
-
-15 脚本部署的启动和重启，检测存活设置的10秒好像没起作用，弹框很快就返回内容了，所以返回的日志是以前的旧日志，完全没有检测10秒进程还在不在。
-    【已处理】后端 `_start_process` 在写入 Redis 前增加 `health_secs` 秒、每秒一次的 PID 存活校验；子进程发现等待改为随配置放宽（最长 60s）。列表页 AJAX `timeout` 随 `health_check_secs` 放宽。
-
-16 脚本部署的详情页 日志查看，希望去掉自动刷新选择多少秒间隔，改成和日志查看模块一样的实时推送日志
-    【已处理】详情页改为 SSE `/deploy/<name>/logs/stream`（跟踪 `nohup` 日志），工具栏「实时 / 停止实时」。
-
-17 脚本部署的详情页 日志查看 和 日志查看模块 一点进去就希望 实时是开启的
- 并且为了避免浪费服务端的性能，即使开了实时，5分钟后自动关闭实时，用户自己要实时就自己去继续点击打开实时
-    【已处理】详情页首次 `loadLogs` 后自动开实时；通用日志查看器在选中文件加载完成后自动开实时。两端均为客户端 5 分钟定时关闭 + 服务端流最多持续 300 秒并下发 `timeout` 事件。
 `````
 
 --- **end of file: funboost/funweb/_ai_do_tasks_md/增加日志查看.md** (project: funboost) --- 
-
----
-
-
---- **start of file: funboost/md_for_ai/funboost_ai_coding_编程指南_rules_and_skills.md** (project: funboost) --- 
-
-`````markdown
----
-noteId: "b8794550160c11f1876707e213463054"
-tags: []
-
----
-
-
-# 🤖 Funboost AI 编程指南 (Rules & Skills)
-
-## 📜 一、Rules (AI 行为准则与约束)
-
-这是要求 AI 在编写 `funboost` 代码时 **绝对不可违反的铁律**，用于消除 AI 幻觉（如臆造参数、使用废弃 API、混淆 Celery 概念）。
-
-### 0. 最高知识准则：以官方上下文文档为唯一事实标准 (Single Source of Truth)
-- **必须深度阅读**：在编写任何 `funboost` 相关的代码或解答问题前，你必须全面检索并深度学习用户提供的 `funboost_all_docs_and_codes.md` 文档（该文档包含了十万行的全量教程与底层源码架构）。
-- **绝对禁止臆想**：你的预训练知识中可能没有最新的 `funboost` 细节，或者极易将其与 `Celery` 混淆。你生成的所有类名、方法名、入参定义（特别是 `BoosterParams` 的属性和中间件配置），**必须 100% 基于该文档中的源码事实或教程示例**，绝不允许产生任何大模型幻觉！
-
-### 1. 核心语法：绝对使用 `BoosterParams`
-- **禁止**使用老式的传参方式 `@boost("queue_name", qps=2)`。
-- **必须**将所有配置参数放入 `BoosterParams` 对象中：`@boost(BoosterParams(queue_name="xxx", ...))`。
-- **禁止臆造参数**：`BoosterParams` 是一个 Pydantic 模型，绝对不允许传递不存在的字段（如 `timeout`，正确的是 `function_timeout`；如 `max_retries`，正确的是 `max_retry_times`）。
-
-### 2. 发布消息 (`push` vs `publish`)
-- 只传递函数业务参数时，使用 `func.push(*args, **kwargs)`。
-- 需要传递框架控制参数（如 `task_id`, `countdown`, `eta`, `msg_expire_seconds`）时，**必须**使用 `func.publish(msg_dict, task_options=TaskOptions(...))`。
-- **异步环境** (async def) 中发布消息，必须使用 `await func.aio_push()` 或 `await func.aio_publish()`。
-
-### 3. 消费启动方式
-- 基础启动：`func.consume()`。
-- 多进程+多线程叠加并发（性能炸裂）：`func.multi_process_consume(n)` 或简写 `func.mp_consume(n)`。
-- 分组启动：`BoostersManager.consume_group("group_name")` （BoosterParams 里需要先设置 booster_group 的值）。
-- 启动代码的末尾，如果主线程没有其他阻塞任务，**建议**使用 `from funboost import ctrl_c_recv; ctrl_c_recv()` 阻止主线程退出。
-- 连续启动多个函数.consume()消费：`func1.consume(); func2.consume()`， 不要一厢情愿的使用子线程来启动消费，`func1.consume()`不会阻塞主线程。 
-  不要使用 `threading.Thread(target=func1.consume).start()` 和  `threading.Thread(target=func2.consume).start()` 来连续启动消费，这样做是多此一举，funboost框架很人性化，早就从框架层面让用户可以避免这样写代码了。
-  
-
-### 4. 上下文获取 (禁止 Celery 思维)
-- **禁止**像 Celery 一样在函数参数中加 `self` 或 `bind=True` 来获取上下文。
-- **必须**使用全局上下文对象：`from funboost import fct`。
-- 获取 Task ID：`fct.task_id`。
-- 获取重试次数：`fct.function_result_status.run_times`。 （function_result_status 中还有非常丰富的各种其他属性，其类型是 `FunctionResultStatus`）
-- 获取完整消息：`fct.full_msg`。
-
-### 5. 定时任务 (ApsJobAdder)
-- **禁止**直接使用原生的 `apscheduler.add_job` 去执行消费函数本体。
-- **必须**使用 `ApsJobAdder` 类：`ApsJobAdder(func, job_store_kind='redis').add_push_job(trigger='...', ...)`。
-
-### 6. 异步并发 (Asyncio)
-- 若消费函数为 `async def`，**必须**在 `BoosterParams` 中设置 `concurrent_mode=ConcurrentModeEnum.ASYNC`（并发模式设置为多线程也可以兼容 async def 的异步函数，但不是最佳选择）。
-- asyncio 生态获取 RPC 结果时，**必须**使用 `AioAsyncResult` 并 `await`，绝对禁止在异步函数中使用同步的 `AsyncResult.result`。
-
-### 7. FaaS 微服务
-- 集成 FastAPI/Flask/Django 时，**不需要**手动写发布和获取结果的 API。
-- **优先使用内置 router**直接引入框架内置的 Router：`from funboost.faas import fastapi_router; app.include_router(fastapi_router)`。
-
-### 8. 异构系统兼容与任意 JSON 消费规范 (非常重要)
-- 默认情况下，Funboost 会严格校验发布的消息字段与函数签名的入参是否完全一致。
-- **如果要消费非 Funboost 发布的消息（如 Java/Go 写入的消息，或带有未知 key 的 JSON）**：
-  - **必须**在 BoosterParams 中设置 `should_check_publish_func_params=False`。
-  - **必须**将消费函数入参定义为接收不定长参数，例如 `def task_fun(**kwargs):`，绝对禁止写成 `def task_fun(msg):` 去企图用一个 msg 入参接收整个字典。
-
-### 9. 实例方法与类方法的 `push` 调用规范
-- AI 极易用错实例方法的发布方式！Funboost 支持装饰实例方法和类方法，但 `push` 语法与普通函数不同。
-- **实例方法**：**禁止**写成 `obj.method.push(x)`。**必须**写成 `ClassName.method.push(obj, x)`，第一个参数必须传入对象实例，且该对象必须定义 `obj_init_params` 属性以便反序列化。
-- **类方法**：**禁止**写成 `ClassName.method.push(x)`。**必须**写成 `ClassName.method.push(ClassName, x)`，第一个参数必须传入类本身。
-
-### 10. 自定义扩展规范 (`user_options` 与 `override_cls`)
-- **禁止**为了实现自定义逻辑去修改 Funboost 源码或胡编 `BoosterParams` 的属性。
-- 如果用户需要传递自定义配置，**必须**放在 `BoosterParams(user_options={'my_key': 'value'})` 字典中。
-- 如果用户需要重写拦截逻辑（如格式化消息、限流），**必须**使用 OOP 继承 `AbstractConsumer` 并通过 `consumer_override_cls` 传入。
-
-### 11. AI Agent 应该使用 `python -c "import subprocess; subprocess.run(['python','your_script.py'], timeout=30)"` 启动funboost消费脚本。
-- **核心问题**：Funboost 消费函数启动后是无限循环拉取消息，程序不会自动结束，AI Agent 运行测试时会被阻塞。
-- **必须主动关闭**：AI Agent 在运行 Funboost 启动消费程序后，**必须**在适当时间后主动强制kill关闭程序，避免长时间阻塞。ai最多50秒钟后就应该强制关闭funboost消费程序。
-- **ai应该使用subprocess启动funboost消费** :
-  ai agent 启动测试funboost程序，请记住永远使用 `python -c "import subprocess; subprocess.run(['python','your_script.py'], timeout=30)"`  , 这样就会自动杀死funboost程序了。 your_script.py 替换成ai需要启动的消费脚本.
-  ai agent 禁止直接使用 `python your_script.py` 启动 funboost程序，以免ai流程被一直阻塞。
-- `subprocess.run(['python','your_script.py'], timeout=30)` 中的 your_script.py 替换成实际需要运行的脚本，timeout可以按需修改，但最大不超过50秒，python替换成真正的python解释器绝对路径。
-
-
----
-
-## 🛠️ 二、Skills (AI 技能模板)
-
-这是提供给 AI 的**标准代码切片（Snippets）**，让 AI 遇到特定场景（如写爬虫、写定时任务、写微服务）时，直接照抄最佳实践，无需自行发挥。
-
-### Skill 0: 最简 Hello World 任务 (零配置/本地单进程)
-**场景**：用户想写一个最简单的后台任务，不需要额外安装 Redis/RabbitMQ，只要求能跑起来。
-**模板**：
-```python
-import time
-from funboost import boost, BoosterParams, BrokerEnum, ctrl_c_recv
-
-@boost(BoosterParams(
-    queue_name="hello_queue",
-    broker_kind=BrokerEnum.MEMORY_QUEUE,  # 极简模式：使用内存队列，无需安装任何外部中间件
-    qps=2,                                # 简单的控频：每秒执行2次
-))
-def hello_task(word: str):
-    print(f"Hello, {word}!")
-    time.sleep(1)
-    return True
-
-if __name__ == '__main__':
-    # 1. 发布任务
-    for i in range(10):
-        hello_task.push(word=f"funboost_{i}")
-    
-    # 2. 基础启动消费 (当前进程内使用多线程运行，占用内存极小)
-    hello_task.consume() 
-    
-    # 3. 阻塞主线程
-    ctrl_c_recv()
-```
-
-### Skill 1: 创建标准的基础后台任务 (含高阶控制)
-**场景**：用户需要一个后台队列任务，要求高并发、控频、出错重试。
-**模板**：
-```python
-import time
-from funboost import boost, BoosterParams, BrokerEnum, ctrl_c_recv
-
-@boost(BoosterParams(
-    queue_name="my_standard_task",
-    broker_kind=BrokerEnum.REDIS_ACK_ABLE, # 确保不丢数据
-    concurrent_num=50,                     # 线程池并发数
-    qps=10,                                # 精准控频：每秒执行10次
-    max_retry_times=3,                     # 失败最大重试3次
-))
-def my_task(user_id: int, action: str):
-    print(f"Processing user: {user_id}, action: {action}")
-    time.sleep(1)
-    return True
-
-if __name__ == '__main__':
-    # 发布任务
-    for i in range(100):
-        my_task.push(user_id=i, action="login")
-    
-    # 启动消费 (多进程叠加多线程)
-    my_task.mp_consume(2)  # mp_consume(n) 是 multi_process_consume(n) 的简写
-    ctrl_c_recv()
-```
-
-### Skill 2: 实现 RPC 模式（发布后等待结果）
-**场景**：用户需要在发布任务后，同步或异步等待消费者执行完并返回结果。
-**模板**：
-```python
-from funboost import boost, BoosterParams, BrokerEnum, AsyncResult
-
-@boost(BoosterParams(
-    queue_name="rpc_task",
-    broker_kind=BrokerEnum.REDIS_ACK_ABLE,
-    is_using_rpc_mode=True, # 必须开启 RPC 模式
-))
-def calc_sum(a: int, b: int):
-    return a + b
-
-if __name__ == '__main__':
-    calc_sum.consume()
-    
-    # 发布并获取 AsyncResult 对象
-    async_result: AsyncResult = calc_sum.push(10, 20)
-    
-    print(f"Task ID: {async_result.task_id}, Result: {async_result.result}")
-```
-
-### Skill 3: 创建定时调度任务 (Cron / Interval)
-**场景**：用户需要每天定时、或每隔几秒钟执行一次任务。
-**模板**：
-```python
-from funboost import boost, BoosterParams, BrokerEnum, ApsJobAdder, ctrl_c_recv
-
-@boost(BoosterParams(queue_name="daily_report", broker_kind=BrokerEnum.REDIS))
-def generate_report(report_type: str):
-    print(f"Generating {report_type} report...")
-
-if __name__ == '__main__':
-    generate_report.consume()
-    
-    # 使用 ApsJobAdder 添加定时任务
-    ApsJobAdder(generate_report, job_store_kind='redis').add_push_job(
-        trigger='cron',
-        hour=2,         # 每天凌晨2点执行
-        minute=0,
-        kwargs={"report_type": "sales"},
-        id='daily_sales_report',
-        replace_existing=True
-    )
-    ctrl_c_recv()
-```
-
-### Skill 4: Asyncio 异步任务与协程发布
-**场景**：用户使用 FastAPI 或其他 asyncio 生态，需要纯异步的调度。
-**模板**：
-```python
-import asyncio
-from funboost import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum, AioAsyncResult
-
-@boost(BoosterParams(
-    queue_name="async_crawler",
-    broker_kind=BrokerEnum.REDIS,
-    concurrent_mode=ConcurrentModeEnum.ASYNC, # 指定为 asyncio 并发模式
-    is_using_rpc_mode=True
-))
-async def async_fetch(url: str):
-    await asyncio.sleep(1) # 模拟 aiohttp/httpx 异步请求
-    return f"Data from {url}"
-
-async def main():
-    # 异步生态下，必须使用 aio_push
-    aio_result = await async_fetch.aio_push("http://example.com")
-    
-    # 异步等待结果
-    result_status = await AioAsyncResult(aio_result.task_id).status_and_result
-    print(result_status.result)
-
-if __name__ == '__main__':
-    async_fetch.consume()
-    asyncio.run(main())
-```
-
-### Skill 5: 声明式工作流编排 (Workflow)
-**场景**：用户需要执行串行(Chain)、并行(Group)或并行+汇总(Chord)的复杂任务流。
-**模板**：
-```python
-from funboost import boost
-from funboost.workflow import chain, group, chord, WorkflowBoosterParams
-
-@boost(WorkflowBoosterParams(queue_name="wf_download"))
-def download(url): return f"/tmp/{url}"
-
-@boost(WorkflowBoosterParams(queue_name="wf_process"))
-def process(path, resolution): return f"{path}_{resolution}"
-
-@boost(WorkflowBoosterParams(queue_name="wf_notify"))
-def notify(results, user_id): print(f"User {user_id} done: {results}")
-
-if __name__ == '__main__':
-    # 启动消费者
-    download.consume()
-    process.consume()
-    notify.consume()
-    
-    # 构建 Chord 工作流 (先下载 -> 并行处理3种分辨率 -> 汇总通知)
-    workflow = chain(
-        download.s("video.mp4"),
-        chord(
-            group(process.s(resolution=r) for r in ['360p', '720p', '1080p']),
-            notify.s(user_id=1001)
-        )
-    )
-    result = workflow.apply() # 阻塞等待整个工作流完成
-```
-
-### Skill 6: 快速集成 FaaS 微服务接口
-**场景**：用户需要将 Funboost 任务直接暴露为 HTTP 接口供外部系统调用。
-**模板**：
-```python
-import uvicorn
-from fastapi import FastAPI
-from funboost.faas import fastapi_router, CareProjectNameEnv
-
-# 选填：只关注当前项目的队列，防止被其他队列干扰
-CareProjectNameEnv.set('my_faas_project')
-
-app = FastAPI()
-
-# 核心：一键挂载 funboost 所有标准路由 (publish, get_result, get_msg_count 等)
-app.include_router(fastapi_router)
-
-if __name__ == '__main__':
-    # 启动后访问 http://127.0.0.1:8000/docs 即可看到 /funboost/publish 等接口
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-```
-
-**核心 API 接口说明**：
-
-启动服务后，所有接口都在 `/funboost` 前缀下，自动生成交互式文档访问 `http://127.0.0.1:8000/docs`
-
-#### 6.1 发布消息（支持 RPC 模式）
-
-**接口**：`POST /funboost/publish`
-
-**请求体**：
-```json
-{
-    "queue_name": "my_task_queue",
-    "msg_body": {"user_id": 1001, "action": "login"},
-    "need_result": true,
-    "timeout": 60,
-    "task_id": "optional_custom_task_id"
-}
-```
-
-**字段说明**：
-- `queue_name` (必填): 队列名称
-- `msg_body` (必填): 消息体字典，即消费函数的入参
-- `need_result` (可选): 是否等待 RPC 结果，默认 `false`
-- `timeout` (可选): 等待结果的最大超时时间（秒），默认 `60`
-- `task_id` (可选): 自定义任务 ID，不传则自动生成
-
----
-
-#### 6.2 其他部分重要接口速查
-
-**说明：**接口定义，ai不方便查看网页接口docs，可以查看 funboost\faas\fastapi_adapter.py 文件中的fastapi的路由和pydantic model定义。
-
-**获取 RPC 结果**：`GET /funboost/get_result?task_id={任务 ID}&timeout=5`
-
-**添加定时任务**：`POST /funboost/add_timing_job`
-```json
-{
-    "queue_name": "my_queue",
-    "trigger": "cron",
-    "hour": "2",
-    "minute": "0",
-    "kwargs": {"report_type": "daily"}
-}
-```
-触发器类型：`date`（一次性）/ `interval`（间隔）/ `cron`（周期）
-
-**获取队列消息数**：`GET /funboost/get_msg_count?queue_name={队列名}`
-
-**暂停/恢复消费**：`POST /funboost/pause_consume` 或 `/resume_consume`
-```json
-{"queue_name": "my_queue"}
-```
-
-**获取定时任务列表**：`GET /funboost/get_timing_jobs?queue_name={队列名}`
-
-**获取单个定时任务**：`GET /funboost/get_timing_job?job_id={任务 ID}&queue_name={队列名}`
-
-**删除定时任务**：`DELETE /funboost/delete_timing_job?job_id={任务 ID}&queue_name={队列名}`
-
-**清空队列**：`POST /funboost/clear_queue`
-```json
-{"queue_name": "my_queue"}
-```
-
-**获取所有队列**：`GET /funboost/get_all_queues`
-
-**获取所有队列运行详情**：`GET /funboost/get_all_queue_run_info`
-
----
-
-**提示**：完整 API 文档访问 `http://127.0.0.1:8000/docs`，所有接口统一返回格式：`{"succ": bool, "msg": str, "data": any, "code": int}`
-
-
-
-
-
-### Skill 7: 高效爬虫 (配合 boost_spider)
-**场景**：用户需要写一个分布式爬虫，要求自动换代理、XPath 解析、一键入库。
-**模板**：
-```python
-from funboost import boost, BoosterParams, BrokerEnum
-from boost_spider import  RequestClient, SpiderResponse, DatasetSink
-
-db_sink = DatasetSink("sqlite:///spider_data.db")
-
-@boost(BoosterParams(
-    queue_name="spider_task", 
-    broker_kind=BrokerEnum.REDIS_ACK_ABLE,
-    qps=3, # 控频防封
-    max_retry_times=5
-))
-def crawl_page(url: str):
-    # RequestClient 内置了重试、UA 切换机制
-    client = RequestClient(request_retry_times=3, is_change_ua_every_request=True)
-    resp: SpiderResponse = client.get(url)
-    
-    # SpiderResponse 支持直接使用 xpath/css
-    title = resp.xpath('//title/text()').extract_first()
-    
-    data = {"url": url, "title": title}
-    # 一键入库
-    db_sink.save("article_table", data)
-    return data
-```
-
-### Skill 8：继承 BoosterParams（减少重复配置）
-**场景**：当项目中有多个消费函数时，通常会有大量重复的配置参数。通过继承 `BoosterParams` 创建自定义子类，可以避免在每个 `@boost` 装饰器中重复书写相同的配置。
-**模板**：
-```python
-from funboost import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum, ctrl_c_recv
-
-# 定义项目统一的配置子类
-class MyBoosterParams(BoosterParams):
-    broker_kind: str = BrokerEnum.REDIS_ACK_ABLE
-    max_retry_times: int = 3
-    concurrent_mode: str = ConcurrentModeEnum.THREADING
-    project_name: str = 'my_project'
-
-
-# 使用自定义配置类，无需每次都写重复参数
-@boost(MyBoosterParams(queue_name='task_queue_1'))
-def task1(x: int):
-    print(f"Task1: {x}")
-    return x * 2
-
-@boost(MyBoosterParams(queue_name='task_queue_3', qps=0.5))  # 特殊函数可单独覆盖配置
-def task3(report_type: str):
-    print(f"Generating {report_type} report")
-    return True
-
-
-if __name__ == '__main__':
-    task1.consume()
-    task3.consume()
-    ctrl_c_recv()
-```
-
-### Skill 9: 消费异构系统/第三方的任意 JSON 消息
-**场景**：消息不是由 Funboost 发布的（可能是 Java 部门直接写入 Redis 的），JSON 字段不固定或很多，只需要消费其中的某几个字段或全部原样接收。
-**模板**：
-```python
-from funboost import boost, BoosterParams, BrokerEnum, fct
-
-@boost(BoosterParams(
-    queue_name="java_topic_queue",
-    broker_kind=BrokerEnum.REDIS,
-    should_check_publish_func_params=False  # 核心：关闭严格的参数校验
-))
-def process_any_msg(**kwargs): # 一定要定义成 **kwargs 接收所有未知字段，不要企图用一个msg入参去接受消息队列中的json消息的多个字段。
-    # 使用 **kwargs 接收所有未知字段
-    print(f"接收到外部系统的完整字典: {kwargs}")
-    
-    # 也可以通过 fct.full_msg 获取包含框架 extra 信息的完整原始消息
-    print(f"原始完整消息: {fct.full_msg}")
-
-if __name__ == '__main__':
-    process_any_msg.consume()
-```
-
-### Skill 10: 自定义消费者拦截器 (Override Class)
-**场景**：用户希望在函数运行前后执行自定义逻辑（如特殊的数据清洗、自定义的全局限流器、自定义的结果入库机制）。
-**模板**：
-```python
-from funboost import boost, BoosterParams, AbstractConsumer, FunctionResultStatus
-
-# 1. 继承 AbstractConsumer 编写自定义逻辑
-class MyCustomConsumer(AbstractConsumer):
-    def _user_convert_msg_before_run(self, msg) -> dict:
-        # 在函数运行前，对消息进行清洗或反序列化
-        if isinstance(msg, str) and "=" in msg:
-            # 假设消息是 "a=1,b=2" 这种奇葩非 JSON 格式
-            return {k: int(v) for k, v in [pair.split('=') for pair in msg.split(',')]}
-        return super()._user_convert_msg_before_run(msg)
-        
-    def user_custom_record_process_info_func(self, function_result_status: FunctionResultStatus):
-        # 在函数运行后，自定义记录结果到特定数据库
-        if function_result_status.success:
-            print(f"自定义入库：任务 {function_result_status.task_id} 成功，耗时 {function_result_status.time_cost}")
-
-# 2. 通过 consumer_override_cls 挂载自定义类
-@boost(BoosterParams(
-    queue_name="custom_override_queue",
-    consumer_override_cls=MyCustomConsumer
-))
-def my_task(a: int, b: int):
-    return a + b
-```
-
-### Skill 11: 配置特定中间件专属参数 (`broker_exclusive_config`)
-
-**场景**：你需要为所选的消息队列中间件（如 RabbitMQ、Kafka、Redis）设置其特有的高级功能，例如：RabbitMQ 的消息优先级、Kafka 的消费者组或分区数、Redis Stream 的消费者组名等。这些配置无法通过通用的 `BoosterParams` 字段表达，必须通过 `broker_exclusive_config` 字典传递。
-
-**模板**：
-```python
-from funboost import boost, BoosterParams, BrokerEnum
-
-# 示例 1: RabbitMQ 启用消息优先级 (x-max-priority)
-@boost(BoosterParams(
-    queue_name="priority_queue",
-    broker_kind=BrokerEnum.RABBITMQ_AMQPSTORM,
-    broker_exclusive_config={
-        'x-max-priority': 5,      # 必须为整数，建议 ≤5
-        'no_ack': False,           # 是否自动确认
-    }
-))
-def priority_task(user_id: int):
-    print(f"Processing VIP user: {user_id}")
-    return True
-
-# 示例 2: Kafka 配置消费者组和分区数
-@boost(BoosterParams(
-    queue_name="kafka_topic",
-    broker_kind=BrokerEnum.KAFKA_CONFLUENT,
-    broker_exclusive_config={
-        'group_id': 'my_consumer_group',   # Kafka 消费者组
-        'auto_offset_reset': 'earliest',   # 从最早的消息开始消费
-        'num_partitions': 10,               # Topic 分区数（自动创建时有效）
-        'replication_factor': 1,             # 副本因子
-    }
-))
-def process_kafka_msg(data: dict):
-    print(f"Received from Kafka: {data}")
-
-```
-
-**注意事项**：
-- `broker_exclusive_config` 是一个字典，**只能包含所选 `broker_kind` 所支持的键**。支持的键定义在 `funboost/core/broker_kind__exclusive_config_default_define.py` 中（例如 `'x-max-priority'` 仅对 RabbitMQ 有效，对 Redis 无效）。
-- 如果传递了不支持的键，框架会发出警告，但不会阻止运行。为确保配置生效，请务必查阅对应中间件的文档或框架源码。
-
-
-### Skill 12: 启动 Funboost Web 管理器 (funboost_web_manager)
-**场景**：需要通过 Web 界面实时监控队列状态、消费速度、任务成功率等指标。
-
-**模板**：
-
-#### 方式1：命令行启动（推荐）
-```bash
-# 设置项目根目录到 PYTHONPATH
-# Linux/macOS
-export PYTHONPATH=/path/to/your/project
-# Windows (cmd)
-set PYTHONPATH=C:\path\to\your\project
-# Windows (PowerShell)
-$env:PYTHONPATH = "C:\path\to\your\project"
-
-# 启动 Web 管理器
-python -m funboost.funweb.app
-```
-
-#### 方式2：代码中启动
-```python
-from funboost.funweb.app import start_funboost_web_manager
-
-# 基础启动（默认端口 27018）
-start_funboost_web_manager()
-
-# 自定义端口和项目过滤
-start_funboost_web_manager(
-    port=8080,
-    care_project_name="my_project"  # 只显示该项目的队列
-)
-```
-
-
-
-
-### 🚨 Skill 100 : BoosterParams 配置参数字典 (AI 必读属性库)
-**重要提示**：这是 `BoosterParams` 的全量合法字段定义。**AI 在为用户生成 `@boost` 配置时，只能使用以下属性名，绝对禁止自行创造字典外不存在的参数名！**
-
-```python
-class BoosterParams(BaseJsonAbleModel):
-    """
-    掌握funboost 的精华就是知道 BoosterParams 的入参有哪些，如果知道有哪些入参字段，就掌握了funboost的 90% 用法。
-
-    pydatinc pycharm编程代码补全,请安装 pydantic插件, 在pycharm的  file -> settings -> Plugins -> 输入 pydantic 搜索,点击安装 pydantic 插件.
-
-    @boost的传参必须是此类或者继承此类,如果你不想每个装饰器入参都很多,你可以写一个子类继承BoosterParams, 传参这个子类,例如下面的 BoosterParamsComplete
-    """
-
-    queue_name: str  # 队列名字,必传项,每个函数要使用不同的队列名字.
-    broker_kind: str = BrokerEnum.SQLITE_QUEUE  # 中间件选型见3.1章节 https://funboost.readthedocs.io/zh-cn/latest/articles/c3.html
-
-    """ project_name是项目名，属于管理层面的标签, 默认为None, 给booster设置所属项目名, 用于对于在redis保存的funboost信息中，根据项目名字查看相关队列。
-    # 如果不设置很难从redis保存的funboost信息中，区分哪些队列名属于哪个项目。 主要是给web接口查看用。
-    # 一个项目的队列名字有哪些，是保存在redis的set中，key为 f'funboost.project_name:{project_name}'
-    # 通常配合 CareProjectNameEnv.set($project_name) 使用 ，它可以让你在监控和管理时“只看自己的一亩三分地“，避免被其他人的队列刷屏干扰。"""
-    project_name: typing.Optional[str] = None
-
-    """如果设置了qps，并且cocurrent_num是默认的50，会自动开了500并发，由于是采用的智能线程池任务少时候不会真开那么多线程而且会自动缩小线程数量。
-    具体看ThreadPoolExecutorShrinkAble的说明
-    由于有很好用的qps控制运行频率和智能扩大缩小的线程池，此框架建议不需要理会和设置并发数量只需要关心qps就行了，框架的并发是自适应并发数量，这一点很强很好用。"""
-    concurrent_mode: str = ConcurrentModeEnum.THREADING  # 并发模式,支持THREADING,GEVENT,EVENTLET,ASYNC,SINGLE_THREAD并发,multi_process_consume 支持协程/线程 叠加多进程并发,性能炸裂.
-    concurrent_num: int = 50  # 并发数量，并发种类由concurrent_mode决定
-    specify_concurrent_pool: typing.Optional[FunboostBaseConcurrentPool] = None  # 使用指定的线程池/携程池，可以多个消费者共使用一个线程池,节约线程.不为None时候。threads_num失效
-    
-    specify_async_loop: typing.Optional[asyncio.AbstractEventLoop] = None  # 指定的async的loop循环，设置并发模式为async才能起作用。 有些包例如aiohttp,发送请求和httpclient的实例化不能处在两个不同的loop中,可以传过来.
-    is_auto_start_specify_async_loop_in_child_thread: bool = True  # 是否自动在funboost asyncio并发池的子线程中自动启动指定的async的loop循环，设置并发模式为async才能起作用。如果是False,用户自己在自己的代码中去手动启动自己的loop.run_forever() 
-    
-    """qps:
-    强悍的控制功能,指定1秒内的函数执行次数，例如可以是小数0.01代表每100秒执行一次，也可以是50代表1秒执行50次.为None则不控频。 
-    设置qps时候,不需要指定并发数量,funboost的能够自适应智能动态调节并发池大小."""
-    qps: typing.Union[float, int, None] = None
-    """is_using_distributed_frequency_control:
-    是否使用分布式空频（依赖redis统计消费者数量，然后频率平分），默认只对当前实例化的消费者空频有效。
-    假如实例化了2个qps为10的使用同一队列名的消费者，并且都启动，则每秒运行次数会达到20。
-    如果使用分布式空频则所有消费者加起来的总运行次数是10。"""
-    is_using_distributed_frequency_control: bool = False
-
-    is_send_consumer_heartbeat_to_redis: bool = False  # 是否将发布者的心跳发送到redis，有些功能的实现需要统计活跃消费者。因为有的中间件不是真mq。这个功能,需要安装redis.
-    
-    # --------------- 重试配置 开始
-    """max_retry_times:
-    最大自动重试次数，当函数发生错误，立即自动重试运行n次，对一些特殊不稳定情况会有效果。
-    可以在函数中主动抛出重试的异常ExceptionForRetry，框架也会立即自动重试。
-    主动抛出ExceptionForRequeue异常，则当前 消息会重返中间件，
-    主动抛出 ExceptionForPushToDlxqueue  异常，可以使消息发送到单独的死信队列中，死信队列的名字是 队列名字 + _dlx。"""
-    max_retry_times: int = 3
-    
-    """
-    is_using_advanced_retry:
-    是否使用高级重试，高级重试支持指数退避重试。is_using_advanced_retry=True 时候，is_using_advanced_retry参数才能生效。
-
-
-    重试间隔有2种模式，requeue 模式 和 sleep 模式。
-    requeue模式: 将消息发回队列带延迟重试，立即释放线程,适合重试间隔大，防止长时间sleep占用线程导致降低了系统吞吐量。
-    sleep模式: 在当前线程/协程 sleep 重试，适合重试间隔小，并且消息数量少执行不频繁。此模式的sleep时候会占用工作线程/协程
-    
-    如果retry_base_interval= 1.0,retry_multiplier=2.0,retry_max_interval=60.0,则重试间隔为：
-    1s,2s,4s,8s,16s,32s,60s,60s,60s...
-    """
-    is_using_advanced_retry: bool = False  
-    advanced_retry_config :dict =  { 
-        'retry_mode': 'sleep', # 可以是 'sleep' 或 'requeue'，如果重试间隔大并且指数退避倍数大，那么应该使用requeue模式。因为sleep原地占用线程/协程降低服务吞吐量
-        'retry_base_interval': 1.0, # 基础重试间隔（秒）  1s,2s,4s,8s,16s,30s,30s,30s...
-        'retry_multiplier': 2.0, # 指数退避倍数 ，如果你想固定重试间隔，则设置为1.0
-        'retry_max_interval': 60.0, # 最大重试间隔上限（秒）
-        'retry_jitter': False, # 是否添加随机抖动
-    }
-    
-    is_push_to_dlx_queue_when_retry_max_times: bool = False  # 函数达到最大重试次数仍然没成功，是否发送到死信队列,死信队列的名字是 队列名字 + _dlx。
-    # --------------- 重试配置 结束
-
-    consuming_function_decorator: typing.Optional[typing.Callable[..., typing.Any]] = None  # 函数的装饰器。因为此框架做参数自动转指点，需要获取精准的入参名称，不支持在消费函数上叠加 @ *args  **kwargs的装饰器，如果想用装饰器可以这里指定。
-    
-    
-    """
-    function_timeout: 
-    超时秒数，函数运行超过这个时间，则自动杀死函数。为0是不限制。 
-    用户应该尽量使用各种三方包例如 aiohttp pymysql 自己的 socket timeout 设置来控制超时，而不是无脑使用funboost的function_timeout参数。
-    谨慎使用,非必要别去设置超时时间,设置后性能会降低(因为需要把用户函数包装到另一个线单独的程中去运行),而且突然强制超时杀死运行中函数,可能会造成死锁.
-    (例如用户函数在获得线程锁后突然杀死函数,别的线程再也无法获得锁了)
-    """
-    function_timeout: typing.Union[int, float,None] = None 
-    """
-    is_support_remote_kill_task:
-    是否支持远程任务杀死功能，如果任务数量少，单个任务耗时长，确实需要远程发送命令来杀死正在运行的函数，才设置为true，否则不建议开启此功能。
-    (是把函数放在单独的线程中实现的,随时准备线程被远程命令杀死,所以性能会降低)
-    """
-    is_support_remote_kill_task: bool = False  
-    
-    """
-    log_level:
-        logger_name 对应的 日志级别
-        消费者和发布者的日志级别,建议设置DEBUG级别,不然无法知道正在运行什么消息.
-        这个是funboost每个队列的单独命名空间的日志级别,丝毫不会影响改变用户其他日志以及root命名空间的日志级别,所以DEBUG级别就好,
-        用户不要压根不懂什么是python logger 的name,还去手痒调高级别. 
-        不懂python日志命名空间的小白去看nb_log文档,或者直接问 ai大模型 python logger name的作用是什么.
-    """
-    log_level: int = logging.DEBUG # 不需要改这个级别,请看上面原因
-    logger_prefix: str = ''  # 日志名字前缀,可以设置前缀
-    create_logger_file: bool = True  # 发布者和消费者是否创建文件文件日志,为False则只打印控制台不写文件.
-    logger_name: typing.Union[str, None] = ''  # 队列消费者发布者的日志命名空间.
-    log_filename: typing.Union[str, None] = None  # 消费者发布者的文件日志名字.如果为None,则自动使用 funboost.队列 名字作为文件日志名字.  日志文件夹是在nb_log_config.py的 LOG_PATH中决定的.
-    is_show_message_get_from_broker: bool = False  # 运行时候,是否记录从消息队列获取出来的消息内容
-    is_print_detail_exception: bool = True  # 消费函数出错时候,是否打印详细的报错堆栈,为False则只打印简略的报错信息不包含堆栈.
-    publish_msg_log_use_full_msg: bool = False # 发布到消息队列的消息内容的日志，是否显示消息的完整体，还是只显示函数入参。
-
-    msg_expire_seconds: typing.Union[float, int,None] = None  # 消息过期时间,可以设置消息是多久之前发布的就丢弃这条消息,不运行. 为None则永不丢弃
-
-    do_task_filtering: bool = False  # 是否对函数入参进行过滤去重.
-    task_filtering_expire_seconds: int = 0  # 任务过滤的失效期，为0则永久性过滤任务。例如设置过滤过期时间是1800秒 ， 30分钟前发布过1 + 2 的任务，现在仍然执行，如果是30分钟以内执行过这个任务，则不执行1 + 2
-
-    function_result_status_persistance_conf: FunctionResultStatusPersistanceConfig = FunctionResultStatusPersistanceConfig(
-        is_save_result=False, is_save_status=False, expire_seconds=7 * 24 * 3600, is_use_bulk_insert=False)  # 是否保存函数的入参，运行结果和运行状态到mongodb。这一步用于后续的参数追溯，任务统计和web展示，需要安装mongo。
-
-    user_custom_record_process_info_func: typing.Optional[typing.Callable[..., typing.Any]] = None  # 提供一个用户自定义的保存消息处理记录到某个地方例如mysql数据库的函数，函数仅仅接受一个入参，入参类型是 FunctionResultStatus，用户可以打印参数
-
-    is_using_rpc_mode: bool = False  # 是否使用rpc模式，可以在发布端获取消费端的结果回调，但消耗一定性能，使用async_result.result时候会等待阻塞住当前线程。
-    rpc_result_expire_seconds: int = 1800  # redis保存rpc结果的过期时间.
-    rpc_timeout:int = 1800 # rpc模式下，等待rpc结果返回的超时时间
-
-    delay_task_apscheduler_jobstores_kind :Literal[ 'redis', 'memory'] = 'redis'  # 延时任务的aspcheduler对象使用哪种jobstores ，可以为 redis memory 两种作为jobstore
-
-    
-    """
-    allow_run_time_cron:
-    只允许在规定的crontab表达式时间内运行。
-
-    例如 '* 23,0-2 * * *' 表示只在23点到2点运行。
-    allow_run_time_cron='* 9-17 * * 1-5', 表示只在周一到周五的9点到17:59:59运行。
-    为None则不限制运行时间。
-    语法是知名 croniter 包的语法，不是funboost创造的特殊语法，用户自己去google或者ai学习语法。
-    """
-    allow_run_time_cron: typing.Optional[str] = None
-
-    schedule_tasks_on_main_thread: bool = False  # 直接在主线程调度任务，意味着不能直接在当前主线程同时开启两个消费者。
-
-    is_auto_start_consuming_message: bool = False  # 是否在定义后就自动启动消费，无需用户手动写 .consume() 来启动消息消费。
-    
-    # booster_group :消费分组名字， BoostersManager.consume_group 时候根据 booster_group 启动多个消费函数,减少需要写 f1.consume() f2.consume() ...这种。
-    # 不像BoostersManager.consume_all() 会启动所有不相关消费函数,也不像  f1.consume() f2.consume() 这样需要逐个启动消费函数。
-    # 可以根据业务逻辑创建不同的分组，实现灵活的消费启动策略。
-    # 用法见文档 4.2d.3 章节.   使用 BoostersManager ,通过 consume_group 启动一组消费函数
-    booster_group:typing.Union[str, None] = None
-
-    consuming_function: typing.Optional[typing.Callable[..., typing.Any]] = None  # 消费函数,在@boost时候不用指定,因为装饰器知道下面的函数.
-    consuming_function_raw: typing.Optional[typing.Callable[..., typing.Any]] = None  # 不需要传递，自动生成
-    consuming_function_name: str = '' # 不需要传递，自动生成
-
-    
-    """
-    # 加上一个不同种类中间件非通用的配置,不同中间件自身独有的配置，不是所有中间件都兼容的配置，因为框架支持30种消息队列，消息队列不仅仅是一般的先进先出queue这么简单的概念，
-    # 例如kafka支持消费者组，rabbitmq也支持各种独特概念例如各种ack机制 复杂路由机制，有的中间件原生能支持消息优先级有的中间件不支持,
-    # 每一种消息队列都有独特的配置参数意义，可以通过这里传递。
-    # 每种中间件能传递的键值对可以看 funboost/core/broker_kind__exclusive_config_default.py 的 BROKER_EXCLUSIVE_CONFIG_DEFAULT 属性。
-    """
-    broker_exclusive_config: dict = {} 
-    
-
-
-    should_check_publish_func_params: bool = True  # 消息发布时候是否校验消息发布内容,比如有的人发布消息,函数只接受a,b两个入参,他去传2个入参,或者传参不存在的参数名字; 如果消费函数加了装饰器 ，你非要写*args,**kwargs,那就需要关掉发布消息时候的函数入参检查
-    manual_func_input_params :dict= {'is_manual_func_input_params': False,'must_arg_name_list':[],'optional_arg_name_list':[]} # 也可以手动指定函数入参字段，默认是根据消费函数def定义的入参来生成这个。
-
-
-    consumer_override_cls: typing.Optional[typing.Type] = None  # 使用 consumer_override_cls 和 publisher_override_cls 来自定义重写或新增消费者 发布者,见文档4.21b介绍，
-    publisher_override_cls: typing.Optional[typing.Type] = None
-
-    # func_params_is_pydantic_model: bool = False  # funboost 兼容支持 函数娼还是 pydantic model类型，funboost在发布之前和取出来时候自己转化。
-
-    consuming_function_kind: typing.Optional[str] = None  # 自动生成的信息,不需要用户主动传参,如果自动判断失误就传递。是判断消费函数是函数还是实例方法还是类方法。如果传递了，就不自动获取函数类型。
-    """ consuming_function_kind 可以为以下类型，
-    class FunctionKind:
-        CLASS_METHOD = 'CLASS_METHOD'
-        INSTANCE_METHOD = 'INSTANCE_METHOD'
-        STATIC_METHOD = 'STATIC_METHOD'
-        COMMON_FUNCTION = 'COMMON_FUNCTION'
-    """
-
-    """
-    user_options:
-    用户额外自定义的配置,高级用户或者奇葩需求可以用得到,用户可以自由发挥,存放任何设置.
-    user_options 提供了一个统一的、用户自定义的命名空间，让用户可以为自己的“奇葩需求”或“高级定制”传递配置，而无需等待框架开发者添加官方支持。
-    funboost 是自由框架不是奴役框架,不仅消费函数逻辑自由,目录层级结构自由,自定义奇葩扩展也要追求自由,用户不用改funboost BoosterParams 源码来加装饰器参数
-    
-    使用场景见文档 4b.6 章节.
-    """
-    user_options: dict = {} # 用户自定义的配置,高级用户或者奇葩需求可以用得到,用户可以自由发挥,存放任何设置,例如配合 consumer_override_cls中读取 或 register_custom_broker 使用
-    
-    
-    auto_generate_info: dict = {}  # 自动生成的信息,不需要用户主动传参.例如包含 final_func_input_params_info 和 where_to_instantiate 等。
-    
-    """# is_fake_booster：是否是伪造的booster,
-    # 用于faas模式下，因为跨项目的faas管理只拿到了redis的一些基本元数据，没有booster的函数逻辑，
-    # 例如ApsJobAdder管理定时任务，需要booster，但没有真实的函数逻辑，
-    # 你可以看 SingleQueueConusmerParamsGetter.gen_booster_for_faas 的用法，目前主要是控制不要执行 BoostersManager.regist_booster
-    # 普通用户完全不用改这个参数。
-    """
-    is_fake_booster: bool = False
-
-    # 普通用户不用管不用改，用于隔离boosters注册。例如faas的是虚假的跨服务跨项目的booster，没有具体函数逻辑，不可污染真正的注册。
-    # 如果你是想分组启动部分booster，那你应该用的是 booster_group 参数。
-    booster_registry_name: str = StrConst.BOOSTER_REGISTRY_NAME_DEFAULT  
-
-    
-```
-
-`````
-
---- **end of file: funboost/md_for_ai/funboost_ai_coding_编程指南_rules_and_skills.md** (project: funboost) --- 
-
----
-
-
---- **start of file: funboost/md_for_ai/test1.md** (project: funboost) --- 
-
-`````markdown
----
-noteId: "cdeeb610160f11f1876707e213463054"
-tags: []
-
----
-
-
-`````
-
---- **end of file: funboost/md_for_ai/test1.md** (project: funboost) --- 
-
----
-
-
---- **start of file: funboost/md_for_ai/如何扩展增加新的中间件.md** (project: funboost) --- 
-
-`````markdown
-
-# 0 ai如何在 funboost如何固定方式扩展增加新的broker中间件(或者定制和现有broker_kind不一样的功能)
-
-**funboost 扩展新的broker中间件，可以分为3种方式**
-
-- 静态扩展中间件。因为我是funboost作者，所以我可以在funboost框架的文件夹源码中直接增加写死代码。（这种只适合我本人，用户不能在funboost文件夹中写代码，而且只有最核心必须的中间件代码才推荐使用这种方式）
-
-- 动态扩展中间件方式一，按照教程 `funboost_all_docs.md` 4.21章节,``4.21 【完全自由定制扩展（方式1）】 使用 `register_custom_broker` 完全彻底自由灵活自定义扩展和定制修改中间件(消费者和发布者)``
-
-- 动态扩展中间件方式一，动态扩展中间件，按照教程 `funboost_all_docs.md` 4.21b章节,``4.21b 【完全自由定制扩展(方式2)】,使用 `consumer_override_cls` 和 `publisher_override_cls` 来自定义消费者 发布者。``
-
-
-# 1. 介绍 静态扩展中间件
-
-静态扩展中间件，就是需要直接在funboost/consumers 和 funboost/publishers 中增加代码文件来写代码
-
-## 静态扩展broker时候，需要修改以下文件
-
-### funboost_config_deafult.py 中的 BrokerConnConfig 增加
-如果新中间件需要连接配置（如 SQS 的 region、access_key 等固定连接配置），需要在这里添加配置项
-
-### 在 funboost/core/broker_kind__exclusive_config_default_define.py 
- 增加可额外传递独特的broker动态参数
-
-### 在 funboost/publishers 增加 publisher
-
-### 在 funboost/consumers 增加 consumer
-
-### 在 funboost/constant.py  BrokerEnum 增加枚举
-
-### 在 funboost/factories/broker_kind__publsiher_consumer_type_map.py 
- regist_to_funboost 注册publisher和consumer
-
-### 静态扩展时候，任然可以参考文档的 funboost_all_docs_and_codes.md 中教程的 4.21 章节，知道要继承重写父类哪些方法。  
-4.21 是动态扩展broker，ai在增加中间件时候，不必动态，直接把代码写死在funboost项目中就可以了
-
-当动态扩展中间件时候，不要修改以上文件。
-
-
-# 2. 动态扩展中间件方式一： `register_custom_broker` 
-
-动态新增中间件，就是不在 funboost/consumers 和 funboost/publishers 中写代码
-
-register_custom_broker，这种更适合扩展全新的不存在中间件
-
-用户新增的`YourPublisher`和`YourConsumer`类可以继承 `AbstractPublisher` 和 `AbstractConsumer` 或者  `EmptyPublisher` 和 `EmptyConsumer`。
-
-ai可以参考文档 `funboost_all_docs_and_codes.md` 中教程的 4.21 章节
-ai可以参考 `funboost/contrib/register_custom_broker_contrib` 目录下的代码，这些是动态扩展新的中间件。
-
-
-
-# 3. 动态扩展中间件方式二： `consumer_override_cls` 和 `publisher_override_cls` 
-
-`override_cls` 扩展方式更倾向于覆盖修改父类逻辑，定制用户自己的逻辑，将逻辑混入到各种broker中。
-
-用户新增的`YourPublisherMixin`和`YourConsumerMixin`类可以继承 `AbstractPublisher` 和 `AbstractConsumer` 或者  `EmptyPublisher` 和 `EmptyConsumer`。
-
-用户新增的`YourPublisherMixin`和`YourConsumerMixin`类也可以不继承任何父类，因为是mixin混入，而且mixin类从根本原理上不应该继承父类。  
-为什么`funboost/contrib/override_publisher_consumer_cls` 目录下的Mixin类代码继承了父类呢？主要是方便写代码时候代码补全实例属性和方法名，`funboost的`AbstractConsumer`和`AbstractPublisher` 有丰富的实例属性和方法，如果mixin类不继承父类，funboost代码运行毫无问题，只是不方便你写代码时候ide代码自动补全提示，你的键盘容易敲错单词字母。
-
-
-
-ai可以参考文档 `funboost_all_docs_and_codes.md` 中教程的 4.21b 章节
-
-ai可以参考 `funboost/contrib/override_publisher_consumer_cls` 目录下的代码，这些是覆盖父类定制逻辑。
-
-
-
-----------------
-
-# 4. `register_custom_broker` 和 `override_cls` 理论上都能实现新增broker和定制运行逻辑
-
-## 4.1 register_custom_broker 为什么也可以定制运行逻辑？
-register_custom_broker采用经典继承，重写 AbstractPublisher 或者 AbstractPublisher的某个具体的子类的方法，  
-推荐重写和操作消息队列有关的方法，例如 `_publish_impl`,   
-
-但是为什么register_custom_broker也能定制运行逻辑，因为你完全可以重写 _submit_task _run 等通用的函数运行控制方法， 
-没禁止你不能重写控制函数运行的这些方法。
-
-## 4.2 override_cls 为什么也可以新增全新中间件？
-
-override_cls采用mixin混入，框架自动将新的中间件类混入到父类中，用户可以在新的中间件类中重写父类的方法，实现定制逻辑，
-并且mixin类的方法作为mro查找顺序的最高优先级。
-
-@boost除了要指定`consumer_override_cls` 和 `publisher_override_cls` ，你还需要指定 `broker_kind=BrokerEnum.EMPTY` 即可。
-```python
-    @boost(BoosterParams(
-        queue_name='my_task',
-        consumer_override_cls=YourConsumerMixin,
-        publisher_override_cls=YourPublisherMixin,
-        broker_kind=BrokerEnum.EMPTY,
-    ))
-    def my_task(x):
-        return x * 2
-   
-```
-
-
-
-# publisher 和 consumer 如何写
-
-## ai要遵循的规则
-```
-注意：
-1.你要阅读 `funboost_all_docs_and_codes.md`中的4.21章节，`4.21 funboost完全自由定制扩展`
-2.你要阅读 `funboost_all_docs_and_codes.md` 中的 `funboost/md_for_ai/如何扩展增加新的中间件.md`
-3.你要参考已有的funboost扩展代码实现 `funboost/contrib/override_publisher_consumer_cls` 和 `funboost/contrib/register_custom_broker_contrib` 文件夹中的代码。
-4.你要阅读 `funboost/consumers/base_consumer.py`的AbstractConsumer基类逻辑
-5.你要阅读 `funboost/publishers/base_publisher.py`的AbstractPublisher基类逻辑
-```
-
-## Publisher 继承 AbstractPublisher ，需要实现的方法：
-
-- `custom_init()` - 可选，自定义初始化
-- `_publish_impl(msg: str)` - **必须实现**，发布消息的核心逻辑
-- `clear()` - **必须实现**，清空队列，
-- `get_message_count()` - **必须实现**，获取队列消息数量
-- `close()` - **必须实现**，关闭连接，这个方法可以写pass，因为funboost不会自动停止，是永久运行的。
-
-
-##  Consumer 继承 AbstractConsumer，需要实现的方法：
-
-- `custom_init()` - 可选，自定义初始化
-- `_dispatch_task()` - **必须实现**，从中间件取出消息，循环调用 `self._submit_task(kw)`
-- `_confirm_consume(kw)` - **必须实现**，确认消费（ack）
-- `_requeue(kw)` - **必须实现**，消息重入队
-- 如果涉及到函数控制修改的，确保要兼容 _run 和 _async_run 同步和异步两个方法
-
-## 重写父类方法时，不要忘了调用 super().xx()
-
-### 规则
-
-- 重写 AbstractPublisher / AbstractConsumer 的同名方法时，**必须调用 super().xx()**
-
-- 即使父类方法是 `pass` 的空方法，为了未来扩展，也必须调用。
-  例如虽然 `AbstractConsumer` 没有具体实现 `_both_sync_and_aio_frame_custom_record_process_info_func` 方法（只是 pass），
-  但 `PrometheusConsumerMixin` 和 `CircuitBreakerConsumerMixin` 都重写了这个方法，
-  用户可能需要组合多个 mixin，例如 `class MyCombinedMixin(CircuitBreakerConsumerMixin,PrometheusConsumerMixin)`，
-  正是因为两者都调用了 `super()._both_sync_and_aio_frame_custom_record_process_info_func()`，MRO 链才不会断，两个 mixin 的逻辑才都能执行。
-
-- 以下两种情况**可以不调用** super()：
-  1. 父类方法抛出了 `raise NotImplementedError`（纯抽象方法），例如 `_publish_impl`、`_dispatch_task`、`_confirm_consume`、`_requeue` 等
-  2. 确实需要完全替换父类逻辑，不能让父类代码执行（如 `MicroBatchConsumerMixin` 完全重写 `_submit_task`）
-
-### super() 的调用位置
-
-- **初始化类方法**（`custom_init`、`_before_start_consuming_message_hook`）：先调 `super()`，再执行自己的初始化
-- **前置拦截类方法**（`_submit_task` 加配额检查、熔断阻塞）：先执行自己的逻辑，再调 `super()`
-- **后置记录类方法**（`_after_publish`、`_both_sync_and_aio_frame_custom_record_process_info_func`）：先调或后调 `super()` 均可，因为父类目前是 `pass`
-- **前后都有自己逻辑的方法**（如 `_run`、`_async_run` 加链路追踪）：在自己的逻辑中间调 `super()`，例如 `AutoOtelConsumerMixin._run` 先开启 span，然后在 span 激活状态下调 `super()._run(kw)`，捕获异常后记录到 span，`super()` 夹在自己逻辑的中间
-
-### 正确示例 vs 错误示例
-
-```python
-# 正确 —— 初始化时先调 super()
-def custom_init(self):
-    super().custom_init()
-    self._my_config = self.consumer_params.user_options.get('my_key', 10)
-
-# 正确 —— 前置拦截后调 super()
-def _submit_task(self, kw):
-    self._check_something()       # 自己的前置逻辑
-    super()._submit_task(kw)      # 再走父类流程
-
-# 正确 —— 包裹父类调用
-def _run(self, kw: dict):
-    with some_context():
-        return super()._run(kw)   # 在上下文中调父类
-
-# 错误 —— 忘记调用 super()
-def custom_init(self):
-    self._my_config = self.consumer_params.user_options.get('my_key', 10)
-    # 缺少 super().custom_init()，父类未来的初始化逻辑会被跳过
-```
-
-##  consumer的 _submit_task(kw) 方法的kw 字典必须包含的字段：
-
-```python
-kw = {
-    'body': message_body,  # 消息体，消息体包含了函数入参大全，以及extra 这个key中有各种辅助字段
-    # 其他用于 ack/requeue 的辅助字段，每种broker都不一样，如：
-    # 'receipt_handle': ...,  # SQS 用
-    # 'message': ...,         # AMQP 用
-    # 'channel': ...,         # RabbitMQ 用
-}
-self._submit_task(kw)
-```
-
-## ai使用 override_cls 扩展mixin类的时候，最好是将新增的多个配置入参放在 user_options字典的 某个key中
-
-例如 CircuitBreakerConsumerMixin 的熔断器配置，可以放在 user_options字典的 'circuit_breaker_options' 这个key中。
-因为可以防止 user_options 字典中其他key和熔断器配置key冲突。
-
-
-## ai扩展mixin类，如果需要使用框架提供的记录结果的钩子函数，请使用以下方法
-
-- `_both_sync_and_aio_frame_custom_record_process_info_func` 
-  同步和异步都会调用，如果是纯cpu计算，里面不涉及到io可以用这个。
-- `_frame_custom_record_process_info_func`  
-  里面涉及到io操作，不能用 `_both_sync_and_aio_frame_custom_record_process_info_func`，要重写这个。
-- `_aio_frame_custom_record_process_info_func`
-  里面涉及到io操作，不能用 `_both_sync_and_aio_frame_custom_record_process_info_func`，要重写这个。
-  为了避免代码和同步的 `_frame_custom_record_process_info_func` 重复，所以可以快速的用 `simple_run_in_executor` 将异步逻辑转换成同步逻辑。
-  ```python
-  await super()._aio_frame_custom_record_process_info_func(current_function_result_status, kw)
-  await simple_run_in_executor(self._frame_custom_record_process_info_func, current_function_result_status, kw)
-  ```
-
-
-
-
-## broker特有独有配置访问规范：
-
-- `broker_exclusive_config` 中的配置**必须使用中括号 `[]` 访问**，不要用 `.get()`
-- 默认值最好在 `broker_kind__exclusive_config_default_define.py` 中的 `register_broker_exclusive_config_default` 函数进行声明，方便用户知道可以传递哪些
-- 如果 key 不存在会直接抛出 KeyError，便于发现问题
-
-- 在consumer类中通过 self.consumer_params.broker_exclusive_config['$key'] 访问
-- 在publisher类中通过 self.publisher_params.broker_exclusive_config['$key'] 访问
-
-## ai可以参考的
-
-ai 可以参考里面的funboost/publishers 和 funboost/consumers 其他broker写法。
-
-ai 可以参考文档 `funboost_all_docs_and_codes.md` 中教程的 4.21 和 4.21b 章节
-
-ai可以参考 `funboost/contrib/override_publisher_consumer_cls` 目录下的代码,这些是动态扩展中间件。
-
-## ai编程不需要过度保守防御性编程
-
-例如写过多的try，对确定的字典进行get
-
-
-# 编写测试代码 
-增加扩展新的中间件后，需要在 test_frame/ 目录下编写测试验证功能
-在 test_frame/ 目录下新建一个文件夹，编写测试验证功能
-
-**ai注意：**
-ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右，然后kill。
-如果funboost时间太短，可能还没来得及启动消费
-如果不主动kill，funboost不会自动结束的，因为funboost设计成了无限循环消费
-
-`````
-
---- **end of file: funboost/md_for_ai/如何扩展增加新的中间件.md** (project: funboost) --- 
 
 ---
 
@@ -62069,20 +60784,16 @@ def signal_handler(signum, frame):
 
 def ctrl_c_recv(confirmation_count=1):
     """ 
-    程序最末尾加 ctrl_c_recv() 主要是为了主线程持续在运行，方便你敲击键盘 ctrl + c 可以停止程序而已。  
+    程序最末尾加 ctrl_c_recv() 主要是为了主线程持续在运行，方便你在 windows系统下敲击键盘 ctrl + c 可以停止程序而已。  
     你即使程序最末尾不加 ctrl_c_recv(),funboost消费程序也会永久持续运行，控制台也会不断打印日志和 `print` 输出。
     
-    
     加与不加的详细区别，可以看教程6.25b章节 `## 6.25b `ctrl_c_recv` 到底要不要加？—— 直接看效果`
-    
     
     你也可以不用ctrl_c_recv(),  直接在你的启动脚本文件的最末尾加上：
     while 1:
         time.sleep(100) 
-    来达到主线程在持续运行的目的。
+    也能达到主线程在持续运行的目的，从而在windows系统下敲击键盘 ctrl + c 可以停止程序。
     """
-    # signal.signal(signal.SIGTERM, signal_handler)
-    
     for i in range(confirmation_count):
         while 1:
             try:
@@ -62092,9 +60803,9 @@ def ctrl_c_recv(confirmation_count=1):
                 print(f'{type(e)} 你按了ctrl c ,程序退出, 第 {i + 1} 次', flush=True)
                 # time.sleep(2)
                 break
-    # sys.exit(4)
+
     os._exit(44)
-    # exit(444)
+
 
 `````
 
