@@ -16,14 +16,17 @@ import threading
 from functools import wraps
 
 from funboost.concurrent_pool import FunboostBaseConcurrentPool
-from funboost.core.loggers import FunboostFileLoggerMixin, LoggerLevelSetterMixin, FunboostMetaTypeFileLogger
+from funboost.core.loggers import FunboostFileLoggerMixin, LoggerLevelSetterMixin, FunboostMetaTypeFileLogger,flogger
 
 
 class FlexibleThreadPool(FunboostFileLoggerMixin, LoggerLevelSetterMixin, FunboostBaseConcurrentPool):
     KEEP_ALIVE_TIME = 10
     MIN_WORKERS = 1
 
-    def __init__(self, max_workers: int = None,work_queue_maxsize=10):
+    def __init__(self, max_workers: int = None,work_queue_maxsize=10,
+                 specify_async_loop=None,
+                is_auto_start_specify_async_loop_in_child_thread=True
+                 ):
         self.work_queue = queue.Queue(work_queue_maxsize)
         self.max_workers = max_workers
         self._threads_num = 0
@@ -33,6 +36,8 @@ class FlexibleThreadPool(FunboostFileLoggerMixin, LoggerLevelSetterMixin, Funboo
         self._lock_for_adjust_thread = threading.Lock()
         self._lock_for_judge_threads_free_count = threading.Lock()
         self.pool_ident = id(self)
+        self._specify_async_loop = specify_async_loop
+        self._is_auto_start_specify_async_loop_in_child_thread = is_auto_start_specify_async_loop_in_child_thread
         # self.asyncio_loop = asyncio.new_event_loop()
 
     def _change_threads_free_count(self, change_num):
@@ -100,6 +105,32 @@ def sync_or_async_fun_deco(func):
     return _inner
 
 
+def _new_anyio_fun(func,args:tuple,kwargs:dict,specify_async_loop,is_auto_start_specify_async_loop_in_child_thread):
+    fun_is_asyncio = inspect.iscoroutinefunction(func)
+    def _start_specify_async_loop():
+        try:
+            specify_async_loop.create_task(func(*args, **kwargs))
+        except BaseException as exc:
+            flogger.error(f'_start_specify_async_loop 启动指定的asyncio loop 时发生错误 {exc}') #is_running有竞争， 小概率重复启动。
+
+    if fun_is_asyncio:
+        try:
+            if specify_async_loop is not None:
+                if is_auto_start_specify_async_loop_in_child_thread:
+                    if specify_async_loop.is_running():
+                        pass
+                    else:
+                        threading.Thread(target=_start_specify_async_loop).start()
+                return asyncio.run_coroutine_threadsafe(func(*args, **kwargs), specify_async_loop).result()
+            else:
+                loop = _get_thread_local_loop()
+                return loop.run_until_complete(func(*args, **kwargs))
+        finally:
+            pass
+            # loop.close()
+    else:
+        return func(*args, **kwargs)
+
 # noinspection PyProtectedMember
 class _KeepAliveTimeThread(threading.Thread, metaclass=FunboostMetaTypeFileLogger):
     def __init__(self, thread_pool: FlexibleThreadPool):
@@ -128,8 +159,9 @@ class _KeepAliveTimeThread(threading.Thread, metaclass=FunboostMetaTypeFileLogge
                         continue
             self.pool._change_threads_free_count(-1)
             try:
-                fun = sync_or_async_fun_deco(func)
-                fun(*args, **kwargs)
+                # fun = sync_or_async_fun_deco(func)
+                # fun(*args, **kwargs)
+                _new_anyio_fun(func,args,kwargs,self.pool._specify_async_loop,self.pool._is_auto_start_specify_async_loop_in_child_thread)
             except BaseException as exc:
                 self.logger.exception(f'函数 {func} 中发生错误，错误原因是 {type(exc)} {exc} ')
             self.pool._change_threads_free_count(1)
