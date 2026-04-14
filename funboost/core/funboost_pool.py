@@ -12,7 +12,6 @@ NbFunboostPool 拥有funboost的所有能力
 
 import typing
 import concurrent.futures
-import inspect
 from funboost import BoosterParams, BrokerEnum, Booster, FunctionResultStatus, AsyncResult
 from funboost.concurrent_pool.flexible_thread_pool import _new_anyio_fun,FlexibleThreadPoolMinWorkers0
 
