@@ -108,6 +108,10 @@ class FunboostPool:
 
 
 class NbFunboostPool(FunboostPool):
+    """
+    NbFunboostPool 比 FunboostPool 能设置更多的控制参数，支持精细化设置 BoosterParams 所有控制入参，例如重试等。
+    """
+
     def __init__(
         self,
         booster_params,
@@ -115,7 +119,7 @@ class NbFunboostPool(FunboostPool):
     ):  
         """
         创建一个通用任务池。
-        :param booster_params: BoosterParams对象. NbFunboostPool相比FunboostPool有更多的控制入参。
+        :param booster_params: BoosterParams 对象. NbFunboostPool相比FunboostPool有更多的控制入参。
         :param is_future_direct_ret_result: future中是的数据是最终result结果，还是 FunctionResultStatus 对象。
                如果返回FunctionResultStatus的信息更为丰富，包括重试了几次，耗时等等。
                如果返回result结果，那么只有结果，没有其他信息，但是更贴合原原生的 concurrent.futures.Future.result() 方法的返回值。
@@ -150,20 +154,21 @@ if __name__ == "__main__":
         return x * 10
 
 
-
-    # 像原生线程池一样随意切换函数
-    # pool = NbFunboostPool(
-    #     BoosterParams(
-    #         queue_name="universal_queue",
-    #         broker_kind=BrokerEnum.MEMORY_QUEUE,
-    #         concurrent_num=10,
-    #     ),
+    # pool = FunboostPool(
+    #     max_workers=10,
+    #     qps=100,
+    #     is_future_direct_ret_result=True,
     # )
-    pool = FunboostPool(
-        max_workers=10,
-        qps=100,
-        is_future_direct_ret_result=True,
+
+    # 像原生线程池一样随意切换函数， 
+    pool = NbFunboostPool(
+        BoosterParams(
+            queue_name="universal_queue",
+            broker_kind=BrokerEnum.MEMORY_QUEUE,
+            concurrent_num=10,
+        ),
     )
+    
 
     # 提交加法
     f1 = pool.submit(add, 5, 3)
