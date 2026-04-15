@@ -128,13 +128,11 @@ class NbFunboostPool(FunboostPool):
         """
         self.booster_params = booster_params
         if self.booster_params.broker_kind != BrokerEnum.MEMORY_QUEUE:
+            self._callback_run_executor = FlexibleThreadPoolMinWorkers0(self.booster_params.concurrent_num,work_queue_maxsize=50)
             self.booster_params.is_using_rpc_mode = True
         self.is_future_direct_ret_result = is_future_direct_ret_result
         self.booster: Booster = None
         self._create_booster()
-        if self.booster_params.broker_kind != BrokerEnum.MEMORY_QUEUE: 
-            self._callback_run_executor = FlexibleThreadPoolMinWorkers0(self.booster_params.concurrent_num,work_queue_maxsize=50)
-    
     def submit(self, fn: typing.Callable, *args, **kwargs) -> concurrent.futures.Future:
         # 1. 如果是内存队列，直接复用父类的高效实现（底层用 get_future）
         if self.booster_params.broker_kind == BrokerEnum.MEMORY_QUEUE:
@@ -197,7 +195,7 @@ if __name__ == "__main__":
     pool = NbFunboostPool(
         BoosterParams(
             queue_name="universal_queue",
-            broker_kind=BrokerEnum.REDIS,
+            broker_kind=BrokerEnum.REDIS, # 不仅支持内存队列，也支持其他队列。
             concurrent_num=10,
         ),
     )
