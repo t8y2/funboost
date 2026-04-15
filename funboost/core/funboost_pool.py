@@ -1,11 +1,17 @@
 """
 写一个 Funboost 通用任务池，支持 submit 任意函数，并返回 Future。
 除了实例化入参，最常用的submit方法和 concurrent.futures.ThreadPoolExecutor 一样。例如submit和返回future。
+所以用户可以使用 FunboostPool 或者 NbFunboostPool 的实例化对象替代之前的 ThreadPoolExecutor的对象。一般用户只用到pool.submit，基本完美平替，只需要修改一行代码。
+
+funboostpool 比 ThreadPoolExecutor更强的在于，可以内存存储任务，也可以分布式消息队列存任务。
+funboostpool 有几十种任务控制功能，例如重试策略，超时策略，任务优先级。
+funboostpool 能支持asyncio任务和同步任务，ThreadPoolExecutor 没这个能力
+funboostpool 的池子可以自动扩大和自动缩小，ThreadPoolExecutor 不能自动缩小。
+NbFunboostPool 拥有funboost的所有能力
 """
 
 import typing
 import concurrent.futures
-import inspect
 from funboost import BoosterParams, BrokerEnum, Booster, FunctionResultStatus, AsyncResult
 from funboost.concurrent_pool.flexible_thread_pool import _new_anyio_fun,FlexibleThreadPoolMinWorkers0
 
@@ -21,12 +27,14 @@ class FunboostPool:
         self,
         max_workers: int = 4,
         qps: int = 100,
+        is_need_result : bool = False,
         is_future_direct_ret_result: bool = True,
     ):
         """
         创建一个通用任务池。
         :param max_workers: 最大线程数
         :param qps: 每秒处理消息数
+        :param is_need_result: 是否需要返回执行结果,如果不关心结果只执行，可以减少性能损耗
         :param is_future_direct_ret_result: future中是的数据是最终result结果，还是 FunctionResultStatus 对象。
                如果返回FunctionResultStatus对象，那么信息更为丰富，包括重试了几次，耗时等等。
                如果返回result结果，那么只有结果，没有其他信息，但是更贴合原生的 concurrent.futures.Future.result() 方法的返回值。
@@ -36,12 +44,14 @@ class FunboostPool:
         self.qps = qps
         self.booster: Booster = None
         # self._pool_queue_name = f"universal_pool_{id(self)}"
+        
         self.booster_params = BoosterParams(
             queue_name=f"universal_pool_{id(self)}",
             concurrent_num=self.max_workers,
             qps=self.qps,
             broker_kind=BrokerEnum.MEMORY_QUEUE,
         )
+        self.is_need_result = is_need_result
         self.is_future_direct_ret_result = is_future_direct_ret_result
         self._create_booster()
 
@@ -71,6 +81,9 @@ class FunboostPool:
         # 将函数和参数打包成一个字典，直接放进消息队列
         # 因为用的是 MEMORY_QUEUE，函数对象不会被序列化，而是直接传递引用！
         task_data = {"func": fn, "args": args, "kwargs": kwargs}
+        if self.is_need_result is False:
+            self.booster.push(task_data)
+            return None
 
         # 使用 publisher 的 get_future 方法，直接返回 Future 对象
         raw_future = self.booster.publisher.get_future(task_data)
@@ -116,30 +129,46 @@ class NbFunboostPool(FunboostPool):
     def __init__(
         self,
         booster_params,
+        is_need_result = False,
         is_future_direct_ret_result: bool = True,
     ):  
         """
         创建一个通用任务池。
         :param booster_params: BoosterParams 对象. NbFunboostPool相比FunboostPool有更多的控制入参。
+        :param is_need_result: 是否需要返回执行结果,如果不关心结果只执行，可以不使用rpc模式，不依赖redis做rpc，节约redis空间和性能。
         :param is_future_direct_ret_result: future中是的数据是最终result结果，还是 FunctionResultStatus 对象。
                如果返回FunctionResultStatus的信息更为丰富，包括重试了几次，耗时等等。
                如果返回result结果，那么只有结果，没有其他信息，但是更贴合原原生的 concurrent.futures.Future.result() 方法的返回值。
         :return:
         """
         self.booster_params = booster_params
+<<<<<<< HEAD:funboost/core/funboost_as_pool.py
         if self.booster_params.broker_kind != BrokerEnum.MEMORY_QUEUE:
             self._callback_run_executor = FlexibleThreadPoolMinWorkers0(self.booster_params.concurrent_num,work_queue_maxsize=50)
+=======
+        if self.booster_params.broker_kind != BrokerEnum.MEMORY_QUEUE and is_need_result is True :
+>>>>>>> 1bc40f0401b5695233551aeea12c46143a5ac0a0:funboost/core/funboost_pool.py
             self.booster_params.is_using_rpc_mode = True
+            self._callback_run_executor = FlexibleThreadPoolMinWorkers0(self.booster_params.concurrent_num,)
+        self.is_need_result = is_need_result
         self.is_future_direct_ret_result = is_future_direct_ret_result
         self.booster: Booster = None
         self._create_booster()
+<<<<<<< HEAD:funboost/core/funboost_as_pool.py
+=======
+        
+>>>>>>> 1bc40f0401b5695233551aeea12c46143a5ac0a0:funboost/core/funboost_pool.py
     def submit(self, fn: typing.Callable, *args, **kwargs) -> concurrent.futures.Future:
         # 1. 如果是内存队列，直接复用父类的高效实现（底层用 get_future）
         if self.booster_params.broker_kind == BrokerEnum.MEMORY_QUEUE:
             return super().submit(fn, *args, **kwargs)
+        task_data = {"func": fn, "args": args, "kwargs": kwargs}
+        if self.is_need_result is False:
+            self.booster.push(task_data)
+            return None
 
         # 2. 如果是分布式队列，走标准 RPC 回调封装
-        task_data = {"func": fn, "args": args, "kwargs": kwargs}
+        
         async_result: AsyncResult = self.booster.push(task_data)
         async_result.callback_run_executor = self._callback_run_executor
 
@@ -197,7 +226,10 @@ if __name__ == "__main__":
             queue_name="universal_queue",
             broker_kind=BrokerEnum.REDIS, # 不仅支持内存队列，也支持其他队列。
             concurrent_num=10,
+            
         ),
+        is_need_result=True,
+        is_future_direct_ret_result=True,
     )
     
 
