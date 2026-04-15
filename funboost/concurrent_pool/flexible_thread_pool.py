@@ -5,7 +5,7 @@
 
 此线程池性能比concurrent.futures.ThreadPoolExecutor高200%
 
-顺便兼容asyns def的函数并发运行
+ThreadPoolExecutorShrinkAble 顺便兼容asyns def的函数并发运行
 """
 
 import asyncio
@@ -25,7 +25,7 @@ class FlexibleThreadPool(FunboostFileLoggerMixin, LoggerLevelSetterMixin, Funboo
 
     def __init__(self, max_workers: int = None,work_queue_maxsize=10,
                  specify_async_loop=None,
-                is_auto_start_specify_async_loop_in_child_thread=True
+                 is_auto_start_specify_async_loop_in_child_thread=True
                  ):
         self.work_queue = queue.Queue(work_queue_maxsize)
         self.max_workers = max_workers

@@ -142,22 +142,14 @@ class NbFunboostPool(FunboostPool):
         :return:
         """
         self.booster_params = booster_params
-<<<<<<< HEAD:funboost/core/funboost_as_pool.py
-        if self.booster_params.broker_kind != BrokerEnum.MEMORY_QUEUE:
-            self._callback_run_executor = FlexibleThreadPoolMinWorkers0(self.booster_params.concurrent_num,work_queue_maxsize=50)
-=======
         if self.booster_params.broker_kind != BrokerEnum.MEMORY_QUEUE and is_need_result is True :
->>>>>>> 1bc40f0401b5695233551aeea12c46143a5ac0a0:funboost/core/funboost_pool.py
             self.booster_params.is_using_rpc_mode = True
             self._callback_run_executor = FlexibleThreadPoolMinWorkers0(self.booster_params.concurrent_num,)
         self.is_need_result = is_need_result
         self.is_future_direct_ret_result = is_future_direct_ret_result
         self.booster: Booster = None
         self._create_booster()
-<<<<<<< HEAD:funboost/core/funboost_as_pool.py
-=======
-        
->>>>>>> 1bc40f0401b5695233551aeea12c46143a5ac0a0:funboost/core/funboost_pool.py
+
     def submit(self, fn: typing.Callable, *args, **kwargs) -> concurrent.futures.Future:
         # 1. 如果是内存队列，直接复用父类的高效实现（底层用 get_future）
         if self.booster_params.broker_kind == BrokerEnum.MEMORY_QUEUE:
@@ -228,23 +220,23 @@ if __name__ == "__main__":
             concurrent_num=10,
             
         ),
-        is_need_result=True,
+        is_need_result=False,
         is_future_direct_ret_result=True,
     )
     
 
     # 提交加法
-    f1 = pool.submit(add, 5, 3)
+    fut1 = pool.submit(add, 5, 3)
     # 提交乘法
-    f2 = pool.submit(multiply, 4, 7)
+    fut2 = pool.submit(multiply, 4, 7)
     # 提交带关键字参数的函数
-    f3 = pool.submit(greet, name="Funboost")
+    fut3 = pool.submit(greet, name="Funboost")
+    
+    fut4 = pool.submit(aio_fun, 5)
 
-    f4 = pool.submit(aio_fun, 5)
+    # res1 = fut1.result()  # 8
+    # print(type(res1), res1)
 
-    res1 = f1.result()  # 8
-    print(type(res1), res1)
-
-    print(f2.result())  # 28
-    print(f3.result())  # Hello, Funboost
-    print(f4.result())  # 50
+    # print(fut2.result())  # 28
+    # print(fut3.result())  # Hello, Funboost
+    # print(fut4.result())  # 50

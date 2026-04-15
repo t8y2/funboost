@@ -49,9 +49,15 @@ if sys.platform == "darwin":  # mac 上会出错
       import selectors
       selectors.DefaultSelector = selectors.PollSelector
 
+from funboost.concurrent_pool.custom_threadpool_executor import ThreadPoolExecutorShrinkAble
+
 class AsyncPoolExecutor(FunboostFileLoggerMixin,FunboostBaseConcurrentPool):
     """
     使api和线程池一样，最好的性能做法是submit也弄成 async def，生产和消费在同一个线程同一个loop一起运行，但会对调用链路的兼容性产生破坏，从而调用方式不兼容线程池。
+    
+    AsyncPoolExecutor 是真asyncio 并发池，是在一个loop跑多个协程任务，而非是 伪线程池里面每个线程都单独用一个新的临时的loop去运行一个协程任务。
+
+    AsyncPoolExecutor 支持异步函数运行，也支持同步函数运行。
     """
 
     def __init__(self, size, specify_async_loop=None,
@@ -71,6 +77,7 @@ class AsyncPoolExecutor(FunboostFileLoggerMixin,FunboostBaseConcurrentPool):
         t = Thread(target=self._start_loop_in_new_thread, daemon=False)
         # t.setDaemon(True)  # 设置守护线程是为了有机会触发atexit，使程序自动结束，不用手动调用shutdown
         t.start()
+        self._thread_pool = ThreadPoolExecutorShrinkAble(self._size) # 留个线程池，方便执行同步函数
      
 
     # def submit000(self, func, *args, **kwargs):
@@ -107,7 +114,10 @@ class AsyncPoolExecutor(FunboostFileLoggerMixin,FunboostBaseConcurrentPool):
                 break
             # noinspection PyBroadException,PyUnusedLocal
             try:
-                await func(*args, **kwargs)
+                if asyncio.iscoroutinefunction(func):
+                    await func(*args, **kwargs)
+                else:
+                    self._thread_pool.submit(func, *args, **kwargs)
             except BaseException as e:
                 self.logger.exception(f'func:{func}, args:{args}, kwargs:{kwargs} exc_type:{type(e)}  traceback_exc:{traceback.format_exc()}')
             # self._queue.task_done()
