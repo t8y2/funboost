@@ -1,19 +1,21 @@
 """
 比 ThreadPoolExecutorShrinkAble 更简单的的弹性线程池。完全彻底从头手工开发
 
-这个线程池 submit没有返回值，不返回future对象，不支持map方法。
+FlexibleThreadPool submit 返回标准的 concurrent.futures.Future 对象。
+FlexibleThreadPool 的map 方法，虽然没继承concurrent.futures.Executor ，但能直接万能复用使用 concurrent.futures.Executor.map 方法。
 
 此线程池性能比concurrent.futures.ThreadPoolExecutor高200%
 
-ThreadPoolExecutorShrinkAble 顺便兼容asyns def的函数并发运行
-"""
 
+"""
+import typing
 import asyncio
 import inspect
 import os
 import queue
 import threading
 from functools import wraps
+from concurrent.futures import Future, Executor
 
 from funboost.concurrent_pool import FunboostBaseConcurrentPool
 from funboost.core.loggers import FunboostFileLoggerMixin, LoggerLevelSetterMixin, FunboostMetaTypeFileLogger,flogger
@@ -23,7 +25,7 @@ class FlexibleThreadPool(FunboostFileLoggerMixin, LoggerLevelSetterMixin, Funboo
     KEEP_ALIVE_TIME = 10
     MIN_WORKERS = 1
 
-    def __init__(self, max_workers: int = None,work_queue_maxsize=10,
+    def __init__(self, max_workers: typing.Optional[int] = None,work_queue_maxsize=10,
                  specify_async_loop=None,
                  is_auto_start_specify_async_loop_in_child_thread=True
                  ):
@@ -48,13 +50,17 @@ class FlexibleThreadPool(FunboostFileLoggerMixin, LoggerLevelSetterMixin, Funboo
         with self._lock_compute_start_thread:
             self._threads_num += change_num
 
-    def submit(self, func, *args, **kwargs):
-        self.work_queue.put([func, args, kwargs])
+    def submit(self, func, *args, **kwargs) -> Future:
+        fut = Future()
+        self.work_queue.put([func, args, kwargs,fut])
         with self._lock_for_adjust_thread:
             if self.threads_free_count <= self.MIN_WORKERS and self._threads_num < self.max_workers:
                 _KeepAliveTimeThread(self).start()
                 self._change_threads_free_count(1) 
                 self._change_threads_start_count(1)
+        return fut
+    
+    map = Executor.map # 神级别方式，直接使用 concurrent.futures.Executor.map 方法。
 
 
 class FlexibleThreadPoolMinWorkers0(FlexibleThreadPool):
@@ -144,7 +150,7 @@ class _KeepAliveTimeThread(threading.Thread, metaclass=FunboostMetaTypeFileLogge
         self.logger.debug(f'新启动线程 {self.ident} ')
         while 1:
             try:
-                func, args, kwargs = self.pool.work_queue.get(block=True, timeout=self.pool.KEEP_ALIVE_TIME)
+                func, args, kwargs,fut = self.pool.work_queue.get(block=True, timeout=self.pool.KEEP_ALIVE_TIME)
             except queue.Empty:
                 with self.pool._lock_for_judge_threads_free_count:
                     # print(self.pool.threads_free_count)
@@ -161,8 +167,10 @@ class _KeepAliveTimeThread(threading.Thread, metaclass=FunboostMetaTypeFileLogge
             try:
                 # fun = sync_or_async_fun_deco(func)
                 # fun(*args, **kwargs)
-                _new_anyio_fun(func,args,kwargs,self.pool._specify_async_loop,self.pool._is_auto_start_specify_async_loop_in_child_thread)
+                res = _new_anyio_fun(func,args,kwargs,self.pool._specify_async_loop,self.pool._is_auto_start_specify_async_loop_in_child_thread)
+                fut.set_result(res)
             except BaseException as exc:
+                fut.set_exception(exc)
                 self.logger.exception(f'函数 {func} 中发生错误，错误原因是 {type(exc)} {exc} ')
             self.pool._change_threads_free_count(1)
 
@@ -192,10 +200,22 @@ if __name__ == '__main__':
     pool = FlexibleThreadPool(100)
     # pool = ThreadPoolExecutor(100)
     # pool = ThreadPoolExecutorShrinkAble(100)
+    
+    # 测试submit和 输出 future.result() 的结果
+    # for i in range(20000):
+    #     # time.sleep(2)
+    #     futx:Future = pool.submit(aiotestf, i)
+    #     print(futx.result())
 
-    for i in range(20000):
-        # time.sleep(2)
-        pool.submit(aiotestf, i)
+    # 测试map用法
+    results = pool.map(aiotestf, [1, 2, 3, 4], timeout=5)
+    try:
+        for res in results:
+            print(res)
+    except TimeoutError:
+        print("有任务执行超时！")
+
+
 
     # for i in range(100000):
     #     pool.submit(testf, i)
@@ -203,3 +223,5 @@ if __name__ == '__main__':
     # while 1:
     #     time.sleep(1000)
     # loop.run_forever()
+
+

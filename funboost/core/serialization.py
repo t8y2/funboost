@@ -17,12 +17,17 @@ class Serialization:
 
     @staticmethod
     def to_json_str_non_strict(dic:typing.Union[dict,str]):
-        # can_not_json_serializable_keys = Serialization.find_can_not_json_serializable_keys(dic)
-        # new_msg = copy.deepcopy(Serialization.to_dict(dic))
-        # for key in can_not_json_serializable_keys:
-        #     new_msg[key] = PickleHelper.to_str(new_msg[key])
-        # return Serialization.to_json_str(new_msg)
+
         return json_helper.dict_to_un_strict_json_deep(dic)
+    
+    @staticmethod
+    def to_json_str_non_strict_use_pickle_str(dic:typing.Union[dict,str]):
+        can_not_json_serializable_keys = Serialization.find_can_not_json_serializable_keys(dic)
+        new_msg = copy.deepcopy(Serialization.to_dict(dic))
+        for key in can_not_json_serializable_keys:
+            new_msg[key] = PickleHelper.to_str(new_msg[key])
+        return Serialization.to_json_str(new_msg)
+      
 
     @staticmethod
     def to_dict(strx:typing.Union[str,dict]):

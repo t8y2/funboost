@@ -184,8 +184,16 @@ class BoosterParams(BaseJsonAbleModel):
 
     function_result_status_persistance_conf: FunctionResultStatusPersistanceConfig = FunctionResultStatusPersistanceConfig(
         is_save_result=False, is_save_status=False, expire_seconds=7 * 24 * 3600, is_use_bulk_insert=False)  # 是否保存函数的入参，运行结果和运行状态到mongodb。这一步用于后续的参数追溯，任务统计和web展示，需要安装mongo。
+    
+    """
+    user_custom_record_process_info_func:
+    此函数仅仅接受一个入参，入参类型是 FunctionResultStatus，用户可以打印或者保存结果到任意地方。以及用于其他功能，例如判断报错时候发邮件
+    建议用户通过 mixin类写user_custom_record_process_info_func方法 ，使用 consumer_override_cls 方式来自定义保存函数运行状态和结果。
 
-    user_custom_record_process_info_func: typing.Optional[typing.Callable[..., typing.Any]] = None  # 提供一个用户自定义的保存消息处理记录到某个地方例如mysql数据库的函数，函数仅仅接受一个入参，入参类型是 FunctionResultStatus，用户可以打印参数
+    框架之后不再额外在BoosterParams中增加更多其他钩子字段，以减少字段数量；用户需要学习教程的4.21b章节的 consumer_override_cls，
+    consumer_override_cls 自定义灵活性无敌，用户自由发挥余地很大。
+    """
+    user_custom_record_process_info_func: typing.Optional[typing.Callable[..., typing.Any]] = None  
 
     is_using_rpc_mode: bool = False  # 是否使用rpc模式，可以在发布端获取消费端的结果回调，但消耗一定性能，使用async_result.result时候会等待阻塞住当前线程。
     rpc_result_expire_seconds: int = 1800  # redis保存rpc结果的过期时间.
@@ -197,7 +205,6 @@ class BoosterParams(BaseJsonAbleModel):
     """
     allow_run_time_cron:
     只允许在规定的crontab表达式时间内运行。
-
     例如 '* 23,0-2 * * *' 表示只在23点到2点运行。
     allow_run_time_cron='* 9-17 * * 1-5', 表示只在周一到周五的9点到17:59:59运行。
     为None则不限制运行时间。

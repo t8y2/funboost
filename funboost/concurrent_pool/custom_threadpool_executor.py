@@ -15,7 +15,8 @@
 
 4、此线程池运行函数出错时候，直接显示线程错误，官方的线程池则不会显示错误，例如函数中写1/0,任然不现实错误。
 
-此实现了submit，还实现future相关的内容，真正的和内置的ThreadpoolExecutor 完全替代。
+ThreadPoolExecutorShrinkAble 实现了submit，还实现future相关的内容，真正的和内置的ThreadpoolExecutor 完全替代。
+ThreadPoolExecutorShrinkAble 支持 map方法，因为继承了 concurrent.futures.Executor 类，
 
 可以在各种地方加入 time.sleep 来验证 第1条和第2条的自动智能缩放功能。
 """
@@ -135,6 +136,8 @@ class ThreadPoolExecutorShrinkAble(Executor, FunboostFileLoggerMixin, LoggerLeve
             self.work_queue.put(w)
             self._adjust_thread_count()
             return f
+    
+
 
     def _adjust_thread_count(self):
         # print(self.threads_free_count, self.MIN_WORKERS, len(self._threads), self._max_workers)

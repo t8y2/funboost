@@ -536,6 +536,18 @@ def task_fun(a, b):
     return a + b
 ```
 
+### 1.3.5 FunboostPool 完美平替 concurrent.futures.ThreadPoolExecutor
+
+`FunboostPool` 完美平替 `concurrent.futures.ThreadPoolExecutor`，只需要替换一行实例化代码，无任何负担，兼容用户老项目到极致了。
+
+详见教程 4.38章节 `## 4.38 MemoryFunboostPool 和 FunboostPool 的使用`
+
+```python
+from funboost import MemoryFunboostPool
+pool = MemoryFunboostPool(10,) # 完美支持submit 和map，入参和返回类型一致。
+future = pool.submit(task_fun, 1, 2) # future类型是 concurrent.futures.Future 。
+print(future.result()) # 一样能通过future获取结果
+```
 
 ## 🖥️ funweb (Funboost Web Manager) 界面预览
 
