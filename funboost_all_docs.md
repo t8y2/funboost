@@ -554,7 +554,7 @@ pydatinc pycharm编程代码补全,请安装 pydantic插件, 在pycharm的  file
 - `booster_registry_name: str = StrConst.BOOSTER_REGISTRY_NAME_DEFAULT`
 
 ##### 📌 `class BoosterParamsComplete(BoosterParams)`
-*Line: 345*
+*Line: 346*
 
 **Docstring:**
 `````
@@ -576,7 +576,7 @@ specify_concurrent_pool 同一个进程的不同booster函数,共用一个线程
 - `specify_concurrent_pool: FunboostBaseConcurrentPool = Field(default_factory=functools.partial(ConcurrentPoolBuilder.get_pool, FlexibleThreadPool, 500))`
 
 ##### 📌 `class TaskOptions(BaseJsonAbleModel)`
-*Line: 365*
+*Line: 366*
 
 **Docstring:**
 `````
@@ -608,7 +608,7 @@ specify_concurrent_pool 同一个进程的不同booster函数,共用一个线程
 - `otel_context: typing.Optional[dict] = None`
 
 ##### 📌 `class PublisherParams(BaseJsonAbleModel)`
-*Line: 420*
+*Line: 421*
 
 **Class Variables (21):**
 - `queue_name: str`
@@ -2503,28 +2503,28 @@ Entry Points (not imported by other project files):
   行265: ## 1.2 框架功能介绍
   行279: ### 1.2.1 🆚 对比：Funboost 取代传统线程池
   行283: #### ❌ 方式 A：手动开启线程池 (传统)
-  行299: #### ✅ 方式 B：Funboost 模式 (推荐)
-  行318: ### 1.2.2 🚀 任务控制功能矩阵
-  行322: #### 🌌 维度一：连接与架构 (Connectivity & Architecture)
-  行333: #### ⚡ 维度二：并发与吞吐 (Concurrency & Throughput)
-  行340: #### 🛡️ 维度三：可靠性保障 (Reliability)
-  行349: #### 🕹️ 维度四：流量治理 (Traffic Governance)
-  行359: #### 🎼 维度五：调度与编排 (Scheduling & Orchestration)
-  行366: #### 🔭 维度六：可观测性 (Observability)
-  行374: #### 🧬 维度七：开发体验 (Developer Experience)
-  行386: ## 1.3 🚀 快速上手：你的第一个 Funboost 程序
-  行394: ### 1.3.1 ✨ Hello World：最简单的任务调度
-  行439: ### 1.3.2 🔥 进阶实战：RPC、定时任务与丝滑连招
-  行519: ### 1.3.3 ✂️ 极简写法：省略 `@boost`
-  行530: ### 1.3.4 ❌ 过时写法： 直接在 @boost传各种配置入参，不推荐
-  行539: ### 1.3.5 FunboostPool 完美平替 concurrent.futures.ThreadPoolExecutor
-  行552: ## 🖥️ funweb (Funboost Web Manager) 界面预览
-  行576: ## 1.4 💡 为什么 Python 极其需要分布式函数计算？
-  行580: ### 1️⃣ 痛点一：GIL 锁的限制 (多核利用率低)
-  行588: ### 2️⃣ 痛点二：原生性能瓶颈 (动态语言特性)
-  行600: ## 1.5 🎓 最佳学习路径
-  行619: ## 1.6 🥋 funboost 练就吸星大法神功，一招吸走 Celery 毕生内力
-  行629: ### ⚔️ 降维打击：化繁为简的绝世武功
+  行299: #### ✅ 方式 B：Funboost @boost 模式 (推荐)
+  行318: #### ✅ 方式 C：FunboostPool 模式
+  行331: ### 1.2.2 🚀 任务控制功能矩阵
+  行335: #### 🌌 维度一：连接与架构 (Connectivity & Architecture)
+  行346: #### ⚡ 维度二：并发与吞吐 (Concurrency & Throughput)
+  行353: #### 🛡️ 维度三：可靠性保障 (Reliability)
+  行362: #### 🕹️ 维度四：流量治理 (Traffic Governance)
+  行372: #### 🎼 维度五：调度与编排 (Scheduling & Orchestration)
+  行379: #### 🔭 维度六：可观测性 (Observability)
+  行387: #### 🧬 维度七：开发体验 (Developer Experience)
+  行399: ## 1.3 🚀 快速上手：你的第一个 Funboost 程序
+  行407: ### 1.3.1 ✨ Hello World：最简单的任务调度
+  行452: ### 1.3.2 🔥 进阶实战：RPC、定时任务与丝滑连招
+  行532: ### 1.3.3 ✂️ 极简写法：省略 `@boost`
+  行543: ### 1.3.4 ❌ 过时写法： 直接在 @boost传各种配置入参，不推荐
+  行554: ## 🖥️ funweb (Funboost Web Manager) 界面预览
+  行578: ## 1.4 💡 为什么 Python 极其需要分布式函数计算？
+  行582: ### 1️⃣ 痛点一：GIL 锁的限制 (多核利用率低)
+  行590: ### 2️⃣ 痛点二：原生性能瓶颈 (动态语言特性)
+  行602: ## 1.5 🎓 最佳学习路径
+  行621: ## 1.6 🥋 funboost 练就吸星大法神功，一招吸走 Celery 毕生内力
+  行631: ### ⚔️ 降维打击：化繁为简的绝世武功
 
 ============================================================
 文件: c10.md
@@ -4623,7 +4623,7 @@ if __name__ == '__main__':
         pool.submit(f, i)
 ```
 
-#### ✅ 方式 B：Funboost 模式 (推荐)
+#### ✅ 方式 B：Funboost @boost 模式 (推荐)
 ```python
 import time
 from funboost import BoosterParams, BrokerEnum
@@ -4640,6 +4640,19 @@ def f(x):
 if __name__ == '__main__':
     for i in range(100):
         f.push(i)
+```
+
+####  ✅ 方式 C：FunboostPool 模式 
+
+`FunboostPool` 完美平替 `concurrent.futures.ThreadPoolExecutor`，只需要替换一行实例化代码，无任何负担，兼容用户老项目到极致了。
+
+详见教程 4.38章节 `## 4.38 MemoryFunboostPool 和 FunboostPool 的使用`
+
+```python
+from funboost import MemoryFunboostPool,FunboostPool
+pool = MemoryFunboostPool(10,) # 完美支持submit 和map，入参和返回类型一致。
+future = pool.submit(task_fun, 1, 2) # future类型是 concurrent.futures.Future 。
+print(future.result()) # 一样能通过future获取结果
 ```
 
 ### 1.2.2 🚀 任务控制功能矩阵
@@ -4863,18 +4876,7 @@ def task_fun(a, b):
     return a + b
 ```
 
-### 1.3.5 FunboostPool 完美平替 concurrent.futures.ThreadPoolExecutor
 
-`FunboostPool` 完美平替 `concurrent.futures.ThreadPoolExecutor`，只需要替换一行实例化代码，无任何负担，兼容用户老项目到极致了。
-
-详见教程 4.38章节 `## 4.38 MemoryFunboostPool 和 FunboostPool 的使用`
-
-```python
-from funboost import MemoryFunboostPool
-pool = MemoryFunboostPool(10,) # 完美支持submit 和map，入参和返回类型一致。
-future = pool.submit(task_fun, 1, 2) # future类型是 concurrent.futures.Future 。
-print(future.result()) # 一样能通过future获取结果
-```
 
 ## 🖥️ funweb (Funboost Web Manager) 界面预览
 

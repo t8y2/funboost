@@ -11,6 +11,7 @@ FunboostPool 拥有funboost的所有能力
 """
 
 import typing
+from typing import Optional
 import concurrent.futures
 from funboost import (
     BoosterParams,
@@ -19,11 +20,64 @@ from funboost import (
     FunctionResultStatus,
     AsyncResult,
 )
+from funboost.core.exceptions import FunboostTaskExecutionError
 from funboost.concurrent_pool.flexible_thread_pool import (
     _new_anyio_fun,
     FlexibleThreadPoolMinWorkers0,
 )
 import importlib
+
+
+class FunboostFuture(concurrent.futures.Future):
+    """
+    继承 concurrent.futures.Future，统一处理 FunctionResultStatus → 业务结果的转换。
+    消除 submit 方法中的闭包和双 Future 模式。
+    """
+
+    def __init__(self, is_future_direct_ret_result: bool = True, has_result_source: bool = True):
+        super().__init__()
+        self._is_direct = is_future_direct_ret_result
+        self._has_result_source = has_result_source
+
+    def result(self, timeout=None):
+        if not self._has_result_source:
+            raise RuntimeError(
+                "当前 FunboostPool 未启用结果获取（is_need_result=False）。\n"
+                "要获取 future.result()，请在初始化时设置 is_need_result=True"
+            )
+        return super().result(timeout=timeout)
+
+    def _resolve_status(self, status: FunctionResultStatus):
+        if self._is_direct:
+            if status.success:
+                self.set_result(status.result)
+            else:
+                self.set_exception(FunboostTaskExecutionError(
+                    exception_type=status.exception_type or 'UnknownError',
+                    exception_msg=status.exception,
+                ))
+        else:
+            self.set_result(status)
+
+    def bind_raw_future(self, raw_future: concurrent.futures.Future):
+        """内存队列模式：监听 raw_future 完成回调"""
+        def _on_done(fut):
+            try:
+                self._resolve_status(fut.result())
+            except Exception as e:
+                self.set_exception(e)
+        raw_future.add_done_callback(_on_done)
+
+    def bind_async_result(self, async_result: AsyncResult, callback_run_executor):
+        """分布式队列模式：注册 RPC 回调"""
+        async_result.callback_run_executor = callback_run_executor
+        def _on_rpc(status_and_result: dict):
+            try:
+                status = FunctionResultStatus.parse_status_and_result_to_obj(status_and_result)
+                self._resolve_status(status)
+            except Exception as e:
+                self.set_exception(e)
+        async_result.set_callback(_on_rpc)
 
 
 class MemoryFunboostPool:
@@ -37,7 +91,7 @@ class MemoryFunboostPool:
         self,
         concurrent_num: int = 4,
         *,
-        qps: float = None,
+        qps: Optional[float] = None,
         is_future_direct_ret_result: bool = True,
         is_auto_start_consuming_message: bool = True,
     ):
@@ -53,7 +107,7 @@ class MemoryFunboostPool:
         """
         self.concurrent_num = concurrent_num
         self.qps = qps
-        self.booster: Booster = None # 用户仍然可以通过 pool.booster. 来操作booster其他方法和属性，booster是公有属性
+        self.booster: Booster  # 用户仍然可以通过 pool.booster. 来操作booster其他方法和属性，booster是公有属性
         # self._pool_queue_name = f"universal_pool_{id(self)}"
 
         self.booster_params = BoosterParams(
@@ -96,33 +150,10 @@ class MemoryFunboostPool:
         :param kwargs: 关键字参数
         :return: concurrent.futures.Future 对象
         """
-        # 将函数和参数打包成一个字典，直接放进消息队列
-        # 因为用的是 MEMORY_QUEUE，函数对象不会被序列化，而是直接传递引用！
-
-        # 使用 publisher 的 get_future 方法，直接返回 Future 对象
         raw_future = self.booster.publisher.get_future(fn, args, kwargs)
-        if self.is_future_direct_ret_result is False:
-            return raw_future
-        else:
-            # 2. 创建一个新的 Future，用于承载真正的业务返回值
-            final_future = concurrent.futures.Future()
-
-            # 3. 当 raw_future 完成时，提取业务结果并设置到 final_future
-            def on_raw_future_done(fut):
-                try:
-                    # raw_future.result() 返回的是 FunctionResultStatus 对象
-                    status: FunctionResultStatus = fut.result()
-                    if status.success:
-                        # 关键：把真正的业务结果设置给 final_future
-                        final_future.set_result(status.result)
-                    else:
-                        # 如果业务执行失败，抛出异常
-                        final_future.set_exception(Exception(status.exception))
-                except Exception as e:
-                    final_future.set_exception(e)
-
-            raw_future.add_done_callback(on_raw_future_done)
-            return final_future
+        future = FunboostFuture(self.is_future_direct_ret_result)
+        future.bind_raw_future(raw_future)
+        return future
 
     map = concurrent.futures.Executor.map
 
@@ -167,7 +198,7 @@ class FunboostPoolPickleFunc(MemoryFunboostPool):
         self.is_need_result = is_need_result
         self.is_future_direct_ret_result = is_future_direct_ret_result
         self.is_auto_start_consuming_message = is_auto_start_consuming_message
-        self.booster: Booster = None # 用户仍然可以通过 pool.booster. 来操作booster其他方法和属性，booster是公有属性
+        self.booster: Booster  # 用户仍然可以通过 pool.booster. 来操作booster其他方法和属性，booster是公有属性
         self._create_booster()
         self._start_consume()
     
@@ -179,40 +210,17 @@ class FunboostPoolPickleFunc(MemoryFunboostPool):
         return fn
 
     def submit(self, fn: typing.Callable, *args, **kwargs) -> concurrent.futures.Future:
-        # 1. 如果是内存队列，直接复用父类的高效实现（底层用 get_future）
         if self.booster_params.broker_kind == BrokerEnum.MEMORY_QUEUE:
             return super().submit(fn, *args, **kwargs)
 
-        # 2. 如果是分布式队列，走标准 RPC 回调封装
-
         fn_new = self._get_fn_new(fn)
-
         async_result: AsyncResult = self.booster.push(fn_new, args, kwargs)
         if self.is_need_result is False:
-            return None
+            return FunboostFuture(has_result_source=False)
 
-        async_result.callback_run_executor = self._callback_run_executor
-        final_future = concurrent.futures.Future()
-
-        def rpc_callback(status_and_result: dict):
-            try:
-                status = FunctionResultStatus.parse_status_and_result_to_obj(
-                    status_and_result
-                )
-                if self.is_future_direct_ret_result:
-                    if status.success:
-                        final_future.set_result(status.result)
-                    else:
-                        final_future.set_exception(
-                            Exception(f"Task failed: {status.exception}")
-                        )
-                else:
-                    final_future.set_result(status)
-            except Exception as e:
-                final_future.set_exception(e)
-
-        async_result.set_callback(rpc_callback)
-        return final_future
+        future = FunboostFuture(self.is_future_direct_ret_result)
+        future.bind_async_result(async_result, self._callback_run_executor)
+        return future
 
 def get_fun_path(fn: typing.Callable):
     """
@@ -232,30 +240,17 @@ class FunboostPool(FunboostPoolPickleFunc):
         return get_fun_path(fn)
 
     def _create_booster(self):
-        # 核心：定义一个通用的消费函数，它不再依赖 pickle 序列化函数对象
-        def universal_consumer(func_path: str, args: tuple, kwargs: dict):
-            """
-            动态导入并执行函数
-            :param func_path: 例如 "my_module.my_submodule.my_func"
-            :param args: 位置参数元组
-            :param kwargs: 关键字参数字典
-            """
-            try:
-                # 1. 分割模块路径和函数名
-                module_name, func_name = func_path.rsplit(".", 1)
+        def universal_consumer(func_path, args: tuple, kwargs: dict):
+            if callable(func_path):
+                func = func_path
+            else:
+                try:
+                    module_name, func_name = func_path.rsplit(".", 1)
+                    module = importlib.import_module(module_name)
+                    func = getattr(module, func_name)
+                except (ImportError, AttributeError) as e:
+                    raise ImportError(f"cant import function '{func_path}': {e}")
 
-                # 2. 动态导入模块
-                module = importlib.import_module(module_name)
-
-                # 3. 获取函数对象
-                func = getattr(module, func_name)
-
-            except (ImportError, AttributeError) as e:
-                # 处理导入失败的情况
-                raise ImportError(f"cant import function '{func_path}': {e}")
-
-            # 4. 执行真正的业务逻辑
-            # 这里利用了 _new_anyio_fun 支持同步/异步函数的特性
             return _new_anyio_fun(
                 func,
                 args,
