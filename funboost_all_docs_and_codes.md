@@ -2882,101 +2882,101 @@ Entry Points (not imported by other project files):
   行1238: ### 4.8.2 使用分布式函数调度框架，无论接口耗时多少，轻松达到8qps的例子
   行1283: ### 4.8.3  并发数量和qps(每秒执行多少次)之间的区别
   行1306: ## 4.9 演示延时运行任务
-  行1420: ### 4.9.2 Funboost 延时消息实现原理与REDIS_ZSET_DELAY中间件模式介绍
+  行1420: ### 4.9.2 Funboost 延时消息实现原理与REDIS_ZSET_DELAY专用延时中间件模式介绍
   行1424: #### 4.9.2.1 🛠️ 默认模式：基于 APScheduler 二次投递
   行1435: #### 4.9.2.2 🚀 专业模式：基于 `REDIS_ZSET_DELAY` 原生延时队列
-  行1445: #### 4.9.2.3 💻 使用示例
-  行1481: #### 4.9.2.4 📌 选择建议
-  行1489: ## 4.10 在web中如flask fastapi django 如何搭配使用消费框架的例子。
-  行1538: ## 4.11 保存消费状态和结果包mongo，开启消费状态结果的web页面
-  行1540: ### 4.11.1 保存消费状态和结果到mongodb
-  行1596: ### 4.11.2 框架是可以自动保存消费状态/结果到mongo，你想保存到MySQL?
-  行1604: #### 4.11.2.b  作者自己贡献一个吧函数消费状态保存到mysql的函数,(2024.02新增)
-  行1701: ### 4.11.3 可视化，启动python分布式函数调度框架之函数运行结果状态web
-  行1705: ## 4.12 框架 asyncio 方式运行协程
-  行1709: ### 4.12.1 concurrent_mode=ConcurrentModeEnum.ASYNC 运行协程
-  行1727: ### 4.12.2 concurrent_mode=ConcurrentModeEnum.THREADING 运行asyncio协程
-  行1754: ## 4.13 跨项目怎么发布任务或者获取函数执行结果(即不定义@boost消费函数就发送消息)？
-  行1831: ## 4.13b 彩蛋!!不使用funboost的消费功能,funboost作为各种消息队列的万能发布者
-  行1867: ## 4.14 获取消费进程信息的方法(用于排查查看正在运行的消费者)
-  行1906: ## 4.16 文件日志所在的地方
-  行1919: ### 4.16.1 没亲自指定 日志文件名
-  行1930: ### 4.16.2 亲自指定日志文件名,log_filename的值
-  行1987: ### 4.16.3 把用户自己的业务日志和funboost框架日志写到同一个文件
-  行1996: ## 4.16.4 funboost 日志由 nb_log 提供。
-  行2002: ## 4.17 判断函数运行完所有任务，再执行后续操作
-  行2064: ## 4.18 暂停消费
-  行2115: ## 4.19 用户自定义记录函数消费 状态/结果 钩子函数
-  行2158: ### 4.19.b 自定义保存函数消费状态结果到mysql/sqlite/pgsql请看4.11.2.b的章节
-  行2160: ## 4.20 通过 broker_exclusive_config 参数 设置不同中间件能使用到的差异化独特配置
-  行2183: ### 4.20.2 怎么知道每种消息队列 broker_exclusive_config 能支持哪些独有特殊的参数配置
-  行2193: ## 4.21 【funboost完全自由定制扩展（方式1）】 使用 register_custom_broker 完全彻底自由灵活自定义扩展和定制修改中间件(消费者和发布者)
-  行2243: ## 4.21b 【完全自由定制扩展(方式2)】,使用 consumer_override_cls 和 publisher_override_cls 来自定义消费者 发布者。
-  行2247: ### 4.21b.1 重写某些方法的例子
-  行2302: ### 4.21b.2 完全实现新增中间件类型.
-  行2392: ### 4.21b.3 funboost的用户自定义扩展比celery更容易,更彻底
-  行2406: ## 4.21c 不想吃苦？让ai来帮你扩展funboost中间件或者定制运行逻辑
-  行2414: ### 4.21c.2 假设你要使用python内置的list作为 funboost的消息队列：
-  行2429: #### 4.21c.2.2 说个ai使用技巧秘密，网页版ai大模型生成funboost代码 吊打编程 ide中的 ai大模型和claude code
-  行2452: ## 4.23 演示funboost框架是如何代替用户手写调用线程池的
-  行2505: ## 4.24 设置消费函数重试次数
-  行2531: ### 4.24.1 抛出ExceptionForRequeue类型错误，消息立即重回消息队列
-  行2551: ### 4.24.2 抛出 ExceptionForPushToDlxqueue 类型错误，消息发送到单独另外的死信队列中
-  行2570: ### 4.24.3  设置is_push_to_dlx_queue_when_retry_max_times,重试到max_retry_times最大次数没成功发送到死信队列
-  行2577: ### 4.24.4 (内置辅助)将一个消息队列中的消息转移到另一个队列
-  行2599: ### 4.24.5 funboost 高级重试：指数退避重试
-  行2613: #### 4.24.5.1 `advanced_retry_config` 参数详解
-  行2623: #### 4.24.5.2 示例：配置一个典型的指数退避
-  行2651: ## 4.25 push 和 publish 发布消息的区别
-  行2656: ### 核心区别对比
-  行2665: ### 代码演示与说明
-  行2703: ## 4.26 性能调优演示
-  行2726: ### 4.26.1 在一个进程中启动多个函数的消费，适合轻型任务
-  行2738: ### 4.26.2 在多个进程中启动函数的消费，适合一次启动大量函数的消费或重型任务
-  行2754: ## 4.28 funboost 支持celery框架整体作为funboost的broker (2023.4新增)
-  行2821: ## 4.29 funboost支持任务优先级队列
-  行2825: ### 4.29.1 队列支持优先级的说明：
-  行2835: ### 4.29.2 优先级通俗理解，用食堂打饭比喻：
-  行2850: ### 4.29.3 队列支持任务优先级的代码主要有三点：
-  行2864: ### 4.29.4 队列支持任务优先级的代码如下：
-  行2893: ### 4.29.5 消息队列优先级是针对一个queue内消息的，那么怎样才能实现不同函数之间的按优先级运行？
-  行2957: ## 4.30 funboost 远程杀死(取消)任务
-  行2975: ### 4.30.1 funboost远程杀死函数的代码例子
-  行3020: ### 4.30.2 远程强制杀死函数、超时自动杀死(function_timeout设置不为0)， 这两个功能要注意死锁：
-  行3048: ### 4.30.2.b 如果想启用funboost函数超时自动杀死功能或者 远程杀死函数功能，推荐消费函数中使用可过期锁 expire_lock
-  行3059: ## 4.31 神级别 fct (funboost_current_task) 上下文获取当前消息和任务状态
-  行3130: ## 4.32 重磅更新！！！ funboost 独家新增支持实例方法和类方法作为消费函数
-  行3138: ### 4.32.0 !!! 实例方法和类方法作为funboost任务时候，push方法需要特别注意第一个入参。
-  行3175: ### 4.32.1 funboost 支持实例方法和类方法作为消费函数的原理
-  行3225: ### 4.32.2 funboost 支持实例方法、类方法、静态方法、普通函数 4种类型，作为消费函数的例子
-  行3298: ## 4.33  @boost设置is_auto_start_consuming_message，自动启动消费。
-  行3325: ## 4.34 pyinstaller 打包 funboost项目为exe 的说明
-  行3331: ## 4.35 演示 funboost 的函数入参过滤功能
-  行3374: ### 4.35.2 警告！！！: funboost的 rpc功能和 函数入参过滤过滤 不要同时使用
-  行3383: ## 4.35c 使用 nb_cache 作为缓存装饰器
-  行3385: ### 4.35c.1 为什么 要用 nb_cache 而不是 funboost 自带的 do_task_filtering
-  行3394: ### 4.35c.2 nb_cache 功能比 funboost自带的 do_task_filtering 全面太多了
-  行3401: #### 4.35c.2.2 举个例子 nb_cache 的防止缓存击穿为什么吊打 funboost的 do_task_filtering
-  行3409: ### 4.35c.2 如何在 funboost 中使用 nb_cache
-  行3416: #### 4.35c.2.1 方式一，@boost 和 @cache 叠加使用
-  行3443: #### 4.35c.2.2 方式二 cache 装饰器传给 funboost 的 `consuming_function_decorator`
-  行3474: ## 4.36 演示`funboost`入参可以是自定义类型(不可json序列化的类型的入参,自动使用pickle)(2025-07新增支持)
-  行3574: ## 4.37 funboost 启动消费函数的方式大全(再次集中总结)
-  行3578: ### 4.37.1. 基础启动 (最常用)
-  行3594: ### 4.37.2. 多进程叠加并发启动 (高性能推荐)
-  行3608: ### 4.37.3. 自动启动 (懒人模式)
-  行3623: ### 4.37.4. 批量启动所有消费者(最粗暴无脑)
-  行3642: ### 4.37.5. 分组启动 (Group Start)
-  行3658: ### 4.37.6. 命令行启动 (CLI)
-  行3667: ### 4.37.7. 远程自动部署启动 (Fabric)
-  行3677: ### 4.37.8. Celery 模式启动 (特殊)
-  行3683: ## 4.38 MemoryFunboostPool 和 FunboostPool 的使用
-  行3687: ### 4.38.1 MemoryFunboostPool：内存增强型任务池
-  行3719: ### 4.38.2 FunboostPool：全能与分布式任务池
-  行3786: ### 4.38.3 选择指南
-  行3803: ## 4.100 使用funboost时候对框架的疑问和猜测，使用控制变量法
-  行3865: ### 4.100.b 举个例子，验证测试框架的超时杀死 function_timeout参数的作用
-  行3912: ## 4.200 [分布式函数调度框架qq群]
+  行1445: #### 4.9.2.3 💻 专业模式：基于 `REDIS_ZSET_DELAY` broker 的使用示例
+  行1487: #### 4.9.2.4 📌 选择建议
+  行1495: ## 4.10 在web中如flask fastapi django 如何搭配使用消费框架的例子。
+  行1544: ## 4.11 保存消费状态和结果包mongo，开启消费状态结果的web页面
+  行1546: ### 4.11.1 保存消费状态和结果到mongodb
+  行1602: ### 4.11.2 框架是可以自动保存消费状态/结果到mongo，你想保存到MySQL?
+  行1610: #### 4.11.2.b  作者自己贡献一个吧函数消费状态保存到mysql的函数,(2024.02新增)
+  行1707: ### 4.11.3 可视化，启动python分布式函数调度框架之函数运行结果状态web
+  行1711: ## 4.12 框架 asyncio 方式运行协程
+  行1715: ### 4.12.1 concurrent_mode=ConcurrentModeEnum.ASYNC 运行协程
+  行1733: ### 4.12.2 concurrent_mode=ConcurrentModeEnum.THREADING 运行asyncio协程
+  行1760: ## 4.13 跨项目怎么发布任务或者获取函数执行结果(即不定义@boost消费函数就发送消息)？
+  行1837: ## 4.13b 彩蛋!!不使用funboost的消费功能,funboost作为各种消息队列的万能发布者
+  行1873: ## 4.14 获取消费进程信息的方法(用于排查查看正在运行的消费者)
+  行1912: ## 4.16 文件日志所在的地方
+  行1925: ### 4.16.1 没亲自指定 日志文件名
+  行1936: ### 4.16.2 亲自指定日志文件名,log_filename的值
+  行1993: ### 4.16.3 把用户自己的业务日志和funboost框架日志写到同一个文件
+  行2002: ## 4.16.4 funboost 日志由 nb_log 提供。
+  行2008: ## 4.17 判断函数运行完所有任务，再执行后续操作
+  行2070: ## 4.18 暂停消费
+  行2121: ## 4.19 用户自定义记录函数消费 状态/结果 钩子函数
+  行2164: ### 4.19.b 自定义保存函数消费状态结果到mysql/sqlite/pgsql请看4.11.2.b的章节
+  行2166: ## 4.20 通过 broker_exclusive_config 参数 设置不同中间件能使用到的差异化独特配置
+  行2189: ### 4.20.2 怎么知道每种消息队列 broker_exclusive_config 能支持哪些独有特殊的参数配置
+  行2199: ## 4.21 【funboost完全自由定制扩展（方式1）】 使用 register_custom_broker 完全彻底自由灵活自定义扩展和定制修改中间件(消费者和发布者)
+  行2249: ## 4.21b 【完全自由定制扩展(方式2)】,使用 consumer_override_cls 和 publisher_override_cls 来自定义消费者 发布者。
+  行2253: ### 4.21b.1 重写某些方法的例子
+  行2308: ### 4.21b.2 完全实现新增中间件类型.
+  行2398: ### 4.21b.3 funboost的用户自定义扩展比celery更容易,更彻底
+  行2412: ## 4.21c 不想吃苦？让ai来帮你扩展funboost中间件或者定制运行逻辑
+  行2420: ### 4.21c.2 假设你要使用python内置的list作为 funboost的消息队列：
+  行2435: #### 4.21c.2.2 说个ai使用技巧秘密，网页版ai大模型生成funboost代码 吊打编程 ide中的 ai大模型和claude code
+  行2458: ## 4.23 演示funboost框架是如何代替用户手写调用线程池的
+  行2511: ## 4.24 设置消费函数重试次数
+  行2537: ### 4.24.1 抛出ExceptionForRequeue类型错误，消息立即重回消息队列
+  行2557: ### 4.24.2 抛出 ExceptionForPushToDlxqueue 类型错误，消息发送到单独另外的死信队列中
+  行2576: ### 4.24.3  设置is_push_to_dlx_queue_when_retry_max_times,重试到max_retry_times最大次数没成功发送到死信队列
+  行2583: ### 4.24.4 (内置辅助)将一个消息队列中的消息转移到另一个队列
+  行2605: ### 4.24.5 funboost 高级重试：指数退避重试
+  行2619: #### 4.24.5.1 `advanced_retry_config` 参数详解
+  行2629: #### 4.24.5.2 示例：配置一个典型的指数退避
+  行2657: ## 4.25 push 和 publish 发布消息的区别
+  行2662: ### 核心区别对比
+  行2671: ### 代码演示与说明
+  行2709: ## 4.26 性能调优演示
+  行2732: ### 4.26.1 在一个进程中启动多个函数的消费，适合轻型任务
+  行2744: ### 4.26.2 在多个进程中启动函数的消费，适合一次启动大量函数的消费或重型任务
+  行2760: ## 4.28 funboost 支持celery框架整体作为funboost的broker (2023.4新增)
+  行2827: ## 4.29 funboost支持任务优先级队列
+  行2831: ### 4.29.1 队列支持优先级的说明：
+  行2841: ### 4.29.2 优先级通俗理解，用食堂打饭比喻：
+  行2856: ### 4.29.3 队列支持任务优先级的代码主要有三点：
+  行2870: ### 4.29.4 队列支持任务优先级的代码如下：
+  行2899: ### 4.29.5 消息队列优先级是针对一个queue内消息的，那么怎样才能实现不同函数之间的按优先级运行？
+  行2963: ## 4.30 funboost 远程杀死(取消)任务
+  行2981: ### 4.30.1 funboost远程杀死函数的代码例子
+  行3026: ### 4.30.2 远程强制杀死函数、超时自动杀死(function_timeout设置不为0)， 这两个功能要注意死锁：
+  行3054: ### 4.30.2.b 如果想启用funboost函数超时自动杀死功能或者 远程杀死函数功能，推荐消费函数中使用可过期锁 expire_lock
+  行3065: ## 4.31 神级别 fct (funboost_current_task) 上下文获取当前消息和任务状态
+  行3136: ## 4.32 重磅更新！！！ funboost 独家新增支持实例方法和类方法作为消费函数
+  行3144: ### 4.32.0 !!! 实例方法和类方法作为funboost任务时候，push方法需要特别注意第一个入参。
+  行3181: ### 4.32.1 funboost 支持实例方法和类方法作为消费函数的原理
+  行3231: ### 4.32.2 funboost 支持实例方法、类方法、静态方法、普通函数 4种类型，作为消费函数的例子
+  行3304: ## 4.33  @boost设置is_auto_start_consuming_message，自动启动消费。
+  行3331: ## 4.34 pyinstaller 打包 funboost项目为exe 的说明
+  行3337: ## 4.35 演示 funboost 的函数入参过滤功能
+  行3380: ### 4.35.2 警告！！！: funboost的 rpc功能和 函数入参过滤过滤 不要同时使用
+  行3389: ## 4.35c 使用 nb_cache 作为缓存装饰器
+  行3391: ### 4.35c.1 为什么 要用 nb_cache 而不是 funboost 自带的 do_task_filtering
+  行3400: ### 4.35c.2 nb_cache 功能比 funboost自带的 do_task_filtering 全面太多了
+  行3407: #### 4.35c.2.2 举个例子 nb_cache 的防止缓存击穿为什么吊打 funboost的 do_task_filtering
+  行3415: ### 4.35c.2 如何在 funboost 中使用 nb_cache
+  行3422: #### 4.35c.2.1 方式一，@boost 和 @cache 叠加使用
+  行3449: #### 4.35c.2.2 方式二 cache 装饰器传给 funboost 的 `consuming_function_decorator`
+  行3480: ## 4.36 演示`funboost`入参可以是自定义类型(不可json序列化的类型的入参,自动使用pickle)(2025-07新增支持)
+  行3580: ## 4.37 funboost 启动消费函数的方式大全(再次集中总结)
+  行3584: ### 4.37.1. 基础启动 (最常用)
+  行3600: ### 4.37.2. 多进程叠加并发启动 (高性能推荐)
+  行3614: ### 4.37.3. 自动启动 (懒人模式)
+  行3629: ### 4.37.4. 批量启动所有消费者(最粗暴无脑)
+  行3648: ### 4.37.5. 分组启动 (Group Start)
+  行3664: ### 4.37.6. 命令行启动 (CLI)
+  行3673: ### 4.37.7. 远程自动部署启动 (Fabric)
+  行3683: ### 4.37.8. Celery 模式启动 (特殊)
+  行3689: ## 4.38 MemoryFunboostPool 和 FunboostPool 的使用
+  行3693: ### 4.38.1 MemoryFunboostPool：内存增强型任务池
+  行3725: ### 4.38.2 FunboostPool：全能与分布式任务池
+  行3792: ### 4.38.3 选择指南
+  行3809: ## 4.100 使用funboost时候对框架的疑问和猜测，使用控制变量法
+  行3871: ### 4.100.b 举个例子，验证测试框架的超时杀死 function_timeout参数的作用
+  行3918: ## 4.200 [分布式函数调度框架qq群]
 
 ============================================================
 文件: c4b.md
@@ -11989,7 +11989,7 @@ for i in range(1, 20):
 
 ---
 
-### 4.9.2 Funboost 延时消息实现原理与REDIS_ZSET_DELAY中间件模式介绍
+### 4.9.2 Funboost 延时消息实现原理与REDIS_ZSET_DELAY专用延时中间件模式介绍
 
 Funboost 支持两种延时机制，核心区别在于**“何时判断时间”**。
 
@@ -11997,7 +11997,7 @@ Funboost 支持两种延时机制，核心区别在于**“何时判断时间”
 
 1. 消息携带 `countdown/eta` 发往原 Broker（如 Redis List、Kafka）。
 2. 消费者拉取后识别为延时任务，立即 ACK 并从原队列移除。
-3. 交由内置 `APScheduler` 计时，到期后将消息**重新推回原队列**。
+3. 交由内置 `APScheduler` 计时，到期后将消息**重新推回原队列** ,实际是借助了APScheduler的能力。
 4. 消费者再次拉取并执行（此时无延时字段）。
 
 **⚠️ 注意**：若队列积压大量普通消息，队尾的延时消息无法及时取出，导致执行滞后。**仅适合低频、无积压场景。**
@@ -12008,46 +12008,52 @@ Funboost 支持两种延时机制，核心区别在于**“何时判断时间”
 
 1. 消息直接存入 **Redis Sorted Set**，Score = 到期时间戳。
 2. 专用消费者持续执行 `ZRANGEBYSCORE` 拉取 `Score <= now` 的消息。
-3. 时间到达立即拉取执行，无需二次入队。
+3. 时间到达立即拉取执行，无需二次入队。是funboost作者自己使用redis zset结构实现的延时任务，没有借助APScheduler的能力。
 
-**✅ 优势**：无视队列顺序，不受普通消息积压影响，精准定时。**生产环境推荐。**
+**✅ 优势**：无视队列顺序，不受普通消息积压影响，精准定时，没有broker中间商赚差价。**生产环境推荐。**
 
 ---
 
-#### 4.9.2.3 💻 使用示例
+#### 4.9.2.3 💻 专业模式：基于 `REDIS_ZSET_DELAY` broker 的使用示例
 
 ```python
 import datetime
-from funboost import boost, BoosterParams, TaskOptions
-from funboost.constant import BrokerEnum
+from funboost import boost, BoosterParams, TaskOptions, BrokerEnum
+
 
 # 定义延时任务（使用专用延时队列）
 @boost(BoosterParams(queue_name="delay_add", broker_kind=BrokerEnum.REDIS_ZSET_DELAY))
 def add(x, y):
     print(f"{x} + {y} = {x + y}")
 
-# 1. 相对延时（60秒后执行 3+5）
-add.publish(
-    {"x": 3, "y": 5},
-    task_options=TaskOptions(
-        other_extra_params={
-            'for_broker_redis_zset_delay': {'delay_seconds': 60}
-        }
-    )
-)
 
-# 2. 绝对定时（2026年10月1日 08:00:00 执行 10+20）
-target_time = datetime.datetime(2026, 10, 1, 8, 0, 0)
-eta_timestamp = target_time.timestamp()
 
-add.publish(
-    {"x": 10, "y": 20},
-    task_options=TaskOptions(
-        other_extra_params={
-            'for_broker_redis_zset_delay': {'eta_timestamp': eta_timestamp}
-        }
+if __name__ == '__main__':
+    # 启动消费
+    add.consume()
+
+    # 1. 相对延时（60秒后执行 3+5）
+    add.publish(
+        {"x": 3, "y": 5},
+        task_options=TaskOptions(
+            other_extra_params={
+                'for_broker_redis_zset_delay': {'delay_seconds': 20}
+            }
+        )
     )
-)
+
+    # 2. 绝对定时（2026年10月1日 08:00:00 执行 10+20）
+    target_time = datetime.datetime(2026, 10, 1, 8, 0, 0)
+    eta_timestamp = target_time.timestamp()
+
+    add.publish(
+        {"x": 10, "y": 20},
+        task_options=TaskOptions(
+            other_extra_params={
+                'for_broker_redis_zset_delay': {'eta_timestamp': eta_timestamp}
+            }
+        )
+    )
 ```
 
 #### 4.9.2.4 📌 选择建议
@@ -43834,7 +43840,7 @@ register_broker_exclusive_config_default(
     BROKER_KIND_REDIS_ZSET_PRIORITY,
     {
         'pull_msg_batch_size': 16,
-        'pull_base_interval': 0.02,
+        'pull_base_interval': 0.02, # 指数退避，初始拉取间隔 0.02s
         'pull_max_interval': 2,
     }
 )
@@ -43843,7 +43849,7 @@ register_broker_exclusive_config_default(
     BROKER_KIND_REDIS_ZSET_DELAY,
     {
         'pull_msg_batch_size': 16,
-        'pull_base_interval': 0.01,
+        'pull_base_interval': 0.01, # 指数退避，初始拉取间隔 0.01s
         'pull_max_interval': 2,
     }
 )

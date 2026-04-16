@@ -100,7 +100,7 @@ class ThreadPoolExecutorShrinkAble(Executor, FunboostFileLoggerMixin, LoggerLeve
     # KEEP_ALIVE_TIME = 60  # 这个参数表名，当前线程从queue.get(block=True, timeout=KEEP_ALIVE_TIME)多久没任务，就线程结束。
 
     MIN_WORKERS = 1
-    KEEP_ALIVE_TIME = 60
+    KEEP_ALIVE_TIME = 10
     THREAD_USE_DAEMON = True
 
     def __init__(self, max_workers: int = None, thread_name_prefix='',work_queue_maxsize=10):
@@ -258,23 +258,26 @@ def get_current_threads_num():
 if __name__ == '__main__':
     show_current_threads_num(sleep_time=5)
 
-
+    tid_set = set()
     def f1(a):
         time.sleep(0.2)  # 可修改这个数字测试多线程数量调节功能。
-        print(f'{a} 。。。。。。。')
+        print(f'{a} 。。。。。。。{threading.current_thread().ident}')
+        tid_set.add(threading.current_thread().ident)
         return a * 10
         # raise Exception('抛个错误测试')  # 官方的不会显示函数出错你，你还以为你写的代码没毛病呢。
 
 
-    pool = ThreadPoolExecutorShrinkAble(1)
+    pool = ThreadPoolExecutorShrinkAble(30)
     # pool = ThreadPoolExecutor(200)  # 测试对比官方自带
 
     for i in range(30):
-        time.sleep(0.1)  # 这里的间隔时间模拟，当任务来临不密集，只需要少量线程就能搞定f1了，因为f1的消耗时间短，
+        time.sleep(0.05)  # 这里的间隔时间模拟，当任务来临不密集，只需要少量线程就能搞定f1了，因为f1的消耗时间短，
         # 不需要开那么多线程，CustomThreadPoolExecutor比ThreadPoolExecutor 优势之一。
         futurex = pool.submit(f1, i)
         # print(futurex.result())
-
+    
+    time.sleep(10)
+    print(tid_set)
     # 1/下面测试阻塞主线程退出的情况。注释掉可以测主线程退出的情况。
     # 2/此代码可以证明，在一段时间后，连续长时间没任务，官方线程池的线程数目还是保持在最大数量了。而此线程池会自动缩小，实现了java线程池的keppalivetime功能。
     time.sleep(1000000)
