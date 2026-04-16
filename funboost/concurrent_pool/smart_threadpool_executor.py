@@ -1,5 +1,7 @@
 """
 SmartThreadPoolExecutor —— 轻量级自适应线程池
+这个SmartThreadPoolExecutor线程池是手写的，funboost里面没用到这个线程池，只是作为实现方式之一，对自适应智能线程池有兴趣的人，可以看源码实现，仅供参考，没有被funboost利用。
+funboost的  ConcurrentModeEnum.THREADING 线程池用的是 flexible_thread_pool.py 的 FlexibleThreadPool 线程池，因为那个能同时支持asyncio函数，兼容更全面。
 
 核心特性：
     1. 动态扩缩容：线程按需创建，空闲超过 keep_alive 秒后自动退出，无需手动管理线程生命周期。
