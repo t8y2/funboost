@@ -309,7 +309,7 @@ The first argument of the push method must be the instance of the class.
                     msg_function_kw=msg_function_kw, extra_params=extra_params, task_id=task_id)
             except Exception as e:
                 can_not_json_serializable_keys = Serialization.find_can_not_json_serializable_keys(msg_dict)
-                self.logger.warning(f'msg 中包含不能序列化的键: {can_not_json_serializable_keys}')
+                self.logger.debug(f'msg 中包含不能json序列化的键: {can_not_json_serializable_keys} ,自动使用pickle序列化')
                 # raise ValueError(f'msg 中包含不能序列化的键: {can_not_json_serializable_keys}')
                 new_msg = copy.deepcopy(Serialization.to_dict(msg_dict))
                 for key in can_not_json_serializable_keys:

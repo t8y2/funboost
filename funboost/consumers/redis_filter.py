@@ -51,7 +51,10 @@ class RedisFilter(RedisMixin, FunboostFileLoggerMixin):
         for k in sorted(value):
             ordered_dict[k] = value[k]
         # print(ordered_dict,filter_str)
-        return json.dumps(ordered_dict)
+        try:
+            return Serialization.to_json_str(ordered_dict)
+        except Exception as e:
+            return Serialization.to_json_str_non_strict_use_pickle_str(ordered_dict)
 
 
     def add_a_value(self, value: typing.Union[str, dict], filter_str: typing.Optional[str] = None):

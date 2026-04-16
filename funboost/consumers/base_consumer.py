@@ -1351,7 +1351,7 @@ class ConcurrentModeDispatcher(FunboostFileLoggerMixin):
         # pool_type = BoundedProcessPoolExecutor
         # from concurrent.futures import ProcessPoolExecutor
         # pool_type = ProcessPoolExecutor
-        if self._concurrent_mode == ConcurrentModeEnum.ASYNC:
+        if self._concurrent_mode in [ConcurrentModeEnum.ASYNC, ConcurrentModeEnum.THREADING]:
             self.consumer._concurrent_pool = self.consumer.consumer_params.specify_concurrent_pool or pool_type(
                 self.consumer.consumer_params.concurrent_num,
                 specify_async_loop=self.consumer.consumer_params.specify_async_loop,

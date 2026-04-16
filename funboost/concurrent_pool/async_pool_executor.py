@@ -2,6 +2,9 @@ import sys
 
 import atexit
 import asyncio
+import concurrent.futures
+from concurrent.futures import Executor
+import functools
 import threading
 import time
 import traceback
@@ -49,9 +52,17 @@ if sys.platform == "darwin":  # mac 上会出错
       import selectors
       selectors.DefaultSelector = selectors.PollSelector
 
+
+
 class AsyncPoolExecutor(FunboostFileLoggerMixin,FunboostBaseConcurrentPool):
     """
     使api和线程池一样，最好的性能做法是submit也弄成 async def，生产和消费在同一个线程同一个loop一起运行，但会对调用链路的兼容性产生破坏，从而调用方式不兼容线程池。
+    
+    AsyncPoolExecutor 是真asyncio并发池，是在一个loop跑多个协程任务，而非是 伪线程池里面每个线程都单独用一个新的临时的loop.run_until_complete去运行一个协程任务。
+
+    AsyncPoolExecutor 支持异步函数运行，也支持同步函数运行。
+    AsyncPoolExecutor 支持submit 和 map方法，并能返回 concurrent.futures.Future 对象。
+    AsyncPoolExecutor 支持aio_submit方法，并能返回 asyncio.Future 对象。
     """
 
     def __init__(self, size, specify_async_loop=None,
@@ -59,7 +70,7 @@ class AsyncPoolExecutor(FunboostFileLoggerMixin,FunboostBaseConcurrentPool):
         """
 
         :param size: 同时并发运行的协程任务数量。
-        :param specify_loop: 可以指定loop,异步三方包的连接池发请求不能使用不同的loop去使用连接池.
+        :param specify_loop: 可以指定loop,很多异步三方包的连接池发请求和类实例化，不能处在不同的loop中。也就是臭名昭著的 `attached to a different loop`
         """
         self._size = size
         self._specify_async_loop = specify_async_loop
@@ -71,6 +82,8 @@ class AsyncPoolExecutor(FunboostFileLoggerMixin,FunboostBaseConcurrentPool):
         t = Thread(target=self._start_loop_in_new_thread, daemon=False)
         # t.setDaemon(True)  # 设置守护线程是为了有机会触发atexit，使程序自动结束，不用手动调用shutdown
         t.start()
+        from funboost.concurrent_pool.custom_threadpool_executor import ThreadPoolExecutorShrinkAble
+        self._thread_pool = ThreadPoolExecutorShrinkAble(self._size) # 留个线程池，方便执行同步函数
      
 
     # def submit000(self, func, *args, **kwargs):
@@ -93,23 +106,49 @@ class AsyncPoolExecutor(FunboostFileLoggerMixin,FunboostBaseConcurrentPool):
 
 
     def submit(self, func, *args, **kwargs):
-        future = asyncio.run_coroutine_threadsafe(self._produce(func, *args, **kwargs), self.loop)  # 这个 run_coroutine_threadsafe 方法也有缺点，消耗的性能巨大。
-        future.result()  # 阻止过快放入，放入超过队列大小后，使submit阻塞。 背压是为了防止 迅速掏空消息队列几千万消息到内存.
+        """
+        从非事件循环线程提交任务，返回 concurrent.futures.Future，可通过 .result() 获取执行结果。
+        队列满时会阻塞（背压），防止迅速掏空消息队列几千万消息到内存。
+        """
+        result_future = concurrent.futures.Future()
+        produce_future = asyncio.run_coroutine_threadsafe(self._produce(func, args, kwargs, result_future), self.loop)
+        produce_future.result()  # 阻止过快放入，放入超过队列大小后，使submit阻塞。
+        return result_future
+    
+    map = Executor.map # 神级别方式，直接使用 concurrent.futures.Executor.map 方法。
 
-    async def _produce(self, func, *args, **kwargs):
-        await self._queue.put((func, args, kwargs))
+    async def aio_submit(self, func, *args, **kwargs):
+        """
+        从事件循环内部提交任务，返回 asyncio.Future，可 await 获取执行结果。
+        队列满时 await 会挂起当前协程（背压）。
+        """
+        result_future = self.loop.create_future()
+        await self._produce(func, args, kwargs, result_future)
+        return result_future
+
+    async def _produce(self, func, args, kwargs, result_future=None):
+        await self._queue.put((func, args, kwargs, result_future))
 
     async def _consume(self):
         while True:
-            func, args, kwargs = await self._queue.get()
+            func, args, kwargs, result_future = await self._queue.get()
             if isinstance(func, str) and func.startswith('stop'):
                 # self.logger.debug(func)
                 break
             # noinspection PyBroadException,PyUnusedLocal
             try:
-                await func(*args, **kwargs)
+                if asyncio.iscoroutinefunction(func):
+                    result = await func(*args, **kwargs)
+                else:
+                    result = await self.loop.run_in_executor(
+                        self._thread_pool, functools.partial(func, *args, **kwargs)
+                    )
+                if result_future is not None:
+                    result_future.set_result(result)
             except BaseException as e:
                 self.logger.exception(f'func:{func}, args:{args}, kwargs:{kwargs} exc_type:{type(e)}  traceback_exc:{traceback.format_exc()}')
+                if result_future is not None:
+                    result_future.set_exception(e)
             # self._queue.task_done()
 
     async def __run(self):
@@ -154,6 +193,7 @@ class AsyncPoolExecutor(FunboostFileLoggerMixin,FunboostBaseConcurrentPool):
 
 
 if __name__ == '__main__':
+    
     def test_async_pool_executor():
         from funboost.concurrent_pool import CustomThreadPoolExecutor as ThreadPoolExecutor
         # from concurrent.futures.thread import ThreadPoolExecutor
@@ -162,32 +202,51 @@ if __name__ == '__main__':
             await asyncio.sleep(1)
             pass
             print('打印', x)
+
             # await asyncio.sleep(1)
             # raise Exception('aaa')
+            return x * 2
 
         def f2(x):
             pass
             # time.sleep(0.001)
             print('打印', x)
+            return x * 20
 
         print(1111)
 
         t1 = time.time()
+
         pool = AsyncPoolExecutor(20)
         # pool = ThreadPoolExecutor(200)  # 协程不能用线程池运行，否则压根不会执行print打印，对于一部函数 f(x)得到的是一个协程，必须进一步把协程编排成任务放在loop循环里面运行。
-        for i in range(1, 501):
-            print('放入', i)
-            pool.submit(f, i)
+        
+        # 测试submit方法
+        # for i in range(1, 501):
+        #     print('放入', i)
+        #     fut = pool.submit(f, i)
+        #     print(fut.result())
+
         # time.sleep(5)
         # pool.submit(f, 'hi')
         # pool.submit(f, 'hi2')
         # pool.submit(f, 'hi3')
         # print(2222)
-        pool.shutdown()
+
+         # 测试map方法
+        results = pool.map(f2, [1, 2, 3, 4], timeout=5)
+        try:
+            for res in results:
+                print(res)
+        except TimeoutError:
+            print("有任务执行超时！")
+     
         print(time.time() - t1)
 
 
     test_async_pool_executor()
     # test_async_producer_consumer()
+
+   
+
 
     print(sys.version_info)

@@ -154,6 +154,14 @@ class FunboostRpcResultError(FunboostException):
 class HasNotAsyncResult(FunboostException):
     pass
 
+class FunboostTaskExecutionError(FunboostException):
+    """FunboostPool 中任务执行失败时抛出，保留原始异常类型名和消息"""
+    def __init__(self, exception_type: str, exception_msg, **kwargs):
+        self.original_exception_type = exception_type
+        self.original_exception_msg = exception_msg
+        message = f"{exception_type}: {exception_msg}"
+        super().__init__(message=message, **kwargs)
+
 class ExceptionForPushToDlxqueue(FunboostException):
     """框架检测到ExceptionForPushToDlxqueue错误，发布到死信队列"""
 

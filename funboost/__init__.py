@@ -63,7 +63,7 @@ from funboost.concurrent_pool.custom_threadpool_executor import show_current_thr
 
 from funboost.core.current_task import funboost_current_task,fct,get_current_taskid
 
-
+from funboost.core.funboost_pool import MemoryFunboostPool,FunboostPool,FunboostPoolPickleFunc
 
 
 

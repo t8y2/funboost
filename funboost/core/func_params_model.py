@@ -95,8 +95,9 @@ class BoosterParams(BaseJsonAbleModel):
     concurrent_num: int = 50  # 并发数量，并发种类由concurrent_mode决定
     specify_concurrent_pool: typing.Optional[FunboostBaseConcurrentPool] = None  # 使用指定的线程池/携程池，可以多个消费者共使用一个线程池,节约线程.不为None时候。threads_num失效
     
-    specify_async_loop: typing.Optional[asyncio.AbstractEventLoop] = None  # 指定的async的loop循环，设置并发模式为async才能起作用。 有些包例如aiohttp,发送请求和httpclient的实例化不能处在两个不同的loop中,可以传过来.
-    is_auto_start_specify_async_loop_in_child_thread: bool = True  # 是否自动在funboost asyncio并发池的子线程中自动启动指定的async的loop循环，设置并发模式为async才能起作用。如果是False,用户自己在自己的代码中去手动启动自己的loop.run_forever() 
+    # specify_async_loop 是为了避免 asyncio 经典报错 `attached to a different loop` 和 `context manager should be used inside a task`
+    specify_async_loop: typing.Optional[asyncio.AbstractEventLoop] = None  # 指定的async的loop循环，threading和async并发模式都能使用。 有些包例如aiohttp,发送请求和httpclient的实例化不能处在两个不同的loop中,需要用户手动传过来. 
+    is_auto_start_specify_async_loop_in_child_thread: bool = True  # 是否自动在funboost asyncio并发池的子线程中自动启动指定的async的loop循环。如果是False,用户自己在自己的代码中去手动启动自己的loop.run_forever() 
     
     """qps:
     强悍的控制功能,指定1秒内的函数执行次数，例如可以是小数0.01代表每100秒执行一次，也可以是50代表1秒执行50次.为None则不控频。 
@@ -184,8 +185,16 @@ class BoosterParams(BaseJsonAbleModel):
 
     function_result_status_persistance_conf: FunctionResultStatusPersistanceConfig = FunctionResultStatusPersistanceConfig(
         is_save_result=False, is_save_status=False, expire_seconds=7 * 24 * 3600, is_use_bulk_insert=False)  # 是否保存函数的入参，运行结果和运行状态到mongodb。这一步用于后续的参数追溯，任务统计和web展示，需要安装mongo。
+    
+    """
+    user_custom_record_process_info_func:
+    此函数仅仅接受一个入参，入参类型是 FunctionResultStatus，用户可以打印或者保存结果到任意地方。以及用于其他功能，例如判断报错时候发邮件
+    建议用户通过 mixin类写user_custom_record_process_info_func方法 ，使用 consumer_override_cls 方式来自定义保存函数运行状态和结果。
 
-    user_custom_record_process_info_func: typing.Optional[typing.Callable[..., typing.Any]] = None  # 提供一个用户自定义的保存消息处理记录到某个地方例如mysql数据库的函数，函数仅仅接受一个入参，入参类型是 FunctionResultStatus，用户可以打印参数
+    框架之后不再额外在BoosterParams中增加更多其他钩子字段，以减少字段数量；用户需要学习教程的4.21b章节的 consumer_override_cls，
+    consumer_override_cls 自定义灵活性无敌，用户自由发挥余地很大。
+    """
+    user_custom_record_process_info_func: typing.Optional[typing.Callable[..., typing.Any]] = None  
 
     is_using_rpc_mode: bool = False  # 是否使用rpc模式，可以在发布端获取消费端的结果回调，但消耗一定性能，使用async_result.result时候会等待阻塞住当前线程。
     rpc_result_expire_seconds: int = 1800  # redis保存rpc结果的过期时间.
@@ -197,7 +206,6 @@ class BoosterParams(BaseJsonAbleModel):
     """
     allow_run_time_cron:
     只允许在规定的crontab表达式时间内运行。
-
     例如 '* 23,0-2 * * *' 表示只在23点到2点运行。
     allow_run_time_cron='* 9-17 * * 1-5', 表示只在周一到周五的9点到17:59:59运行。
     为None则不限制运行时间。

@@ -12,7 +12,7 @@ async_aiomysql_f1 使用主线程的连接池,.
 不精通asyncio编程生态的人应该老老实实使用同步多线程编程生态,简单多了.
 因为funboost的线程池 FlexibleThreadPool能自动扩缩,
 能自动缩容是吊打内置线程池 concurrent.futures.threadpoolexecutor的神级别操作,
-FlexibleThreadPool 去掉了实现futures特性,精简了代码, 性能比官方内置线程池提高了250%
+FlexibleThreadPool 性能比官方内置线程池提高了250%
 
 
 方式2:
