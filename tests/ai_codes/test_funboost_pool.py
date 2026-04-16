@@ -223,7 +223,7 @@ def test_funboost_future_no_result_source():
 
 
 def test_funboost_future_done_callback():
-    """FunboostFuture 支持 add_done_callback"""
+    """惰性模式下：先调用 result() 触发解析，回调随之触发"""
     pool = MemoryFunboostPool(2)
     callback_results = []
 
@@ -232,7 +232,8 @@ def test_funboost_future_done_callback():
 
     fut = pool.submit(add, 7, 7)
     fut.add_done_callback(on_done)
-    time.sleep(1)
+    assert fut.result(timeout=5) == 14
+    time.sleep(0.1)
     assert callback_results == [14], f"回调结果不对: {callback_results}"
     print("  [PASS] test_funboost_future_done_callback")
 
