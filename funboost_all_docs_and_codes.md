@@ -3126,43 +3126,42 @@ Entry Points (not imported by other project files):
   行1365: ## 6.24 funboost框架从消息队列获取多少条消息？有没有负载均衡？
   行1427: ## 6.25 funboost消费启动后，按ctrl + c 无法结束代码？
   行1440: ## 6.25b `ctrl_c_recv` 到底要不要加？—— 直接看效果
-  行1459: ### 6.25b.0 ctrl_c_rev的源码很简单，很容易看懂。
-  行1499: ### 6.25b.1 ✅ 情况A：代码末尾加了 `ctrl_c_recv()`
-  行1514: ### 6.25b.2 ❌ 情况B：代码末尾**没有**加 `ctrl_c_recv()`
-  行1530: ### 6.25b.3 效果对比表（一目了然）
-  行1541: ### 6.25b.4 最终结论
-  行1549: ## 6.25b.5 顺便说一下，文档中其他地方提到的 `ctrl_c_recv` 和 apscheduler 的定时器之间的关系
-  行1555: ### 6.25b.5.1 APScheduler 的两种原生定时器
-  行1562: ### 6.25b.5.2 早期版本（2025年之前）的问题
-  行1575: ### 6.25b.5.3 2025年之后的改进
-  行1584: ### 6.25b.5.4 三种定时器的行为对比
-  行1592: ### 6.25b.5.5 总结
-  行1600: ## 6.26 ASYNC 并发模式,异步函数操作数据库/aiohttp连接池报错 `attached to a different loop`(是用户不看文档和boost的入参说明造成)
-  行1665: ### 6.26.1 演示aiohttp连接池,解决报错 `RuntimeError: context manager should be used inside a task`
-  行1803: ### 6.26.2 演示 aiomysql 连接池在funboost使用,解决 `attached to a different loop`
-  行1979: ### 6.26.3 演示子线程怎么正确的使用aiomysql连接池的本质(和funboost无关但原理相通)
-  行2059: ## 6.28 日志提示 是掉线或关闭消费者的 和 重新放入掉线消费者未消费确认的任务 ,是正常的提示.
-  行2092: ## 6.29 funboost 推荐用户使用什么并发模式？
-  行2096: ### 6.29.1 默认推荐：当前进程内 + 多线程模式 (最省心、最稳定、最好用)
-  行2112: ### 6.29.2 高性能推荐：多进程叠加并发模式 (性能炸裂)
-  行2130: #### 6.29.2.2 ⚠️ 极度重要：多进程在 Linux 上建议显式设置 spawn 模式，抛弃默认的 fork 模式
-  行2171: ### 6.29.3 极客推荐：纯 Asyncio 协程模式 (高手的玩具)
-  行2195: ### 6.29.4 特殊场景：单线程串行模式 (Single Thread)
-  行2221: ### 6.29.5 至于 gevent 和 eventlet 并发模式，直接忽略就好
-  行2225: ## 6.30 funboost 如何实配置触发失败告警和恢复告警
-  行2229: ### 6.30.1 使用内置告警 Mixin（AlertNotifier）
-  行2239: #### 6.30.1 AlertNotifierConsumerMixin 发送警告到 微信 钉钉 飞书
-  行2262: #### 6.30.1 AlertNotifierConsumerMixin 发送警告到任意渠道
-  行2284: ### 6.30.2 通过熔断器钩子自定义告警
-  行2319: ### 6.30.3 基于 Prometheus 指标 + Grafana 告警
-  行2352: ### 6.30.4 使用funboost的 MongoAlertMonitor 实现错误告警
-  行2373: #### 6.30.4.1 MongoAlertMonitor 使用例子，发到内置实现的 企业微信 钉钉 飞书
-  行2443: #### 6.30.4.2 MongoAlertMonitor 使用例子，发到自定义的渠道
-  行2463: ### 6.30.5 elk + grafana 实现错误告警
-  行2469: ### 6.30.6 错误触发警告的方式选择
-  行2475: ## 6.31 怎么知道 Funboost 发布者生成的最终消息内容格式是什么样？
-  行2477: ### 6.31.1 方式一：直接查看 Broker
-  行2481: ### 6.31.2 方式二：预览消息（不真正发送）
+  行1456: ### 6.25b.1 ✅ 情况A：代码末尾加了 `ctrl_c_recv()`
+  行1471: ### 6.25b.2 ❌ 情况B：代码末尾**没有**加 `ctrl_c_recv()`
+  行1487: ### 6.25b.3 效果对比表（一目了然）
+  行1498: ### 6.25b.4 最终结论
+  行1506: ## 6.25b.5 顺便说一下，文档中其他地方提到的 `ctrl_c_recv` 和 apscheduler 的定时器之间的关系
+  行1512: ### 6.25b.5.1 APScheduler 的两种原生定时器
+  行1519: ### 6.25b.5.2 早期版本（2025年之前）的问题
+  行1532: ### 6.25b.5.3 2025年之后的改进
+  行1541: ### 6.25b.5.4 三种定时器的行为对比
+  行1549: ### 6.25b.5.5 总结
+  行1557: ## 6.26 ASYNC 并发模式,异步函数操作数据库/aiohttp连接池报错 `attached to a different loop`(是用户不看文档和boost的入参说明造成)
+  行1622: ### 6.26.1 演示aiohttp连接池,解决报错 `RuntimeError: context manager should be used inside a task`
+  行1760: ### 6.26.2 演示 aiomysql 连接池在funboost使用,解决 `attached to a different loop`
+  行1936: ### 6.26.3 演示子线程怎么正确的使用aiomysql连接池的本质(和funboost无关但原理相通)
+  行2016: ## 6.28 日志提示 是掉线或关闭消费者的 和 重新放入掉线消费者未消费确认的任务 ,是正常的提示.
+  行2049: ## 6.29 funboost 推荐用户使用什么并发模式？
+  行2053: ### 6.29.1 默认推荐：当前进程内 + 多线程模式 (最省心、最稳定、最好用)
+  行2069: ### 6.29.2 高性能推荐：多进程叠加并发模式 (性能炸裂)
+  行2087: #### 6.29.2.2 ⚠️ 极度重要：多进程在 Linux 上建议显式设置 spawn 模式，抛弃默认的 fork 模式
+  行2128: ### 6.29.3 极客推荐：纯 Asyncio 协程模式 (高手的玩具)
+  行2152: ### 6.29.4 特殊场景：单线程串行模式 (Single Thread)
+  行2178: ### 6.29.5 至于 gevent 和 eventlet 并发模式，直接忽略就好
+  行2182: ## 6.30 funboost 如何实配置触发失败告警和恢复告警
+  行2186: ### 6.30.1 使用内置告警 Mixin（AlertNotifier）
+  行2196: #### 6.30.1 AlertNotifierConsumerMixin 发送警告到 微信 钉钉 飞书
+  行2219: #### 6.30.1 AlertNotifierConsumerMixin 发送警告到任意渠道
+  行2241: ### 6.30.2 通过熔断器钩子自定义告警
+  行2276: ### 6.30.3 基于 Prometheus 指标 + Grafana 告警
+  行2309: ### 6.30.4 使用funboost的 MongoAlertMonitor 实现错误告警
+  行2330: #### 6.30.4.1 MongoAlertMonitor 使用例子，发到内置实现的 企业微信 钉钉 飞书
+  行2400: #### 6.30.4.2 MongoAlertMonitor 使用例子，发到自定义的渠道
+  行2420: ### 6.30.5 elk + grafana 实现错误告警
+  行2426: ### 6.30.6 错误触发警告的方式选择
+  行2432: ## 6.31 怎么知道 Funboost 发布者生成的最终消息内容格式是什么样？
+  行2434: ### 6.31.1 方式一：直接查看 Broker
+  行2438: ### 6.31.2 方式二：预览消息（不真正发送）
 
 ============================================================
 文件: c7.md
@@ -17701,14 +17700,8 @@ if __name__ == '__main__':
 
 ## 6.25b `ctrl_c_recv` 到底要不要加？—— 直接看效果
 
-win和linux表现不一样：
-linux 代码末尾不加ctrl_c_recv(),按ctrl +c 可以结束程序。win 不加ctrl_c_recv(),按ctrl +c 无法结束程序。
-
 **先给出正确的结论:**  
 你即使程序最末尾不加 ctrl_c_recv(),funboost消费程序也会永久持续运行，控制台也会不断打印日志和 `print` 输出。
-
-严禁认为 ctrl_c_recv() 的作用是“优雅退出”或“防止程序结束”。实际上，不加它程序也会一直运行
-真实作用：在 Windows 下如果不加这行代码，按 Ctrl+C 无法停止程序。加上后即可正常。
 
 
 很多开发者（包括一些AI）容易对 `ctrl_c_recv` 的作用产生两种误解：  
@@ -17716,43 +17709,6 @@ linux 代码末尾不加ctrl_c_recv(),按ctrl +c 可以结束程序。win 不加
 - **误解二**：以为不加 `ctrl_c_recv`，脚本会自动变成 `nohup` 那样的后台任务，关掉终端窗口还能继续跑。
 
 **❌ 这些都是错误的！**
-
-
-### 6.25b.0 ctrl_c_rev的源码很简单，很容易看懂。
-
-ctrl_c_recv 的源码非常简单，它不是“优雅退出”的实现——没有等待任务完成、没有清理资源、没有发送任何信号给工作线程或消息队列，funboost不需要优雅退出，是依靠mq本身的确认消费来防止丢消息。
-
-```python
-def ctrl_c_recv(confirmation_count=1):
-    """ 
-    程序最末尾加 ctrl_c_recv() 主要是为了主线程持续在运行，方便你在 windows系统下敲击键盘 ctrl + c 可以停止程序而已。  
-    你即使程序最末尾不加 ctrl_c_recv(),funboost消费程序也会永久持续运行，控制台也会不断打印日志和 `print` 输出。
-    
-    加与不加的详细区别，可以看教程6.25b章节 `## 6.25b `ctrl_c_recv` 到底要不要加？—— 直接看效果`
-    
-    你也可以不用ctrl_c_recv(),  直接在你的启动脚本文件的最末尾加上：
-    while 1:
-        time.sleep(100) 
-    也能达到主线程在持续运行的目的，从而在windows系统下敲击键盘 ctrl + c 可以停止程序。
-    """
-    for i in range(confirmation_count):
-        while 1:
-            try:
-                time.sleep(2)
-            except (KeyboardInterrupt,) as e:
-                # time.sleep(2)
-                print(f'{type(e)} 你按了ctrl c ,程序退出, 第 {i + 1} 次', flush=True)
-                # time.sleep(2)
-                break
-
-    os._exit(44)
-```
-
-
-
-
-
-
 
 下面我们直接列出**加**与**不加**的真实效果，不涉及底层原理，只讲你实际能看到的现象。
 
@@ -19753,7 +19709,7 @@ funboost发布性能是celery的22倍，消费性能是celery的46倍。
 基于查询 分布式汇总保存到mongo的数据，实现触发告警，告警渠道支持 企业微信 钉钉 飞书。 
 见`6.30.4` 章节
 
-## 7.66 2026-03 funboost_web_manager 统一改称 funweb，增加3个系统功能
+## 7.66 2026-03 funboost_web_manager 统一改称 funweb，增加两个系统功能
 
 **funboost_web_manager** → **funweb**（新老导入和运行方式均兼容）
 
@@ -19763,7 +19719,6 @@ funboost发布性能是celery的22倍，消费性能是celery的46倍。
 | :--- | :--- | :--- |
 | 📜 **脚本部署管理** | 一键管理任何语言的脚本（进程守护 + 自动发布 + 日志聚合） | [13.4 章节](#13.4-funboost-web-manager-脚本部署管理爽功能) |
 | 💻 **服务器资源监控** | 实时监控 CPU、内存、磁盘使用率，支持历史走势 | [13.5 章节](#13.5-funweb-系统功能-资源监控) |
-| 📖 **通用日志查看器** | 脱离 SSH 终端的 Web 日志排查方案，支持实时 tail -f 体验、日志内容搜索 | [13.6 章节](#13.6-funweb-系统功能-通用日志查看器) |
 
 `````
 
@@ -29471,8 +29426,8 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
     │   ├── current_task.py
     │   ├── exceptions.py
     │   ├── fabric_deploy_helper.py
-    │   ├── funboost_as_pool.py
     │   ├── funboost_config_getter.py
+    │   ├── funboost_pool.py
     │   ├── funboost_time.py
     │   ├── func_params_model.py
     │   ├── function_result_status_saver.py
@@ -29874,9 +29829,9 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
 
 - `funboost/core/fabric_deploy_helper.py`
 
-- `funboost/core/funboost_as_pool.py`
-
 - `funboost/core/funboost_config_getter.py`
+
+- `funboost/core/funboost_pool.py`
 
 - `funboost/core/funboost_time.py`
 
@@ -47330,17 +47285,40 @@ def kill_all_remote_tasks(host, port, user, password):
 ---
 
 
---- **start of file: funboost/core/funboost_as_pool.py** (project: funboost) --- 
+--- **start of file: funboost/core/funboost_config_getter.py** (project: funboost) --- 
+
+`````python
+def _try_get_user_funboost_common_config(funboost_common_conf_field:str):
+    try:
+        import funboost_config  # 第一次启动funboost前还没这个文件,或者还没有初始化配置之前,就要使用使用配置.
+        return getattr(funboost_config.FunboostCommonConfig,funboost_common_conf_field)
+    except Exception as e:
+        # print(e)
+        return None
+`````
+
+--- **end of file: funboost/core/funboost_config_getter.py** (project: funboost) --- 
+
+---
+
+
+--- **start of file: funboost/core/funboost_pool.py** (project: funboost) --- 
 
 `````python
 """
 写一个 Funboost 通用任务池，支持 submit 任意函数，并返回 Future。
 除了实例化入参，最常用的submit方法和 concurrent.futures.ThreadPoolExecutor 一样。例如submit和返回future。
+所以用户可以使用 FunboostPool 或者 NbFunboostPool 的实例化对象替代之前的 ThreadPoolExecutor的对象。一般用户只用到pool.submit，基本完美平替，只需要修改一行代码。
+
+funboostpool 比 ThreadPoolExecutor更强的在于，可以内存存储任务，也可以分布式消息队列存任务。
+funboostpool 有几十种任务控制功能，例如重试策略，超时策略，任务优先级。
+funboostpool 能支持asyncio任务和同步任务，ThreadPoolExecutor 没这个能力
+funboostpool 的池子可以自动扩大和自动缩小，ThreadPoolExecutor 不能自动缩小。
+NbFunboostPool 拥有funboost的所有能力
 """
 
 import typing
 import concurrent.futures
-import inspect
 from funboost import BoosterParams, BrokerEnum, Booster, FunctionResultStatus, AsyncResult
 from funboost.concurrent_pool.flexible_thread_pool import _new_anyio_fun,FlexibleThreadPoolMinWorkers0
 
@@ -47356,12 +47334,14 @@ class FunboostPool:
         self,
         max_workers: int = 4,
         qps: int = 100,
+        is_need_result : bool = False,
         is_future_direct_ret_result: bool = True,
     ):
         """
         创建一个通用任务池。
         :param max_workers: 最大线程数
         :param qps: 每秒处理消息数
+        :param is_need_result: 是否需要返回执行结果,如果不关心结果只执行，可以减少性能损耗
         :param is_future_direct_ret_result: future中是的数据是最终result结果，还是 FunctionResultStatus 对象。
                如果返回FunctionResultStatus对象，那么信息更为丰富，包括重试了几次，耗时等等。
                如果返回result结果，那么只有结果，没有其他信息，但是更贴合原生的 concurrent.futures.Future.result() 方法的返回值。
@@ -47371,12 +47351,14 @@ class FunboostPool:
         self.qps = qps
         self.booster: Booster = None
         # self._pool_queue_name = f"universal_pool_{id(self)}"
+        
         self.booster_params = BoosterParams(
             queue_name=f"universal_pool_{id(self)}",
             concurrent_num=self.max_workers,
             qps=self.qps,
             broker_kind=BrokerEnum.MEMORY_QUEUE,
         )
+        self.is_need_result = is_need_result
         self.is_future_direct_ret_result = is_future_direct_ret_result
         self._create_booster()
 
@@ -47406,6 +47388,9 @@ class FunboostPool:
         # 将函数和参数打包成一个字典，直接放进消息队列
         # 因为用的是 MEMORY_QUEUE，函数对象不会被序列化，而是直接传递引用！
         task_data = {"func": fn, "args": args, "kwargs": kwargs}
+        if self.is_need_result is False:
+            self.booster.push(task_data)
+            return None
 
         # 使用 publisher 的 get_future 方法，直接返回 Future 对象
         raw_future = self.booster.publisher.get_future(task_data)
@@ -47451,32 +47436,38 @@ class NbFunboostPool(FunboostPool):
     def __init__(
         self,
         booster_params,
+        is_need_result = False,
         is_future_direct_ret_result: bool = True,
     ):  
         """
         创建一个通用任务池。
         :param booster_params: BoosterParams 对象. NbFunboostPool相比FunboostPool有更多的控制入参。
+        :param is_need_result: 是否需要返回执行结果,如果不关心结果只执行，可以不使用rpc模式，不依赖redis做rpc，节约redis空间和性能。
         :param is_future_direct_ret_result: future中是的数据是最终result结果，还是 FunctionResultStatus 对象。
                如果返回FunctionResultStatus的信息更为丰富，包括重试了几次，耗时等等。
                如果返回result结果，那么只有结果，没有其他信息，但是更贴合原原生的 concurrent.futures.Future.result() 方法的返回值。
         :return:
         """
         self.booster_params = booster_params
-        if self.booster_params.broker_kind != BrokerEnum.MEMORY_QUEUE:
+        if self.booster_params.broker_kind != BrokerEnum.MEMORY_QUEUE and is_need_result is True :
             self.booster_params.is_using_rpc_mode = True
+            self._callback_run_executor = FlexibleThreadPoolMinWorkers0(self.booster_params.concurrent_num,)
+        self.is_need_result = is_need_result
         self.is_future_direct_ret_result = is_future_direct_ret_result
         self.booster: Booster = None
         self._create_booster()
-        if self.booster_params.broker_kind != BrokerEnum.MEMORY_QUEUE: 
-            self._callback_run_executor = FlexibleThreadPoolMinWorkers0(self.booster_params.concurrent_num,work_queue_maxsize=50)
-    
+        
     def submit(self, fn: typing.Callable, *args, **kwargs) -> concurrent.futures.Future:
         # 1. 如果是内存队列，直接复用父类的高效实现（底层用 get_future）
         if self.booster_params.broker_kind == BrokerEnum.MEMORY_QUEUE:
             return super().submit(fn, *args, **kwargs)
+        task_data = {"func": fn, "args": args, "kwargs": kwargs}
+        if self.is_need_result is False:
+            self.booster.push(task_data)
+            return None
 
         # 2. 如果是分布式队列，走标准 RPC 回调封装
-        task_data = {"func": fn, "args": args, "kwargs": kwargs}
+        
         async_result: AsyncResult = self.booster.push(task_data)
         async_result.callback_run_executor = self._callback_run_executor
 
@@ -47534,7 +47525,10 @@ if __name__ == "__main__":
             queue_name="universal_queue",
             broker_kind=BrokerEnum.REDIS,
             concurrent_num=10,
+            
         ),
+        is_need_result=True,
+        is_future_direct_ret_result=True,
     )
     
 
@@ -47556,24 +47550,7 @@ if __name__ == "__main__":
 
 `````
 
---- **end of file: funboost/core/funboost_as_pool.py** (project: funboost) --- 
-
----
-
-
---- **start of file: funboost/core/funboost_config_getter.py** (project: funboost) --- 
-
-`````python
-def _try_get_user_funboost_common_config(funboost_common_conf_field:str):
-    try:
-        import funboost_config  # 第一次启动funboost前还没这个文件,或者还没有初始化配置之前,就要使用使用配置.
-        return getattr(funboost_config.FunboostCommonConfig,funboost_common_conf_field)
-    except Exception as e:
-        # print(e)
-        return None
-`````
-
---- **end of file: funboost/core/funboost_config_getter.py** (project: funboost) --- 
+--- **end of file: funboost/core/funboost_pool.py** (project: funboost) --- 
 
 ---
 
