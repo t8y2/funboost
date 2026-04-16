@@ -255,7 +255,7 @@ register_broker_exclusive_config_default(
     BROKER_KIND_REDIS_ZSET_PRIORITY,
     {
         'pull_msg_batch_size': 16,
-        'pull_base_interval': 0.02,
+        'pull_base_interval': 0.02, # 指数退避，初始拉取间隔 0.02s
         'pull_max_interval': 2,
     }
 )
@@ -264,7 +264,7 @@ register_broker_exclusive_config_default(
     BROKER_KIND_REDIS_ZSET_DELAY,
     {
         'pull_msg_batch_size': 16,
-        'pull_base_interval': 0.01,
+        'pull_base_interval': 0.01, # 指数退避，初始拉取间隔 0.01s
         'pull_max_interval': 2,
     }
 )

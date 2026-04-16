@@ -186,6 +186,7 @@
 - `from funboost.core.current_task import get_current_taskid`
 - `from funboost.core.funboost_pool import MemoryFunboostPool`
 - `from funboost.core.funboost_pool import FunboostPool`
+- `from funboost.core.funboost_pool import FunboostPoolPickleFunc`
 
 
 ---
@@ -553,7 +554,7 @@ pydatinc pycharm编程代码补全,请安装 pydantic插件, 在pycharm的  file
 - `booster_registry_name: str = StrConst.BOOSTER_REGISTRY_NAME_DEFAULT`
 
 ##### 📌 `class BoosterParamsComplete(BoosterParams)`
-*Line: 338*
+*Line: 345*
 
 **Docstring:**
 `````
@@ -575,7 +576,7 @@ specify_concurrent_pool 同一个进程的不同booster函数,共用一个线程
 - `specify_concurrent_pool: FunboostBaseConcurrentPool = Field(default_factory=functools.partial(ConcurrentPoolBuilder.get_pool, FlexibleThreadPool, 500))`
 
 ##### 📌 `class TaskOptions(BaseJsonAbleModel)`
-*Line: 358*
+*Line: 365*
 
 **Docstring:**
 `````
@@ -607,7 +608,7 @@ specify_concurrent_pool 同一个进程的不同booster函数,共用一个线程
 - `otel_context: typing.Optional[dict] = None`
 
 ##### 📌 `class PublisherParams(BaseJsonAbleModel)`
-*Line: 413*
+*Line: 420*
 
 **Class Variables (21):**
 - `queue_name: str`
@@ -709,7 +710,7 @@ funboost也内置支持了各种python三方包和消费框架作为broker,例�
 - `WEBSOCKET = 'WEBSOCKET'`
 
 ##### 📌 `class ConcurrentModeEnum`
-*Line: 197*
+*Line: 198*
 
 **Docstring:**
 `````
@@ -728,7 +729,7 @@ funboost的多进程和多线程 asyncio是叠加的，不是互斥的。
 - `SOLO = SINGLE_THREAD`
 
 ##### 📌 `class FunctionKind`
-*Line: 215*
+*Line: 216*
 
 **Docstring:**
 `````
@@ -743,7 +744,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `COMMON_FUNCTION = 'COMMON_FUNCTION'`
 
 ##### 📌 `class ConstStrForClassMethod`
-*Line: 226*
+*Line: 227*
 
 **Class Variables (5):**
 - `FIRST_PARAM_NAME = 'first_param_name'`
@@ -753,7 +754,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `CLS_FILE = 'cls_file'`
 
 ##### 📌 `class RedisKeys`
-*Line: 234*
+*Line: 235*
 
 **Public Methods (9):**
 - `def gen_funboost_apscheduler_redis_lock_key_by_queue_name(queue_name)` `staticmethod`
@@ -790,7 +791,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `FUNBOOST_UNACK_REGISTRY_PREFIX = 'funboost_unack_registry:'`
 
 ##### 📌 `class ConsumingFuncInputParamsCheckerField`
-*Line: 298*
+*Line: 299*
 
 **Class Variables (6):**
 - `is_manual_func_input_params = 'is_manual_func_input_params'`
@@ -801,14 +802,14 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `func_position = 'func_position'`
 
 ##### 📌 `class MongoDbName`
-*Line: 307*
+*Line: 308*
 
 **Class Variables (2):**
 - `TASK_STATUS_DB = 'funboost_task_status'`
 - `MONGOMQ_DB = 'funboost_mongomq'`
 
 ##### 📌 `class StrConst`
-*Line: 311*
+*Line: 312*
 
 **Class Variables (4):**
 - `BOOSTER_REGISTRY_NAME_DEFAULT = 'booster_registry_default'`
@@ -817,7 +818,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `FILTERED_TASK_RESULT = 'filtered_task_result'`
 
 ##### 📌 `class EnvConst`
-*Line: 317*
+*Line: 318*
 
 **Class Variables (2):**
 - `FUNBOOST_FAAS_CARE_PROJECT_NAME = 'funboost.faas.care_project_name'`
@@ -2881,96 +2882,101 @@ Entry Points (not imported by other project files):
   行1238: ### 4.8.2 使用分布式函数调度框架，无论接口耗时多少，轻松达到8qps的例子
   行1283: ### 4.8.3  并发数量和qps(每秒执行多少次)之间的区别
   行1306: ## 4.9 演示延时运行任务
-  行1408: ## 4.10 在web中如flask fastapi django 如何搭配使用消费框架的例子。
-  行1457: ## 4.11 保存消费状态和结果包mongo，开启消费状态结果的web页面
-  行1459: ### 4.11.1 保存消费状态和结果到mongodb
-  行1515: ### 4.11.2 框架是可以自动保存消费状态/结果到mongo，你想保存到MySQL?
-  行1523: #### 4.11.2.b  作者自己贡献一个吧函数消费状态保存到mysql的函数,(2024.02新增)
-  行1620: ### 4.11.3 可视化，启动python分布式函数调度框架之函数运行结果状态web
-  行1624: ## 4.12 框架 asyncio 方式运行协程
-  行1628: ### 4.12.1 concurrent_mode=ConcurrentModeEnum.ASYNC 运行协程
-  行1646: ### 4.12.2 concurrent_mode=ConcurrentModeEnum.THREADING 运行asyncio协程
-  行1673: ## 4.13 跨项目怎么发布任务或者获取函数执行结果(即不定义@boost消费函数就发送消息)？
-  行1750: ## 4.13b 彩蛋!!不使用funboost的消费功能,funboost作为各种消息队列的万能发布者
-  行1786: ## 4.14 获取消费进程信息的方法(用于排查查看正在运行的消费者)
-  行1825: ## 4.16 文件日志所在的地方
-  行1838: ### 4.16.1 没亲自指定 日志文件名
-  行1849: ### 4.16.2 亲自指定日志文件名,log_filename的值
-  行1906: ### 4.16.3 把用户自己的业务日志和funboost框架日志写到同一个文件
-  行1915: ## 4.16.4 funboost 日志由 nb_log 提供。
-  行1921: ## 4.17 判断函数运行完所有任务，再执行后续操作
-  行1983: ## 4.18 暂停消费
-  行2034: ## 4.19 用户自定义记录函数消费 状态/结果 钩子函数
-  行2077: ### 4.19.b 自定义保存函数消费状态结果到mysql/sqlite/pgsql请看4.11.2.b的章节
-  行2079: ## 4.20 通过 broker_exclusive_config 参数 设置不同中间件能使用到的差异化独特配置
-  行2102: ### 4.20.2 怎么知道每种消息队列 broker_exclusive_config 能支持哪些独有特殊的参数配置
-  行2112: ## 4.21 【funboost完全自由定制扩展（方式1）】 使用 register_custom_broker 完全彻底自由灵活自定义扩展和定制修改中间件(消费者和发布者)
-  行2162: ## 4.21b 【完全自由定制扩展(方式2)】,使用 consumer_override_cls 和 publisher_override_cls 来自定义消费者 发布者。
-  行2166: ### 4.21b.1 重写某些方法的例子
-  行2221: ### 4.21b.2 完全实现新增中间件类型.
-  行2311: ### 4.21b.3 funboost的用户自定义扩展比celery更容易,更彻底
-  行2325: ## 4.21c 不想吃苦？让ai来帮你扩展funboost中间件或者定制运行逻辑
-  行2333: ### 4.21c.2 假设你要使用python内置的list作为 funboost的消息队列：
-  行2348: #### 4.21c.2.2 说个ai使用技巧秘密，网页版ai大模型生成funboost代码 吊打编程 ide中的 ai大模型和claude code
-  行2371: ## 4.23 演示funboost框架是如何代替用户手写调用线程池的
-  行2424: ## 4.24 设置消费函数重试次数
-  行2450: ### 4.24.1 抛出ExceptionForRequeue类型错误，消息立即重回消息队列
-  行2470: ### 4.24.2 抛出 ExceptionForPushToDlxqueue 类型错误，消息发送到单独另外的死信队列中
-  行2489: ### 4.24.3  设置is_push_to_dlx_queue_when_retry_max_times,重试到max_retry_times最大次数没成功发送到死信队列
-  行2496: ### 4.24.4 (内置辅助)将一个消息队列中的消息转移到另一个队列
-  行2518: ### 4.24.5 funboost 高级重试：指数退避重试
-  行2532: #### 4.24.5.1 `advanced_retry_config` 参数详解
-  行2542: #### 4.24.5.2 示例：配置一个典型的指数退避
-  行2570: ## 4.25 push 和 publish 发布消息的区别
-  行2575: ### 核心区别对比
-  行2584: ### 代码演示与说明
-  行2622: ## 4.26 性能调优演示
-  行2645: ### 4.26.1 在一个进程中启动多个函数的消费，适合轻型任务
-  行2657: ### 4.26.2 在多个进程中启动函数的消费，适合一次启动大量函数的消费或重型任务
-  行2673: ## 4.28 funboost 支持celery框架整体作为funboost的broker (2023.4新增)
-  行2740: ## 4.29 funboost支持任务优先级队列
-  行2744: ### 4.29.1 队列支持优先级的说明：
-  行2754: ### 4.29.2 优先级通俗理解，用食堂打饭比喻：
-  行2769: ### 4.29.3 队列支持任务优先级的代码主要有三点：
-  行2783: ### 4.29.4 队列支持任务优先级的代码如下：
-  行2812: ### 4.29.5 消息队列优先级是针对一个queue内消息的，那么怎样才能实现不同函数之间的按优先级运行？
-  行2876: ## 4.30 funboost 远程杀死(取消)任务
-  行2894: ### 4.30.1 funboost远程杀死函数的代码例子
-  行2939: ### 4.30.2 远程强制杀死函数、超时自动杀死(function_timeout设置不为0)， 这两个功能要注意死锁：
-  行2967: ### 4.30.2.b 如果想启用funboost函数超时自动杀死功能或者 远程杀死函数功能，推荐消费函数中使用可过期锁 expire_lock
-  行2978: ## 4.31 神级别 fct (funboost_current_task) 上下文获取当前消息和任务状态
-  行3049: ## 4.32 重磅更新！！！ funboost 独家新增支持实例方法和类方法作为消费函数
-  行3057: ### 4.32.0 !!! 实例方法和类方法作为funboost任务时候，push方法需要特别注意第一个入参。
-  行3094: ### 4.32.1 funboost 支持实例方法和类方法作为消费函数的原理
-  行3144: ### 4.32.2 funboost 支持实例方法、类方法、静态方法、普通函数 4种类型，作为消费函数的例子
-  行3217: ## 4.33  @boost设置is_auto_start_consuming_message，自动启动消费。
-  行3244: ## 4.34 pyinstaller 打包 funboost项目为exe 的说明
-  行3250: ## 4.35 演示 funboost 的函数入参过滤功能
-  行3293: ### 4.35.2 警告！！！: funboost的 rpc功能和 函数入参过滤过滤 不要同时使用
-  行3302: ## 4.35c 使用 nb_cache 作为缓存装饰器
-  行3304: ### 4.35c.1 为什么 要用 nb_cache 而不是 funboost 自带的 do_task_filtering
-  行3313: ### 4.35c.2 nb_cache 功能比 funboost自带的 do_task_filtering 全面太多了
-  行3320: #### 4.35c.2.2 举个例子 nb_cache 的防止缓存击穿为什么吊打 funboost的 do_task_filtering
-  行3328: ### 4.35c.2 如何在 funboost 中使用 nb_cache
-  行3335: #### 4.35c.2.1 方式一，@boost 和 @cache 叠加使用
-  行3362: #### 4.35c.2.2 方式二 cache 装饰器传给 funboost 的 `consuming_function_decorator`
-  行3393: ## 4.36 演示`funboost`入参可以是自定义类型(不可json序列化的类型的入参,自动使用pickle)(2025-07新增支持)
-  行3493: ## 4.37 funboost 启动消费函数的方式大全(再次集中总结)
-  行3497: ### 4.37.1. 基础启动 (最常用)
-  行3513: ### 4.37.2. 多进程叠加并发启动 (高性能推荐)
-  行3527: ### 4.37.3. 自动启动 (懒人模式)
-  行3542: ### 4.37.4. 批量启动所有消费者(最粗暴无脑)
-  行3561: ### 4.37.5. 分组启动 (Group Start)
-  行3577: ### 4.37.6. 命令行启动 (CLI)
-  行3586: ### 4.37.7. 远程自动部署启动 (Fabric)
-  行3596: ### 4.37.8. Celery 模式启动 (特殊)
-  行3602: ## 4.38 MemoryFunboostPool 和 FunboostPool 的使用
-  行3606: ### 4.38.1 MemoryFunboostPool：内存增强型任务池
-  行3638: ### 4.38.2 FunboostPool：全能与分布式任务池
-  行3705: ### 4.38.3 选择指南
-  行3722: ## 4.100 使用funboost时候对框架的疑问和猜测，使用控制变量法
-  行3784: ### 4.100.b 举个例子，验证测试框架的超时杀死 function_timeout参数的作用
-  行3831: ## 4.200 [分布式函数调度框架qq群]
+  行1420: ### 4.9.2 Funboost 延时消息实现原理与REDIS_ZSET_DELAY中间件模式介绍
+  行1424: #### 4.9.2.1 🛠️ 默认模式：基于 APScheduler 二次投递
+  行1435: #### 4.9.2.2 🚀 专业模式：基于 `REDIS_ZSET_DELAY` 原生延时队列
+  行1445: #### 4.9.2.3 💻 使用示例
+  行1481: #### 4.9.2.4 📌 选择建议
+  行1489: ## 4.10 在web中如flask fastapi django 如何搭配使用消费框架的例子。
+  行1538: ## 4.11 保存消费状态和结果包mongo，开启消费状态结果的web页面
+  行1540: ### 4.11.1 保存消费状态和结果到mongodb
+  行1596: ### 4.11.2 框架是可以自动保存消费状态/结果到mongo，你想保存到MySQL?
+  行1604: #### 4.11.2.b  作者自己贡献一个吧函数消费状态保存到mysql的函数,(2024.02新增)
+  行1701: ### 4.11.3 可视化，启动python分布式函数调度框架之函数运行结果状态web
+  行1705: ## 4.12 框架 asyncio 方式运行协程
+  行1709: ### 4.12.1 concurrent_mode=ConcurrentModeEnum.ASYNC 运行协程
+  行1727: ### 4.12.2 concurrent_mode=ConcurrentModeEnum.THREADING 运行asyncio协程
+  行1754: ## 4.13 跨项目怎么发布任务或者获取函数执行结果(即不定义@boost消费函数就发送消息)？
+  行1831: ## 4.13b 彩蛋!!不使用funboost的消费功能,funboost作为各种消息队列的万能发布者
+  行1867: ## 4.14 获取消费进程信息的方法(用于排查查看正在运行的消费者)
+  行1906: ## 4.16 文件日志所在的地方
+  行1919: ### 4.16.1 没亲自指定 日志文件名
+  行1930: ### 4.16.2 亲自指定日志文件名,log_filename的值
+  行1987: ### 4.16.3 把用户自己的业务日志和funboost框架日志写到同一个文件
+  行1996: ## 4.16.4 funboost 日志由 nb_log 提供。
+  行2002: ## 4.17 判断函数运行完所有任务，再执行后续操作
+  行2064: ## 4.18 暂停消费
+  行2115: ## 4.19 用户自定义记录函数消费 状态/结果 钩子函数
+  行2158: ### 4.19.b 自定义保存函数消费状态结果到mysql/sqlite/pgsql请看4.11.2.b的章节
+  行2160: ## 4.20 通过 broker_exclusive_config 参数 设置不同中间件能使用到的差异化独特配置
+  行2183: ### 4.20.2 怎么知道每种消息队列 broker_exclusive_config 能支持哪些独有特殊的参数配置
+  行2193: ## 4.21 【funboost完全自由定制扩展（方式1）】 使用 register_custom_broker 完全彻底自由灵活自定义扩展和定制修改中间件(消费者和发布者)
+  行2243: ## 4.21b 【完全自由定制扩展(方式2)】,使用 consumer_override_cls 和 publisher_override_cls 来自定义消费者 发布者。
+  行2247: ### 4.21b.1 重写某些方法的例子
+  行2302: ### 4.21b.2 完全实现新增中间件类型.
+  行2392: ### 4.21b.3 funboost的用户自定义扩展比celery更容易,更彻底
+  行2406: ## 4.21c 不想吃苦？让ai来帮你扩展funboost中间件或者定制运行逻辑
+  行2414: ### 4.21c.2 假设你要使用python内置的list作为 funboost的消息队列：
+  行2429: #### 4.21c.2.2 说个ai使用技巧秘密，网页版ai大模型生成funboost代码 吊打编程 ide中的 ai大模型和claude code
+  行2452: ## 4.23 演示funboost框架是如何代替用户手写调用线程池的
+  行2505: ## 4.24 设置消费函数重试次数
+  行2531: ### 4.24.1 抛出ExceptionForRequeue类型错误，消息立即重回消息队列
+  行2551: ### 4.24.2 抛出 ExceptionForPushToDlxqueue 类型错误，消息发送到单独另外的死信队列中
+  行2570: ### 4.24.3  设置is_push_to_dlx_queue_when_retry_max_times,重试到max_retry_times最大次数没成功发送到死信队列
+  行2577: ### 4.24.4 (内置辅助)将一个消息队列中的消息转移到另一个队列
+  行2599: ### 4.24.5 funboost 高级重试：指数退避重试
+  行2613: #### 4.24.5.1 `advanced_retry_config` 参数详解
+  行2623: #### 4.24.5.2 示例：配置一个典型的指数退避
+  行2651: ## 4.25 push 和 publish 发布消息的区别
+  行2656: ### 核心区别对比
+  行2665: ### 代码演示与说明
+  行2703: ## 4.26 性能调优演示
+  行2726: ### 4.26.1 在一个进程中启动多个函数的消费，适合轻型任务
+  行2738: ### 4.26.2 在多个进程中启动函数的消费，适合一次启动大量函数的消费或重型任务
+  行2754: ## 4.28 funboost 支持celery框架整体作为funboost的broker (2023.4新增)
+  行2821: ## 4.29 funboost支持任务优先级队列
+  行2825: ### 4.29.1 队列支持优先级的说明：
+  行2835: ### 4.29.2 优先级通俗理解，用食堂打饭比喻：
+  行2850: ### 4.29.3 队列支持任务优先级的代码主要有三点：
+  行2864: ### 4.29.4 队列支持任务优先级的代码如下：
+  行2893: ### 4.29.5 消息队列优先级是针对一个queue内消息的，那么怎样才能实现不同函数之间的按优先级运行？
+  行2957: ## 4.30 funboost 远程杀死(取消)任务
+  行2975: ### 4.30.1 funboost远程杀死函数的代码例子
+  行3020: ### 4.30.2 远程强制杀死函数、超时自动杀死(function_timeout设置不为0)， 这两个功能要注意死锁：
+  行3048: ### 4.30.2.b 如果想启用funboost函数超时自动杀死功能或者 远程杀死函数功能，推荐消费函数中使用可过期锁 expire_lock
+  行3059: ## 4.31 神级别 fct (funboost_current_task) 上下文获取当前消息和任务状态
+  行3130: ## 4.32 重磅更新！！！ funboost 独家新增支持实例方法和类方法作为消费函数
+  行3138: ### 4.32.0 !!! 实例方法和类方法作为funboost任务时候，push方法需要特别注意第一个入参。
+  行3175: ### 4.32.1 funboost 支持实例方法和类方法作为消费函数的原理
+  行3225: ### 4.32.2 funboost 支持实例方法、类方法、静态方法、普通函数 4种类型，作为消费函数的例子
+  行3298: ## 4.33  @boost设置is_auto_start_consuming_message，自动启动消费。
+  行3325: ## 4.34 pyinstaller 打包 funboost项目为exe 的说明
+  行3331: ## 4.35 演示 funboost 的函数入参过滤功能
+  行3374: ### 4.35.2 警告！！！: funboost的 rpc功能和 函数入参过滤过滤 不要同时使用
+  行3383: ## 4.35c 使用 nb_cache 作为缓存装饰器
+  行3385: ### 4.35c.1 为什么 要用 nb_cache 而不是 funboost 自带的 do_task_filtering
+  行3394: ### 4.35c.2 nb_cache 功能比 funboost自带的 do_task_filtering 全面太多了
+  行3401: #### 4.35c.2.2 举个例子 nb_cache 的防止缓存击穿为什么吊打 funboost的 do_task_filtering
+  行3409: ### 4.35c.2 如何在 funboost 中使用 nb_cache
+  行3416: #### 4.35c.2.1 方式一，@boost 和 @cache 叠加使用
+  行3443: #### 4.35c.2.2 方式二 cache 装饰器传给 funboost 的 `consuming_function_decorator`
+  行3474: ## 4.36 演示`funboost`入参可以是自定义类型(不可json序列化的类型的入参,自动使用pickle)(2025-07新增支持)
+  行3574: ## 4.37 funboost 启动消费函数的方式大全(再次集中总结)
+  行3578: ### 4.37.1. 基础启动 (最常用)
+  行3594: ### 4.37.2. 多进程叠加并发启动 (高性能推荐)
+  行3608: ### 4.37.3. 自动启动 (懒人模式)
+  行3623: ### 4.37.4. 批量启动所有消费者(最粗暴无脑)
+  行3642: ### 4.37.5. 分组启动 (Group Start)
+  行3658: ### 4.37.6. 命令行启动 (CLI)
+  行3667: ### 4.37.7. 远程自动部署启动 (Fabric)
+  行3677: ### 4.37.8. Celery 模式启动 (特殊)
+  行3683: ## 4.38 MemoryFunboostPool 和 FunboostPool 的使用
+  行3687: ### 4.38.1 MemoryFunboostPool：内存增强型任务池
+  行3719: ### 4.38.2 FunboostPool：全能与分布式任务池
+  行3786: ### 4.38.3 选择指南
+  行3803: ## 4.100 使用funboost时候对框架的疑问和猜测，使用控制变量法
+  行3865: ### 4.100.b 举个例子，验证测试框架的超时杀死 function_timeout参数的作用
+  行3912: ## 4.200 [分布式函数调度框架qq群]
 
 ============================================================
 文件: c4b.md
@@ -11970,6 +11976,87 @@ for i in range(1, 20):
         eta=datetime.datetime(2021, 5, 19, 17, 56, 30) + datetime.timedelta(seconds=i),  
         misfire_grace_time=100000000))  
 ```  
+
+好的，这样确实更直观。我把绝对定时的例子改成 **2026年10月1日早上8点整**，这样用户一眼就能看出是“指定死日期”的定时任务。
+
+以下是修正后的 **4.9.2 章节完整内容**，替换了绝对定时的例子：
+
+---
+
+好的，这个建议非常到位。如果业务本身就是**以延时任务为主导**（例如订单超时取消、定时提醒），那么使用专用延时队列显然是更合理的架构选型。
+
+以下是在“选择建议”表格中增加这一行的完整内容：
+
+---
+
+### 4.9.2 Funboost 延时消息实现原理与REDIS_ZSET_DELAY中间件模式介绍
+
+Funboost 支持两种延时机制，核心区别在于**“何时判断时间”**。
+
+#### 4.9.2.1 🛠️ 默认模式：基于 APScheduler 二次投递
+
+1. 消息携带 `countdown/eta` 发往原 Broker（如 Redis List、Kafka）。
+2. 消费者拉取后识别为延时任务，立即 ACK 并从原队列移除。
+3. 交由内置 `APScheduler` 计时，到期后将消息**重新推回原队列**。
+4. 消费者再次拉取并执行（此时无延时字段）。
+
+**⚠️ 注意**：若队列积压大量普通消息，队尾的延时消息无法及时取出，导致执行滞后。**仅适合低频、无积压场景。**
+
+---
+
+#### 4.9.2.2 🚀 专业模式：基于 `REDIS_ZSET_DELAY` 原生延时队列
+
+1. 消息直接存入 **Redis Sorted Set**，Score = 到期时间戳。
+2. 专用消费者持续执行 `ZRANGEBYSCORE` 拉取 `Score <= now` 的消息。
+3. 时间到达立即拉取执行，无需二次入队。
+
+**✅ 优势**：无视队列顺序，不受普通消息积压影响，精准定时。**生产环境推荐。**
+
+---
+
+#### 4.9.2.3 💻 使用示例
+
+```python
+import datetime
+from funboost import boost, BoosterParams, TaskOptions
+from funboost.constant import BrokerEnum
+
+# 定义延时任务（使用专用延时队列）
+@boost(BoosterParams(queue_name="delay_add", broker_kind=BrokerEnum.REDIS_ZSET_DELAY))
+def add(x, y):
+    print(f"{x} + {y} = {x + y}")
+
+# 1. 相对延时（60秒后执行 3+5）
+add.publish(
+    {"x": 3, "y": 5},
+    task_options=TaskOptions(
+        other_extra_params={
+            'for_broker_redis_zset_delay': {'delay_seconds': 60}
+        }
+    )
+)
+
+# 2. 绝对定时（2026年10月1日 08:00:00 执行 10+20）
+target_time = datetime.datetime(2026, 10, 1, 8, 0, 0)
+eta_timestamp = target_time.timestamp()
+
+add.publish(
+    {"x": 10, "y": 20},
+    task_options=TaskOptions(
+        other_extra_params={
+            'for_broker_redis_zset_delay': {'eta_timestamp': eta_timestamp}
+        }
+    )
+)
+```
+
+#### 4.9.2.4 📌 选择建议
+
+| 场景 | 推荐方案 |
+| :--- | :--- |
+| 开发测试 / 极低频延时 | 默认 `TaskOptions(countdown=…)` |
+| 业务以延时任务为主（如订单超时、定时提醒） | **`BrokerEnum.REDIS_ZSET_DELAY`** |
+| 生产环境 / 高频延时 / 严格守时 | **`BrokerEnum.REDIS_ZSET_DELAY`** |
 
 ## 4.10 在web中如flask fastapi django 如何搭配使用消费框架的例子。  
 
@@ -24682,6 +24769,7 @@ boost_scrapy 就是这样的框架，使用 funboost的引擎来封装的，封�
 - `from funboost.core.current_task import get_current_taskid`
 - `from funboost.core.funboost_pool import MemoryFunboostPool`
 - `from funboost.core.funboost_pool import FunboostPool`
+- `from funboost.core.funboost_pool import FunboostPoolPickleFunc`
 
 
 ---
@@ -25049,7 +25137,7 @@ pydatinc pycharm编程代码补全,请安装 pydantic插件, 在pycharm的  file
 - `booster_registry_name: str = StrConst.BOOSTER_REGISTRY_NAME_DEFAULT`
 
 ##### 📌 `class BoosterParamsComplete(BoosterParams)`
-*Line: 338*
+*Line: 345*
 
 **Docstring:**
 `````
@@ -25071,7 +25159,7 @@ specify_concurrent_pool 同一个进程的不同booster函数,共用一个线程
 - `specify_concurrent_pool: FunboostBaseConcurrentPool = Field(default_factory=functools.partial(ConcurrentPoolBuilder.get_pool, FlexibleThreadPool, 500))`
 
 ##### 📌 `class TaskOptions(BaseJsonAbleModel)`
-*Line: 358*
+*Line: 365*
 
 **Docstring:**
 `````
@@ -25103,7 +25191,7 @@ specify_concurrent_pool 同一个进程的不同booster函数,共用一个线程
 - `otel_context: typing.Optional[dict] = None`
 
 ##### 📌 `class PublisherParams(BaseJsonAbleModel)`
-*Line: 413*
+*Line: 420*
 
 **Class Variables (21):**
 - `queue_name: str`
@@ -25205,7 +25293,7 @@ funboost也内置支持了各种python三方包和消费框架作为broker,例�
 - `WEBSOCKET = 'WEBSOCKET'`
 
 ##### 📌 `class ConcurrentModeEnum`
-*Line: 197*
+*Line: 198*
 
 **Docstring:**
 `````
@@ -25224,7 +25312,7 @@ funboost的多进程和多线程 asyncio是叠加的，不是互斥的。
 - `SOLO = SINGLE_THREAD`
 
 ##### 📌 `class FunctionKind`
-*Line: 215*
+*Line: 216*
 
 **Docstring:**
 `````
@@ -25239,7 +25327,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `COMMON_FUNCTION = 'COMMON_FUNCTION'`
 
 ##### 📌 `class ConstStrForClassMethod`
-*Line: 226*
+*Line: 227*
 
 **Class Variables (5):**
 - `FIRST_PARAM_NAME = 'first_param_name'`
@@ -25249,7 +25337,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `CLS_FILE = 'cls_file'`
 
 ##### 📌 `class RedisKeys`
-*Line: 234*
+*Line: 235*
 
 **Public Methods (9):**
 - `def gen_funboost_apscheduler_redis_lock_key_by_queue_name(queue_name)` `staticmethod`
@@ -25286,7 +25374,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `FUNBOOST_UNACK_REGISTRY_PREFIX = 'funboost_unack_registry:'`
 
 ##### 📌 `class ConsumingFuncInputParamsCheckerField`
-*Line: 298*
+*Line: 299*
 
 **Class Variables (6):**
 - `is_manual_func_input_params = 'is_manual_func_input_params'`
@@ -25297,14 +25385,14 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `func_position = 'func_position'`
 
 ##### 📌 `class MongoDbName`
-*Line: 307*
+*Line: 308*
 
 **Class Variables (2):**
 - `TASK_STATUS_DB = 'funboost_task_status'`
 - `MONGOMQ_DB = 'funboost_mongomq'`
 
 ##### 📌 `class StrConst`
-*Line: 311*
+*Line: 312*
 
 **Class Variables (4):**
 - `BOOSTER_REGISTRY_NAME_DEFAULT = 'booster_registry_default'`
@@ -25313,7 +25401,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `FILTERED_TASK_RESULT = 'filtered_task_result'`
 
 ##### 📌 `class EnvConst`
-*Line: 317*
+*Line: 318*
 
 **Class Variables (2):**
 - `FUNBOOST_FAAS_CARE_PROJECT_NAME = 'funboost.faas.care_project_name'`
@@ -30404,8 +30492,9 @@ class BrokerEnum:
     MEMORY_QUEUE = 'MEMORY_QUEUE'  # 使用python queue.Queue实现的基于当前python进程的消息队列，不支持跨进程 跨脚本 跨机器共享任务，不支持持久化，适合一次性短期简单任务。
     LOCAL_PYTHON_QUEUE = MEMORY_QUEUE  # 别名，python本地queue就是基于python自带的语言的queue.Queue，消息存在python程序的内存中，不支持重启断点接续。
     
-    # 高性能内存队列，使用 collections.deque 代替 queue.Queue，去除不必要的 task_done/join 开销
+    # 高性能内存队列，使用 collections.deque 代替 queue.Queue，去除不必要的 task_done/join 开销。
     # 性能比 MEMORY_QUEUE 提升 2-5 倍，支持批量拉取消息（通过 broker_exclusive_config={'pull_msg_batch_size': 1000}）
+    # 不推荐用户用FASTEST_MEM_QUEUE，如果要用内存队列，一般用MEMORY_QUEUE模式就好了。
     FASTEST_MEM_QUEUE = 'FASTEST_MEM_QUEUE'
 
     RABBITMQ_PIKA = 'RABBITMQ_PIKA'  # 使用pika包操作rabbitmq  作为 分布式消息队列。，不建议使用
@@ -31066,7 +31155,7 @@ from funboost.concurrent_pool.custom_threadpool_executor import show_current_thr
 
 from funboost.core.current_task import funboost_current_task,fct,get_current_taskid
 
-from funboost.core.funboost_pool import MemoryFunboostPool,FunboostPool
+from funboost.core.funboost_pool import MemoryFunboostPool,FunboostPool,FunboostPoolPickleFunc
 
 
 
@@ -47422,7 +47511,7 @@ class MemoryFunboostPool:
         """
         self.concurrent_num = concurrent_num
         self.qps = qps
-        self.booster: Booster = None
+        self.booster: Booster = None # 用户仍然可以通过 pool.booster. 来操作booster其他方法和属性，booster是公有属性
         # self._pool_queue_name = f"universal_pool_{id(self)}"
 
         self.booster_params = BoosterParams(
@@ -47536,11 +47625,12 @@ class FunboostPoolPickleFunc(MemoryFunboostPool):
         self.is_need_result = is_need_result
         self.is_future_direct_ret_result = is_future_direct_ret_result
         self.is_auto_start_consuming_message = is_auto_start_consuming_message
-        self.booster: Booster = None
+        self.booster: Booster = None # 用户仍然可以通过 pool.booster. 来操作booster其他方法和属性，booster是公有属性
         self._create_booster()
         self._start_consume()
-
-    def _get_fn_new(self, fn: typing.Callable):
+    
+    @staticmethod
+    def _get_fn_new( fn: typing.Callable):
         """
         FunboostPoolPickleFunc 模式，fn会被自动pickle序列化，再发到消息队列。
         """
@@ -47582,16 +47672,22 @@ class FunboostPoolPickleFunc(MemoryFunboostPool):
         async_result.set_callback(rpc_callback)
         return final_future
 
+def get_fun_path(fn: typing.Callable):
+    """
+    获取函数的路径字符串，例如 "my_module.my_submodule.my_func"
+    """
+    return f"{fn.__module__}.{fn.__qualname__}"
 
 class FunboostPool(FunboostPoolPickleFunc):
 
-    def _get_fn_new(self, fn: typing.Callable):
+    @staticmethod
+    def _get_fn_new( fn: typing.Callable):
         """
         FunboostPool 模式
-        使用函数路径，它不再依赖 pickle 序列化函发到消息队列，而是把路径字符串发送到消息队列。
+        使用函数路径，它不再依赖 pickle 序列化函发到消息队列，而是把函数路径字符串发送到消息队列。
         消息更清晰，用户能通过查看消息，知道要运行的是什么函数
         """
-        return f"{fn.__module__}.{fn.__qualname__}"
+        return get_fun_path(fn)
 
     def _create_booster(self):
         # 核心：定义一个通用的消费函数，它不再依赖 pickle 序列化函数对象
@@ -47614,7 +47710,7 @@ class FunboostPool(FunboostPoolPickleFunc):
 
             except (ImportError, AttributeError) as e:
                 # 处理导入失败的情况
-                raise ImportError(f"无法加载任务函数 '{func_path}': {e}")
+                raise ImportError(f"cant import function '{func_path}': {e}")
 
             # 4. 执行真正的业务逻辑
             # 这里利用了 _new_anyio_fun 支持同步/异步函数的特性
@@ -48217,8 +48313,16 @@ class BoosterParams(BaseJsonAbleModel):
 
     function_result_status_persistance_conf: FunctionResultStatusPersistanceConfig = FunctionResultStatusPersistanceConfig(
         is_save_result=False, is_save_status=False, expire_seconds=7 * 24 * 3600, is_use_bulk_insert=False)  # 是否保存函数的入参，运行结果和运行状态到mongodb。这一步用于后续的参数追溯，任务统计和web展示，需要安装mongo。
+    
+    """
+    user_custom_record_process_info_func:
+    此函数仅仅接受一个入参，入参类型是 FunctionResultStatus，用户可以打印或者保存结果到任意地方。以及用于其他功能，例如判断报错时候发邮件
+    建议用户通过 mixin类写user_custom_record_process_info_func方法 ，使用 consumer_override_cls 方式来自定义保存函数运行状态和结果。
 
-    user_custom_record_process_info_func: typing.Optional[typing.Callable[..., typing.Any]] = None  # 提供一个用户自定义的保存消息处理记录到某个地方例如mysql数据库的函数，函数仅仅接受一个入参，入参类型是 FunctionResultStatus，用户可以打印参数
+    框架之后不再额外在BoosterParams中增加更多其他钩子字段，以减少字段数量；用户需要学习教程的4.21b章节的 consumer_override_cls，
+    consumer_override_cls 自定义灵活性无敌，用户自由发挥余地很大。
+    """
+    user_custom_record_process_info_func: typing.Optional[typing.Callable[..., typing.Any]] = None  
 
     is_using_rpc_mode: bool = False  # 是否使用rpc模式，可以在发布端获取消费端的结果回调，但消耗一定性能，使用async_result.result时候会等待阻塞住当前线程。
     rpc_result_expire_seconds: int = 1800  # redis保存rpc结果的过期时间.
@@ -48230,7 +48334,6 @@ class BoosterParams(BaseJsonAbleModel):
     """
     allow_run_time_cron:
     只允许在规定的crontab表达式时间内运行。
-
     例如 '* 23,0-2 * * *' 表示只在23点到2点运行。
     allow_run_time_cron='* 9-17 * * 1-5', 表示只在周一到周五的9点到17:59:59运行。
     为None则不限制运行时间。
