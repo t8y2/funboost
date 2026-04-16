@@ -125,7 +125,7 @@ class FlexibleThreadPool(FunboostFileLoggerMixin, LoggerLevelSetterMixin, Funboo
                         self._total_threads -= 1
                         return  # 退出循环，非守护线程自然死亡
                     else:
-                        continue
+                        continue # 一定要continue跳出本次while 循环，不然会执行下面的self._free_threads -= 1,会导致减两次。
 
             with self._state_lock:
                 self._free_threads -= 1
