@@ -1,14 +1,14 @@
-# nb_cli 设计稿
+# nb_cmd 设计稿（PyPI包名: nb-cmd）
 
 ## 一句话定位
 
-**nb_cli = "万能接口生成器"**——你写一个 Python class，自动获得 CLI + REST API + Web UI 三种接口。不是"更好的CLI框架"，而是"超越CLI的CLI"。
+**nb_cmd = "万能接口生成器"**——你写一个 Python class，自动获得 CLI + REST API + Web UI 三种接口。不是"更好的CLI框架"，而是"超越CLI的CLI"。
 
 ---
 
 ## 目录
 
-- [1. 为什么要做 nb_cli](#1-为什么要做-nb_cli)
+- [1. 为什么要做 nb_cmd](#1-为什么要做-nb_cmd)
 - [2. 核心设计哲学](#2-核心设计哲学)
 - [3. 四步走转化思路](#3-四步走转化思路)
 - [4. API 设计——基础用法](#4-api-设计基础用法)
@@ -23,7 +23,7 @@
 
 ---
 
-## 1. 为什么要做 nb_cli
+## 1. 为什么要做 nb_cmd
 
 ### 1.1 CLI框架的根本痛点
 
@@ -51,7 +51,7 @@
 
 **所有现有框架都是"CLI是终点"的世界观。**
 
-### 1.3 nb_cli 的世界观
+### 1.3 nb_cmd 的世界观
 
 **"Class是中心，接口是投影"。**
 
@@ -71,7 +71,7 @@
 
 funboost 让你写一个函数，装饰器一加就能跑在40种消息队列上。
 
-nb_cli 让你写一个class，run一调就能跑在3种接口模式上。
+nb_cmd 让你写一个class，run一调就能跑在3种接口模式上。
 
 ---
 
@@ -95,13 +95,13 @@ nb_cli 让你写一个class，run一调就能跑在3种接口模式上。
 
 ### 2.4 和现有生态的集成
 
-nb_cli 不从零开始造轮子，而是充分复用已有的 nb_api（API生成）、nb_log（日志+增强print）、nb_config（配置管理）等。
+nb_cmd 不从零开始造轮子，而是充分复用已有的 nb_api（API生成）、nb_log（日志+增强print）、nb_config（配置管理）等。
 
 ---
 
 ## 3. 四步走转化思路
 
-用 oop_4steps 的思路理解 nb_cli 的设计：
+用 oop_4steps 的思路理解 nb_cmd 的设计：
 
 ### 第0步（灵魂步骤）：脑中打草稿
 
@@ -111,14 +111,14 @@ nb_cli 不从零开始造轮子，而是充分复用已有的 nb_api（API生成
 
 ```python
 # deploy_tool.py 模块 → class DeployTool
-class DeployTool(NbCli):
+class DeployTool(NbCmd):
     ...
 ```
 
 ### 第2步：全局变量 → 实例属性
 
 ```python
-class DeployTool(NbCli):
+class DeployTool(NbCmd):
     def __init__(self):
         self.db_conn = connect_db()  # 共享的数据库连接
         self.config = load_config()   # 共享的配置
@@ -127,7 +127,7 @@ class DeployTool(NbCli):
 ### 第3步：函数 → 实例方法
 
 ```python
-class DeployTool(NbCli):
+class DeployTool(NbCmd):
     def deploy(self, host: str, port: int = 22):
         self.db_conn.log_deploy(host)  # 直接用self.xx
         ...
@@ -142,9 +142,9 @@ class DeployTool(NbCli):
 ### 4.1 最简示例
 
 ```python
-from nb_cli import NbCli
+from nb_cmd import NbCmd
 
-class MyTool(NbCli):
+class MyTool(NbCmd):
     """我的超级工具（自动变成CLI的description）"""
 
     def greet(self, name: str, times: int = 1):
@@ -224,7 +224,7 @@ $ python my_tool.py deploy 192.168.1.1 --port 2222 --verbose
 | `str` 类型（默认） | 字符串参数 |
 | `_` 开头的方法 | 不暴露为子命令 |
 | 类的 `__init__` | 不暴露 |
-| 继承自 NbCli 的方法 | 不暴露（run/before_run/after_run等） |
+| 继承自 NbCmd 的方法 | 不暴露（run/before_run/after_run等） |
 
 ---
 
@@ -233,7 +233,7 @@ $ python my_tool.py deploy 192.168.1.1 --port 2222 --verbose
 ### 5.1 类型驱动的高级参数
 
 ```python
-from nb_cli import NbCli
+from nb_cmd import NbCmd
 from pathlib import Path
 from typing import List, Optional, Tuple
 from enum import Enum
@@ -243,7 +243,7 @@ class Environment(Enum):
     STAGING = "staging"
     PROD = "prod"
 
-class DeployTool(NbCli):
+class DeployTool(NbCmd):
     """部署工具"""
 
     def deploy(self,
@@ -284,7 +284,7 @@ class DeployTool(NbCli):
 ### 5.2 继承覆写——OOP的核心优势
 
 ```python
-class BaseDeploy(NbCli):
+class BaseDeploy(NbCmd):
     """基础部署工具"""
 
     def deploy(self, host: str, port: int = 22):
@@ -339,10 +339,10 @@ if __name__ == '__main__':
 类似 `git remote add`、`docker container ls` 这种多层级子命令，通过**内部类**实现：
 
 ```python
-from nb_cli import NbCli
+from nb_cmd import NbCmd
 
 
-class GitRemote(NbCli):
+class GitRemote(NbCmd):
     """远程仓库管理"""
 
     def add(self, name: str, url: str):
@@ -358,7 +358,7 @@ class GitRemote(NbCli):
         print("origin  https://github.com/xxx/xxx.git (fetch)")
 
 
-class GitBranch(NbCli):
+class GitBranch(NbCmd):
     """分支管理"""
 
     def create(self, name: str, *, from_branch: str = "main"):
@@ -377,7 +377,7 @@ class GitBranch(NbCli):
         print("  feature/login")
 
 
-class GitTool(NbCli):
+class GitTool(NbCmd):
     """简易Git工具"""
 
     sub_commands = {
@@ -447,12 +447,12 @@ $ python git_tool.py --help
 - 子命令组的类可以被单独复用和测试
 - `sub_commands` 字典的key就是CLI中的子命令组名称
 
-**实现原理：** `_discover_commands()` 中检测 `sub_commands` 类变量，对其中的每个NbCli子类递归构建 argparse 的 subparser。
+**实现原理：** `_discover_commands()` 中检测 `sub_commands` 类变量，对其中的每个NbCmd子类递归构建 argparse 的 subparser。
 
 多层级还可以继续嵌套：
 
 ```python
-class ServerConfig(NbCli):
+class ServerConfig(NbCmd):
     """配置管理"""
     def show(self):
         """显示配置"""
@@ -463,7 +463,7 @@ class ServerConfig(NbCli):
         print(f"设置 {key} = {value}")
 
 
-class ServerGroup(NbCli):
+class ServerGroup(NbCmd):
     """服务器管理"""
     sub_commands = {
         'config': ServerConfig,
@@ -474,7 +474,7 @@ class ServerGroup(NbCli):
         print("重启中...")
 
 
-class MyTool(NbCli):
+class MyTool(NbCmd):
     """运维工具"""
     sub_commands = {
         'server': ServerGroup,
@@ -490,7 +490,7 @@ $ python my_tool.py server restart
 ### 5.4 带状态的CLI（__init__参数 → 全局选项）
 
 ```python
-class DbTool(NbCli):
+class DbTool(NbCmd):
     """数据库管理工具"""
 
     def __init__(self, db_url: str = "sqlite:///default.db", verbose: bool = False):
@@ -538,7 +538,7 @@ $ python db_tool.py --db-url "mysql://localhost/mydb" --verbose query "SELECT * 
 ### 5.5 返回值处理
 
 ```python
-class DataTool(NbCli):
+class DataTool(NbCmd):
 
     def query(self, table: str) -> list:
         """查询数据"""
@@ -565,7 +565,7 @@ class DataTool(NbCli):
 ### 5.6 进度条和表格
 
 ```python
-class DataTool(NbCli):
+class DataTool(NbCmd):
 
     def process(self, input_file: Path, output_file: Path):
         """处理大数据文件"""
@@ -619,7 +619,7 @@ CPU:       45%
 Python方法名中的下划线自动转换为CLI中的短横线：
 
 ```python
-class MyTool(NbCli):
+class MyTool(NbCmd):
     def create_user(self, name: str):     # CLI: create-user
         ...
     def delete_all_data(self):            # CLI: delete-all-data
@@ -631,9 +631,9 @@ class MyTool(NbCli):
 ### 5.8 参数校验和自定义校验
 
 ```python
-from nb_cli import NbCli, validate
+from nb_cmd import NbCmd, validate
 
-class MyTool(NbCli):
+class MyTool(NbCmd):
 
     @validate(port=lambda x: 1 <= x <= 65535, host=lambda x: '.' in x)
     def deploy(self, host: str, port: int = 22):
@@ -652,7 +652,7 @@ $ python my_tool.py deploy invalid_host
 ### 5.9 参数别名
 
 ```python
-class MyTool(NbCli):
+class MyTool(NbCmd):
 
     def deploy(self, host: str, port: int = 22, verbose: bool = False):
         """部署"""
@@ -817,7 +817,7 @@ $ python tool.py --web --port 8080
 ### 7.1 Meta 配置类
 
 ```python
-class MyTool(NbCli):
+class MyTool(NbCmd):
     class Meta:
         name = "mytool"                     # CLI名称（默认用类名的snake_case）
         version = "1.0.0"                   # 版本号
@@ -856,7 +856,7 @@ class MyTool(NbCli):
 | `use_nb_log = True` | 自动增强：print输出自带时间戳、文件名、行号（nb_print效果） | nb_log增强版logger，自带彩色控制台handler | 自动写入log_file | 有（nb_log彩色） |
 
 简单来说：
-- **False**：nb_cli零外部依赖，纯标准库运行，适合轻量脚本
+- **False**：nb_cmd零外部依赖，纯标准库运行，适合轻量脚本
 - **True**：自动获得nb_log全套能力（彩色日志 + 增强print + 文件日志），适合正式项目
 
 ```bash
@@ -872,7 +872,7 @@ $ python tool.py deploy 192.168.1.1
 ### 7.2 生命周期钩子
 
 ```python
-class MyTool(NbCli):
+class MyTool(NbCmd):
 
     def before_run(self):
         """所有子命令执行前的钩子"""
@@ -892,10 +892,10 @@ class MyTool(NbCli):
 
 ### 7.3 内置工具方法
 
-NbCli 基类提供以下工具方法供子类使用：
+NbCmd 基类提供以下工具方法供子类使用：
 
 ```python
-class NbCli:
+class NbCmd:
     # 输出工具
     def table(self, data: list, headers: list = None): ...     # 表格输出
     def kv(self, data: dict): ...                               # 键值对输出
@@ -920,7 +920,7 @@ class NbCli:
 ### 7.4 与 auto_run_on_remote 集成
 
 ```python
-class DeployTool(NbCli):
+class DeployTool(NbCmd):
     
     def deploy(self, host: str):
         """部署"""
@@ -946,7 +946,7 @@ import inspect
 import sys
 from typing import get_type_hints
 
-class NbCli:
+class NbCmd:
     def run(self, args=None):
         """主入口"""
         # 1. 检查全局模式参数
@@ -986,7 +986,7 @@ def _discover_commands(self):
     """通过反射发现所有公有方法，以及 sub_commands 类变量中注册的子命令组"""
     commands = {}
     
-    base_methods = set(dir(NbCli))
+    base_methods = set(dir(NbCmd))
     
     # 1. 发现普通方法（子命令）
     for name in dir(self):
@@ -1015,7 +1015,7 @@ def _discover_commands(self):
     # 2. 发现子命令组（通过 sub_commands 类变量注册）
     sub_cmds = getattr(self.__class__, 'sub_commands', {})
     for group_name, group_cls in sub_cmds.items():
-        if inspect.isclass(group_cls) and issubclass(group_cls, NbCli):
+        if inspect.isclass(group_cls) and issubclass(group_cls, NbCmd):
             commands[group_name] = {
                 'cls': group_cls,
                 'doc': (inspect.getdoc(group_cls) or "").split('\n')[0],
@@ -1250,7 +1250,7 @@ def _get_choices(self, python_type):
 
 ### 9.1 功能对比表
 
-| 功能 | argparse | click | typer | fire | **nb_cli** |
+| 功能 | argparse | click | typer | fire | **nb_cmd** |
 |------|----------|-------|-------|------|----------|
 | 零配置 | ✗ | ✗ | 部分 | ✓ | **✓** |
 | 类型驱动 | 手动 | 手动 | ✓ | ✗ | **✓** |
@@ -1311,9 +1311,9 @@ fire.Fire(Tool)
 # 最简，但没有类型校验和帮助定制
 ```
 
-**nb_cli: ~15行 + 自动获得API/Web UI**
+**nb_cmd: ~15行 + 自动获得API/Web UI**
 ```python
-class Tool(NbCli):
+class Tool(NbCmd):
     def deploy(self, host: str, port: int = 22):
         ...
 Tool().run()
@@ -1322,7 +1322,7 @@ Tool().run()
 
 ### 9.3 核心差异总结
 
-| 维度 | typer/fire | nb_cli |
+| 维度 | typer/fire | nb_cmd |
 |------|-----------|---------|
 | **世界观** | CLI是终点 | Class是中心，接口是投影 |
 | **扩展方式** | 无（火fire）或有限（typer） | OOP继承覆写 |
@@ -1334,8 +1334,8 @@ Tool().run()
 ## 10. 项目结构
 
 ```
-nb_cli/
-├── __init__.py               # 核心入口，NbCli基类
+nb_cmd/
+├── __init__.py               # 核心入口，NbCmd基类
 ├── core/
 │   ├── __init__.py
 │   ├── discovery.py           # 命令发现（反射）
@@ -1349,11 +1349,35 @@ nb_cli/
 │   └── web_mode.py            # Web UI模式（依赖fastapi + jinja2）
 ├── ui/
 │   ├── __init__.py
-│   ├── table.py               # 表格输出
-│   ├── progress.py            # 进度条
-│   ├── colors.py              # 彩色输出
-│   └── templates/
-│       └── web_ui.html        # Web UI模板
+│   ├── table.py               # 表格输出（CLI模式）
+│   ├── progress.py            # 进度条（CLI模式）
+│   ├── colors.py              # 彩色输出（CLI模式）
+│   └── static/                # **前端预构建产物（npm run build生成，随包发布）**
+│       ├── index.html
+│       ├── assets/
+│       │   ├── index-xxxxx.js
+│       │   └── index-xxxxx.css
+│       └── favicon.ico
+├── web_frontend/              # **前端源码（仅开发者需要，不随包发布）**
+│   ├── package.json
+│   ├── vite.config.ts
+│   ├── tsconfig.json
+│   ├── index.html
+│   ├── src/
+│   │   ├── main.ts
+│   │   ├── App.vue
+│   │   ├── components/
+│   │   │   ├── CommandInput.vue      # 命令行输入框组件
+│   │   │   ├── ParamForm.vue         # 参数表单组件（可折叠）
+│   │   │   ├── ConsoleOutput.vue     # 实时控制台输出组件
+│   │   │   ├── CommandHistory.vue    # 命令历史组件
+│   │   │   └── StatusBar.vue         # 底部状态栏组件
+│   │   ├── composables/
+│   │   │   ├── useWebSocket.ts       # WebSocket连接管理
+│   │   │   └── useCommandHistory.ts  # 命令历史（localStorage持久化）
+│   │   └── types/
+│   │       └── command.ts            # 命令/参数类型定义
+│   └── build_to_package.sh    # 构建并复制到 ui/static/ 的脚本
 ├── utils/
 │   ├── __init__.py
 │   ├── config.py              # 参数持久化
@@ -1386,10 +1410,9 @@ fastapi>=0.68.0
 uvicorn>=0.15.0
 pydantic>=1.8.0
 
-# Web UI模式
+# Web UI模式（前端已预构建，用户无需安装Node.js）
 fastapi>=0.68.0
 uvicorn>=0.15.0
-jinja2>=3.0.0
 websockets>=10.0
 
 # 增强输出
@@ -1402,13 +1425,103 @@ nb_config
 
 **核心设计原则：CLI模式零外部依赖，其他模式按需安装。**
 
+### 前端技术栈（仅作者开发时需要，用户无感知）
+
+```
+Vue 3 + Element Plus + Vite + TypeScript
+```
+
+**构建流程（仅作者执行）：**
+
+```bash
+cd nb_cmd/web_frontend/
+npm install
+npm run build
+# vite自动将构建产物输出到 ../ui/static/
+```
+
+**用户使用时的体验：**
+
+```bash
+pip install nb-cmd
+python tool.py --web --port 8080
+# 直接启动Web UI，无需Node.js，前端文件已打包在Python包中
+```
+
+**关键配置 `vite.config.ts`：**
+
+```typescript
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import ElementPlus from 'unplugin-element-plus/vite'
+import path from 'path'
+
+export default defineConfig({
+  plugins: [vue(), ElementPlus({})],
+  build: {
+    // 构建产物输出到Python包的static目录
+    outDir: path.resolve(__dirname, '../ui/static'),
+    emptyOutDir: true,
+    // 生成单文件，减少HTTP请求
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
+  },
+  base: './',  // 使用相对路径，适配任意部署路径
+})
+```
+
+**Python端serve静态文件：**
+
+```python
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+import importlib.resources
+
+app = FastAPI()
+
+# 获取包内static目录路径
+static_dir = importlib.resources.files('nb_cmd') / 'ui' / 'static'
+app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="static")
+```
+
+**`setup.py` / `pyproject.toml` 中包含静态文件：**
+
+```toml
+[tool.setuptools.package-data]
+nb_cmd = ["ui/static/**/*"]
+```
+
+**前端与后端通信：**
+
+```
+前端（Vue3）                     后端（FastAPI）
+    │                                │
+    ├── POST /api/{command}  ────────┤  执行命令
+    │                                │
+    ├── WebSocket /ws  ──────────────┤  实时控制台输出推送
+    │                                │
+    ├── GET /api/commands  ──────────┤  获取所有命令和参数定义
+    │                                │
+    └── GET /api/help/{cmd}  ────────┤  获取命令帮助信息
+```
+
+**为什么用 Vue3 + Element Plus？**
+
+1. **Element Plus** 提供了现成的表单组件（Input、Select、Switch、InputNumber等），参数类型到表单控件的映射开箱即用
+2. **Vue3** 的响应式系统天然适合实时控制台输出和命令历史的状态管理
+3. **Vite** 构建速度极快，开发体验好
+4. **构建产物体积小**——gzip后整个前端通常 < 500KB
+
 ---
 
 ## 12. 开发路线
 
 ### 阶段1：MVP（核心CLI功能）
 
-- [x] NbCli 基类
+- [x] NbCmd 基类
 - [x] 命令发现（反射）
 - [x] 参数自动推导（inspect.signature）
 - [x] 基础类型支持（str/int/float/bool）
@@ -1463,7 +1576,7 @@ nb_config
 ### A. 数据库管理工具
 
 ```python
-from nb_cli import NbCli
+from nb_cmd import NbCmd
 from pathlib import Path
 from typing import List, Optional
 from enum import Enum
@@ -1476,7 +1589,7 @@ class OutputFormat(Enum):
     CSV = "csv"
 
 
-class DbTool(NbCli):
+class DbTool(NbCmd):
     """数据库管理工具 - 支持多种数据库的通用管理"""
 
     def __init__(self, db_url: str = "sqlite:///default.db", verbose: bool = False):
@@ -1584,11 +1697,11 @@ $ python db_tool.py --serve --port 8080
 ### B. 服务器运维工具（继承示例）
 
 ```python
-from nb_cli import NbCli
+from nb_cmd import NbCmd
 from typing import List
 
 
-class BaseOps(NbCli):
+class BaseOps(NbCmd):
     """基础运维工具"""
 
     def __init__(self, ssh_key: str = "~/.ssh/id_rsa"):
@@ -1676,7 +1789,7 @@ $ python ops.py k8s scale myapp --replicas 5
 
 ## 总结
 
-**nb_cli 的核心颠覆点：**
+**nb_cmd 的核心颠覆点：**
 
 1. **不是"更好的CLI框架"，而是"万能接口生成器"** —— 一个class，三种接口（CLI + REST API + Web UI）
 2. **OOP继承覆写** —— typer/fire/click 都做不到的能力
