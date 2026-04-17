@@ -11,7 +11,6 @@ FunboostPool 拥有funboost的所有能力
 """
 
 import typing
-import threading
 from typing import Optional
 import concurrent.futures
 from funboost import (
@@ -31,21 +30,18 @@ import importlib
 class FunboostFuture(concurrent.futures.Future):
     """
     继承 concurrent.futures.Future，统一处理 FunctionResultStatus → 业务结果的转换。
-
-    惰性模式：只在用户调用 .result() 时才真正获取结果，
-    如果用户不调用 result()，不会触发 Redis blpop 等网络操作，零额外开销。
-    注意：惰性模式下 done() / add_done_callback() / as_completed() 需要先调用 result() 才能生效。
+    
+    修改为完全惰性模式：只在用户调用 .result() 时才真正获取结果，无后台预取，零额外开销。
     """
 
     def __init__(self, is_future_direct_ret_result: bool = True, has_result_source: bool = True):
         super().__init__()
         self._is_direct = is_future_direct_ret_result
         self._has_result_source = has_result_source
-        self._async_result: typing.Optional[AsyncResult] = None
-        self._raw_future: typing.Optional[concurrent.futures.Future] = None
+        self._async_result: typing.Optional[AsyncResult] = None  # 分布式模式的 AsyncResult
+        self._raw_future: typing.Optional[concurrent.futures.Future] = None  # 内存模式的 raw_future
         self._is_memory_mode = False
-        self._resolve_lock = threading.Lock()
-        self._resolved = False
+        self._result_fetched = False
 
     def result(self, timeout=None):
         if not self._has_result_source:
@@ -53,49 +49,30 @@ class FunboostFuture(concurrent.futures.Future):
                 "当前 FunboostPool 未启用结果获取（is_need_result=False）。\n"
                 "要获取 future.result()，请在初始化时设置 is_need_result=True"
             )
-        self._ensure_resolved(timeout)
-        return super().result(timeout=timeout)
-
-    def _ensure_resolved(self, timeout=None):
-        """
-        线程安全的惰性解析，使用 double-check locking 避免重复获取。
-        关键设计：
-        1. 在调用 set_result/set_exception 之前先设置 _resolved=True 并释放引用，
-           防止回调中再次调用 result() 时产生死锁或重复解析。
-        2. 内存模式的 TimeoutError 直接 re-raise 不标记 resolved，
-           因为任务仍在后台执行，用户可用更长的 timeout 重试。
-        """
-        if self._resolved:
-            return
-        with self._resolve_lock:
-            if self._resolved:
-                return
-            status_to_resolve = None
-            try:
-                if self._is_memory_mode and self._raw_future is not None:
-                    status_to_resolve = self._raw_future.result(timeout=timeout)
-                elif self._async_result is not None:
+        
+        # 惰性拉取：第一次调用 result() 时才真正等待结果
+        if not self._result_fetched:
+            if self._is_memory_mode and self._raw_future is not None:
+                try:
+                    raw_result = self._raw_future.result(timeout=timeout)
+                    self._resolve_status(raw_result)
+                except Exception as e:
+                    self.set_exception(e)
+            elif self._async_result is not None:
+                try:
                     if timeout is not None:
                         self._async_result.set_timeout(timeout)
-                    status_to_resolve = self._async_result.status_and_result_obj
-                    if status_to_resolve is None:
-                        from funboost.core.exceptions import FunboostWaitRpcResultTimeout
-                        raise FunboostWaitRpcResultTimeout(
-                            f'wait rpc data timeout for task_id:{self._async_result.task_id}'
-                        )
-            except concurrent.futures.TimeoutError:
-                raise
-            except Exception as e:
-                self._resolved = True
-                self._async_result = None
-                self._raw_future = None
-                if not self.done():
+                    status = self._async_result.wait_rpc_data_or_raise(raise_exception=True)
+                    self._resolve_status(status)
+                except Exception as e:
                     self.set_exception(e)
-                return
-            self._resolved = True
+            
+            self._result_fetched = True
+            # 清理引用，释放资源
             self._async_result = None
             self._raw_future = None
-            self._resolve_status(status_to_resolve)
+        
+        return super().result(timeout=0 if self.done() else timeout)
 
     def _resolve_status(self, status: FunctionResultStatus):
         if self._is_direct:
@@ -110,12 +87,12 @@ class FunboostFuture(concurrent.futures.Future):
             self.set_result(status)
 
     def bind_raw_future(self, raw_future: concurrent.futures.Future):
-        """内存队列模式：保存 raw_future 引用，延迟到 result() 时才获取"""
+        """内存队列模式：只保存 raw_future，不添加回调（惰性等待）"""
         self._is_memory_mode = True
         self._raw_future = raw_future
 
     def bind_async_result(self, async_result: AsyncResult):
-        """分布式队列模式：保存 AsyncResult 引用，延迟到 result() 时才获取"""
+        """分布式队列模式：只保存 AsyncResult，不启动后台回调（惰性等待）"""
         self._async_result = async_result
 
 
@@ -147,7 +124,6 @@ class MemoryFunboostPool:
         self.concurrent_num = concurrent_num
         self.qps = qps
         self.booster: Booster  # 用户仍然可以通过 pool.booster. 来操作booster其他方法和属性，booster是公有属性
-        # self._pool_queue_name = f"universal_pool_{id(self)}"
 
         self.booster_params = BoosterParams(
             queue_name=f"universal_pool_{id(self)}",
@@ -231,6 +207,7 @@ class FunboostPoolPickleFunc(MemoryFunboostPool):
             and is_need_result is True
         ):
             self.booster_params.is_using_rpc_mode = True
+            # 惰性模式下不再需要后台回调线程池
         self.is_need_result = is_need_result
         self.is_future_direct_ret_result = is_future_direct_ret_result
         self.is_auto_start_consuming_message = is_auto_start_consuming_message
@@ -258,11 +235,13 @@ class FunboostPoolPickleFunc(MemoryFunboostPool):
         future.bind_async_result(async_result)
         return future
 
+
 def get_fun_path(fn: typing.Callable):
     """
     获取函数的路径字符串，例如 "my_module.my_submodule.my_func"
     """
     return f"{fn.__module__}.{fn.__qualname__}"
+
 
 class FunboostPool(FunboostPoolPickleFunc):
 
