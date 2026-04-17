@@ -8,6 +8,8 @@ funboostpool 有几十种任务控制功能，例如重试策略，超时策略�
 funboostpool 能支持asyncio任务和同步任务，ThreadPoolExecutor 没这个能力
 funboostpool 的池子可以自动扩大和自动缩小，ThreadPoolExecutor 不能自动缩小。
 FunboostPool 拥有funboost的所有能力
+
+api用法和普通线程池一样，用法详见教程4.38章节。
 """
 
 import typing

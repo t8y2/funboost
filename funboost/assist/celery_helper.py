@@ -6,6 +6,7 @@ import os
 import sys
 import threading
 from functools import partial
+import time 
 
 import celery
 from celery.app.task import Task
@@ -81,42 +82,45 @@ class CeleryHelper:
         cls.to_be_start_work_celery_queue_name_set.add(queue_name)
 
     @classmethod
-    def realy_start_celery_worker(cls, worker_name=None, loglevel='INFO',worker_concurrency=200,start_consume_queue_name_list:list=None,is_start_consume_all_queues:bool=False):
-
+    def realy_start_celery_worker(cls, worker_name=None, loglevel='INFO', worker_concurrency=200,
+                                  start_consume_queue_name_list: list = None,
+                                  is_start_consume_all_queues: bool = False,
+                                  worker_ready_timeout: float = 5.0):
+        """在非守护线程中启动 celery worker，等待 worker 就绪后返回。
+        非守护线程会保持进程存活直到 worker 停止。
+        返回后可安全调用 celery_result.get() 获取任务结果。
+        """
         if is_start_consume_all_queues is False:
             to_be_start_work_celery_queue_name_set_new = copy.copy(cls.to_be_start_work_celery_queue_name_set)
             to_be_start_work_celery_queue_name_set_new.update(set(start_consume_queue_name_list or []))
         else:
             from funboost import BoostersManager
-            # print(BoostersManager.get_all_queues())
             to_be_start_work_celery_queue_name_set_new = set(BoostersManager.get_all_queues())
         queue_names_str = ','.join(list(to_be_start_work_celery_queue_name_set_new))
         if not to_be_start_work_celery_queue_name_set_new:
             raise Exception('celery worker 没有需要运行的queue')
-        # '--concurrency=200',
-        # '--autoscale=5,500' threads 并发模式不支持自动扩大缩小并发数量,
         worker_name = worker_name or f'pid_{os.getpid()}'
         pool_name = 'threads'
         if cls.concurrent_mode == ConcurrentModeEnum.GEVENT:
             pool_name = 'gevent'
         if cls.concurrent_mode == ConcurrentModeEnum.EVENTLET:
             pool_name = 'eventlet'
-        '''
-        并发数量在app配置中已经制定了。自己用 update_celery_app_conf 方法更新就好了。
-        celery_app.conf.update({
-             # 'worker_redirect_stdouts': False,
-             'worker_concurrency': 200
-         }
-         或
-         CeleryHelper.update_celery_app_conf({ 'worker_concurrency': 500})
-        '''
-        cls.update_celery_app_conf({'worker_concurrency':worker_concurrency})
+        cls.update_celery_app_conf({'worker_concurrency': worker_concurrency})
         argv = ['worker', f'--pool={pool_name}',
                 '-n', f'worker_funboost_{worker_name}@%h', f'--loglevel={loglevel}',
-                f'--queues={queue_names_str}',  # 并发数量是 在app配置中已经制定了。自己用 update_celery_app_conf 方法更新就好了。
+                f'--queues={queue_names_str}',
                 ]
         logger.info(f'celery 启动work参数 {argv}')
-        celery_app.worker_main(argv)
+
+        t = threading.Thread(target=celery_app.worker_main, args=(argv,),
+                             name='celery_worker_main')
+        t.start()
+
+        
+        time.sleep(worker_ready_timeout)
+        from celery._state import _set_task_join_will_block
+        _set_task_join_will_block(False)
+        return t
 
     @staticmethod
     def use_nb_log_instead_celery_log(log_level: int = logging.INFO, log_filename='celery.log', formatter_template=7):

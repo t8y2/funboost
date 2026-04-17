@@ -5,12 +5,12 @@
 
 核心思路：
     CeleryPool 已经封装了 Celery app 创建、worker 自动启动、universal_task 注册等逻辑。
-    本方案直接复用 CeleryPool 实例的 app 和 _start_worker()，
+    本方案直接复用 CeleryPool 实例的 app 和 start_worker()，
     只需在其 app 上额外注册一个 "funboost 消息处理 task"，就能桥接 funboost 的消息协议。
 
     Publisher：通过 pool.app.send_task() 发送 funboost 消息
     Consumer：在 pool.app 上注册 task 解析 funboost 消息并调用消费函数
-    Worker：  复用 pool._start_worker() 自动在后台线程启动
+    Worker：  复用 pool.start_worker() 自动在后台线程启动
 
 运行方式：
     D:\\ProgramData\\Miniconda3\\envs\\py39b\\python.exe tests/ai_codes/celery_pool_as_funboost_broker.py
@@ -18,8 +18,6 @@
 
 import json
 import time
-import threading
-import typing
 import uuid
 
 from funboost import (
@@ -35,33 +33,6 @@ from funboost.assist.celery_pool import CeleryPool
 
 BROKER_KIND_CELERY_POOL = 'CELERY_POOL'
 
-_pool_cache: typing.Dict[str, CeleryPool] = {}
-_pool_cache_lock = threading.Lock()
-
-
-def _get_or_create_pool(queue_name: str, config: dict) -> CeleryPool:
-    """
-    获取或创建指定 queue 的 CeleryPool 实例。
-    同一个 queue_name 的 Publisher 和 Consumer 共享同一个 CeleryPool。
-    首次创建时 is_auto_start_worker=False，由 Consumer 显式启动。
-    """
-    with _pool_cache_lock:
-        if queue_name in _pool_cache:
-            return _pool_cache[queue_name]
-
-        pool = CeleryPool(
-            broker_url=config.get('broker_url', 'redis://localhost:6379/0'),
-            result_backend=config.get('result_backend'),
-            concurrent_num=config.get('concurrent_num', 4),
-            pool_type=config.get('pool_type', 'threads'),
-            queue_name=queue_name,
-            is_auto_start_worker=False,
-            worker_loglevel=config.get('worker_loglevel', 'WARNING'),
-            worker_startup_timeout=config.get('worker_startup_timeout', 3.0),
-        )
-        _pool_cache[queue_name] = pool
-        return pool
-
 
 # ============================================================================
 # Publisher：复用 CeleryPool.app 发送 funboost 消息
@@ -72,7 +43,16 @@ class CeleryPoolPublisher(AbstractPublisher):
     def custom_init(self):
         super().custom_init()
         config = self.publisher_params.broker_exclusive_config
-        self._pool = _get_or_create_pool(self.queue_name, config)
+        self._pool = CeleryPool(
+            broker_url=config.get('broker_url', 'redis://localhost:6379/0'),
+            result_backend=config.get('result_backend'),
+            concurrent_num=config.get('concurrent_num', 4),
+            pool_type=config.get('pool_type', 'threads'),
+            queue_name=self.queue_name,
+            is_auto_start_worker=False,
+            worker_loglevel=config.get('worker_loglevel', 'WARNING'),
+            worker_startup_timeout=config.get('worker_startup_timeout', 3.0),
+        )
         self._task_name = f'funboost_celery_pool_{self.queue_name}'
 
     def _publish_impl(self, msg: str):
@@ -86,39 +66,22 @@ class CeleryPoolPublisher(AbstractPublisher):
         """覆写基类，返回 Celery 原生 AsyncResult 而非 funboost AsyncResult"""
         t_start = time.time()
         celery_result = self._wrapped_publish_impl(publish_msg_context.msg_json)
-        current_time = time.time()
-        if self.logger.isEnabledFor(10):
-            self.logger.debug(
-                f'向{self._queue_name} 队列，推送消息 '
-                f'耗时{round(current_time - t_start, 4)}秒  '
-                f'{publish_msg_context.msg_function_kw}',
-                extra={'task_id': publish_msg_context.task_id},
-            )
-        self.count_per_minute += 1
-        self.publish_msg_num_total += 1
-        if current_time - self._current_time > 10:
-            with self._lock_for_count:
-                if current_time - self._current_time > 10:
-                    self.logger.info(
-                        f'10秒内推送了 {self.count_per_minute} 条消息,'
-                        f'累计推送了 {self.publish_msg_num_total} 条消息到 '
-                        f'{self._queue_name} 队列中')
-                    self._init_count()
-        self._after_publish(publish_msg_context)
+        self._post_publish_log_and_count(t_start, publish_msg_context)
         return celery_result
 
     def clear(self):
-        pass
+        purged = self._pool.clear()
+        self.logger.warning(f'清空 celery 队列 {self.queue_name} 中的消息，删除了 {purged} 条')
 
     def get_message_count(self):
-        return -1
+        return self._pool.get_message_count()
 
     def close(self):
         pass
 
 
 # ============================================================================
-# Consumer：复用 CeleryPool.app 注册 task + CeleryPool._start_worker()
+# Consumer：复用 CeleryPool.app 注册 task + CeleryPool.start_worker()
 # ============================================================================
 
 class CeleryPoolConsumer(AbstractConsumer):
@@ -128,7 +91,16 @@ class CeleryPoolConsumer(AbstractConsumer):
     def custom_init(self):
         super().custom_init()
         config = self.consumer_params.broker_exclusive_config
-        self._pool = _get_or_create_pool(self.queue_name, config)
+        self._pool = CeleryPool(
+            broker_url=config.get('broker_url', 'redis://localhost:6379/0'),
+            result_backend=config.get('result_backend'),
+            concurrent_num=config.get('concurrent_num', 4),
+            pool_type=config.get('pool_type', 'threads'),
+            queue_name=self.queue_name,
+            is_auto_start_worker=False,
+            worker_loglevel=config.get('worker_loglevel', 'WARNING'),
+            worker_startup_timeout=config.get('worker_startup_timeout', 3.0),
+        )
 
         task_name = f'funboost_celery_pool_{self.queue_name}'
         consuming_func = self.consuming_function
@@ -177,7 +149,7 @@ class CeleryPoolConsumer(AbstractConsumer):
 
     def start_consuming_message(self):
         if not self._pool._worker_thread:
-            self._pool._start_worker()
+            self._pool.start_worker()
             self.logger.info(
                 f'[CELERY_POOL] 复用 CeleryPool worker: '
                 f'queue={self.queue_name}, pool={self._pool.pool_type}, '
@@ -263,7 +235,7 @@ if __name__ == '__main__':
     print(f'随机后缀: {random_suffix}')
     print('=' * 60)
 
-    print('\n>>> 启动消费者（复用 CeleryPool._start_worker()）...')
+    print('\n>>> 启动消费者（复用 CeleryPool.start_worker()）...')
     add.consume()
     multiply.consume()
 

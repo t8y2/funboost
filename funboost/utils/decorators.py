@@ -18,7 +18,7 @@ import traceback
 import unittest
 from functools import wraps
 # noinspection PyUnresolvedReferences
-import pysnooper
+# import pysnooper
 from tomorrow3 import threads as tomorrow_threads
 
 from funboost.utils import LogManager, nb_print, LoggerMixin

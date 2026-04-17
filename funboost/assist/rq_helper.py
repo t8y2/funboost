@@ -3,7 +3,7 @@ import os
 import uuid
 from rq.worker import RandomWorker
 from funboost.core.loggers import get_funboost_file_logger
-from redis3 import Redis
+from redis5 import Redis
 from rq import Worker
 from funboost.funboost_config_deafult import BrokerConnConfig
 from funboost.assist.rq_windows_worker import WindowsWorker
