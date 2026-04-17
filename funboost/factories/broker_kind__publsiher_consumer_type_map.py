@@ -18,7 +18,7 @@ from funboost.publishers.mongomq_publisher import MongoMqPublisher
 
 from funboost.publishers.persist_queue_publisher import PersistQueuePublisher
 
-from funboost.publishers.rabbitmq_pika_publisher import RabbitmqPublisher
+
 
 from funboost.publishers.redis_publisher import RedisPublisher
 
@@ -38,7 +38,7 @@ from funboost.consumers.nats_consumer import NatsConsumer
 
 from funboost.consumers.peewee_conusmer import PeeweeConsumer
 from funboost.consumers.persist_queue_consumer import PersistQueueConsumer
-from funboost.consumers.rabbitmq_pika_consumer import RabbitmqConsumer
+
 
 from funboost.consumers.redis_brpoplpush_consumer import RedisBrpopLpushConsumer
 from funboost.consumers.redis_consumer import RedisConsumer
@@ -63,7 +63,7 @@ broker_kind__publsiher_consumer_type_map = {
     BrokerEnum.REDIS: (RedisPublisher, RedisConsumer),
     BrokerEnum.MEMORY_QUEUE: (LocalPythonQueuePublisher, LocalPythonQueueConsumer),
     BrokerEnum.FASTEST_MEM_QUEUE: (FastestMemQueuePublisher, FastestMemQueueConsumer),
-    BrokerEnum.RABBITMQ_PIKA: (RabbitmqPublisher, RabbitmqConsumer),
+
     BrokerEnum.MONGOMQ: (MongoMqPublisher, MongoMqConsumer),
     BrokerEnum.PERSISTQUEUE: (PersistQueuePublisher, PersistQueueConsumer),
     BrokerEnum.KAFKA: (KafkaPublisher, KafkaConsumer),
@@ -127,6 +127,11 @@ def regist_to_funboost(broker_kind: str):
         from funboost.publishers.rabbitmq_rabbitpy_publisher import RabbitmqPublisherUsingRabbitpy
         from funboost.consumers.rabbitmq_rabbitpy_consumer import RabbitmqConsumerRabbitpy
         register_custom_broker(BrokerEnum.RABBITMQ_RABBITPY, RabbitmqPublisherUsingRabbitpy, RabbitmqConsumerRabbitpy)
+        
+    if broker_kind == BrokerEnum.RABBITMQ_PIKA:
+        from funboost.publishers.rabbitmq_pika_publisher import RabbitmqPublisher
+        from funboost.consumers.rabbitmq_pika_consumer import RabbitmqConsumer
+        register_custom_broker(BrokerEnum.RABBITMQ_PIKA, RabbitmqPublisher, RabbitmqConsumer)
 
     if broker_kind == BrokerEnum.PULSAR:
         from funboost.consumers.pulsar_consumer import PulsarConsumer
