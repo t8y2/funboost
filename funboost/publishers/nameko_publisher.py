@@ -1,37 +1,35 @@
 # -*- coding: utf-8 -*-
 # @Author  : ydf
 # @Time    : 2023/8/6 0006 12:12
-import copy
-import json
 import time
-import typing
-import uuid
 
 from nameko.standalone.rpc import ClusterRpcProxy
 
 from funboost.funboost_config_deafult import BrokerConnConfig
-from funboost.publishers.base_publisher import AbstractPublisher, TaskOptions
+from funboost.publishers.base_publisher import AbstractPublisher, PublishMsgContext
 
 
 def get_nameko_config():
     return {'AMQP_URI': f'amqp://{BrokerConnConfig.RABBITMQ_USER}:{BrokerConnConfig.RABBITMQ_PASS}@{BrokerConnConfig.RABBITMQ_HOST}:{BrokerConnConfig.RABBITMQ_PORT}/{BrokerConnConfig.RABBITMQ_VIRTUAL_HOST}'}
 
 
-class NamekoPublisher(AbstractPublisher, ):
+class NamekoPublisher(AbstractPublisher):
     """
-    使用nameko作为中间件
+    使用 nameko 作为中间件（同步 RPC 调用模式）。
+
+    Nameko 的发布是同步 RPC，通过 ClusterRpcProxy 调用远端 service 的 call 方法。
+    覆写 _execute_publish 以返回 nameko RPC 调用结果而非 funboost AsyncResult。
+    publish() / push() / delay() 均走基类流程，最终进入 _execute_publish。
     """
 
     def custom_init(self):
         self._rpc = ClusterRpcProxy(get_nameko_config())
 
-    def publish(self, msg: typing.Union[str, dict], task_id=None,
-                task_options: TaskOptions = None):
-        msg, msg_function_kw, extra_params, task_id = self._convert_msg(msg, task_id, task_options)
+    def _execute_publish(self, publish_msg_context: PublishMsgContext):
         t_start = time.time()
         with self._rpc as rpc:
-            res = getattr(rpc, self.queue_name).call(**msg_function_kw)
-        self.logger.debug(f'调用nameko的 {self.queue_name} service 的 call方法 耗时{round(time.time() - t_start, 4)}秒，入参  {msg_function_kw}')  # 显示msg太长了。
+            res = getattr(rpc, self.queue_name).call(**publish_msg_context.msg_function_kw)
+        self._post_publish_log_and_count(t_start, publish_msg_context)
         return res
 
     def _publish_impl(self, msg):
@@ -44,5 +42,4 @@ class NamekoPublisher(AbstractPublisher, ):
         return -1
 
     def close(self):
-        # self.redis_db7.connection_pool.disconnect()
         pass

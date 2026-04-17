@@ -205,27 +205,24 @@ class AbstractPublisher(metaclass=abc.ABCMeta, ):
     def _execute_publish(self,publish_msg_context: PublishMsgContext):
         t_start = time.time()
         self._wrapped_publish_impl(publish_msg_context.msg_json)
+        self._post_publish_log_and_count(t_start, publish_msg_context)
+        return AsyncResult(publish_msg_context.task_id, timeout=self.publisher_params.rpc_timeout)
 
-        # 优化：先获取当前时间用于后续判断，减少 time.time() 调用
+    def _post_publish_log_and_count(self, t_start: float, publish_msg_context: PublishMsgContext):
+        """发布后的日志记录和计数统计。子类覆写 _execute_publish 时调用此方法，避免重复代码。"""
         current_time = time.time()
         if self.logger.isEnabledFor(logging.DEBUG):
             self.logger.debug(f'向{self._queue_name} 队列，推送消息 耗时{round(current_time - t_start, 4)}秒  {publish_msg_context.msg_json if self.publisher_params.publish_msg_log_use_full_msg else publish_msg_context.msg_function_kw}',
                               extra={'task_id': publish_msg_context.task_id})
-        
-        # 优化：减少锁内操作，先计数再判断是否需要输出日志
         self.count_per_minute += 1
         self.publish_msg_num_total += 1
-        # 每10秒输出一次统计日志，减少锁竞争
         if current_time - self._current_time > 10:
             with self._lock_for_count:
-                # 双重检查，避免多线程重复输出
                 if current_time - self._current_time > 10:
                     self.logger.info(
                         f'10秒内推送了 {self.count_per_minute} 条消息,累计推送了 {self.publish_msg_num_total} 条消息到 {self._queue_name} 队列中')
                     self._init_count()
         self._after_publish(publish_msg_context)
-        # AsyncResult 本身就是懒加载的，只有访问 result 等属性时才建立 redis 连接
-        return AsyncResult(publish_msg_context.task_id, timeout=self.publisher_params.rpc_timeout)
 
     
     def _after_publish(self, publish_msg_context: PublishMsgContext):

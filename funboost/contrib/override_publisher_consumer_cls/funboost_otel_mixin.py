@@ -76,12 +76,15 @@ class AutoOtelPublisherMixin(AbstractPublisher):
     1. 优先检查消息中是否已携带 otel_context (用户手动传递)
     2. 如果没有，则自动使用当前线程的上下文
     3. 生成 Producer Span 并注入/覆盖到消息中
+
+    覆写 _execute_publish 而非 publish，确保 publish/push/delay 三种调用方式
+    都能正确创建 OTEL Producer Span 并注入链路上下文。
     """
-    
+
     def _get_parent_context(self, msg: dict):
         """确定父级上下文 (Parent Context)"""
         return extract_otel_context_from_funboost_msg(msg)
-    
+
     def _inject_otel_context_to_msg(self, msg: dict):
         """
         将当前线程的 OTel 上下文注入到消息的 extra.otel_context 中
@@ -90,84 +93,52 @@ class AutoOtelPublisherMixin(AbstractPublisher):
         """
         if 'extra' not in msg:
             msg['extra'] = {}
-        
-        # 只有当用户没有手动传递 otel_context 时才注入
         if not msg['extra'].get('otel_context'):
             carrier = {}
-            inject(carrier)  # 将当前线程的上下文注入到 carrier
+            inject(carrier)
             msg['extra']['otel_context'] = carrier
-    
-    def publish(self, msg, task_id=None, task_options=None):
-        msg = copy.deepcopy(msg)  # 字典是可变对象,不要改变影响用户自身的传参字典. 用户可能继续使用这个传参字典.
-        msg, msg_function_kw, extra_params, task_id = self._convert_msg(msg, task_id, task_options)
-        
-        # -------------------------------------------------------
-        # 2. 确定父级上下文 (Parent Context)
-        # -------------------------------------------------------
-        parent_ctx = self._get_parent_context(msg)
 
-        # -------------------------------------------------------
-        # 3. 开启 Producer Span (链接到 parent_ctx)
-        # -------------------------------------------------------
+    def _execute_publish(self, publish_msg_context):
+        msg_dict = publish_msg_context.msg_dict
+        parent_ctx = self._get_parent_context(msg_dict)
         span_name = f"{self.queue_name} send"
-        
+
         with tracer.start_as_current_span(
-            span_name, 
-            context=parent_ctx, # 关键：使用刚才确定的父级
+            span_name,
+            context=parent_ctx,
             kind=SpanKind.PRODUCER
         ) as span:
-            
             span.set_attribute("messaging.system", "funboost")
             span.set_attribute("messaging.destination", self.queue_name)
 
-            
-            # ---------------------------------------------------
-            # 4. 注入新的 Context (Inject)
-            # ---------------------------------------------------
-            # 无论之前有没有 context，这里都要注入当前 Producer Span 的 context
-            # 这样下游消费者看到的父节点才是这个 Producer Span，保证链路完整：
-            # Upstream -> Producer(Send) -> Consumer(Process)
-            
             carrier = {}
-            inject(carrier) # 将当前 Span (Producer) 注入到 carrier
-            
-            if 'extra' not in msg:
-                msg['extra'] = {}
-            
-            # 覆盖/写入最新的链路信息
-            msg['extra']['otel_context'] = carrier
-            
-            # 记录 Task ID
-            span.set_attribute("messaging.message_id", task_id)
+            inject(carrier)
+            msg_dict.setdefault('extra', {})['otel_context'] = carrier
+            span.set_attribute("messaging.message_id", publish_msg_context.task_id)
+
+            if isinstance(publish_msg_context.msg_json, str):
+                publish_msg_context.msg_json = Serialization.to_json_str(msg_dict)
 
             try:
-                return super().publish(msg, task_id, task_options)
+                return super()._execute_publish(publish_msg_context)
             except Exception as e:
                 span.record_exception(e)
                 span.set_status(Status(StatusCode.ERROR))
-                raise e
+                raise
 
     async def aio_publish(self, msg, task_id=None, task_options=None):
         """
-        asyncio 生态下的 OTel 链路追踪发布
-        
+        asyncio 生态下的 OTel 链路追踪发布。
+
         关键问题：父类 aio_publish 使用 run_in_executor 在线程池执行 publish，
         但 OTel 上下文是线程本地的，跨线程会丢失。
-        
-        解决方案：
-        1. 在当前 asyncio 线程先捕获 OTel 上下文
-        2. 注入到消息的 extra.otel_context 中
-        3. 然后调用父类的 aio_publish（在 executor 线程中执行 publish）
-        4. publish 方法检测到 otel_context 已存在，会使用它作为父上下文
+
+        解决方案：在当前 asyncio 线程先捕获 OTel 上下文注入到消息中，
+        然后 _execute_publish 在 executor 线程中从消息恢复上下文。
         """
-        msg = copy.deepcopy(msg)  # 字典是可变对象,不要改变影响用户自身的传参字典
-        
-        # 在当前 asyncio 线程捕获 OTel 上下文并注入到消息中
-        # 这样当 publish 在 executor 线程执行时，能从消息中恢复正确的父上下文
-        self._inject_otel_context_to_msg(msg) # 这是核心，
-        
-        # 调用父类的 aio_publish，它会在 executor 中调用 self.publish
-        # publish 方法会检测到 msg['extra']['otel_context'] 并使用它
+        msg = copy.deepcopy(msg)
+        if isinstance(msg, dict):
+            self._inject_otel_context_to_msg(msg)
         return await super().aio_publish(msg, task_id, task_options)
 
 

@@ -250,7 +250,7 @@ register_broker_exclusive_config_default(
         'override_key_fields': [],
         'pull_base_interval': 0.01,
         'pull_max_interval': 2,
-        'pull_batch_size': 100,
+        'pull_batch_size': 5,
     }
 )
 

@@ -173,9 +173,9 @@ class CeleryConsumer(AbstractConsumer):
             if _use_celery_native_retry:
                 # 用户在 broker_exclusive_config['celery_task_config'] 中配置了 autoretry_for，
                 # 由 celery 自身接管重试逻辑，直接执行函数即可。
-                return self.consuming_function(*args, **kwargs)
+                return self.consumer_params.consuming_function(*args, **kwargs)
             try:
-                return self.consuming_function(*args, **kwargs)
+                return self.consumer_params.consuming_function(*args, **kwargs)
             except Exception as exc:
                 # print(this.request.__dict__,dir(this))
                 if this.request.retries != self.consumer_params.max_retry_times:

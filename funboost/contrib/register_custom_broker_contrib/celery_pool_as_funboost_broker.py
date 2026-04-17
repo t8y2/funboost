@@ -66,25 +66,7 @@ class CeleryPoolPublisher(AbstractPublisher):
         """覆写基类，返回 Celery 原生 AsyncResult 而非 funboost AsyncResult"""
         t_start = time.time()
         celery_result = self._wrapped_publish_impl(publish_msg_context.msg_json)
-        current_time = time.time()
-        if self.logger.isEnabledFor(10):
-            self.logger.debug(
-                f'向{self._queue_name} 队列，推送消息 '
-                f'耗时{round(current_time - t_start, 4)}秒  '
-                f'{publish_msg_context.msg_function_kw}',
-                extra={'task_id': publish_msg_context.task_id},
-            )
-        self.count_per_minute += 1
-        self.publish_msg_num_total += 1
-        if current_time - self._current_time > 10:
-            with self._lock_for_count:
-                if current_time - self._current_time > 10:
-                    self.logger.info(
-                        f'10秒内推送了 {self.count_per_minute} 条消息,'
-                        f'累计推送了 {self.publish_msg_num_total} 条消息到 '
-                        f'{self._queue_name} 队列中')
-                    self._init_count()
-        self._after_publish(publish_msg_context)
+        self._post_publish_log_and_count(t_start, publish_msg_context)
         return celery_result
 
     def clear(self):

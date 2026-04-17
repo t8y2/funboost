@@ -48,5 +48,4 @@ if __name__ == '__main__':
     CeleryHelper.show_celery_app_conf()
     f_beat.consume()  # 启动f_beat消费，这个是登记celery worker要启动消费的函数，真正的启动worker消费需要运行 realy_start_celery_worker，realy_start_celery_worker是一次性启动所有登记的需要运行的函数
     # f_beat2.consume()  # 启动f_beat2消费，这个是登记celery worker要启动消费的函数，真正的启动worker消费需要运行 realy_start_celery_worker，realy_start_celery_worker是一次性启动所有登记的需要运行的函数
-    CeleryHelper.realy_start_celery_worker(worker_name='test_worker啊')  # 这个是真正的启动celery worker 函数消费。
-    print('batch_start_celery_consumers()  之后的代码不会被运行')
+    CeleryHelper.realy_start_celery_worker(worker_name='test_worker啊')  # 在非守护线程中启动 celery worker，不阻塞主线程。
