@@ -377,6 +377,10 @@ class CeleryFuture(Future):
                     self.set_exception(e)
 
 
+_pool_cache: typing.Dict[str, 'CeleryPool'] = {}
+_pool_cache_lock = threading.Lock()
+
+
 class CeleryPool:
     """
     将 Celery 封装为 concurrent.futures.Executor 兼容的通用任务池。
@@ -410,6 +414,10 @@ class CeleryPool:
         - 需要 Redis / RabbitMQ 等外部 Broker 运行
         - 惰性模式下 done() / as_completed() 需先调 result() 触发
 
+    单例语义：
+        同一个 queue_name 只创建一次实例，后续 CeleryPool(queue_name='x') 返回缓存的实例。
+        避免 for 循环实例化时重复创建 Celery app 和 worker。
+
     典型用法：
         pool = CeleryPool(
             broker_url='redis://localhost:6379/0',
@@ -419,6 +427,17 @@ class CeleryPool:
         future = pool.submit(my_func, arg1, arg2)
         print(future.result())
     """
+
+    def __new__(cls, *args, **kwargs):
+        queue_name = kwargs.get('queue_name')
+        if queue_name is not None:
+            with _pool_cache_lock:
+                if queue_name in _pool_cache:
+                    return _pool_cache[queue_name]
+                instance = super().__new__(cls)
+                _pool_cache[queue_name] = instance
+                return instance
+        return super().__new__(cls)
 
     def __init__(
         self,
@@ -449,6 +468,9 @@ class CeleryPool:
                                        可传入任何 Celery 支持的配置项，例如：
                                        {'task_acks_late': True, 'worker_prefetch_multiplier': 1}
         """
+        if getattr(self, '_initialized', False):
+            return
+
         self.broker_url = broker_url
         self.result_backend = result_backend
         self.concurrent_num = concurrent_num
@@ -474,7 +496,7 @@ class CeleryPool:
         if other_celery_app_conf:
             app_conf.update(other_celery_app_conf)
 
-        self.app = Celery('celery_pool')
+        self.app = Celery(f'celery_pool_{self.queue_name}')
         self.app.conf.update(**app_conf)
 
         @self.app.task(name=task_name)
@@ -485,9 +507,11 @@ class CeleryPool:
 
         self._worker_thread = None
         if is_auto_start_worker:
-            self._start_worker()
+            self.start_worker()
 
-    def _start_worker(self):
+        self._initialized = True
+
+    def start_worker(self):
         """在线程中启动 Celery worker，通过 sleep 等待其就绪。"""
         def _run():
             self.app.worker_main([
@@ -531,3 +555,4 @@ class CeleryPool:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.shutdown()
+
