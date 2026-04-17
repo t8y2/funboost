@@ -1605,7 +1605,7 @@ asyncio异步编程，最重要的方法有 aio_push aio_publish，
 #### 🔧 Public Functions (1)
 
 - `def deco_mq_conn_error(f)`
-  - *Line: 420*
+  - *Line: 417*
 
 
 ---
@@ -2935,49 +2935,49 @@ Entry Points (not imported by other project files):
   行2732: ### 4.26.1 在一个进程中启动多个函数的消费，适合轻型任务
   行2744: ### 4.26.2 在多个进程中启动函数的消费，适合一次启动大量函数的消费或重型任务
   行2760: ## 4.28 funboost 支持celery框架整体作为funboost的broker (2023.4新增)
-  行2827: ## 4.29 funboost支持任务优先级队列
-  行2831: ### 4.29.1 队列支持优先级的说明：
-  行2841: ### 4.29.2 优先级通俗理解，用食堂打饭比喻：
-  行2856: ### 4.29.3 队列支持任务优先级的代码主要有三点：
-  行2870: ### 4.29.4 队列支持任务优先级的代码如下：
-  行2899: ### 4.29.5 消息队列优先级是针对一个queue内消息的，那么怎样才能实现不同函数之间的按优先级运行？
-  行2963: ## 4.30 funboost 远程杀死(取消)任务
-  行2981: ### 4.30.1 funboost远程杀死函数的代码例子
-  行3026: ### 4.30.2 远程强制杀死函数、超时自动杀死(function_timeout设置不为0)， 这两个功能要注意死锁：
-  行3054: ### 4.30.2.b 如果想启用funboost函数超时自动杀死功能或者 远程杀死函数功能，推荐消费函数中使用可过期锁 expire_lock
-  行3065: ## 4.31 神级别 fct (funboost_current_task) 上下文获取当前消息和任务状态
-  行3136: ## 4.32 重磅更新！！！ funboost 独家新增支持实例方法和类方法作为消费函数
-  行3144: ### 4.32.0 !!! 实例方法和类方法作为funboost任务时候，push方法需要特别注意第一个入参。
-  行3181: ### 4.32.1 funboost 支持实例方法和类方法作为消费函数的原理
-  行3231: ### 4.32.2 funboost 支持实例方法、类方法、静态方法、普通函数 4种类型，作为消费函数的例子
-  行3304: ## 4.33  @boost设置is_auto_start_consuming_message，自动启动消费。
-  行3331: ## 4.34 pyinstaller 打包 funboost项目为exe 的说明
-  行3337: ## 4.35 演示 funboost 的函数入参过滤功能
-  行3380: ### 4.35.2 警告！！！: funboost的 rpc功能和 函数入参过滤过滤 不要同时使用
-  行3389: ## 4.35c 使用 nb_cache 作为缓存装饰器
-  行3391: ### 4.35c.1 为什么 要用 nb_cache 而不是 funboost 自带的 do_task_filtering
-  行3400: ### 4.35c.2 nb_cache 功能比 funboost自带的 do_task_filtering 全面太多了
-  行3407: #### 4.35c.2.2 举个例子 nb_cache 的防止缓存击穿为什么吊打 funboost的 do_task_filtering
-  行3415: ### 4.35c.2 如何在 funboost 中使用 nb_cache
-  行3422: #### 4.35c.2.1 方式一，@boost 和 @cache 叠加使用
-  行3449: #### 4.35c.2.2 方式二 cache 装饰器传给 funboost 的 `consuming_function_decorator`
-  行3480: ## 4.36 演示`funboost`入参可以是自定义类型(不可json序列化的类型的入参,自动使用pickle)(2025-07新增支持)
-  行3580: ## 4.37 funboost 启动消费函数的方式大全(再次集中总结)
-  行3584: ### 4.37.1. 基础启动 (最常用)
-  行3600: ### 4.37.2. 多进程叠加并发启动 (高性能推荐)
-  行3614: ### 4.37.3. 自动启动 (懒人模式)
-  行3629: ### 4.37.4. 批量启动所有消费者(最粗暴无脑)
-  行3648: ### 4.37.5. 分组启动 (Group Start)
-  行3664: ### 4.37.6. 命令行启动 (CLI)
-  行3673: ### 4.37.7. 远程自动部署启动 (Fabric)
-  行3683: ### 4.37.8. Celery 模式启动 (特殊)
-  行3689: ## 4.38 MemoryFunboostPool 和 FunboostPool 的使用
-  行3693: ### 4.38.1 MemoryFunboostPool：内存增强型任务池
-  行3725: ### 4.38.2 FunboostPool：全能与分布式任务池
-  行3792: ### 4.38.3 选择指南
-  行3809: ## 4.100 使用funboost时候对框架的疑问和猜测，使用控制变量法
-  行3871: ### 4.100.b 举个例子，验证测试框架的超时杀死 function_timeout参数的作用
-  行3918: ## 4.200 [分布式函数调度框架qq群]
+  行2829: ## 4.29 funboost支持任务优先级队列
+  行2833: ### 4.29.1 队列支持优先级的说明：
+  行2843: ### 4.29.2 优先级通俗理解，用食堂打饭比喻：
+  行2858: ### 4.29.3 队列支持任务优先级的代码主要有三点：
+  行2872: ### 4.29.4 队列支持任务优先级的代码如下：
+  行2901: ### 4.29.5 消息队列优先级是针对一个queue内消息的，那么怎样才能实现不同函数之间的按优先级运行？
+  行2965: ## 4.30 funboost 远程杀死(取消)任务
+  行2983: ### 4.30.1 funboost远程杀死函数的代码例子
+  行3028: ### 4.30.2 远程强制杀死函数、超时自动杀死(function_timeout设置不为0)， 这两个功能要注意死锁：
+  行3056: ### 4.30.2.b 如果想启用funboost函数超时自动杀死功能或者 远程杀死函数功能，推荐消费函数中使用可过期锁 expire_lock
+  行3067: ## 4.31 神级别 fct (funboost_current_task) 上下文获取当前消息和任务状态
+  行3138: ## 4.32 重磅更新！！！ funboost 独家新增支持实例方法和类方法作为消费函数
+  行3146: ### 4.32.0 !!! 实例方法和类方法作为funboost任务时候，push方法需要特别注意第一个入参。
+  行3183: ### 4.32.1 funboost 支持实例方法和类方法作为消费函数的原理
+  行3233: ### 4.32.2 funboost 支持实例方法、类方法、静态方法、普通函数 4种类型，作为消费函数的例子
+  行3306: ## 4.33  @boost设置is_auto_start_consuming_message，自动启动消费。
+  行3333: ## 4.34 pyinstaller 打包 funboost项目为exe 的说明
+  行3339: ## 4.35 演示 funboost 的函数入参过滤功能
+  行3382: ### 4.35.2 警告！！！: funboost的 rpc功能和 函数入参过滤过滤 不要同时使用
+  行3391: ## 4.35c 使用 nb_cache 作为缓存装饰器
+  行3393: ### 4.35c.1 为什么 要用 nb_cache 而不是 funboost 自带的 do_task_filtering
+  行3402: ### 4.35c.2 nb_cache 功能比 funboost自带的 do_task_filtering 全面太多了
+  行3409: #### 4.35c.2.2 举个例子 nb_cache 的防止缓存击穿为什么吊打 funboost的 do_task_filtering
+  行3417: ### 4.35c.2 如何在 funboost 中使用 nb_cache
+  行3424: #### 4.35c.2.1 方式一，@boost 和 @cache 叠加使用
+  行3451: #### 4.35c.2.2 方式二 cache 装饰器传给 funboost 的 `consuming_function_decorator`
+  行3482: ## 4.36 演示`funboost`入参可以是自定义类型(不可json序列化的类型的入参,自动使用pickle)(2025-07新增支持)
+  行3582: ## 4.37 funboost 启动消费函数的方式大全(再次集中总结)
+  行3586: ### 4.37.1. 基础启动 (最常用)
+  行3602: ### 4.37.2. 多进程叠加并发启动 (高性能推荐)
+  行3616: ### 4.37.3. 自动启动 (懒人模式)
+  行3631: ### 4.37.4. 批量启动所有消费者(最粗暴无脑)
+  行3650: ### 4.37.5. 分组启动 (Group Start)
+  行3666: ### 4.37.6. 命令行启动 (CLI)
+  行3675: ### 4.37.7. 远程自动部署启动 (Fabric)
+  行3685: ### 4.37.8. Celery 模式启动 (特殊)
+  行3691: ## 4.38 MemoryFunboostPool 和 FunboostPool 的使用
+  行3695: ### 4.38.1 MemoryFunboostPool：内存增强型任务池
+  行3727: ### 4.38.2 FunboostPool：全能与分布式任务池
+  行3794: ### 4.38.3 选择指南
+  行3811: ## 4.100 使用funboost时候对框架的疑问和猜测，使用控制变量法
+  行3873: ### 4.100.b 举个例子，验证测试框架的超时杀死 function_timeout参数的作用
+  行3920: ## 4.200 [分布式函数调度框架qq群]
 
 ============================================================
 文件: c4b.md
@@ -5241,7 +5241,7 @@ if __name__ == '__main__':
     f_beat.consume()  # 启动f_beat消费，这个是登记celery worker要启动消费的函数，真正的启动worker消费需要运行 realy_start_celery_worker，realy_start_celery_worker是一次性启动所有登记的需要运行的函数  
     f_beat2.consume() # 启动f_beat2消费，这个是登记celery worker要启动消费的函数，真正的启动worker消费需要运行 realy_start_celery_worker，realy_start_celery_worker是一次性启动所有登记的需要运行的函数  
     CeleryHelper.realy_start_celery_worker(worker_name='test_worker啊')  # 这个是真正的启动celery worker 函数消费。  
-    print('CeleryHelper.realy_start_celery_worker()  之后的代码不会被运行')  
+
 
 
 ```  
@@ -13384,13 +13384,15 @@ def f2(a, b):
 
 
 if __name__ == '__main__':  
+    f1.consume()  # 登记celery worker命令需要启动的--queues  
+    f2.consume()  # 登记celery worker命令需要启动的--queues  
+    CeleryHelper.realy_start_celery_worker(worker_name='测试celery worker2') # 正正的启动celery worker  
+    
     for i in range(200):  
         f1.push(i, i * 2)  
         f2.push(a=i, b=i * 10)  
 
-    f1.consume()  # 登记celery worker命令需要启动的--queues  
-    f2.consume()  # 登记celery worker命令需要启动的--queues  
-    CeleryHelper.realy_start_celery_worker(worker_name='测试celery worker2') # 正正的启动celery worker  
+    
 
 
 ```  

@@ -316,6 +316,17 @@ class CeleryPool:
 
     map = Executor.map
 
+    def get_message_count(self) -> int:
+        """查询当前队列中未消费的消息数量。"""
+        with self.app.connection_or_acquire() as conn:
+            return conn.default_channel.queue_declare(
+                queue=self.queue_name, passive=False, durable=True, auto_delete=False).message_count
+
+    def clear(self) -> int:
+        """清空队列中的所有消息，返回被清除的消息数量。"""
+        with self.app.connection_or_acquire() as conn:
+            return conn.default_channel.queue_purge(self.queue_name) or 0
+
     def shutdown(self, wait: bool = True):
         pass
 

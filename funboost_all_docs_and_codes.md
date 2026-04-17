@@ -1605,7 +1605,7 @@ asyncio异步编程，最重要的方法有 aio_push aio_publish，
 #### 🔧 Public Functions (1)
 
 - `def deco_mq_conn_error(f)`
-  - *Line: 420*
+  - *Line: 417*
 
 
 ---
@@ -2935,49 +2935,49 @@ Entry Points (not imported by other project files):
   行2732: ### 4.26.1 在一个进程中启动多个函数的消费，适合轻型任务
   行2744: ### 4.26.2 在多个进程中启动函数的消费，适合一次启动大量函数的消费或重型任务
   行2760: ## 4.28 funboost 支持celery框架整体作为funboost的broker (2023.4新增)
-  行2827: ## 4.29 funboost支持任务优先级队列
-  行2831: ### 4.29.1 队列支持优先级的说明：
-  行2841: ### 4.29.2 优先级通俗理解，用食堂打饭比喻：
-  行2856: ### 4.29.3 队列支持任务优先级的代码主要有三点：
-  行2870: ### 4.29.4 队列支持任务优先级的代码如下：
-  行2899: ### 4.29.5 消息队列优先级是针对一个queue内消息的，那么怎样才能实现不同函数之间的按优先级运行？
-  行2963: ## 4.30 funboost 远程杀死(取消)任务
-  行2981: ### 4.30.1 funboost远程杀死函数的代码例子
-  行3026: ### 4.30.2 远程强制杀死函数、超时自动杀死(function_timeout设置不为0)， 这两个功能要注意死锁：
-  行3054: ### 4.30.2.b 如果想启用funboost函数超时自动杀死功能或者 远程杀死函数功能，推荐消费函数中使用可过期锁 expire_lock
-  行3065: ## 4.31 神级别 fct (funboost_current_task) 上下文获取当前消息和任务状态
-  行3136: ## 4.32 重磅更新！！！ funboost 独家新增支持实例方法和类方法作为消费函数
-  行3144: ### 4.32.0 !!! 实例方法和类方法作为funboost任务时候，push方法需要特别注意第一个入参。
-  行3181: ### 4.32.1 funboost 支持实例方法和类方法作为消费函数的原理
-  行3231: ### 4.32.2 funboost 支持实例方法、类方法、静态方法、普通函数 4种类型，作为消费函数的例子
-  行3304: ## 4.33  @boost设置is_auto_start_consuming_message，自动启动消费。
-  行3331: ## 4.34 pyinstaller 打包 funboost项目为exe 的说明
-  行3337: ## 4.35 演示 funboost 的函数入参过滤功能
-  行3380: ### 4.35.2 警告！！！: funboost的 rpc功能和 函数入参过滤过滤 不要同时使用
-  行3389: ## 4.35c 使用 nb_cache 作为缓存装饰器
-  行3391: ### 4.35c.1 为什么 要用 nb_cache 而不是 funboost 自带的 do_task_filtering
-  行3400: ### 4.35c.2 nb_cache 功能比 funboost自带的 do_task_filtering 全面太多了
-  行3407: #### 4.35c.2.2 举个例子 nb_cache 的防止缓存击穿为什么吊打 funboost的 do_task_filtering
-  行3415: ### 4.35c.2 如何在 funboost 中使用 nb_cache
-  行3422: #### 4.35c.2.1 方式一，@boost 和 @cache 叠加使用
-  行3449: #### 4.35c.2.2 方式二 cache 装饰器传给 funboost 的 `consuming_function_decorator`
-  行3480: ## 4.36 演示`funboost`入参可以是自定义类型(不可json序列化的类型的入参,自动使用pickle)(2025-07新增支持)
-  行3580: ## 4.37 funboost 启动消费函数的方式大全(再次集中总结)
-  行3584: ### 4.37.1. 基础启动 (最常用)
-  行3600: ### 4.37.2. 多进程叠加并发启动 (高性能推荐)
-  行3614: ### 4.37.3. 自动启动 (懒人模式)
-  行3629: ### 4.37.4. 批量启动所有消费者(最粗暴无脑)
-  行3648: ### 4.37.5. 分组启动 (Group Start)
-  行3664: ### 4.37.6. 命令行启动 (CLI)
-  行3673: ### 4.37.7. 远程自动部署启动 (Fabric)
-  行3683: ### 4.37.8. Celery 模式启动 (特殊)
-  行3689: ## 4.38 MemoryFunboostPool 和 FunboostPool 的使用
-  行3693: ### 4.38.1 MemoryFunboostPool：内存增强型任务池
-  行3725: ### 4.38.2 FunboostPool：全能与分布式任务池
-  行3792: ### 4.38.3 选择指南
-  行3809: ## 4.100 使用funboost时候对框架的疑问和猜测，使用控制变量法
-  行3871: ### 4.100.b 举个例子，验证测试框架的超时杀死 function_timeout参数的作用
-  行3918: ## 4.200 [分布式函数调度框架qq群]
+  行2829: ## 4.29 funboost支持任务优先级队列
+  行2833: ### 4.29.1 队列支持优先级的说明：
+  行2843: ### 4.29.2 优先级通俗理解，用食堂打饭比喻：
+  行2858: ### 4.29.3 队列支持任务优先级的代码主要有三点：
+  行2872: ### 4.29.4 队列支持任务优先级的代码如下：
+  行2901: ### 4.29.5 消息队列优先级是针对一个queue内消息的，那么怎样才能实现不同函数之间的按优先级运行？
+  行2965: ## 4.30 funboost 远程杀死(取消)任务
+  行2983: ### 4.30.1 funboost远程杀死函数的代码例子
+  行3028: ### 4.30.2 远程强制杀死函数、超时自动杀死(function_timeout设置不为0)， 这两个功能要注意死锁：
+  行3056: ### 4.30.2.b 如果想启用funboost函数超时自动杀死功能或者 远程杀死函数功能，推荐消费函数中使用可过期锁 expire_lock
+  行3067: ## 4.31 神级别 fct (funboost_current_task) 上下文获取当前消息和任务状态
+  行3138: ## 4.32 重磅更新！！！ funboost 独家新增支持实例方法和类方法作为消费函数
+  行3146: ### 4.32.0 !!! 实例方法和类方法作为funboost任务时候，push方法需要特别注意第一个入参。
+  行3183: ### 4.32.1 funboost 支持实例方法和类方法作为消费函数的原理
+  行3233: ### 4.32.2 funboost 支持实例方法、类方法、静态方法、普通函数 4种类型，作为消费函数的例子
+  行3306: ## 4.33  @boost设置is_auto_start_consuming_message，自动启动消费。
+  行3333: ## 4.34 pyinstaller 打包 funboost项目为exe 的说明
+  行3339: ## 4.35 演示 funboost 的函数入参过滤功能
+  行3382: ### 4.35.2 警告！！！: funboost的 rpc功能和 函数入参过滤过滤 不要同时使用
+  行3391: ## 4.35c 使用 nb_cache 作为缓存装饰器
+  行3393: ### 4.35c.1 为什么 要用 nb_cache 而不是 funboost 自带的 do_task_filtering
+  行3402: ### 4.35c.2 nb_cache 功能比 funboost自带的 do_task_filtering 全面太多了
+  行3409: #### 4.35c.2.2 举个例子 nb_cache 的防止缓存击穿为什么吊打 funboost的 do_task_filtering
+  行3417: ### 4.35c.2 如何在 funboost 中使用 nb_cache
+  行3424: #### 4.35c.2.1 方式一，@boost 和 @cache 叠加使用
+  行3451: #### 4.35c.2.2 方式二 cache 装饰器传给 funboost 的 `consuming_function_decorator`
+  行3482: ## 4.36 演示`funboost`入参可以是自定义类型(不可json序列化的类型的入参,自动使用pickle)(2025-07新增支持)
+  行3582: ## 4.37 funboost 启动消费函数的方式大全(再次集中总结)
+  行3586: ### 4.37.1. 基础启动 (最常用)
+  行3602: ### 4.37.2. 多进程叠加并发启动 (高性能推荐)
+  行3616: ### 4.37.3. 自动启动 (懒人模式)
+  行3631: ### 4.37.4. 批量启动所有消费者(最粗暴无脑)
+  行3650: ### 4.37.5. 分组启动 (Group Start)
+  行3666: ### 4.37.6. 命令行启动 (CLI)
+  行3675: ### 4.37.7. 远程自动部署启动 (Fabric)
+  行3685: ### 4.37.8. Celery 模式启动 (特殊)
+  行3691: ## 4.38 MemoryFunboostPool 和 FunboostPool 的使用
+  行3695: ### 4.38.1 MemoryFunboostPool：内存增强型任务池
+  行3727: ### 4.38.2 FunboostPool：全能与分布式任务池
+  行3794: ### 4.38.3 选择指南
+  行3811: ## 4.100 使用funboost时候对框架的疑问和猜测，使用控制变量法
+  行3873: ### 4.100.b 举个例子，验证测试框架的超时杀死 function_timeout参数的作用
+  行3920: ## 4.200 [分布式函数调度框架qq群]
 
 ============================================================
 文件: c4b.md
@@ -5241,7 +5241,7 @@ if __name__ == '__main__':
     f_beat.consume()  # 启动f_beat消费，这个是登记celery worker要启动消费的函数，真正的启动worker消费需要运行 realy_start_celery_worker，realy_start_celery_worker是一次性启动所有登记的需要运行的函数  
     f_beat2.consume() # 启动f_beat2消费，这个是登记celery worker要启动消费的函数，真正的启动worker消费需要运行 realy_start_celery_worker，realy_start_celery_worker是一次性启动所有登记的需要运行的函数  
     CeleryHelper.realy_start_celery_worker(worker_name='test_worker啊')  # 这个是真正的启动celery worker 函数消费。  
-    print('CeleryHelper.realy_start_celery_worker()  之后的代码不会被运行')  
+
 
 
 ```  
@@ -13384,13 +13384,15 @@ def f2(a, b):
 
 
 if __name__ == '__main__':  
+    f1.consume()  # 登记celery worker命令需要启动的--queues  
+    f2.consume()  # 登记celery worker命令需要启动的--queues  
+    CeleryHelper.realy_start_celery_worker(worker_name='测试celery worker2') # 正正的启动celery worker  
+    
     for i in range(200):  
         f1.push(i, i * 2)  
         f2.push(a=i, b=i * 10)  
 
-    f1.consume()  # 登记celery worker命令需要启动的--queues  
-    f2.consume()  # 登记celery worker命令需要启动的--queues  
-    CeleryHelper.realy_start_celery_worker(worker_name='测试celery worker2') # 正正的启动celery worker  
+    
 
 
 ```  
@@ -26199,7 +26201,7 @@ asyncio异步编程，最重要的方法有 aio_push aio_publish，
 #### 🔧 Public Functions (1)
 
 - `def deco_mq_conn_error(f)`
-  - *Line: 420*
+  - *Line: 417*
 
 
 ---
@@ -31588,6 +31590,7 @@ import os
 import sys
 import threading
 from functools import partial
+import time 
 
 import celery
 from celery.app.task import Task
@@ -31663,42 +31666,45 @@ class CeleryHelper:
         cls.to_be_start_work_celery_queue_name_set.add(queue_name)
 
     @classmethod
-    def realy_start_celery_worker(cls, worker_name=None, loglevel='INFO',worker_concurrency=200,start_consume_queue_name_list:list=None,is_start_consume_all_queues:bool=False):
-
+    def realy_start_celery_worker(cls, worker_name=None, loglevel='INFO', worker_concurrency=200,
+                                  start_consume_queue_name_list: list = None,
+                                  is_start_consume_all_queues: bool = False,
+                                  worker_ready_timeout: float = 5.0):
+        """在非守护线程中启动 celery worker，等待 worker 就绪后返回。
+        非守护线程会保持进程存活直到 worker 停止。
+        返回后可安全调用 celery_result.get() 获取任务结果。
+        """
         if is_start_consume_all_queues is False:
             to_be_start_work_celery_queue_name_set_new = copy.copy(cls.to_be_start_work_celery_queue_name_set)
             to_be_start_work_celery_queue_name_set_new.update(set(start_consume_queue_name_list or []))
         else:
             from funboost import BoostersManager
-            # print(BoostersManager.get_all_queues())
             to_be_start_work_celery_queue_name_set_new = set(BoostersManager.get_all_queues())
         queue_names_str = ','.join(list(to_be_start_work_celery_queue_name_set_new))
         if not to_be_start_work_celery_queue_name_set_new:
             raise Exception('celery worker 没有需要运行的queue')
-        # '--concurrency=200',
-        # '--autoscale=5,500' threads 并发模式不支持自动扩大缩小并发数量,
         worker_name = worker_name or f'pid_{os.getpid()}'
         pool_name = 'threads'
         if cls.concurrent_mode == ConcurrentModeEnum.GEVENT:
             pool_name = 'gevent'
         if cls.concurrent_mode == ConcurrentModeEnum.EVENTLET:
             pool_name = 'eventlet'
-        '''
-        并发数量在app配置中已经制定了。自己用 update_celery_app_conf 方法更新就好了。
-        celery_app.conf.update({
-             # 'worker_redirect_stdouts': False,
-             'worker_concurrency': 200
-         }
-         或
-         CeleryHelper.update_celery_app_conf({ 'worker_concurrency': 500})
-        '''
-        cls.update_celery_app_conf({'worker_concurrency':worker_concurrency})
+        cls.update_celery_app_conf({'worker_concurrency': worker_concurrency})
         argv = ['worker', f'--pool={pool_name}',
                 '-n', f'worker_funboost_{worker_name}@%h', f'--loglevel={loglevel}',
-                f'--queues={queue_names_str}',  # 并发数量是 在app配置中已经制定了。自己用 update_celery_app_conf 方法更新就好了。
+                f'--queues={queue_names_str}',
                 ]
         logger.info(f'celery 启动work参数 {argv}')
-        celery_app.worker_main(argv)
+
+        t = threading.Thread(target=celery_app.worker_main, args=(argv,),
+                             name='celery_worker_main')
+        t.start()
+
+        
+        time.sleep(worker_ready_timeout)
+        from celery._state import _set_task_join_will_block
+        _set_task_join_will_block(False)
+        return t
 
     @staticmethod
     def use_nb_log_instead_celery_log(log_level: int = logging.INFO, log_filename='celery.log', formatter_template=7):
@@ -31729,264 +31735,30 @@ class CeleryHelper:
 
 `````python
 """
-CeleryPool —— 将 Celery 封装为 concurrent.futures.Executor 兼容的通用任务池
-==============================================================================
+CeleryPool —— 将 Celery 封装为 concurrent.futures.Executor 兼容接口。
+无需 @app.task、无需手动启 worker，submit 任意函数即可获得分布式执行能力。
 
-1. 设计背景
------------
-
-Celery 是 Python 生态中最流行的分布式任务队列框架，功能强大但上手门槛高。
-使用原生 Celery 时，开发者需要：
-
-  a) 为每个任务函数加 @app.task 装饰器，侵入业务代码
-  b) 手动创建 Celery app 并管理配置
-  c) 另起终端启动 worker 进程
-  d) 通过 AsyncResult 获取结果，API 与 concurrent.futures 不兼容
-  e) 理解 Celery 的序列化、路由、backend、ack 等概念
-
-CeleryPool 的目标：把以上所有复杂度封装掉，让用户像使用
-concurrent.futures.ThreadPoolExecutor 一样使用 Celery 分布式能力。
-
-
-2. CeleryPool 相比原生 Celery 的核心优势
------------------------------------------
-
-┌─────────────────────┬───────────────────────────────┬─────────────────────────────────┐
-│        维度          │       原生 Celery              │        CeleryPool               │
-├─────────────────────┼───────────────────────────────┼─────────────────────────────────┤
-│ 函数定义             │ 必须用 @app.task 装饰器标注     │ 任意普通函数，无需装饰器          │
-│ Worker 启动          │ 需另开终端 celery -A ... worker │ 自动在线程中启动 worker          │
-│ 返回值类型           │ celery.result.AsyncResult      │ concurrent.futures.Future        │
-│ 获取结果方式         │ result.get(timeout=...)        │ future.result(timeout=...)       │
-│ 多任务批量执行       │ group / chord / chain           │ pool.map(fn, iterable)           │
-│ 超时处理             │ result.get(timeout) 抛 TimeoutError │ future.result(timeout) 同上  │
-│ 异常传播             │ result.get() 重新抛出远端异常    │ future.result() 同上             │
-│ 与标准库兼容性       │ 不兼容 concurrent.futures       │ 完全兼容                         │
-│ 与 as_completed 兼容 │ 不支持                         │ 惰性模式下需先 result()           │
-│ 资源消耗             │ result.get() 内部轮询消耗线程    │ 惰性模式：不调用 result() 零开销  │
-│ 学习曲线             │ 需理解 task/app/worker/broker   │ 只需理解 submit/result           │
-│ 代码侵入性           │ 业务函数必须注册为 task          │ 业务函数保持纯净                 │
-└─────────────────────┴───────────────────────────────┴─────────────────────────────────┘
-
-
-3. 用法示例
------------
-
-3.1 最简用法 —— 3 行代码替代原生 Celery 完整流程
+用法::
 
     from funboost.assist.celery_pool import CeleryPool
 
     def add(a, b):
         return a + b
 
-    pool = CeleryPool(
-        broker_url='redis://localhost:6379/0',
-        result_backend='redis://localhost:6379/0',
-        queue_name='my_add_queue',
-    )
-    future = pool.submit(add, 1, 2)
-    print(future.result())   # 输出: 3
-
-  对比原生 Celery 需要的步骤:
-    # 1) 创建 tasks.py
-    from celery import Celery
-    app = Celery('tasks', broker='redis://localhost:6379/0', backend='redis://localhost:6379/0')
-    @app.task
-    def add(a, b):
-        return a + b
-
-    # 2) 另起终端运行 worker
-    #    celery -A tasks worker --loglevel=info
-
-    # 3) 在主程序中调用
-    result = add.delay(1, 2)
-    print(result.get(timeout=10))   # 输出: 3
-
-
-3.2 批量提交 —— pool.map 对齐 concurrent.futures.Executor.map
-
-    results = list(pool.map(add, [(1, 2), (3, 4), (5, 6)]))
-    # [3, 7, 11]
-
-
-3.3 "发射后不管"模式 —— 不设置 result_backend
-
-    pool = CeleryPool(broker_url='redis://localhost:6379/0', queue_name='fire_and_forget')
-    pool.submit(send_email, to='user@example.com', body='hello')
-    # 不需要结果，任务静默执行，零资源浪费
-
-
-3.4 自定义并发与队列
+    def multiply(x, y):
+        return x * y
 
     pool = CeleryPool(
         broker_url='redis://localhost:6379/0',
         result_backend='redis://localhost:6379/0',
-        concurrent_num=8,          # 8 个并发 worker 线程
-        pool_type='threads',       # 线程池模式（默认）
-        queue_name='my_tasks',     # 队列名（必传）
-        worker_loglevel='INFO',    # worker 日志级别
+        queue_name='demo_queue',
+        other_celery_app_conf={'task_acks_late': True, 'worker_prefetch_multiplier': 1},
     )
 
-
-3.5 注入额外 Celery 配置
-
-    pool = CeleryPool(
-        broker_url='redis://localhost:6379/0',
-        result_backend='redis://localhost:6379/0',
-        queue_name='advanced_queue',
-        other_celery_app_conf={
-            'task_acks_late': True,               # 任务完成后再 ack
-            'worker_prefetch_multiplier': 1,       # 每次只预取 1 个任务
-            'task_time_limit': 300,                # 单个任务最大执行时间 300s
-            'task_soft_time_limit': 240,           # 软超时 240s（触发 SoftTimeLimitExceeded）
-            'broker_connection_retry_on_startup': True,
-        },
-    )
-
-
-3.6 与 concurrent.futures 工具函数配合
-
-    from concurrent.futures import as_completed, wait
-
-    futures = [pool.submit(add, i, i*10) for i in range(5)]
-
-    # 注意：惰性模式下，需要先触发 result() 才能让 done() 返回 True
-    for f in futures:
-        print(f.result())
-
-    # 或者使用 wait
-    done, not_done = wait(futures, timeout=30)
-
-
-3.7 异常处理
-
-    def risky_task(x):
-        if x < 0:
-            raise ValueError(f"负数不允许: {x}")
-        return x * 2
-
-    future = pool.submit(risky_task, -1)
-    try:
-        future.result()
-    except ValueError as e:
-        print(f"捕获到远端异常: {e}")
-
-
-3.8 同进程 vs 分布式
-
-    CeleryPool 自动处理两种场景：
-
-    同进程模式（默认 is_auto_start_worker=True）：
-      - worker 在当前进程的线程中启动
-      - 函数从 _FUNC_REGISTRY 直接引用，无需可导入
-      - 适合开发、测试、单机部署
-
-    分布式模式（is_auto_start_worker=False）：
-      - 需要在远程机器上独立启动 worker
-      - 函数必须是顶层可导入的（worker 通过 importlib 动态导入）
-      - 适合生产环境多机部署
-
-
-4. 架构概览
------------
-
-    ┌─────────────────┐
-    │   用户代码        │
-    │  pool.submit(fn) │
-    └───────┬─────────┘
-            │  fn → func_path (模块路径字符串)
-            ▼
-    ┌─────────────────┐
-    │  universal_task   │  Celery 注册的唯一 task
-    │  .apply_async()   │  将 (func_path, args, kwargs) 序列化到队列
-    └───────┬─────────┘
-            │  通过 Broker (Redis/RabbitMQ)
-            ▼
-    ┌─────────────────┐
-    │  Celery Worker    │  消费消息
-    │  _import_and_call │  还原函数引用并执行
-    └───────┬─────────┘
-            │  结果写入 Result Backend
-            ▼
-    ┌─────────────────┐
-    │  CeleryFuture     │  惰性轮询 Backend 获取结果
-    │  .result()        │  → 指数退避: 0.01s → 0.02s → 0.04s → ... → 5s
-    └─────────────────┘
-
-    关键设计决策:
-    - 只注册一个 universal_task，通过 func_path 分发所有函数
-    - CeleryFuture 继承 concurrent.futures.Future，惰性解析
-    - 不调用 .result() = 不消耗任何轮询线程/资源
-
-
-5. 惰性结果获取（Lazy Resolution）
-----------------------------------
-
-CeleryFuture 采用惰性解析策略：
-
-  - 创建 future 时不会立刻去 Backend 拉取结果
-  - 只在用户调用 future.result() 时才触发轮询
-  - 轮询采用指数退避策略：初始 10ms，每次翻倍，上限 5s
-  - 线程安全：使用 threading.Lock + double-check locking 保证并发安全
-  - 幂等性：多次调用 result() 只在首次触发解析，后续直接返回缓存值
-
-  惰性模式的代价：
-    done() 在 result() 调用之前始终返回 False（因为结果尚未解析）。
-    这意味着 concurrent.futures.as_completed() 和 add_done_callback()
-    需要在调用 result() 之后才能正确工作。
-    这是在"零资源浪费"和"API 完全兼容"之间的权衡选择。
-
-
-6. 线程安全保证
----------------
-
-CeleryFuture._ensure_resolved 使用 double-check locking：
-
-    if self._resolved:       # 第一次检查（无锁，快速返回）
-        return
-    with self._resolve_lock: # 加锁
-        if self._resolved:   # 第二次检查（防止并发重复解析）
-            return
-        ... 执行轮询和结果设置 ...
-
-  这确保了：
-    - 多个线程同时调用 result() 时只有一个线程执行实际解析
-    - 解析完成后 self._resolved = True，后续调用零开销直接返回
-    - self._cr（Celery AsyncResult 引用）在解析后设为 None，释放资源
-
-
-7. 函数路由机制
----------------
-
-CeleryPool 使用单一 universal_task + 函数路径字符串 实现任意函数路由：
-
-    submit(add, 1, 2)
-      → func_path = "mymodule.add"
-      → universal_task.apply_async(args=["mymodule.add", [1, 2], {}])
-      → Worker 端: _import_and_call("mymodule.add", [1, 2], {})
-                    → 先查 _FUNC_REGISTRY（同进程直接引用）
-                    → 再 importlib.import_module 动态导入（分布式模式）
-                    → 调用 add(1, 2) 并返回结果
-
-    优势：
-    - 用户无需给每个函数加 @app.task 装饰器
-    - 新增函数无需修改 Celery 配置
-    - 同一个 worker 可执行任意函数
-
-
-8. 适用场景
------------
-
-  适合：
-    - 希望用最少代码获得分布式任务能力
-    - 已有大量业务函数，不想逐一加 @app.task
-    - 需要与 concurrent.futures 生态兼容（如 as_completed、wait）
-    - 开发阶段快速验证、测试
-
-  不适合：
-    - 需要 Celery 高级特性（Canvas: chain / chord / group / starmap）
-    - 需要精细的 task 级配置（rate_limit / retry / countdown 等）
-    - 对 done() / as_completed() 的实时性有严格要求（惰性模式限制）
+    f1 = pool.submit(add, 1, 2)
+    f2 = pool.submit(multiply, 3, 7)
+    print(f1.result(timeout=10))  # 3
+    print(f2.result(timeout=10))  # 21
 """
 
 import importlib
@@ -36891,9 +36663,9 @@ class CeleryConsumer(AbstractConsumer):
             if _use_celery_native_retry:
                 # 用户在 broker_exclusive_config['celery_task_config'] 中配置了 autoretry_for，
                 # 由 celery 自身接管重试逻辑，直接执行函数即可。
-                return self.consuming_function(*args, **kwargs)
+                return self.consumer_params.consuming_function(*args, **kwargs)
             try:
-                return self.consuming_function(*args, **kwargs)
+                return self.consumer_params.consuming_function(*args, **kwargs)
             except Exception as exc:
                 # print(this.request.__dict__,dir(this))
                 if this.request.retries != self.consumer_params.max_retry_times:
@@ -43095,12 +42867,15 @@ class AutoOtelPublisherMixin(AbstractPublisher):
     1. 优先检查消息中是否已携带 otel_context (用户手动传递)
     2. 如果没有，则自动使用当前线程的上下文
     3. 生成 Producer Span 并注入/覆盖到消息中
+
+    覆写 _execute_publish 而非 publish，确保 publish/push/delay 三种调用方式
+    都能正确创建 OTEL Producer Span 并注入链路上下文。
     """
-    
+
     def _get_parent_context(self, msg: dict):
         """确定父级上下文 (Parent Context)"""
         return extract_otel_context_from_funboost_msg(msg)
-    
+
     def _inject_otel_context_to_msg(self, msg: dict):
         """
         将当前线程的 OTel 上下文注入到消息的 extra.otel_context 中
@@ -43109,84 +42884,52 @@ class AutoOtelPublisherMixin(AbstractPublisher):
         """
         if 'extra' not in msg:
             msg['extra'] = {}
-        
-        # 只有当用户没有手动传递 otel_context 时才注入
         if not msg['extra'].get('otel_context'):
             carrier = {}
-            inject(carrier)  # 将当前线程的上下文注入到 carrier
+            inject(carrier)
             msg['extra']['otel_context'] = carrier
-    
-    def publish(self, msg, task_id=None, task_options=None):
-        msg = copy.deepcopy(msg)  # 字典是可变对象,不要改变影响用户自身的传参字典. 用户可能继续使用这个传参字典.
-        msg, msg_function_kw, extra_params, task_id = self._convert_msg(msg, task_id, task_options)
-        
-        # -------------------------------------------------------
-        # 2. 确定父级上下文 (Parent Context)
-        # -------------------------------------------------------
-        parent_ctx = self._get_parent_context(msg)
 
-        # -------------------------------------------------------
-        # 3. 开启 Producer Span (链接到 parent_ctx)
-        # -------------------------------------------------------
+    def _execute_publish(self, publish_msg_context):
+        msg_dict = publish_msg_context.msg_dict
+        parent_ctx = self._get_parent_context(msg_dict)
         span_name = f"{self.queue_name} send"
-        
+
         with tracer.start_as_current_span(
-            span_name, 
-            context=parent_ctx, # 关键：使用刚才确定的父级
+            span_name,
+            context=parent_ctx,
             kind=SpanKind.PRODUCER
         ) as span:
-            
             span.set_attribute("messaging.system", "funboost")
             span.set_attribute("messaging.destination", self.queue_name)
 
-            
-            # ---------------------------------------------------
-            # 4. 注入新的 Context (Inject)
-            # ---------------------------------------------------
-            # 无论之前有没有 context，这里都要注入当前 Producer Span 的 context
-            # 这样下游消费者看到的父节点才是这个 Producer Span，保证链路完整：
-            # Upstream -> Producer(Send) -> Consumer(Process)
-            
             carrier = {}
-            inject(carrier) # 将当前 Span (Producer) 注入到 carrier
-            
-            if 'extra' not in msg:
-                msg['extra'] = {}
-            
-            # 覆盖/写入最新的链路信息
-            msg['extra']['otel_context'] = carrier
-            
-            # 记录 Task ID
-            span.set_attribute("messaging.message_id", task_id)
+            inject(carrier)
+            msg_dict.setdefault('extra', {})['otel_context'] = carrier
+            span.set_attribute("messaging.message_id", publish_msg_context.task_id)
+
+            if isinstance(publish_msg_context.msg_json, str):
+                publish_msg_context.msg_json = Serialization.to_json_str(msg_dict)
 
             try:
-                return super().publish(msg, task_id, task_options)
+                return super()._execute_publish(publish_msg_context)
             except Exception as e:
                 span.record_exception(e)
                 span.set_status(Status(StatusCode.ERROR))
-                raise e
+                raise
 
     async def aio_publish(self, msg, task_id=None, task_options=None):
         """
-        asyncio 生态下的 OTel 链路追踪发布
-        
+        asyncio 生态下的 OTel 链路追踪发布。
+
         关键问题：父类 aio_publish 使用 run_in_executor 在线程池执行 publish，
         但 OTel 上下文是线程本地的，跨线程会丢失。
-        
-        解决方案：
-        1. 在当前 asyncio 线程先捕获 OTel 上下文
-        2. 注入到消息的 extra.otel_context 中
-        3. 然后调用父类的 aio_publish（在 executor 线程中执行 publish）
-        4. publish 方法检测到 otel_context 已存在，会使用它作为父上下文
+
+        解决方案：在当前 asyncio 线程先捕获 OTel 上下文注入到消息中，
+        然后 _execute_publish 在 executor 线程中从消息恢复上下文。
         """
-        msg = copy.deepcopy(msg)  # 字典是可变对象,不要改变影响用户自身的传参字典
-        
-        # 在当前 asyncio 线程捕获 OTel 上下文并注入到消息中
-        # 这样当 publish 在 executor 线程执行时，能从消息中恢复正确的父上下文
-        self._inject_otel_context_to_msg(msg) # 这是核心，
-        
-        # 调用父类的 aio_publish，它会在 executor 中调用 self.publish
-        # publish 方法会检测到 msg['extra']['otel_context'] 并使用它
+        msg = copy.deepcopy(msg)
+        if isinstance(msg, dict):
+            self._inject_otel_context_to_msg(msg)
         return await super().aio_publish(msg, task_id, task_options)
 
 
@@ -44431,25 +44174,7 @@ class CeleryPoolPublisher(AbstractPublisher):
         """覆写基类，返回 Celery 原生 AsyncResult 而非 funboost AsyncResult"""
         t_start = time.time()
         celery_result = self._wrapped_publish_impl(publish_msg_context.msg_json)
-        current_time = time.time()
-        if self.logger.isEnabledFor(10):
-            self.logger.debug(
-                f'向{self._queue_name} 队列，推送消息 '
-                f'耗时{round(current_time - t_start, 4)}秒  '
-                f'{publish_msg_context.msg_function_kw}',
-                extra={'task_id': publish_msg_context.task_id},
-            )
-        self.count_per_minute += 1
-        self.publish_msg_num_total += 1
-        if current_time - self._current_time > 10:
-            with self._lock_for_count:
-                if current_time - self._current_time > 10:
-                    self.logger.info(
-                        f'10秒内推送了 {self.count_per_minute} 条消息,'
-                        f'累计推送了 {self.publish_msg_num_total} 条消息到 '
-                        f'{self._queue_name} 队列中')
-                    self._init_count()
-        self._after_publish(publish_msg_context)
+        self._post_publish_log_and_count(t_start, publish_msg_context)
         return celery_result
 
     def clear(self):
@@ -48825,6 +48550,8 @@ funboostpool 有几十种任务控制功能，例如重试策略，超时策略�
 funboostpool 能支持asyncio任务和同步任务，ThreadPoolExecutor 没这个能力
 funboostpool 的池子可以自动扩大和自动缩小，ThreadPoolExecutor 不能自动缩小。
 FunboostPool 拥有funboost的所有能力
+
+api用法和普通线程池一样，用法详见教程4.38章节。
 """
 
 import typing
@@ -59560,27 +59287,24 @@ class AbstractPublisher(metaclass=abc.ABCMeta, ):
     def _execute_publish(self,publish_msg_context: PublishMsgContext):
         t_start = time.time()
         self._wrapped_publish_impl(publish_msg_context.msg_json)
+        self._post_publish_log_and_count(t_start, publish_msg_context)
+        return AsyncResult(publish_msg_context.task_id, timeout=self.publisher_params.rpc_timeout)
 
-        # 优化：先获取当前时间用于后续判断，减少 time.time() 调用
+    def _post_publish_log_and_count(self, t_start: float, publish_msg_context: PublishMsgContext):
+        """发布后的日志记录和计数统计。子类覆写 _execute_publish 时调用此方法，避免重复代码。"""
         current_time = time.time()
         if self.logger.isEnabledFor(logging.DEBUG):
             self.logger.debug(f'向{self._queue_name} 队列，推送消息 耗时{round(current_time - t_start, 4)}秒  {publish_msg_context.msg_json if self.publisher_params.publish_msg_log_use_full_msg else publish_msg_context.msg_function_kw}',
                               extra={'task_id': publish_msg_context.task_id})
-        
-        # 优化：减少锁内操作，先计数再判断是否需要输出日志
         self.count_per_minute += 1
         self.publish_msg_num_total += 1
-        # 每10秒输出一次统计日志，减少锁竞争
         if current_time - self._current_time > 10:
             with self._lock_for_count:
-                # 双重检查，避免多线程重复输出
                 if current_time - self._current_time > 10:
                     self.logger.info(
                         f'10秒内推送了 {self.count_per_minute} 条消息,累计推送了 {self.publish_msg_num_total} 条消息到 {self._queue_name} 队列中')
                     self._init_count()
         self._after_publish(publish_msg_context)
-        # AsyncResult 本身就是懒加载的，只有访问 result 等属性时才建立 redis 连接
-        return AsyncResult(publish_msg_context.task_id, timeout=self.publisher_params.rpc_timeout)
 
     
     def _after_publish(self, publish_msg_context: PublishMsgContext):
@@ -59821,34 +59545,33 @@ def deco_mq_conn_error(f):
 import os
 import sys
 import time
+
 import celery
 import celery.result
-import typing
 
 from funboost.assist.celery_helper import celery_app
-from funboost.publishers.base_publisher import AbstractPublisher, TaskOptions
+from funboost.publishers.base_publisher import AbstractPublisher, PublishMsgContext
 
 
-class CeleryPublisher(AbstractPublisher, ):
+class CeleryPublisher(AbstractPublisher):
     """
-    使用celery作为中间件
+    使用 celery 作为中间件。
+
+    Celery 的发布走 celery_app.send_task()，不走普通的 _publish_impl，
+    因此覆写 _execute_publish 而非 _publish_impl。
+    publish() / push() / delay() 均走基类流程，最终进入 _execute_publish。
+    返回值为 celery.result.AsyncResult，可直接 .get() 获取远端结果。
     """
 
-    def publish(self, msg: typing.Union[str, dict], task_id=None,
-                task_options: TaskOptions = None) -> celery.result.AsyncResult:
-        msg, msg_function_kw, extra_params,task_id = self._convert_msg(msg, task_id, task_options)
+    def _execute_publish(self, publish_msg_context: PublishMsgContext) -> celery.result.AsyncResult:
         t_start = time.time()
-        celery_result = celery_app.send_task(name=self.queue_name, kwargs=msg_function_kw, task_id=extra_params['task_id'])  # type: celery.result.AsyncResult
-        self.logger.debug(f'向{self._queue_name} 队列，推送消息 耗时{round(time.time() - t_start, 4)}秒  {msg_function_kw}')  # 显示msg太长了。
-        with self._lock_for_count:
-            self.count_per_minute += 1
-            self.publish_msg_num_total += 1
-            if time.time() - self._current_time > 10:
-                self.logger.info(
-                    f'10秒内推送了 {self.count_per_minute} 条消息,累计推送了 {self.publish_msg_num_total} 条消息到 {self._queue_name} 队列中')
-                self._init_count()
-        # return AsyncResult(task_id)
-        return celery_result  # 这里返回celery结果原生对象，类型是 celery.result.AsyncResult。
+        celery_result = celery_app.send_task(
+            name=self.queue_name,
+            kwargs=publish_msg_context.msg_function_kw,
+            task_id=publish_msg_context.task_id,
+        )
+        self._post_publish_log_and_count(t_start, publish_msg_context)
+        return celery_result
 
     def _publish_impl(self, msg):
         pass
@@ -59860,11 +59583,9 @@ class CeleryPublisher(AbstractPublisher, ):
         os.system(cmd)
 
     def get_message_count(self):
-        # return -1
         with celery_app.connection_or_acquire() as conn:
             msg_cnt = conn.default_channel.queue_declare(
-                queue=self.queue_name, passive=False,durable=True,auto_delete=False).message_count
-
+                queue=self.queue_name, passive=False, durable=True, auto_delete=False).message_count
         return msg_cnt
 
     def close(self):
@@ -60202,56 +59923,35 @@ class FastestMemQueuePublisher(AbstractPublisher):
 # @Time    : 2023/8/6 0006 12:12
 
 import abc
-import asyncio
-import json
-import time
-import typing
 
-from funboost import TaskOptions
 from funboost.concurrent_pool.async_helper import get_or_create_event_loop
 from funboost.core.serialization import Serialization
 from funboost.publishers.base_publisher import AbstractPublisher
-from funboost.assist.faststream_helper import app,get_broker
-from faststream import FastStream,Context
-from faststream.annotations import Logger
+from funboost.assist.faststream_helper import app, get_broker
+
 
 class FastStreamPublisher(AbstractPublisher, metaclass=abc.ABCMeta):
     """
-    空的发布者，空的实现，需要搭配 boost入参的 consumer_override_cls 和 publisher_override_cls使用，或者被继承。
+    使用 FastStream 作为中间件。
+
+    FastStream 的发布通过 broker.publish() 异步方法完成。
+    只需覆写 _publish_impl 适配 FastStream 的异步接口，
+    日志、计数、AsyncResult 返回等由基类 _execute_publish 统一处理。
     """
+
     def custom_init(self):
-        pass
-        # asyncio.get_event_loop().run_until_complete(broker.start())
         self.broker = get_broker()
         get_or_create_event_loop().run_until_complete(self.broker.connect())
 
-    def publish(self, msg: typing.Union[str, dict], task_id=None,
-                task_options: TaskOptions = None) :
-        msg, msg_function_kw, extra_params, task_id = self._convert_msg(msg, task_id, task_options)
-        t_start = time.time()
-        faststream_result =  get_or_create_event_loop().run_until_complete(self.broker.publish(Serialization.to_json_str(msg), self.queue_name))
-        self.logger.debug(f'向{self._queue_name} 队列，推送消息 耗时{round(time.time() - t_start, 4)}秒  {msg_function_kw}')  # 显示msg太长了。
-        with self._lock_for_count:
-            self.count_per_minute += 1
-            self.publish_msg_num_total += 1
-            if time.time() - self._current_time > 10:
-                self.logger.info(
-                    f'10秒内推送了 {self.count_per_minute} 条消息,累计推送了 {self.publish_msg_num_total} 条消息到 {self._queue_name} 队列中')
-                self._init_count()
-        # return AsyncResult(task_id)
-        return faststream_result  #
-
     def _publish_impl(self, msg):
-        pass
-
+        get_or_create_event_loop().run_until_complete(
+            self.broker.publish(Serialization.to_json_str(msg), self.queue_name))
 
     def clear(self):
         pass
 
-
     def get_message_count(self):
         return -1
-
 
     def close(self):
         pass
@@ -61078,37 +60778,35 @@ class MysqlCdcPublisher(AbstractPublisher):
 # -*- coding: utf-8 -*-
 # @Author  : ydf
 # @Time    : 2023/8/6 0006 12:12
-import copy
-import json
 import time
-import typing
-import uuid
 
 from nameko.standalone.rpc import ClusterRpcProxy
 
 from funboost.funboost_config_deafult import BrokerConnConfig
-from funboost.publishers.base_publisher import AbstractPublisher, TaskOptions
+from funboost.publishers.base_publisher import AbstractPublisher, PublishMsgContext
 
 
 def get_nameko_config():
     return {'AMQP_URI': f'amqp://{BrokerConnConfig.RABBITMQ_USER}:{BrokerConnConfig.RABBITMQ_PASS}@{BrokerConnConfig.RABBITMQ_HOST}:{BrokerConnConfig.RABBITMQ_PORT}/{BrokerConnConfig.RABBITMQ_VIRTUAL_HOST}'}
 
 
-class NamekoPublisher(AbstractPublisher, ):
+class NamekoPublisher(AbstractPublisher):
     """
-    使用nameko作为中间件
+    使用 nameko 作为中间件（同步 RPC 调用模式）。
+
+    Nameko 的发布是同步 RPC，通过 ClusterRpcProxy 调用远端 service 的 call 方法。
+    覆写 _execute_publish 以返回 nameko RPC 调用结果而非 funboost AsyncResult。
+    publish() / push() / delay() 均走基类流程，最终进入 _execute_publish。
     """
 
     def custom_init(self):
         self._rpc = ClusterRpcProxy(get_nameko_config())
 
-    def publish(self, msg: typing.Union[str, dict], task_id=None,
-                task_options: TaskOptions = None):
-        msg, msg_function_kw, extra_params, task_id = self._convert_msg(msg, task_id, task_options)
+    def _execute_publish(self, publish_msg_context: PublishMsgContext):
         t_start = time.time()
         with self._rpc as rpc:
-            res = getattr(rpc, self.queue_name).call(**msg_function_kw)
-        self.logger.debug(f'调用nameko的 {self.queue_name} service 的 call方法 耗时{round(time.time() - t_start, 4)}秒，入参  {msg_function_kw}')  # 显示msg太长了。
+            res = getattr(rpc, self.queue_name).call(**publish_msg_context.msg_function_kw)
+        self._post_publish_log_and_count(t_start, publish_msg_context)
         return res
 
     def _publish_impl(self, msg):
@@ -61121,7 +60819,6 @@ class NamekoPublisher(AbstractPublisher, ):
         return -1
 
     def close(self):
-        # self.redis_db7.connection_pool.disconnect()
         pass
 
 `````
@@ -68793,6 +68490,7 @@ import contextvars
 
 from funboost.publishers.base_publisher import AbstractPublisher
 from funboost.consumers.base_consumer import AbstractConsumer
+from funboost.core.serialization import Serialization
 
 # 使用 contextvars 统一管理上下文，同时支持多线程和异步协程场景
 # 参考 funboost/core/current_task.py 的实现
@@ -68804,52 +68502,45 @@ _workflow_context_var: contextvars.ContextVar[typing.Optional[dict]] = contextva
 class WorkflowPublisherMixin(AbstractPublisher):
     """
     工作流发布者 Mixin
-    
+
     功能：
     1. 在发布消息时，检查当前上下文中是否有工作流信息
     2. 如果有，将工作流上下文注入到消息的 extra 字段中
     3. 支持链路追踪：可以追踪任务是由哪个上游任务触发的
-    
+
     消息中的工作流上下文包含：
     - workflow_id: 工作流唯一标识
     - parent_task_id: 父任务 ID（谁触发了这个任务）
     - chain_depth: 链条深度（用于调试）
-    
-    注意：current_task_id 只在运行时 contextvars 中使用，不存入消息。
-    任务自己的 ID 通过 extra.task_id 获取。
+
+    覆写 _execute_publish 而非 publish，确保 publish/push/delay 三种调用方式
+    都能正确注入工作流上下文。
     """
-    
+
     @classmethod
     def set_workflow_context(cls, workflow_ctx: dict):
         """设置当前线程/协程的工作流上下文"""
         _workflow_context_var.set(workflow_ctx)
-    
+
     @classmethod
     def get_workflow_context(cls) -> typing.Optional[dict]:
         """获取当前线程/协程的工作流上下文"""
         return _workflow_context_var.get()
-    
+
     @classmethod
     def clear_workflow_context(cls):
         """清除当前线程/协程的工作流上下文"""
         _workflow_context_var.set(None)
-    
+
     def _get_workflow_context_from_msg_or_contextvars(self, msg: dict) -> typing.Optional[dict]:
         """
         获取工作流上下文，优先从消息中获取（aio_publish 场景），否则从 contextvars 获取
-        
-        这解决了 aio_publish 使用 run_in_executor 跨线程时 contextvars 丢失的问题：
-        1. aio_publish 在 asyncio 线程先获取 contextvars 中的 workflow_context
-        2. 注入到消息的 extra._workflow_context_from_aio 中
-        3. publish 在 executor 线程执行时，优先从消息中恢复上下文
         """
-        # 优先从消息中获取（aio_publish 场景下的跨线程传递）
         aio_ctx = msg.get('extra', {}).get('_workflow_context_from_aio')
         if aio_ctx:
             return aio_ctx
-        # 否则从 contextvars 获取（同步调用场景）
         return self.get_workflow_context()
-    
+
     def _inject_workflow_context_to_msg(self, msg: dict):
         """
         将当前 contextvars 中的工作流上下文注入到消息中
@@ -68859,57 +68550,39 @@ class WorkflowPublisherMixin(AbstractPublisher):
         if workflow_ctx:
             if 'extra' not in msg:
                 msg['extra'] = {}
-            # 使用特殊 key，区别于最终注入的 workflow_context
             msg['extra']['_workflow_context_from_aio'] = workflow_ctx
-    
-    def publish(self, msg, task_id=None, task_options=None):
-        """
-        发布消息，注入工作流上下文
-        """
-        msg = copy.deepcopy(msg)  # 防止修改用户原始字典
-        
-        # 获取当前工作流上下文（优先从消息中获取，解决 aio_publish 跨线程问题）
-        workflow_ctx = self._get_workflow_context_from_msg_or_contextvars(msg)
-        
+
+    def _execute_publish(self, publish_msg_context):
+        msg_dict = publish_msg_context.msg_dict
+        workflow_ctx = self._get_workflow_context_from_msg_or_contextvars(msg_dict)
+
         if workflow_ctx:
-            if 'extra' not in msg:
-                msg['extra'] = {}
-            
-            # 创建消息中的上下文（只包含必要字段，不含 current_task_id）
             msg_ctx = {
                 'workflow_id': workflow_ctx.get('workflow_id'),
-                'parent_task_id': workflow_ctx.get('current_task_id'),  # 父任务 = 当前正在执行的任务
+                'parent_task_id': workflow_ctx.get('current_task_id'),
                 'chain_depth': workflow_ctx.get('chain_depth', 0) + 1,
             }
-            
-            msg['extra']['workflow_context'] = msg_ctx
-            
-            # 清理临时字段
-            msg['extra'].pop('_workflow_context_from_aio', None)
-        
-        return super().publish(msg, task_id, task_options)
-    
+            msg_dict.setdefault('extra', {})['workflow_context'] = msg_ctx
+            msg_dict.get('extra', {}).pop('_workflow_context_from_aio', None)
+
+            if isinstance(publish_msg_context.msg_json, str):
+                publish_msg_context.msg_json = Serialization.to_json_str(msg_dict)
+
+        return super()._execute_publish(publish_msg_context)
+
     async def aio_publish(self, msg, task_id=None, task_options=None):
         """
-        asyncio 生态下发布消息，处理跨线程的工作流上下文传递
-        
-        关键问题：父类 aio_publish 使用 run_in_executor 在线程池执行 publish，
+        asyncio 生态下发布消息，处理跨线程的工作流上下文传递。
+
+        关键问题：父类 aio_publish 使用 run_in_executor 在线程池执行，
         但 contextvars 不会自动跨线程传递。
-        
-        解决方案：
-        1. 在当前 asyncio 线程先获取 workflow_context
-        2. 注入到消息的 extra._workflow_context_from_aio 中
-        3. 然后调用父类的 aio_publish（在 executor 线程中执行 publish）
-        4. publish 方法检测到 _workflow_context_from_aio，会使用它作为上下文
+
+        解决方案：在当前 asyncio 线程先捕获 workflow_context 注入到消息中，
+        然后 _execute_publish 在 executor 线程中从消息恢复上下文。
         """
-        msg = copy.deepcopy(msg)  # 防止修改用户原始字典
-        
-        # 在当前 asyncio 线程捕获工作流上下文并注入到消息中
-        # 这样当 publish 在 executor 线程执行时，能从消息中恢复正确的上下文
-        self._inject_workflow_context_to_msg(msg)
-        
-        # 调用父类的 aio_publish，它会在 executor 中调用 self.publish
-        # publish 方法会检测到 msg['extra']['_workflow_context_from_aio'] 并使用它
+        msg = copy.deepcopy(msg)
+        if isinstance(msg, dict):
+            self._inject_workflow_context_to_msg(msg)
         return await super().aio_publish(msg, task_id, task_options)
 
 

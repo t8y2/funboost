@@ -41,11 +41,14 @@ def add(x, y):
 
 
 if __name__ == '__main__':
+    print(add.publisher.get_message_count())
+    add.publisher.clear()
     add.consume()
 
     time.sleep(2)
     for i in range(5):
         add.push(x=i, y=i * 10)
+    print(add.publisher.get_message_count())
     rs = add.push(x=1, y=2)
     print(f'add(1, 2) 结果: {rs.get(timeout=10)}')
 

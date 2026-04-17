@@ -70,10 +70,11 @@ class CeleryPoolPublisher(AbstractPublisher):
         return celery_result
 
     def clear(self):
-        pass
+        purged = self._pool.clear()
+        self.logger.warning(f'清空 celery 队列 {self.queue_name} 中的消息，删除了 {purged} 条')
 
     def get_message_count(self):
-        return -1
+        return self._pool.get_message_count()
 
     def close(self):
         pass
