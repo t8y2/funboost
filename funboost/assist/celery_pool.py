@@ -531,6 +531,9 @@ class CeleryPool:
         self._worker_thread.start()
         time.sleep(self.worker_startup_timeout)
 
+        from celery._state import _set_task_join_will_block
+        _set_task_join_will_block(False)
+
     def submit(self, fn: typing.Callable, *args, **kwargs) -> Future:
         """
         提交任意函数到 Celery 执行，返回 concurrent.futures.Future。
