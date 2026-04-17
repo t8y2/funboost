@@ -29605,6 +29605,7 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
     ├── assist
     │   ├── __init__.py
     │   ├── celery_helper.py
+    │   ├── celery_pool.py
     │   ├── dramatiq_helper.py
     │   ├── faststream_helper.py
     │   ├── grpc_helper
@@ -29890,7 +29891,7 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
 ---
 
 
-## funboost (relative dir: `funboost`)  Included Files (total: 261 files)
+## funboost (relative dir: `funboost`)  Included Files (total: 262 files)
 
 
 - `funboost/constant.py`
@@ -29908,6 +29909,8 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
 - `funboost/__main__.py`
 
 - `funboost/assist/celery_helper.py`
+
+- `funboost/assist/celery_pool.py`
 
 - `funboost/assist/dramatiq_helper.py`
 
@@ -31707,6 +31710,241 @@ class CeleryHelper:
 `````
 
 --- **end of file: funboost/assist/celery_helper.py** (project: funboost) --- 
+
+---
+
+
+--- **start of file: funboost/assist/celery_pool.py** (project: funboost) --- 
+
+`````python
+"""
+将 Celery 封装为 concurrent.futures.Executor 兼容的 Pool API。
+
+设计理念与 FunboostPool 一致：
+- submit(fn, *args, **kwargs) 返回 concurrent.futures.Future（原生类型）
+- map() 批量提交
+- shutdown() / with 语句
+
+用法：
+    from celery_pool import CeleryPool
+
+    def add(a, b):
+        return a + b
+
+    pool = CeleryPool(broker_url='redis://localhost:6379/0', result_backend='redis://localhost:6379/0')
+    future = pool.submit(add, 1, 2)
+    print(future.result())  # 3
+"""
+
+import concurrent.futures
+import importlib
+import threading
+import time
+import typing
+from concurrent.futures import Future, Executor
+
+try:
+    from celery import Celery
+    from celery.result import AsyncResult as CeleryAsyncResult
+except ImportError:
+    raise ImportError("请先安装 celery: pip install celery[redis]")
+
+
+_FUNC_REGISTRY: typing.Dict[str, typing.Callable] = {}
+
+
+def _get_func_path(fn: typing.Callable) -> str:
+    path = f"{fn.__module__}.{fn.__qualname__}"
+    _FUNC_REGISTRY[path] = fn
+    return path
+
+
+def _import_and_call(func_path: str, args: list, kwargs: dict):
+    """
+    同进程模式：优先从注册表取函数引用（解决 __main__ 不可导入的问题）。
+    分布式模式：回退到 importlib 动态导入。
+    """
+    func = _FUNC_REGISTRY.get(func_path)
+    if func is None:
+        module_name, func_name = func_path.rsplit(".", 1)
+        module = importlib.import_module(module_name)
+        func = getattr(module, func_name)
+    return func(*args, **kwargs)
+
+
+class CeleryFuture(Future):
+    """
+    继承 concurrent.futures.Future，惰性解析 Celery 结果。
+    不调用 .result() = 不浪费任何线程、不做任何轮询。
+    """
+
+    def __init__(self, celery_async_result: CeleryAsyncResult, has_backend: bool):
+        super().__init__()
+        self._cr = celery_async_result
+        self._has_backend = has_backend
+
+    def result(self, timeout: typing.Optional[float] = None) -> typing.Any:
+        if self.done():
+            return super().result(timeout=0)
+
+        if not self._has_backend:
+            raise RuntimeError(
+                "要获取 future.result()，请在 CeleryPool 初始化时设置 result_backend 参数。\n"
+                "例如: CeleryPool(broker_url='redis://...', result_backend='redis://...')"
+            )
+
+        deadline = time.time() + (timeout if timeout is not None else 300)
+        interval = 0.1
+        while not self._cr.ready():
+            if time.time() > deadline:
+                raise TimeoutError(f"CeleryPool: 等待结果超时({timeout}s)")
+            time.sleep(interval)
+            interval = min(interval * 2, 2.0)
+
+        if not self.done():
+            try:
+                if self._cr.successful():
+                    self.set_result(self._cr.result)
+                else:
+                    exc = self._cr.result
+                    self.set_exception(
+                        exc if isinstance(exc, Exception) else RuntimeError(str(exc))
+                    )
+            except concurrent.futures.InvalidStateError:
+                pass
+
+        return super().result(timeout=0)
+
+
+class CeleryPool:
+    """
+    将 Celery 封装为 concurrent.futures.Executor 兼容的 Pool API。
+
+    与 FunboostPool 对照：
+      FunboostPool 用 funboost Booster 驱动，CeleryPool 用 Celery worker 驱动。
+      二者 submit/map/shutdown 接口一致，均返回标准 concurrent.futures.Future。
+
+    局限：
+    - fn 必须是顶层可导入的函数（与 FunboostPool 的函数路径模式相同限制）
+    - 返回值和参数必须是 JSON 可序列化的（Celery 序列化约束）
+    - 需要 Redis/RabbitMQ 等外部 Broker 运行
+    """
+
+    def __init__(
+        self,
+        broker_url: str = 'redis://localhost:6379/0',
+        result_backend: typing.Optional[str] = None,
+        concurrent_num: int = 4,
+        pool_type: str = 'threads',
+        queue_name: typing.Optional[str] = None,
+        is_auto_start_worker: bool = True,
+        worker_loglevel: str = 'WARNING',
+        worker_startup_timeout: float = 1.0,
+        other_celery_app_conf: typing.Optional[typing.Dict[str, typing.Any]] = None,
+    ):
+        """
+        :param broker_url:      Celery broker 连接 URL
+        :param result_backend:  Celery result backend URL。
+                                设置后 submit 返回的 future 才能调用 .result() 获取结果。
+                                不设置则为纯"发射后不管"模式。
+        :param concurrent_num:  worker 并发数
+        :param pool_type:       worker 并发池类型 (solo / threads / gevent / prefork)
+        :param queue_name:      队列名称（默认自动生成）
+        :param is_auto_start_worker:  是否自动启动 worker
+        :param worker_loglevel: worker 日志级别
+        :param worker_startup_timeout: 等待 worker 启动的秒数
+        :param other_celery_app_conf:  额外 Celery app 配置字典，自动合并到 app.conf 中。
+                                       可传入任何 Celery 支持的配置项，例如：
+                                       {'task_acks_late': True, 'worker_prefetch_multiplier': 1}
+        """
+        self.broker_url = broker_url
+        self.result_backend = result_backend
+        self.concurrent_num = concurrent_num
+        self.pool_type = pool_type
+        self.queue_name = queue_name or f'celery_pool_{id(self)}'
+        self.worker_loglevel = worker_loglevel
+        self.worker_startup_timeout = worker_startup_timeout
+
+        task_name = f'celery_pool_universal_{self.queue_name}'
+
+        app_conf = dict(
+            broker_url=self.broker_url,
+            task_serializer='json',
+            accept_content=['json'],
+            result_serializer='json',
+            task_track_started=True,
+            worker_hijack_root_logger=False,
+            task_default_queue=self.queue_name,
+            task_routes={task_name: {'queue': self.queue_name}},
+        )
+        if self.result_backend:
+            app_conf['result_backend'] = self.result_backend
+        if other_celery_app_conf:
+            app_conf.update(other_celery_app_conf)
+
+        self.app = Celery('celery_pool')
+        self.app.conf.update(**app_conf)
+
+        @self.app.task(name=task_name)
+        def universal_task(func_path, args, kwargs):
+            return _import_and_call(func_path, args, kwargs)
+
+        self._universal_task = universal_task
+
+        if is_auto_start_worker:
+            self._start_worker()
+
+    def _start_worker(self):
+        """
+        在 daemon=False 线程中调用 app.worker_main() 启动 Celery worker。
+        daemon=False：主进程在 worker 存活期间不会退出。
+        """
+        def _run():
+            self.app.worker_main([
+                'worker',
+                f'--pool={self.pool_type}',
+                f'--concurrency={self.concurrent_num}',
+                '-Q', self.queue_name,
+                f'--loglevel={self.worker_loglevel}',
+                '--without-heartbeat',
+                '--without-mingle',
+                '--without-gossip',
+            ])
+
+        self._worker_thread = threading.Thread(
+            target=_run, daemon=False, name='celery-pool-worker',
+        )
+        self._worker_thread.start()
+        time.sleep(self.worker_startup_timeout)
+
+    def submit(self, fn: typing.Callable, *args, **kwargs) -> Future:
+        """
+        提交任意函数到 Celery 执行，返回 concurrent.futures.Future。
+        惰性获取结果：不调用 .result() 不浪费任何线程。
+        """
+        func_path = _get_func_path(fn)
+
+        celery_async_result = self._universal_task.apply_async(
+            args=[func_path, list(args), kwargs],
+            queue=self.queue_name,
+        )
+
+        return CeleryFuture(celery_async_result, has_backend=bool(self.result_backend))
+
+    map = Executor.map
+
+    def shutdown(self, wait: bool = True):
+        pass
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.shutdown()
+
+`````
+
+--- **end of file: funboost/assist/celery_pool.py** (project: funboost) --- 
 
 ---
 
@@ -47694,6 +47932,58 @@ from funboost.concurrent_pool.flexible_thread_pool import (
 import importlib
 
 
+class FunboostFuture(concurrent.futures.Future):
+    """
+    继承 concurrent.futures.Future，统一处理 FunctionResultStatus → 业务结果的转换。
+    消除 submit 方法中的闭包和双 Future 模式。
+    """
+
+    def __init__(self, is_future_direct_ret_result: bool = True, has_result_source: bool = True):
+        super().__init__()
+        self._is_direct = is_future_direct_ret_result
+        self._has_result_source = has_result_source
+
+    def result(self, timeout=None):
+        if not self._has_result_source:
+            raise RuntimeError(
+                "当前 FunboostPool 未启用结果获取（is_need_result=False）。\n"
+                "要获取 future.result()，请在初始化时设置 is_need_result=True"
+            )
+        return super().result(timeout=timeout)
+
+    def _resolve_status(self, status: FunctionResultStatus):
+        if self._is_direct:
+            if status.success:
+                self.set_result(status.result)
+            else:
+                self.set_exception(FunboostTaskExecutionError(
+                    exception_type=status.exception_type or 'UnknownError',
+                    exception_msg=status.exception,
+                ))
+        else:
+            self.set_result(status)
+
+    def bind_raw_future(self, raw_future: concurrent.futures.Future):
+        """内存队列模式：监听 raw_future 完成回调"""
+        def _on_done(fut):
+            try:
+                self._resolve_status(fut.result())
+            except Exception as e:
+                self.set_exception(e)
+        raw_future.add_done_callback(_on_done)
+
+    def bind_async_result(self, async_result: AsyncResult, callback_run_executor):
+        """分布式队列模式：注册 RPC 回调"""
+        async_result.callback_run_executor = callback_run_executor
+        def _on_rpc(status_and_result: dict):
+            try:
+                status = FunctionResultStatus.parse_status_and_result_to_obj(status_and_result)
+                self._resolve_status(status)
+            except Exception as e:
+                self.set_exception(e)
+        async_result.set_callback(_on_rpc)
+
+
 class MemoryFunboostPool:
     """
     一个基于内存队列的 Funboost 任务池。
@@ -47764,35 +48054,10 @@ class MemoryFunboostPool:
         :param kwargs: 关键字参数
         :return: concurrent.futures.Future 对象
         """
-        # 将函数和参数打包成一个字典，直接放进消息队列
-        # 因为用的是 MEMORY_QUEUE，函数对象不会被序列化，而是直接传递引用！
-
-        # 使用 publisher 的 get_future 方法，直接返回 Future 对象
         raw_future = self.booster.publisher.get_future(fn, args, kwargs)
-        if self.is_future_direct_ret_result is False:
-            return raw_future
-        else:
-            # 2. 创建一个新的 Future，用于承载真正的业务返回值
-            final_future = concurrent.futures.Future()
-
-            # 3. 当 raw_future 完成时，提取业务结果并设置到 final_future
-            def on_raw_future_done(fut):
-                try:
-                    # raw_future.result() 返回的是 FunctionResultStatus 对象
-                    status: FunctionResultStatus = fut.result()
-                    if status.success:
-                        # 关键：把真正的业务结果设置给 final_future
-                        final_future.set_result(status.result)
-                    else:
-                        final_future.set_exception(FunboostTaskExecutionError(
-                            exception_type=status.exception_type or 'UnknownError',
-                            exception_msg=status.exception,
-                        ))
-                except Exception as e:
-                    final_future.set_exception(e)
-
-            raw_future.add_done_callback(on_raw_future_done)
-            return final_future
+        future = FunboostFuture(self.is_future_direct_ret_result)
+        future.bind_raw_future(raw_future)
+        return future
 
     map = concurrent.futures.Executor.map
 
@@ -47849,41 +48114,17 @@ class FunboostPoolPickleFunc(MemoryFunboostPool):
         return fn
 
     def submit(self, fn: typing.Callable, *args, **kwargs) -> concurrent.futures.Future:
-        # 1. 如果是内存队列，直接复用父类的高效实现（底层用 get_future）
         if self.booster_params.broker_kind == BrokerEnum.MEMORY_QUEUE:
             return super().submit(fn, *args, **kwargs)
 
-        # 2. 如果是分布式队列，走标准 RPC 回调封装
-
         fn_new = self._get_fn_new(fn)
-
         async_result: AsyncResult = self.booster.push(fn_new, args, kwargs)
         if self.is_need_result is False:
-            return None
+            return FunboostFuture(has_result_source=False)
 
-        async_result.callback_run_executor = self._callback_run_executor
-        final_future = concurrent.futures.Future()
-
-        def rpc_callback(status_and_result: dict):
-            try:
-                status = FunctionResultStatus.parse_status_and_result_to_obj(
-                    status_and_result
-                )
-                if self.is_future_direct_ret_result:
-                    if status.success:
-                        final_future.set_result(status.result)
-                    else:
-                        final_future.set_exception(FunboostTaskExecutionError(
-                            exception_type=status.exception_type or 'UnknownError',
-                            exception_msg=status.exception,
-                        ))
-                else:
-                    final_future.set_result(status)
-            except Exception as e:
-                final_future.set_exception(e)
-
-        async_result.set_callback(rpc_callback)
-        return final_future
+        future = FunboostFuture(self.is_future_direct_ret_result)
+        future.bind_async_result(async_result, self._callback_run_executor)
+        return future
 
 def get_fun_path(fn: typing.Callable):
     """
@@ -47903,30 +48144,17 @@ class FunboostPool(FunboostPoolPickleFunc):
         return get_fun_path(fn)
 
     def _create_booster(self):
-        # 核心：定义一个通用的消费函数，它不再依赖 pickle 序列化函数对象
-        def universal_consumer(func_path: str, args: tuple, kwargs: dict):
-            """
-            动态导入并执行函数
-            :param func_path: 例如 "my_module.my_submodule.my_func"
-            :param args: 位置参数元组
-            :param kwargs: 关键字参数字典
-            """
-            try:
-                # 1. 分割模块路径和函数名
-                module_name, func_name = func_path.rsplit(".", 1)
+        def universal_consumer(func_path, args: tuple, kwargs: dict):
+            if callable(func_path):
+                func = func_path
+            else:
+                try:
+                    module_name, func_name = func_path.rsplit(".", 1)
+                    module = importlib.import_module(module_name)
+                    func = getattr(module, func_name)
+                except (ImportError, AttributeError) as e:
+                    raise ImportError(f"cant import function '{func_path}': {e}")
 
-                # 2. 动态导入模块
-                module = importlib.import_module(module_name)
-
-                # 3. 获取函数对象
-                func = getattr(module, func_name)
-
-            except (ImportError, AttributeError) as e:
-                # 处理导入失败的情况
-                raise ImportError(f"cant import function '{func_path}': {e}")
-
-            # 4. 执行真正的业务逻辑
-            # 这里利用了 _new_anyio_fun 支持同步/异步函数的特性
             return _new_anyio_fun(
                 func,
                 args,
