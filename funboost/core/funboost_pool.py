@@ -318,7 +318,7 @@ if __name__ == "__main__":
     def greet(name):
         return f"Hello, {name}"
 
-    # 能执行asyncio函数，而且能支持指定asyncio loop，能自动启动指定的asyncio loop，例如某些aio的连接池的包，需要实例化和发请求在同一个loop。
+    # funboostpool能执行asyncio函数，而且能支持指定asyncio loop，能自动启动指定的asyncio loop，例如某些aio的连接池的包，需要实例化和发请求在同一个loop。
     async def aio_fun(x):
         await asyncio.sleep(1)
         return x * 10

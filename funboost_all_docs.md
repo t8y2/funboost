@@ -2,29 +2,27 @@
 # 🤖 AI 上下文阅读协议 (由 nb_ai_context 生成)
 
 > **系统指令**：你正在解析一份由工具 **`nb_ai_context`** 自动生成的**结构化项目快照**。
-> **文档性质**：这**不是**一份普通的文档，而是专为 AI 大模型（LLM）设计的上下文数据流。它将项目文档、源代码和 AST 架构元数据进行了特殊的结构化合并。
+> **文档性质**：这**不是**一份普通的面向人类的文档，而是专为 AI 大模型（LLM）设计的上下文数据流。它将项目文档、源代码和 AST 架构元数据进行了特殊的结构化合并，请开启“代码解析器”的心智模式。
 
 ## 🧠 AI 认知与解析准则
 
-这份由 `nb_ai_context` 生成的文档是你的核心知识库。其中的内容是动态的——它可能包含完整的底层源码，也可能仅包含使用教程，或者是两者的混合。请遵循以下自适应阅读策略：
+这份由 `nb_ai_context` 生成的文档是你的核心知识库。其中的内容是动态的——它可能包含完整的底层源码，也可能仅包含使用教程，或者是两者的混合。请严格遵循以下自适应阅读策略：
 
-### 1. 信息的层级与互补
-*   **文档即意图**：将 `README`、教程文档和 Docstrings 视为项目设计的**最高意图**。如果文档中详细描述了某个功能的用法，即使生成器没有包含其对应的源码实现，也请完全信任文档中的逻辑，并以此为基础进行回答。
-*   **源码即事实**：当遇到 `.py` 源码或 AST 元数据（类/函数签名）时，请以此作为实现细节、类型约束和语法准确性的**事实标准**。
-*   **缺失内容的推断**：如果教程演示了调用 `API.process()`，但本文档未包含 `API` 类的源码，**请勿认为该功能不存在**。你应该基于教程中的演示，合理推断该接口的输入输出和行为模式，并据此协助用户。
+### 1. 信息的层级与冲突处理
+*   **文档即意图**：将 `README`、教程文档和 Docstrings 视为项目设计的**最高意图**。如果生成器省略了对应源码，请完全信任文档逻辑，以此为基础推理。
+*   **源码即事实**：遇到 `.py` 源码或 AST 元数据（类/函数签名）时，以此作为实现细节、类型约束和语法准确性的**最终事实标准**。
+*   **冲突处理**：若文档与源码/AST 存在矛盾，请以源码为准，并在回答中向用户简要指出该差异。
+*   **测试代码的忽略**：为优化 Token 长度，集成/单元测试及非核心 API 源码通常被隐藏。**绝对不要**因此推断或提醒用户“项目缺乏测试”或“代码未实现”。
 
 ### 2. 文件边界与架构感知
-*   **上下文定界**：`nb_ai_context` 使用以下标记严格界定文件内容：
-    `--- **start of file: <路径>** ---` ... 内容 ... `--- **end of file: <路径>** ---`
-*   **结构可视化**：请利用“文件树 (File Tree)”章节来建立项目的宏观架构认知，即便某些文件未被展开显示。
-*   **依赖关系**：利用工具生成的“文件依赖分析”章节来理解模块间的引用关系，这有助于你在只有部分代码的情况下理清数据流向。
+*   **上下文定界**：工具使用 `--- **start of file: <路径>** ---` 等标记严格界定文件。**在你的回复中，请使用标准 Markdown 代码块，切勿模仿使用此类系统定界符。**
+*   **结构可视化**：利用“文件树 (File Tree)”章节建立项目的宏观架构认知。
+*   **依赖关系**：利用“文件依赖分析”章节理清模块间的 import 数据流向。
 
-### 3. 代码生成与交互
-*   **风格一致性**：在生成代码或解释逻辑时，请严格模仿文档中已有的代码风格和命名规范。
-*   **元数据利用**：对于仅展示 AST 元数据（如仅有类定义而无函数体）的 Python 文件，请将其视为有效的接口定义，确保你的代码调用符合这些签名约束。
-*   **事实锚定 (Fact Anchoring)**：生成代码时必须严格**锚定**在本文档提供的范围内。
-    *   涉及 API 调用时，必须基于**源码中的 AST 签名**或**教程中的演示示例**。
-    *   **严禁臆造**文档中既未定义、也未在教程中提及的类名、方法名或参数。确保每一个生成的 Token 都有文档依据。
+### 3. 严格的代码生成与交互边界
+*   **事实锚定 (Fact Anchoring)**：你生成的代码必须严格锚定在本文档范围内！API 调用必须基于**源码中的 AST 签名**或**文档中的演示示例**。
+*   **严禁臆造 (Zero Fabrication)**：绝对禁止编造文档中未定义或未提及的类名、方法名或参数。
+*   **越界拒绝**：如果用户询问的功能在当前提供的上下文中完全不存在，请明确告知“当前上下文中未包含该信息”，而不是试图凭空生成。
 
 ---
 # markdown content namespace: funboost_docs project summary 
@@ -121,6 +119,8 @@
 - `funboost/publishers/base_publisher.py`
 - `funboost/consumers/base_consumer.py`
 - `funboost/core/active_cousumer_info_getter.py`
+- `funboost/core/funboost_pool.py`
+- `funboost/assist/celery_pool.py`
 
 
 ### 📄 Python File Metadata: `funboost/__init__.py`
@@ -2191,6 +2191,354 @@ care_project_name 的作用是：
 
 
 
+
+### 📄 Python File Metadata: `funboost/core/funboost_pool.py`
+
+#### 📝 Module Docstring
+
+`````
+写一个 Funboost 通用任务池，支持 submit 任意函数，并返回 Future。
+除了实例化入参，最常用的submit方法和 concurrent.futures.ThreadPoolExecutor 一样。例如submit和返回future。
+所以用户可以使用 MemoryFunboostPool 或者 FunboostPool 的实例化对象替代之前的 ThreadPoolExecutor的对象。一般用户只用到pool.submit，基本完美平替，只需要修改一行代码。
+
+funboostpool 比 ThreadPoolExecutor更强的在于，可以内存存储任务，也可以分布式消息队列存任务。
+funboostpool 有几十种任务控制功能，例如重试策略，超时策略，任务优先级。
+funboostpool 能支持asyncio任务和同步任务，ThreadPoolExecutor 没这个能力
+funboostpool 的池子可以自动扩大和自动缩小，ThreadPoolExecutor 不能自动缩小。
+FunboostPool 拥有funboost的所有能力
+
+api用法和普通线程池一样，用法详见教程4.38章节。
+`````
+
+#### 📦 Imports
+
+- `import typing`
+- `import threading`
+- `from typing import Optional`
+- `import concurrent.futures`
+- `from funboost import BoosterParams`
+- `from funboost import BrokerEnum`
+- `from funboost import Booster`
+- `from funboost import FunctionResultStatus`
+- `from funboost import AsyncResult`
+- `from funboost.core.exceptions import FunboostTaskExecutionError`
+- `from funboost.concurrent_pool.flexible_thread_pool import _new_anyio_fun`
+- `import importlib`
+- `import asyncio`
+- `from funboost.core.exceptions import FunboostWaitRpcResultTimeout`
+
+#### 🏛️ Classes (5)
+
+##### 📌 `class FunboostFuture(concurrent.futures.Future)`
+*Line: 33*
+
+**Docstring:**
+`````
+继承 concurrent.futures.Future，统一处理 FunctionResultStatus → 业务结果的转换。
+
+惰性模式：只在用户调用 .result() 时才真正获取结果，
+如果用户不调用 result()，不会触发 Redis blpop 等网络操作，零额外开销。
+注意：惰性模式下 done() / add_done_callback() / as_completed() 需要先调用 result() 才能生效。
+`````
+
+**🔧 Constructor (`__init__`):**
+- `def __init__(self, is_future_direct_ret_result: bool = True, has_result_source: bool = True)`
+  - **Parameters:**
+    - `self`
+    - `is_future_direct_ret_result: bool = True`
+    - `has_result_source: bool = True`
+
+**Public Methods (3):**
+- `def result(self, timeout = None)`
+- `def bind_raw_future(self, raw_future: concurrent.futures.Future)`
+  - *内存队列模式：保存 raw_future 引用，延迟到 result() 时才获取*
+- `def bind_async_result(self, async_result: AsyncResult)`
+  - *分布式队列模式：保存 AsyncResult 引用，延迟到 result() 时才获取*
+
+##### 📌 `class MemoryFunboostPool`
+*Line: 124*
+
+**Docstring:**
+`````
+一个基于内存队列的 Funboost 任务池。
+支持 submit 任意函数，并返回 Future。
+固定使用内存队列，固定不重试，以复刻原始线程池行为。
+`````
+
+**🔧 Constructor (`__init__`):**
+- `def __init__(self, concurrent_num: int = 4)`
+  - **Docstring:**
+  `````
+  创建一个通用任务池。 固定使用内存队列，固定不重试，以复刻原始线程池行为。
+  :param concurrent_num: 最大线程数
+  :param qps: 每秒处理消息数
+  
+  :param is_future_direct_ret_result: future中是的数据是最终result结果，还是 FunctionResultStatus 对象。
+         如果返回FunctionResultStatus对象，那么信息更为丰富，包括重试了几次，耗时等等。
+         如果返回result结果，那么只有结果，没有其他信息，但是更贴合原生的 concurrent.futures.Future.result() 方法的返回值。
+  :return:
+  `````
+  - **Parameters:**
+    - `self`
+    - `concurrent_num: int = 4`
+
+**Public Methods (2):**
+- `def submit(self, fn: typing.Callable, *args, **kwargs) -> concurrent.futures.Future`
+  - **Docstring:**
+  `````
+  提交任意函数 fn 到线程池执行。
+  :param fn: 要执行的函数
+  :param args: 位置参数
+  :param kwargs: 关键字参数
+  :return: concurrent.futures.Future 对象
+  `````
+- `def shutdown(self, wait: bool = True)`
+  - *关闭线程池（内存队列无需特殊清理）*
+
+**Class Variables (1):**
+- `map = concurrent.futures.Executor.map`
+
+##### 📌 `class FunboostPoolPickleFunc(MemoryFunboostPool)`
+*Line: 212*
+
+**🔧 Constructor (`__init__`):**
+- `def __init__(self, booster_params)`
+  - **Docstring:**
+  `````
+  创建一个通用任务池。
+  :param booster_params: BoosterParams 对象. FunboostPool相比MemoryFunboostPool有更多的控制入参。
+  :param is_need_result: 是否需要返回执行结果,如果不关心结果只执行，可以不使用rpc模式，不依赖redis做rpc，节约redis空间和性能。
+  :param is_future_direct_ret_result: future中是的数据是最终result结果，还是 FunctionResultStatus 对象。
+         如果返回FunctionResultStatus的信息更为丰富，包括重试了几次，耗时等等。
+         如果返回result结果，那么只有结果，没有其他信息，但是更贴合原原生的 concurrent.futures.Future.result() 方法的返回值。
+  :return:
+  `````
+  - **Parameters:**
+    - `self`
+    - `booster_params`
+
+**Public Methods (1):**
+- `def submit(self, fn: typing.Callable, *args, **kwargs) -> concurrent.futures.Future`
+
+##### 📌 `class FunboostPool(FunboostPoolPickleFunc)`
+*Line: 269*
+
+##### 📌 `class Obj`
+*Line: 307*
+
+**🔧 Constructor (`__init__`):**
+- `def __init__(self, x)`
+  - **Parameters:**
+    - `self`
+    - `x`
+
+#### 🔧 Public Functions (5)
+
+- `def get_fun_path(fn: typing.Callable)`
+  - *Line: 263*
+  - *获取函数的路径字符串，例如 "my_module.my_submodule.my_func"*
+
+- `def add(a, b)`
+  - *Line: 311*
+
+- `def multiply(x, y)`
+  - *Line: 315*
+
+- `def greet(name)`
+  - *Line: 318*
+
+- `async def aio_fun(x)`
+  - *Line: 322*
+
+
+---
+
+
+
+
+### 📄 Python File Metadata: `funboost/assist/celery_pool.py`
+
+#### 📝 Module Docstring
+
+`````
+CeleryPool —— 将 Celery 封装为 concurrent.futures.Executor 兼容接口。
+无需 @app.task、无需手动启 worker，submit 任意函数即可获得分布式执行能力。
+
+用法::
+
+    from funboost.assist.celery_pool import CeleryPool
+
+    def add(a, b):
+        return a + b
+
+    def multiply(x, y):
+        return x * y
+
+    pool = CeleryPool(
+        broker_url='redis://localhost:6379/0',
+        result_backend='redis://localhost:6379/0',
+        queue_name='demo_queue',
+        other_celery_app_conf={'task_acks_late': True, 'worker_prefetch_multiplier': 1},
+    )
+
+    f1 = pool.submit(add, 1, 2)
+    f2 = pool.submit(multiply, 3, 7)
+    print(f1.result(timeout=10))  # 3
+    print(f2.result(timeout=10))  # 21
+`````
+
+#### 📦 Imports
+
+- `import importlib`
+- `import threading`
+- `import time`
+- `import typing`
+- `from concurrent.futures import Future`
+- `from concurrent.futures import Executor`
+- `from celery import Celery`
+- `from celery.result import AsyncResult as CeleryAsyncResult`
+- `from celery._state import _set_task_join_will_block`
+
+#### 🏛️ Classes (2)
+
+##### 📌 `class CeleryFuture(Future)`
+*Line: 66*
+
+**Docstring:**
+`````
+继承 concurrent.futures.Future，惰性解析 Celery 任务结果。
+
+与原生 Celery AsyncResult 的区别：
+┌───────────────────┬────────────────────────┬───────────────────────┐
+│      行为          │  Celery AsyncResult     │   CeleryFuture        │
+├───────────────────┼────────────────────────┼───────────────────────┤
+│ 获取结果           │ result.get(timeout)     │ future.result(timeout)│
+│ 类型继承           │ celery.result.AsyncResult│ concurrent.futures.Future│
+│ 结果获取时机       │ 调用 .get() 时轮询      │ 调用 .result() 时轮询 │
+│ 不取结果时开销      │ 无                      │ 无（惰性）            │
+│ 线程安全           │ 依赖 Celery 实现        │ double-check locking  │
+│ 与标准库工具兼容   │ 不兼容                  │ 兼容（有惰性限制）    │
+└───────────────────┴────────────────────────┴───────────────────────┘
+
+惰性模式注意事项：
+    done() / add_done_callback() / as_completed() 需要先调用 result() 才能生效。
+    这是"零资源浪费"和"API 完全兼容"之间的设计权衡。
+
+指数退避轮询策略：
+    初始间隔 10ms → 20ms → 40ms → 80ms → ... → 最大 5s
+    对于快速返回的任务，几乎无额外延迟；
+    对于长耗时任务，逐步降低轮询频率以减少 Backend 压力。
+`````
+
+**🔧 Constructor (`__init__`):**
+- `def __init__(self, celery_async_result: CeleryAsyncResult, has_backend: bool)`
+  - **Parameters:**
+    - `self`
+    - `celery_async_result: CeleryAsyncResult`
+    - `has_backend: bool`
+
+**Public Methods (1):**
+- `def result(self, timeout: typing.Optional[float] = None) -> typing.Any`
+
+##### 📌 `class CeleryPool`
+*Line: 150*
+
+**Docstring:**
+`````
+将 Celery 封装为 concurrent.futures.Executor 兼容的通用任务池。
+
+核心思路：
+    一个 CeleryPool 实例 = 一个 Celery app + 一个 universal_task + 一个自动启动的 worker。
+    用户只需 pool.submit(fn, *args, **kwargs) 即可将任意函数提交到 Celery 执行，
+    无需给函数加 @app.task 装饰器、无需手动启动 worker、无需理解 Celery 配置。
+
+与 FunboostPool / ThreadPoolExecutor / ProcessPoolExecutor 对照：
+    四者 submit / map 接口一致，均返回 concurrent.futures.Future。
+    CeleryPool 额外提供了基于消息队列的分布式执行能力。
+
+与原生 Celery 对照：
+    原生 Celery 需要：@app.task 装饰器 → 启动 worker → result.get()
+    CeleryPool 只需：pool = CeleryPool(...) → pool.submit(fn, ...)  → future.result()
+
+工作模式：
+    1) 同进程模式（默认 is_auto_start_worker=True）：
+       - 自动在当前进程的后台线程中启动 Celery worker
+       - 通过 _FUNC_REGISTRY 直接引用函数（无需函数可导入）
+       - 适合开发、测试、快速验证
+    2) 分布式模式（is_auto_start_worker=False）：
+       - 由用户在远程机器上独立启动 Celery worker
+       - 函数通过 importlib 动态导入（必须是顶层可导入函数）
+       - 适合生产环境、多机部署
+
+局限：
+    - fn 的参数和返回值必须是 JSON 可序列化的（Celery 序列化约束）
+    - 分布式模式下 fn 必须是顶层可导入的函数
+    - 需要 Redis / RabbitMQ 等外部 Broker 运行
+    - 惰性模式下 done() / as_completed() 需先调 result() 触发
+
+单例语义：
+    同一个 queue_name 只创建一次实例，后续 CeleryPool(queue_name='x') 返回缓存的实例。
+    避免 for 循环实例化时重复创建 Celery app 和 worker。
+
+典型用法：
+    pool = CeleryPool(
+        broker_url='redis://localhost:6379/0',
+        result_backend='redis://localhost:6379/0',
+        queue_name='my_task_queue',
+    )
+    future = pool.submit(my_func, arg1, arg2)
+    print(future.result())
+`````
+
+**🔧 Constructor (`__init__`):**
+- `def __init__(self, broker_url: str = 'redis://localhost:6379/0', result_backend: typing.Optional[str] = None, concurrent_num: int = 4, pool_type: str = 'threads')`
+  - **Docstring:**
+  `````
+  :param broker_url:      Celery broker 连接 URL
+  :param result_backend:  Celery result backend URL。
+                          设置后 submit 返回的 future 才能调用 .result() 获取结果。
+                          不设置则为纯"发射后不管"模式。
+  :param concurrent_num:  worker 并发数
+  :param pool_type:       worker 并发池类型 (solo / threads / gevent / prefork)
+  :param queue_name:      队列名称（必传），用于隔离不同 CeleryPool 实例的消息。
+                          建议使用有业务含义的名称，如 'order_tasks'、'email_queue' 等。
+  :param is_auto_start_worker:  是否自动启动 worker
+  :param worker_loglevel: worker 日志级别
+  :param worker_startup_timeout: 等待 worker 启动的秒数
+  :param other_celery_app_conf:  额外 Celery app 配置字典，自动合并到 app.conf 中。
+                                 可传入任何 Celery 支持的配置项，例如：
+                                 {'task_acks_late': True, 'worker_prefetch_multiplier': 1}
+  `````
+  - **Parameters:**
+    - `self`
+    - `broker_url: str = 'redis://localhost:6379/0'`
+    - `result_backend: typing.Optional[str] = None`
+    - `concurrent_num: int = 4`
+    - `pool_type: str = 'threads'`
+
+**Public Methods (5):**
+- `def start_worker(self)`
+  - *在线程中启动 Celery worker，通过 sleep 等待其就绪。*
+- `def submit(self, fn: typing.Callable, *args, **kwargs) -> Future`
+  - **Docstring:**
+  `````
+  提交任意函数到 Celery 执行，返回 concurrent.futures.Future。
+  惰性获取结果：不调用 .result() 不浪费任何线程。
+  `````
+- `def get_message_count(self) -> int`
+  - *查询当前队列中未消费的消息数量。*
+- `def clear(self) -> int`
+  - *清空队列中的所有消息，返回被清除的消息数量。*
+- `def shutdown(self, wait: bool = True)`
+
+**Class Variables (1):**
+- `map = Executor.map`
+
+
+---
+
+
+
 ## 🔗 funboost_docs Some File Dependencies Analysis
 
 以下是项目文件之间的依赖关系，帮助 AI 理解代码结构：
@@ -2200,6 +2548,7 @@ care_project_name 的作用是：
 `````
 Entry Points (not imported by other project files):
   ★ funboost/__init__.py
+  ★ funboost/assist/celery_pool.py
   ★ funboost/constant.py
   ★ funboost/consumers/base_consumer.py
   ★ funboost/core/active_cousumer_info_getter.py
@@ -2207,6 +2556,7 @@ Entry Points (not imported by other project files):
   ★ funboost/core/broker_kind__exclusive_config_default_define.py
   ★ funboost/core/cli/discovery_boosters.py
   ★ funboost/core/current_task.py
+  ★ funboost/core/funboost_pool.py
   ★ funboost/core/func_params_model.py
   ★ funboost/core/msg_result_getter.py
   ★ funboost/funboost_config_deafult.py
