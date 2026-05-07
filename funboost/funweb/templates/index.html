@@ -564,6 +564,13 @@
             <div class="nav-divider"></div>
             <div class="nav-category">数据监控</div>
 
+            <!-- Dashboard 概览 -->
+            <li class="nav-item">
+                <a class="nav-link" href="/?page=dashboard" data-target="/tpl/dashboard.html" data-title="Dashboard">
+                    <i class="fa fa-tachometer"></i><span>Dashboard</span>
+                </a>
+            </li>
+
             <li class="nav-item">
                 <a class="nav-link" href="/?page=fun_result_table" data-target="/tpl/fun_result_table.html" data-title="函数结果表">
                     <i class="fa fa-table"></i><span>函数结果表</span>
@@ -617,13 +624,13 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="/?page=system_monitor" data-target="/tpl/system_monitor.html" data-title="资源监控">
-                    <i class="fa fa-dashboard"></i><span>资源监控</span>
+                <a class="nav-link" href="/?page=log_viewer" data-target="/tpl/log_viewer.html" data-title="日志查看器">
+                    <i class="fa fa-file-text"></i><span>日志查看器</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="/?page=log_viewer" data-target="/tpl/log_viewer.html" data-title="日志查看器">
-                    <i class="fa fa-file-text"></i><span>日志查看器</span>
+                <a class="nav-link" href="/?page=system_monitor" data-target="/tpl/system_monitor.html" data-title="资源监控">
+                    <i class="fa fa-dashboard"></i><span>资源监控</span>
                 </a>
             </li>
 
@@ -711,7 +718,7 @@
             } else if (pageName) {
                 loadPage('/tpl/' + pageName + '.html');
             } else {
-                loadPage('/tpl/queue_op.html');
+                loadPage('/tpl/dashboard.html');
             }
 
             // 导航栏点击：必须用 preventDefault，否则 href 会整页跳转到 /?page=xxx，侧栏滚动被重置到顶部

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Funboost</title>
+    <link href="{{ url_for('static',filename='css_cdn/twitter-bootstrap/3.3.7/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css_cdn/font-awesome/4.7.0/css/font-awesome.min.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static',filename='js/jquery-1.11.0.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/echarts.min.js') }}"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .page-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+        }
+        .page-title {
+            font-size: 22px; font-weight: 700;
+            background: linear-gradient(90deg, #ffffff 0%, #a78bfa 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .refresh-info {
+            font-size: 12px; color: rgba(255,255,255,0.4);
+        }
+        .refresh-btn {
+            background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3);
+            color: #a78bfa; border-radius: 8px; padding: 6px 14px;
+            font-size: 13px; cursor: pointer; transition: all 0.2s;
+        }
+        .refresh-btn:hover {
+            background: rgba(99,102,241,0.3); color: #fff;
+            box-shadow: 0 4px 15px rgba(99,102,241,0.3);
+        }
+
+        /* ====== 统计卡片 ====== */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px; margin-bottom: 20px;
+        }
+        .stat-card {
+            background: rgba(30, 30, 63, 0.85);
+            border: 1px solid rgba(99,102,241,0.15);
+            border-radius: 16px; padding: 20px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            position: relative; overflow: hidden;
+        }
+        .stat-card:hover {
+            border-color: rgba(99,102,241,0.4);
+            box-shadow: 0 8px 30px rgba(99,102,241,0.15);
+            transform: translateY(-3px);
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute; top: 0; right: 0;
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            opacity: 0.1;
+            transform: translate(20px, -20px);
+        }
+        .stat-card.card-queues::before { background: #6366f1; }
+        .stat-card.card-consumers::before { background: #10b981; }
+        .stat-card.card-backlog::before { background: #f59e0b; }
+        .stat-card.card-qps::before { background: #06b6d4; }
+        .stat-card.card-ips::before { background: #8b5cf6; }
+
+        .stat-icon {
+            width: 42px; height: 42px;
+            border-radius: 12px; display: flex;
+            align-items: center; justify-content: center;
+            font-size: 18px; margin-bottom: 12px;
+        }
+        .card-queues .stat-icon { background: rgba(99,102,241,0.2); color: #818cf8; }
+        .card-consumers .stat-icon { background: rgba(16,185,129,0.2); color: #34d399; }
+        .card-backlog .stat-icon { background: rgba(245,158,11,0.2); color: #fbbf24; }
+        .card-qps .stat-icon { background: rgba(6,182,212,0.2); color: #22d3ee; }
+        .card-ips .stat-icon { background: rgba(139,92,246,0.2); color: #a78bfa; }
+
+        .stat-label {
+            font-size: 12px; color: rgba(255,255,255,0.5);
+            margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .stat-value {
+            font-size: 28px; font-weight: 700; color: #fff;
+            line-height: 1.2;
+        }
+        .stat-value .unit { font-size: 14px; color: rgba(255,255,255,0.5); margin-left: 4px; }
+
+        /* ====== 图表区域 ====== */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px; margin-bottom: 20px;
+        }
+        @media (max-width: 900px) {
+            .charts-row { grid-template-columns: 1fr; }
+        }
+        .chart-card {
+            background: rgba(30, 30, 63, 0.85);
+            border: 1px solid rgba(99,102,241,0.15);
+            border-radius: 16px; padding: 16px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+        .chart-card:hover {
+            border-color: rgba(99,102,241,0.4);
+            box-shadow: 0 8px 30px rgba(99,102,241,0.15);
+        }
+        .chart-title {
+            font-size: 14px; font-weight: 600; color: #a78bfa;
+            margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+        }
+        .chart-title i { font-size: 14px; }
+        .chart-container { width: 100%; height: 280px; }
+
+        /* ====== 列表区域 ====== */
+        .lists-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px; margin-bottom: 20px;
+        }
+        @media (max-width: 900px) {
+            .lists-row { grid-template-columns: 1fr; }
+        }
+        .list-card {
+            background: rgba(30, 30, 63, 0.85);
+            border: 1px solid rgba(99,102,241,0.15);
+            border-radius: 16px; padding: 16px;
+            backdrop-filter: blur(10px);
+            max-height: 400px; overflow-y: auto;
+        }
+        .list-card:hover {
+            border-color: rgba(99,102,241,0.4);
+            box-shadow: 0 8px 30px rgba(99,102,241,0.15);
+        }
+        .list-title {
+            font-size: 14px; font-weight: 600; color: #a78bfa;
+            margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+        }
+        .list-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 12px; border-radius: 10px;
+            margin-bottom: 6px; transition: all 0.2s;
+            background: rgba(99,102,241,0.05);
+            border: 1px solid transparent;
+        }
+        .list-item:hover {
+            background: rgba(99,102,241,0.12);
+            border-color: rgba(99,102,241,0.2);
+        }
+        .list-item-name {
+            font-size: 13px; color: #ffffff;
+            max-width: 60%; overflow: hidden;
+            text-overflow: ellipsis; white-space: nowrap;
+        }
+        .list-item-value {
+            font-size: 14px; font-weight: 600;
+        }
+        .list-item-value.danger { color: #f87171; }
+        .list-item-value.warning { color: #fbbf24; }
+        .list-item-value.success { color: #34d399; }
+        .list-item-value.info { color: #22d3ee; }
+
+        /* ====== 系统资源行 ====== */
+        .resource-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px; margin-bottom: 20px;
+        }
+        .resource-card {
+            background: rgba(30, 30, 63, 0.85);
+            border: 1px solid rgba(99,102,241,0.15);
+            border-radius: 16px; padding: 16px;
+            backdrop-filter: blur(10px);
+        }
+        .resource-card:hover {
+            border-color: rgba(99,102,241,0.4);
+            box-shadow: 0 8px 30px rgba(99,102,241,0.15);
+        }
+        .resource-title {
+            font-size: 13px; font-weight: 600; color: #a78bfa;
+            margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+        }
+        .resource-bar {
+            height: 8px; border-radius: 4px;
+            background: rgba(255,255,255,0.08); margin: 6px 0;
+            overflow: hidden;
+        }
+        .resource-bar-fill {
+            height: 100%; border-radius: 4px;
+            transition: width 0.6s ease;
+        }
+        .bar-normal { background: linear-gradient(90deg, #10b981, #34d399); }
+        .bar-warning { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .bar-danger { background: linear-gradient(90deg, #ef4444, #f87171); }
+        .resource-detail {
+            font-size: 12px; color: rgba(255,255,255,0.5);
+            display: flex; justify-content: space-between;
+        }
+
+        /* ====== 加载状态 ====== */
+        .loading-mask {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15,12,41,0.8);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; transition: opacity 0.3s;
+        }
+        .loading-mask.hidden { opacity: 0; pointer-events: none; }
+        .loading-spinner {
+            width: 40px; height: 40px;
+            border: 3px solid rgba(99,102,241,0.2);
+            border-top-color: #6366f1;
+            border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .empty-state {
+            text-align: center; padding: 30px;
+            color: rgba(255,255,255,0.4); font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-mask" id="loadingMask">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="page-header">
+        <div class="page-title"><i class="fa fa-tachometer" style="margin-right:8px;"></i>Dashboard</div>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <span class="refresh-info" id="refreshInfo">--</span>
+            <button class="refresh-btn" onclick="loadDashboard()"><i class="fa fa-refresh"></i> 刷新</button>
+        </div>
+    </div>
+
+    <!-- 统计卡片 -->
+    <div class="stats-row">
+        <div class="stat-card card-queues">
+            <div class="stat-icon"><i class="fa fa-list"></i></div>
+            <div class="stat-label">队列总数</div>
+            <div class="stat-value" id="statQueues">--</div>
+        </div>
+        <div class="stat-card card-consumers">
+            <div class="stat-icon"><i class="fa fa-cogs"></i></div>
+            <div class="stat-label">活跃消费者</div>
+            <div class="stat-value" id="statConsumers">--</div>
+        </div>
+        <div class="stat-card card-backlog">
+            <div class="stat-icon"><i class="fa fa-inbox"></i></div>
+            <div class="stat-label">消息积压总量</div>
+            <div class="stat-value" id="statBacklog">--</div>
+        </div>
+        <div class="stat-card card-qps">
+            <div class="stat-icon"><i class="fa fa-bolt"></i></div>
+            <div class="stat-label">当前总吞吐</div>
+            <div class="stat-value" id="statQps">--<span class="unit">msg/s</span></div>
+        </div>
+        <div class="stat-card card-ips">
+            <div class="stat-icon"><i class="fa fa-server"></i></div>
+            <div class="stat-label">消费者节点</div>
+            <div class="stat-value" id="statIps">--<span class="unit">台</span></div>
+        </div>
+    </div>
+
+    <!-- 图表区域 -->
+    <div class="charts-row">
+        <div class="chart-card">
+            <div class="chart-title"><i class="fa fa-bar-chart"></i>队列积压 Top 10</div>
+            <div class="chart-container" id="chartBacklog"></div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-title"><i class="fa fa-line-chart"></i>队列吞吐 Top 10</div>
+            <div class="chart-container" id="chartThroughput"></div>
+        </div>
+    </div>
+
+    <!-- 列表区域 -->
+    <div class="lists-row">
+        <div class="list-card">
+            <div class="list-title"><i class="fa fa-sort-amount-desc"></i>队列积压排行</div>
+            <div id="listBacklog"><div class="empty-state">加载中...</div></div>
+        </div>
+        <div class="list-card">
+            <div class="list-title"><i class="fa fa-tachometer"></i>队列吞吐排行</div>
+            <div id="listThroughput"><div class="empty-state">加载中...</div></div>
+        </div>
+    </div>
+
+    <!-- 系统资源 -->
+    <div style="margin-bottom:12px;">
+        <div class="list-title" style="font-size:15px;"><i class="fa fa-microchip"></i>系统资源概览</div>
+    </div>
+    <div class="resource-row" id="resourceRow">
+        <div class="empty-state">加载中...</div>
+    </div>
+
+<script>
+var backlogChart = null;
+var throughputChart = null;
+
+function formatNum(n) {
+    if (n === null || n === undefined) return '--';
+    n = parseInt(n);
+    if (n >= 100000000) return (n / 100000000).toFixed(1) + '亿';
+    if (n >= 10000) return (n / 10000).toFixed(1) + '万';
+    return n.toLocaleString();
+}
+
+function getBarClass(pct) {
+    if (pct >= 90) return 'bar-danger';
+    if (pct >= 70) return 'bar-warning';
+    return 'bar-normal';
+}
+
+function getValueClass(backlog) {
+    if (backlog >= 100000) return 'danger';
+    if (backlog >= 10000) return 'warning';
+    if (backlog > 0) return 'info';
+    return 'success';
+}
+
+function shortQueueName(name) {
+    if (!name) return '';
+    if (name.length <= 28) return name;
+    return name.substring(0, 12) + '...' + name.substring(name.length - 12);
+}
+
+function loadDashboard() {
+    $.get('/api/dashboard/summary', function(resp) {
+        $('#loadingMask').addClass('hidden');
+        if (!resp.succ) {
+            console.error('Dashboard error:', resp.error);
+            return;
+        }
+        var d = resp.data;
+        renderStats(d);
+        renderBacklogChart(d.queue_backlog_top || []);
+        renderThroughputChart(d.queue_throughput_top || []);
+        renderBacklogList(d.queue_backlog_top || []);
+        renderThroughputList(d.queue_throughput_top || []);
+        renderResources(d.system_resources || []);
+        $('#refreshInfo').text('更新于 ' + new Date().toLocaleTimeString());
+    }).fail(function() {
+        $('#loadingMask').addClass('hidden');
+        $('#refreshInfo').text('加载失败');
+    });
+}
+
+function renderStats(d) {
+    $('#statQueues').text(d.total_queues || 0);
+    $('#statConsumers').text(d.total_consumers || 0);
+    $('#statBacklog').text(formatNum(d.total_backlog));
+    $('#statQps').html((d.total_qps || 0) + '<span class="unit">msg/s</span>');
+    $('#statIps').html((d.total_consumer_ips || 0) + '<span class="unit">台</span>');
+}
+
+function renderBacklogChart(list) {
+    var container = document.getElementById('chartBacklog');
+    if (!backlogChart) backlogChart = echarts.init(container);
+    var top10 = list.slice(0, 10).reverse();
+    var names = top10.map(function(x) { return shortQueueName(x.queue_name); });
+    var values = top10.map(function(x) { return x.backlog; });
+
+    backlogChart.setOption({
+        textStyle: { color: '#ffffff' },
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' },
+            formatter: function(params) {
+                var idx = params[0].dataIndex;
+                var item = top10[idx];
+                return item.queue_name + '<br/>积压: <b>' + formatNum(item.backlog) + '</b>';
+            }
+        },
+        grid: { left: '3%', right: '8%', bottom: '3%', top: '3%', containLabel: true },
+        xAxis: { type: 'value',
+            axisLabel: { color: '#ffffff', fontSize: 11 },
+            axisLine: { lineStyle: { color: 'rgba(255,255,255,0.3)' } },
+            splitLine: { lineStyle: { color: 'rgba(99,102,241,0.15)' } } },
+        yAxis: { type: 'category', data: names,
+            axisLabel: { color: '#ffffff', fontSize: 12, fontWeight: 'bold' },
+            axisLine: { lineStyle: { color: 'rgba(255,255,255,0.3)' } } },
+        series: [{
+            type: 'bar', data: values, barWidth: 18,
+            itemStyle: {
+                borderRadius: [0, 6, 6, 0],
+                color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                    { offset: 0, color: '#f59e0b' }, { offset: 1, color: '#fbbf24' }
+                ])
+            }
+        }]
+    });
+}
+
+function renderThroughputChart(list) {
+    var container = document.getElementById('chartThroughput');
+    if (!throughputChart) throughputChart = echarts.init(container);
+    var top10 = list.slice(0, 10).reverse();
+    var names = top10.map(function(x) { return shortQueueName(x.queue_name); });
+    var values = top10.map(function(x) { return x.qps; });
+
+    throughputChart.setOption({
+        textStyle: { color: '#ffffff' },
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' },
+            formatter: function(params) {
+                var idx = params[0].dataIndex;
+                var item = top10[idx];
+                return item.queue_name + '<br/>吞吐: <b>' + item.qps + ' msg/s</b>';
+            }
+        },
+        grid: { left: '3%', right: '8%', bottom: '3%', top: '3%', containLabel: true },
+        xAxis: { type: 'value',
+            axisLabel: { color: '#ffffff', fontSize: 11 },
+            axisLine: { lineStyle: { color: 'rgba(255,255,255,0.3)' } },
+            splitLine: { lineStyle: { color: 'rgba(99,102,241,0.15)' } } },
+        yAxis: { type: 'category', data: names,
+            axisLabel: { color: '#ffffff', fontSize: 12, fontWeight: 'bold' },
+            axisLine: { lineStyle: { color: 'rgba(255,255,255,0.3)' } } },
+        series: [{
+            type: 'bar', data: values, barWidth: 18,
+            itemStyle: {
+                borderRadius: [0, 6, 6, 0],
+                color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                    { offset: 0, color: '#06b6d4' }, { offset: 1, color: '#22d3ee' }
+                ])
+            }
+        }]
+    });
+}
+
+function renderBacklogList(list) {
+    var html = '';
+    if (!list.length) {
+        html = '<div class="empty-state">暂无队列数据</div>';
+    } else {
+        for (var i = 0; i < Math.min(list.length, 15); i++) {
+            var item = list[i];
+            var cls = getValueClass(item.backlog);
+            html += '<div class="list-item">'
+                + '<span class="list-item-name" title="' + item.queue_name + '">'
+                + (i + 1) + '. ' + shortQueueName(item.queue_name)
+                + '</span><span class="list-item-value ' + cls + '">'
+                + formatNum(item.backlog) + '</span></div>';
+        }
+    }
+    $('#listBacklog').html(html);
+}
+
+function renderThroughputList(list) {
+    var html = '';
+    if (!list.length) {
+        html = '<div class="empty-state">暂无吞吐数据</div>';
+    } else {
+        for (var i = 0; i < Math.min(list.length, 15); i++) {
+            var item = list[i];
+            html += '<div class="list-item">'
+                + '<span class="list-item-name" title="' + item.queue_name + '">'
+                + (i + 1) + '. ' + shortQueueName(item.queue_name)
+                + '</span><span class="list-item-value info">'
+                + item.qps + ' <small style="color:rgba(255,255,255,0.4)">msg/s</small>'
+                + (item.qps_fail > 0 ? ' <small style="color:#f87171">(' + item.qps_fail + ' fail)</small>' : '')
+                + '</span></div>';
+        }
+    }
+    $('#listThroughput').html(html);
+}
+
+function renderResources(list) {
+    if (!list.length) {
+        $('#resourceRow').html('<div class="empty-state"><i class="fa fa-info-circle"></i> 暂无系统资源数据（需要 psutil 采集器运行）</div>');
+        return;
+    }
+    var html = '';
+    for (var i = 0; i < list.length; i++) {
+        var r = list[i];
+        var cpu = r.cpu || 0;
+        var mem = r.mem || 0;
+        var disk = r.disk || 0;
+        html += '<div class="resource-card">'
+            + '<div class="resource-title"><i class="fa fa-server"></i>' + (r.ip || 'unknown') + '</div>'
+            + '<div class="resource-detail"><span>CPU</span><span>' + cpu.toFixed(1) + '%</span></div>'
+            + '<div class="resource-bar"><div class="resource-bar-fill ' + getBarClass(cpu) + '" style="width:' + cpu + '%"></div></div>'
+            + '<div class="resource-detail"><span>内存</span><span>' + mem.toFixed(1) + '%</span></div>'
+            + '<div class="resource-bar"><div class="resource-bar-fill ' + getBarClass(mem) + '" style="width:' + mem + '%"></div></div>'
+            + '<div class="resource-detail"><span>磁盘</span><span>' + disk.toFixed(1) + '%</span></div>'
+            + '<div class="resource-bar"><div class="resource-bar-fill ' + getBarClass(disk) + '" style="width:' + disk + '%"></div></div>'
+            + '</div>';
+    }
+    $('#resourceRow').html(html);
+}
+
+// 窗口 resize 重绘图表
+$(window).on('resize', function() {
+    if (backlogChart) backlogChart.resize();
+    if (throughputChart) throughputChart.resize();
+});
+
+// 启动
+$(document).ready(function() {
+    loadDashboard();
+    setInterval(loadDashboard, 10000);
+});
+</script>
+</body>
+</html>

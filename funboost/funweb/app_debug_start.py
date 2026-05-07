@@ -13,7 +13,7 @@ from funboost.funweb.app import (
 CareProjectNameEnv.set('test_project1')
 
 
-a=4
+
 
 if __name__ == '__main__':
     QueuesConusmerParamsGetter().cycle_get_queues_params_and_active_consumers_and_report(daemon=True)

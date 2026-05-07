@@ -162,19 +162,16 @@ def monitor_data():
 @monitor_bp.route('/monitor/hosts', methods=['GET'])
 @login_required
 def monitor_hosts():
-    """返回所有有监控数据的主机 IP 列表"""
-    cursor = 0
+    """返回所有有监控数据的主机 IP 列表（通过 FUNBOOST_ALL_IPS 获取，不使用 SCAN）"""
+    from funboost.constant import RedisKeys
     ips = set()
-    while True:
-        cursor, keys = _redis.scan(cursor, match='monitor:*', count=100)
-        for k in keys:
-            if ':heartbeat' in k:
-                continue
-            parts = k.split(':')
-            if len(parts) == 2:
-                ips.add(parts[1])
-        if cursor == 0:
-            break
+    raw_ips = _redis.smembers(RedisKeys.FUNBOOST_ALL_IPS)
+    for ip_raw in raw_ips:
+        ip = ip_raw.decode() if isinstance(ip_raw, bytes) else ip_raw
+        if _redis.exists(f'monitor:{ip}'):
+            ips.add(ip)
+    if _redis.exists(f'monitor:{LOCAL_IP}'):
+        ips.add(LOCAL_IP)
     ip_list = sorted(ips)
     if LOCAL_IP not in ip_list:
         ip_list.insert(0, LOCAL_IP)

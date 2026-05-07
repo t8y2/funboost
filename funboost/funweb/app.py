@@ -51,6 +51,7 @@ from funboost.faas import flask_blueprint
 from funboost.funweb.flask_bps.script_deploy import deploy_bp
 from funboost.funweb.flask_bps.system_monitor import monitor_bp
 from funboost.funweb.flask_bps.log_viewer import log_bp
+from funboost.funweb.flask_bps.dashboard import dashboard_bp
 
 app = Flask(__name__)
 app.secret_key =  os.getenv('FUNWEB_SECRET_KEY', "mtfy54321")
@@ -69,6 +70,7 @@ app.register_blueprint(flask_blueprint)
 app.register_blueprint(deploy_bp)
 app.register_blueprint(monitor_bp)
 app.register_blueprint(log_bp)
+app.register_blueprint(dashboard_bp)
 
 
 
@@ -214,6 +216,7 @@ def serve_template(template):
 
 
 @app.route("/queue/get_time_series_data/<queue_name>", methods=["GET"])
+@login_required
 def get_time_series_data_by_queue_name(
     queue_name,
 ):

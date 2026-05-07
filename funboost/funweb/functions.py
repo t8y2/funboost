@@ -18,6 +18,36 @@ from funboost.utils.mongo_util import MongoMixin
 from funboost.utils.redis_manager import RedisMixin
 from funboost.core.active_cousumer_info_getter import QueuesConusmerParamsGetter, SingleQueueConusmerParamsGetter
 
+
+_mongo_available_cache = {'available': None, 'check_ts': 0}
+
+
+def _is_mongo_available(timeout_ms=3000, cache_ttl=30):
+    """
+    快速检测 MongoDB 是否可连接，结果缓存 cache_ttl 秒。
+    使用独立的短超时客户端探测，避免阻塞主逻辑。
+    """
+    now = time.time()
+    if _mongo_available_cache['available'] is not None and (now - _mongo_available_cache['check_ts']) < cache_ttl:
+        return _mongo_available_cache['available']
+
+    try:
+        import pymongo
+        from funboost.funboost_config_deafult import BrokerConnConfig
+        client = pymongo.MongoClient(
+            BrokerConnConfig.MONGO_CONNECT_URL,
+            serverSelectionTimeoutMS=timeout_ms,
+            connectTimeoutMS=timeout_ms,
+            socketTimeoutMS=timeout_ms,
+        )
+        client.admin.command('ping')
+        client.close()
+        _mongo_available_cache['available'] = True
+    except Exception:
+        _mongo_available_cache['available'] = False
+    _mongo_available_cache['check_ts'] = now
+    return _mongo_available_cache['available']
+
 # from test_frame.my_patch_frame_config import do_patch_frame_config
 #
 # do_patch_frame_config()
@@ -64,27 +94,30 @@ def get_cols(queue_name_search: str):
     
     不再使用 db.list_collection_names()，而是从队列配置中获取表名
     注意：因为多个队列可能共享同一个表，所以查询时必须加上 queue_name 条件
-    """
-    db = MongoMixin().mongo_db_task_status
     
-    # 从队列配置获取所有队列及其对应的表名
+    当 MongoDB 不可用时，仍然返回队列名列表（count 为 -1 表示 MongoDB 不可用）
+    """
     queue_table_map = get_all_queue_table_info()
+
+    db = None
+    if _is_mongo_available():
+        db = MongoMixin().mongo_db_task_status
     
     result = []
     for queue_name, table_name in queue_table_map.items():
-        # 根据搜索条件过滤
         if queue_name_search and queue_name_search not in queue_name:
             continue
         
-        try:
-            # 必须加上 queue_name 条件，因为多个队列可能共享同一个表
-            count = db.get_collection(table_name).count_documents({'queue_name': queue_name})
-        except Exception:
-            count = 0
+        count = -1
+        if db is not None:
+            try:
+                count = db.get_collection(table_name).count_documents({'queue_name': queue_name})
+            except Exception:
+                count = 0
         
         result.append({
-            'collection_name': queue_name,  # 返回队列名（用于前端显示和后续查询）
-            'table_name': table_name,       # 实际的 MongoDB 表名
+            'collection_name': queue_name,
+            'table_name': table_name,
             'count': count
         })
     
@@ -104,6 +137,8 @@ def query_result(queue_name, start_time, end_time, is_success, function_params: 
     t0 = time.time()
     if not queue_name:
         return []
+    if not _is_mongo_available():
+        return {'error': 'MongoDB 不可用，无法查询执行结果'}
     db = MongoMixin().mongo_db_task_status
     
     # 根据队列名获取实际的 MongoDB 表名
@@ -147,6 +182,8 @@ def get_speed(queue_name, start_time, end_time):
     
     注意：因为多个队列可能共享同一个表，所以查询时必须加上 queue_name 条件
     """
+    if not _is_mongo_available():
+        return {'error': 'MongoDB 不可用，无法查询速率统计'}
     db = MongoMixin().mongo_db_task_status
     
     # 根据队列名获取实际的 MongoDB 表名
@@ -193,6 +230,8 @@ def get_consume_speed_curve(queue_name: str, start_time: str, end_time: str, gra
             'granularity': str
         }
     """
+    if not _is_mongo_available():
+        return {'error': 'MongoDB 不可用，无法查询消费速率曲线'}
     db = MongoMixin().mongo_db_task_status
     
     # 根据队列名获取实际的 MongoDB 表名
