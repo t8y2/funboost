@@ -59,7 +59,7 @@ class ApsJobAdder:
             return cls.queue__redis_aps_map[queue_name]
         redis_jobstores = {
 
-            "default": RedisJobStore(**redis_manager.get_redis_conn_kwargs(),
+            "default": RedisJobStore(**redis_manager.get_redis_conn_kwargs_safe(),
                                     jobs_key=RedisKeys.gen_funboost_redis_apscheduler_jobs_key_by_queue_name(queue_name),
                                     run_times_key=RedisKeys.gen_funboost_redis_apscheduler_run_times_key_by_queue_name(queue_name),
                                      )

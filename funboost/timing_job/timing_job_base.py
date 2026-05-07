@@ -196,7 +196,7 @@ class FunboostBackgroundScheduler(BackgroundScheduler):
 
 
 FsdfBackgroundScheduler = FunboostBackgroundScheduler  # 兼容一下名字，fsdf是 function-scheduling-distributed-framework 老框架名字的缩写
-# funboost_aps_scheduler定时配置基于内存的，不可以跨机器远程动态添加/修改/删除定时任务配置。如果需要动态增删改查定时任务，可以使用funboost_background_scheduler_redis_store
+# funboost_aps_scheduler定时配置基于内存的，不可以跨机器远程动态添加/修改/删除定时任务配置。如果需要动态增删改查定时任务，可以使用redis作为jobstores的 ApsJobAdder
 
 """
 建议不要亲自使用这个 funboost_aps_scheduler 对象，而是 ApsJobAdder来添加定时任务，自动多个apscheduler对象实例，
@@ -217,10 +217,9 @@ if __name__ == '__main__':
 
     # 定时运行消费演示
     import datetime
-    from funboost import boost, BrokerEnum, fsdf_background_scheduler, timing_publish_deco, run_forever
+    from funboost import  BrokerEnum,boost
 
-
-    @Booster(boost_params=BoosterParams(queue_name='queue_test_666', broker_kind=BrokerEnum.LOCAL_PYTHON_QUEUE))
+    @boost(BoosterParams(queue_name='queue_test_666', broker_kind=BrokerEnum.LOCAL_PYTHON_QUEUE))
     def consume_func(x, y):
         print(f'{x} + {y} = {x + y}')
 
@@ -244,4 +243,4 @@ if __name__ == '__main__':
 
     # 启动消费
     consume_func.consume()
-    run_forever()
+   

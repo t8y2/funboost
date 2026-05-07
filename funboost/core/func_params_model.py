@@ -41,18 +41,6 @@ class FunctionResultStatusPersistanceConfig(BaseJsonAbleModel):
         return self
 
 
-booster_params_has_been_deleted_fields = [
-    # 功能删除的字段
-    'retry_interval',
-    'is_do_not_run_by_specify_time_effect',
-    'do_not_run_by_specify_time',
-    # 字段名拼写错误修正：旧版拼写有误，新版已修正，旧 redis 元信息里存的是错误拼写的 key
-    'is_send_consumer_hearbeat_to_redis',  # 正确拼写: is_send_consumer_heartbeat_to_redis
-    'consumin_function_decorator',         # 正确拼写: consuming_function_decorator
-    'msg_expire_senconds',                 # 正确拼写: msg_expire_seconds
-]
-
-
 class BoosterParamsFieldsAssit:
     # 已经删除的字段，被别的字段功能替代了。
     has_been_deleted_fields = [
@@ -469,7 +457,7 @@ if __name__ == '__main__':
         "table_name": "3213"
     },
     is_fake_booster=True,
-    is_do_not_run_by_specify_time_effect=False,
+    
                         
                         specify_concurrent_pool=FlexibleThreadPool(100)).json_pre())
     # print(PublisherParams.schema_json())  # 注释掉，因为 PublisherParams 包含 Callable 类型字段，无法生成 JSON Schema

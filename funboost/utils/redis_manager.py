@@ -15,15 +15,36 @@ from funboost.utils import decorators
 
 def get_redis_conn_kwargs():
     return {'host': BrokerConnConfig.REDIS_HOST, 'port': BrokerConnConfig.REDIS_PORT,
-            'username': BrokerConnConfig.REDIS_USERNAME,'ssl' : BrokerConnConfig.REDIS_SSL,
+            'username': BrokerConnConfig.REDIS_USERNAME,
+            'ssl' : BrokerConnConfig.REDIS_SSL,
             'password': BrokerConnConfig.REDIS_PASSWORD, 'db': BrokerConnConfig.REDIS_DB,
             
             # 增强redis稳定性的，尤其外网redis
             'health_check_interval' :30,
             'socket_keepalive' :True,
             # 'socket_timeout':120,  # 不要设置socket_timeout，rpc blpop 等待可以设置很长的时间,和这冲突
-
             }
+
+
+def _get_redis_major_version():
+    """获取标准 redis 包的版本号，因为 RedisJobStore 等第三方库使用的是 redis 包而非 redis5"""
+    try:
+        import redis
+        return int(redis.__version__.split('.')[0])
+    except (AttributeError, ValueError, ImportError):
+        return 2
+
+
+def get_redis_conn_kwargs_safe():
+    """返回兼容低版本 redis 的连接参数，供第三方库（如 apscheduler RedisJobStore）使用"""
+    kwargs = get_redis_conn_kwargs()
+    major_version = _get_redis_major_version()
+    if major_version < 3:
+        for key in ('username', 'ssl', 'health_check_interval', 'socket_keepalive'):
+            kwargs.pop(key, None)
+    elif major_version < 4:
+        kwargs.pop('username', None)
+    return kwargs
 
 
 def _get_redis_conn_kwargs_by_db(db):

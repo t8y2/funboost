@@ -1,5 +1,5 @@
 from apscheduler.jobstores.redis import RedisJobStore
-from funboost.utils.redis_manager import RedisMixin,get_redis_conn_kwargs
+from funboost.utils.redis_manager import RedisMixin,get_redis_conn_kwargs_safe
 
 from funboost.timing_job import FunboostBackgroundScheduler
 from funboost.funboost_config_deafult import BrokerConnConfig, FunboostCommonConfig
@@ -67,16 +67,17 @@ class FunboostBackgroundSchedulerProcessJobsWithinRedisLock(FunboostBackgroundSc
             return 0.1
 
 
-jobstores = {
-    "default": RedisJobStore(**get_redis_conn_kwargs(),
-                             jobs_key='funboost.apscheduler.jobs',run_times_key="funboost.apscheduler.run_times")
-}
 
-"""
-建议不要亲自使用这个 funboost_background_scheduler_redis_store 对象，而是 ApsJobAdder来添加定时任务，自动多个apscheduler对象实例，
-尤其是redis作为jobstores时候，使用不同的jobstores，每个消费函数使用各自单独的jobs_key和 run_times_key
-"""
-funboost_background_scheduler_redis_store = FunboostBackgroundSchedulerProcessJobsWithinRedisLock(timezone=FunboostCommonConfig.TIMEZONE, daemon=False, jobstores=jobstores)
+# jobstores = {
+#     "default": RedisJobStore(**get_redis_conn_kwargs_safe(),
+#                              jobs_key='funboost.apscheduler.jobs',run_times_key="funboost.apscheduler.run_times")
+# }
+
+# """
+# 建议不要亲自使用这个 funboost_background_scheduler_redis_store 对象，而是 ApsJobAdder来添加定时任务，自动多个apscheduler对象实例，
+# 尤其是redis作为jobstores时候，使用不同的jobstores，每个消费函数使用各自单独的jobs_key和 run_times_key
+# """
+# funboost_background_scheduler_redis_store = FunboostBackgroundSchedulerProcessJobsWithinRedisLock(timezone=FunboostCommonConfig.TIMEZONE, daemon=False, jobstores=jobstores)
 
 
 
