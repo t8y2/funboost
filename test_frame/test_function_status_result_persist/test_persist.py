@@ -94,6 +94,8 @@ if __name__ == '__main__':
         my_consuming_function.push(i)
         f2.push(i,i*2)
         aio_f3.push(i)
+        f4.push(i)
+        f5.push(i)
         aio_f6.push(i)
         f7.push(i)
         time.sleep(1)

@@ -52,6 +52,7 @@ from funboost.funweb.flask_bps.script_deploy import deploy_bp
 from funboost.funweb.flask_bps.system_monitor import monitor_bp
 from funboost.funweb.flask_bps.log_viewer import log_bp
 from funboost.funweb.flask_bps.dashboard import dashboard_bp
+from funboost.funweb.flask_bps.redis_alert import alert_bp
 
 app = Flask(__name__)
 app.secret_key =  os.getenv('FUNWEB_SECRET_KEY', "mtfy54321")
@@ -71,6 +72,7 @@ app.register_blueprint(deploy_bp)
 app.register_blueprint(monitor_bp)
 app.register_blueprint(log_bp)
 app.register_blueprint(dashboard_bp)
+app.register_blueprint(alert_bp)
 
 
 

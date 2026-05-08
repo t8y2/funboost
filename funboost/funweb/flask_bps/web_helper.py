@@ -23,7 +23,7 @@ def _get_local_ip():
 def _get_local_hostname():
     return socket.gethostname()
 
-# LOCAL_IP = _get_local_ip()  # win 不同网络，ip容易变化
+# LOCAL_IP = _get_local_ip()  # win 不同,网络，ip容易变化
 
 LOCAL_IP = _get_local_hostname()
 

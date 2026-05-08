@@ -176,6 +176,8 @@
             padding: 30px;
             margin-bottom: 25px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
         }
 
         .query-row {
@@ -293,22 +295,6 @@
         }
 
         /* 快捷时间按钮 */
-        .quick-time-row {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px dashed #dee2e6;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .quick-time-row span {
-            font-size: 13px;
-            color: #6c757d;
-            font-weight: 500;
-        }
-
         .btn-quick-time {
             padding: 8px 16px;
             background: #f8f9fa;
@@ -330,6 +316,99 @@
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             border-color: transparent;
+        }
+
+        .btn-custom-time {
+            padding: 8px 16px;
+            background: #f8f9fa;
+            border: 2px dashed #adb5bd;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom-time:hover {
+            border-color: #667eea;
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .btn-custom-time.active {
+            background: linear-gradient(135deg, #17a2b8, #6610f2);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* 时间范围行：起止时间 + 快捷按钮 + 查询 一体化 */
+        .time-range-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 18px;
+            border-top: 1px dashed #dee2e6;
+            flex-wrap: wrap;
+        }
+
+        .time-range-label {
+            font-size: 13px;
+            color: #6c757d;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .time-range-row .query-group.time-input {
+            margin-bottom: 0;
+            min-width: 190px;
+        }
+
+        .time-range-row .query-group.time-input input {
+            height: 38px;
+            font-size: 13px;
+        }
+
+        .time-separator {
+            font-size: 16px;
+            color: #adb5bd;
+            font-weight: 600;
+        }
+
+        .time-divider {
+            width: 1px;
+            height: 28px;
+            background: #dee2e6;
+            border-radius: 1px;
+            flex-shrink: 0;
+        }
+
+        .time-range-row .btn-query {
+            height: 38px;
+            padding: 8px 22px;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .time-range-row .btn-custom-time {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .time-range-row .btn-quick-time {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        @media (max-width: 1100px) {
+            .time-range-row { gap: 8px; }
+            .time-range-row .query-group.time-input { min-width: 160px; }
+        }
+
+        input.time-disabled {
+            background: #e9ecef !important;
+            color: #999 !important;
+            cursor: not-allowed;
         }
 
         /* 统计卡片 */
@@ -1214,16 +1293,6 @@
                     </select>
                 </div>
 
-                <div class="query-group time-input">
-                    <label><i class="fa fa-calendar"></i> 起始时间</label>
-                    <input type="text" class="form-control" id="start_time" placeholder="选择起始时间">
-                </div>
-
-                <div class="query-group time-input">
-                    <label><i class="fa fa-calendar-check-o"></i> 截止时间</label>
-                    <input type="text" class="form-control" id="end_time" placeholder="选择截止时间">
-                </div>
-
                 <div class="query-group status-select">
                     <label><i class="fa fa-check-circle"></i> 运行状态</label>
                     <select class="form-control" id="sucess_status" style="height: 46px;">
@@ -1247,17 +1316,11 @@
                     <label><i class="fa fa-clock-o"></i> 最小耗时(秒)</label>
                     <input type="number" class="form-control" id="min_time_cost" placeholder="如: 1" min="0" step="0.1" style="width: 100px;">
             </div>
-
-                <div class="query-group">
-                    <label>&nbsp;</label>
-                    <button type="button" class="btn-query" onclick="doQuery()">
-                        <i class="fa fa-search"></i> 查询
-                    </button>
-                </div>
             </div>
 
-            <div class="quick-time-row">
-                <span><i class="fa fa-clock-o"></i> 快捷时间：</span>
+            <!-- 时间范围：起止时间 + 快捷按钮 + 查询 一体化 -->
+            <div class="time-range-row">
+                <span class="time-range-label"><i class="fa fa-clock-o"></i> 时间范围：</span>
                 <button class="btn-quick-time" data-minutes="1">近1分钟</button>
                 <button class="btn-quick-time" data-minutes="10">近10分钟</button>
                 <button class="btn-quick-time" data-minutes="60">近1小时</button>
@@ -1266,6 +1329,20 @@
                 <button class="btn-quick-time active" data-minutes="2880">近2天</button>
                 <button class="btn-quick-time" data-minutes="10080">近7天</button>
                 <button class="btn-quick-time" data-minutes="43200">近30天</button>
+                <span class="time-divider"></span>
+                <button class="btn-custom-time" id="btnCustomTime">
+                    <i class="fa fa-calendar"></i> 自定义
+                </button>
+                <div class="query-group time-input">
+                    <input type="text" class="form-control" id="start_time" placeholder="起始时间">
+                </div>
+                <span class="time-separator">~</span>
+                <div class="query-group time-input">
+                    <input type="text" class="form-control" id="end_time" placeholder="截止时间">
+                </div>
+                <button type="button" class="btn-query" onclick="doQuery()">
+                    <i class="fa fa-search"></i> 查询
+                </button>
             </div>
         </div>
 
@@ -1370,7 +1447,19 @@
             var now = new Date();
             var start = new Date(now.getTime() - minutes * 60 * 1000);
             $('#start_time').val(dateToString(start));
-            $('#end_time').val(dateToString(now));
+            $('#end_time').val('2099-12-31 23:59:59');
+            _setTimeMode('quick');
+        }
+
+        function _setTimeMode(mode) {
+            if (mode === 'quick') {
+                $('#start_time, #end_time').prop('disabled', true).addClass('time-disabled');
+                $('.btn-custom-time').removeClass('active');
+            } else {
+                $('#start_time, #end_time').prop('disabled', false).removeClass('time-disabled');
+                $('.btn-quick-time').removeClass('active');
+                $('.btn-custom-time').addClass('active');
+            }
         }
 
         // 执行查询
@@ -1390,7 +1479,6 @@
             // 设置默认时间（近2天 = 2880分钟）
             setQuickTime(2880);
 
-            // 确保运行状态下拉框正确初始化
             $('#sucess_status').val('1');
 
             // 初始化日期时间选择器
@@ -1480,12 +1568,16 @@
                 $(this).addClass('active');
                 var minutes = parseInt($(this).data('minutes'));
                 setQuickTime(minutes);
-                // 如果已选择队列，立即触发查询
                 if (currentQueueName) {
                     $('#table_container').show();
                     $('#empty_state').hide();
                     queryResult(currentQueueName, 0, true);
                 }
+            });
+
+            // 自定义时间按钮 - 切换到手动输入模式
+            $('#btnCustomTime').click(function() {
+                _setTimeMode('custom');
             });
 
             // 刷新间隔按钮
@@ -1930,7 +2022,7 @@
                 <div class="help-section-code">
                     <h4><i class="fa fa-code"></i> 开启方法示例</h4>
                     <p>在您的 booster 参数中添加以下配置：</p>
-                    <pre class="help-code-block"><code style="color: #7dd3fc;">function_result_status_persistance_conf</code>: <code style="color: #fbbf24;">FunctionResultStatusPersistanceConfig</code>(
+                    <pre class="help-code-block"><code style="color: #7dd3fc;">function_result_status_persistance_conf</code> = <code style="color: #fbbf24;">FunctionResultStatusPersistanceConfig</code>(
     <code style="color: #a5b4fc;">is_save_result</code>=<code style="color: #4ade80;">True</code>,      <code style="color: #6b7280;"># 保存函数返回结果</code>
     <code style="color: #a5b4fc;">is_save_status</code>=<code style="color: #4ade80;">True</code>,      <code style="color: #6b7280;"># 保存执行状态（本页面必须开启）</code>
     <code style="color: #a5b4fc;">expire_seconds</code>=<code style="color: #fb923c;">7 * 24 * 3600</code>,  <code style="color: #6b7280;"># 数据过期时间（秒）</code>

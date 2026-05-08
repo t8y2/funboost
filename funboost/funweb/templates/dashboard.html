@@ -123,53 +123,10 @@
         .chart-title i { font-size: 14px; }
         .chart-container { width: 100%; height: 280px; }
 
-        /* ====== 列表区域 ====== */
-        .lists-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px; margin-bottom: 20px;
-        }
-        @media (max-width: 900px) {
-            .lists-row { grid-template-columns: 1fr; }
-        }
-        .list-card {
-            background: rgba(30, 30, 63, 0.85);
-            border: 1px solid rgba(99,102,241,0.15);
-            border-radius: 16px; padding: 16px;
-            backdrop-filter: blur(10px);
-            max-height: 400px; overflow-y: auto;
-        }
-        .list-card:hover {
-            border-color: rgba(99,102,241,0.4);
-            box-shadow: 0 8px 30px rgba(99,102,241,0.15);
-        }
         .list-title {
             font-size: 14px; font-weight: 600; color: #a78bfa;
             margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
         }
-        .list-item {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 12px; border-radius: 10px;
-            margin-bottom: 6px; transition: all 0.2s;
-            background: rgba(99,102,241,0.05);
-            border: 1px solid transparent;
-        }
-        .list-item:hover {
-            background: rgba(99,102,241,0.12);
-            border-color: rgba(99,102,241,0.2);
-        }
-        .list-item-name {
-            font-size: 13px; color: #ffffff;
-            max-width: 60%; overflow: hidden;
-            text-overflow: ellipsis; white-space: nowrap;
-        }
-        .list-item-value {
-            font-size: 14px; font-weight: 600;
-        }
-        .list-item-value.danger { color: #f87171; }
-        .list-item-value.warning { color: #fbbf24; }
-        .list-item-value.success { color: #34d399; }
-        .list-item-value.info { color: #22d3ee; }
 
         /* ====== 系统资源行 ====== */
         .resource-row {
@@ -363,18 +320,6 @@
         </div>
     </div>
 
-    <!-- 列表区域 -->
-    <div class="lists-row">
-        <div class="list-card">
-            <div class="list-title"><i class="fa fa-sort-amount-desc"></i>队列积压排行</div>
-            <div id="listBacklog"><div class="empty-state">加载中...</div></div>
-        </div>
-        <div class="list-card">
-            <div class="list-title"><i class="fa fa-tachometer"></i>队列吞吐排行</div>
-            <div id="listThroughput"><div class="empty-state">加载中...</div></div>
-        </div>
-    </div>
-
     <!-- 系统资源 -->
     <div style="margin-bottom:12px;">
         <div class="list-title" style="font-size:15px;"><i class="fa fa-microchip"></i>系统资源概览</div>
@@ -401,13 +346,6 @@ function getBarClass(pct) {
     return 'bar-normal';
 }
 
-function getValueClass(backlog) {
-    if (backlog >= 100000) return 'danger';
-    if (backlog >= 10000) return 'warning';
-    if (backlog > 0) return 'info';
-    return 'success';
-}
-
 function shortQueueName(name) {
     if (!name) return '';
     if (name.length <= 28) return name;
@@ -425,8 +363,6 @@ function loadDashboard() {
         renderStats(d);
         renderBacklogChart(d.queue_backlog_top || []);
         renderThroughputChart(d.queue_throughput_top || []);
-        renderBacklogList(d.queue_backlog_top || []);
-        renderThroughputList(d.queue_throughput_top || []);
         renderResources(d.system_resources || []);
         $('#refreshInfo').text('更新于 ' + new Date().toLocaleTimeString());
     }).fail(function() {
@@ -459,7 +395,7 @@ function renderBacklogChart(list) {
                 return item.queue_name + '<br/>积压: <b>' + formatNum(item.backlog) + '</b>';
             }
         },
-        grid: { left: '3%', right: '8%', bottom: '3%', top: '3%', containLabel: true },
+        grid: { left: '3%', right: '12%', bottom: '3%', top: '3%', containLabel: true },
         xAxis: { type: 'value',
             axisLabel: { color: '#ffffff', fontSize: 11 },
             axisLine: { lineStyle: { color: 'rgba(255,255,255,0.3)' } },
@@ -469,6 +405,11 @@ function renderBacklogChart(list) {
             axisLine: { lineStyle: { color: 'rgba(255,255,255,0.3)' } } },
         series: [{
             type: 'bar', data: values, barWidth: 18,
+            label: {
+                show: true, position: 'right',
+                color: '#fbbf24', fontSize: 11, fontWeight: 'bold',
+                formatter: function(params) { return formatNum(params.value); }
+            },
             itemStyle: {
                 borderRadius: [0, 6, 6, 0],
                 color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
@@ -495,7 +436,7 @@ function renderThroughputChart(list) {
                 return item.queue_name + '<br/>吞吐: <b>' + item.qps + ' 次/10秒</b>';
             }
         },
-        grid: { left: '3%', right: '8%', bottom: '3%', top: '3%', containLabel: true },
+        grid: { left: '3%', right: '12%', bottom: '3%', top: '3%', containLabel: true },
         xAxis: { type: 'value',
             axisLabel: { color: '#ffffff', fontSize: 11 },
             axisLine: { lineStyle: { color: 'rgba(255,255,255,0.3)' } },
@@ -505,6 +446,11 @@ function renderThroughputChart(list) {
             axisLine: { lineStyle: { color: 'rgba(255,255,255,0.3)' } } },
         series: [{
             type: 'bar', data: values, barWidth: 18,
+            label: {
+                show: true, position: 'right',
+                color: '#22d3ee', fontSize: 11, fontWeight: 'bold',
+                formatter: function(params) { return params.value + ' 次/10秒'; }
+            },
             itemStyle: {
                 borderRadius: [0, 6, 6, 0],
                 color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
@@ -513,43 +459,6 @@ function renderThroughputChart(list) {
             }
         }]
     });
-}
-
-function renderBacklogList(list) {
-    var html = '';
-    if (!list.length) {
-        html = '<div class="empty-state">暂无队列数据</div>';
-    } else {
-        for (var i = 0; i < Math.min(list.length, 15); i++) {
-            var item = list[i];
-            var cls = getValueClass(item.backlog);
-            html += '<div class="list-item">'
-                + '<span class="list-item-name" title="' + item.queue_name + '">'
-                + (i + 1) + '. ' + shortQueueName(item.queue_name)
-                + '</span><span class="list-item-value ' + cls + '">'
-                + formatNum(item.backlog) + '</span></div>';
-        }
-    }
-    $('#listBacklog').html(html);
-}
-
-function renderThroughputList(list) {
-    var html = '';
-    if (!list.length) {
-        html = '<div class="empty-state">暂无吞吐数据</div>';
-    } else {
-        for (var i = 0; i < Math.min(list.length, 15); i++) {
-            var item = list[i];
-            html += '<div class="list-item">'
-                + '<span class="list-item-name" title="' + item.queue_name + '">'
-                + (i + 1) + '. ' + shortQueueName(item.queue_name)
-                + '</span><span class="list-item-value info">'
-                + item.qps + ' <small style="color:rgba(255,255,255,0.4)">次/10秒</small>'
-                + (item.qps_fail > 0 ? ' <small style="color:#f87171">(' + item.qps_fail + ' fail)</small>' : '')
-                + '</span></div>';
-        }
-    }
-    $('#listThroughput').html(html);
 }
 
 function renderResources(list) {

@@ -1421,6 +1421,7 @@ class MetricCalculation:
         self.current_time_for_execute_task_times_every_unit_time = time.time()
         self.consuming_function_cost_time_total_every_unit_time_tmp = 0
         self.last_execute_task_time = time.time()  # 最近一次执行任务的时间。
+        # last_x_s 代表最近10秒
         self.last_x_s_execute_count = 0
         self.last_x_s_execute_count_fail = 0
         self.last_x_s_avarage_function_spend_time = None
