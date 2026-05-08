@@ -89,7 +89,7 @@ def _get_system_resources():
     """
     从 Redis 获取最近一次系统资源监控数据。
     通过 FUNBOOST_ALL_IPS Set 获取 IP 列表（O(N) 仅限已知 IP），
-    再逐个获取 monitor:{ip} 的最新数据，避免 SCAN 全库。
+    再逐个获取 funboost:funweb:monitor:{ip}:metrics 的最新数据，避免 SCAN 全库。
     """
     resources = []
     try:
@@ -103,7 +103,7 @@ def _get_system_resources():
 
         for ip_raw in ips:
             ip = ip_raw.decode() if isinstance(ip_raw, bytes) else ip_raw
-            zkey = f'monitor:{ip}'
+            zkey = f'funboost:funweb:monitor:{ip}:metrics'
             items = redis_client.zrevrange(zkey, 0, 0, withscores=True)
             if not items:
                 continue

@@ -174,38 +174,57 @@
         /* ====== 系统资源行 ====== */
         .resource-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 16px; margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 240px));
+            gap: 14px; margin-bottom: 20px;
         }
         .resource-card {
-            background: rgba(30, 30, 63, 0.85);
+            background: rgba(30, 30, 63, 0.9);
             border: 1px solid rgba(99,102,241,0.15);
-            border-radius: 16px; padding: 16px;
+            border-radius: 14px; padding: 14px 16px;
             backdrop-filter: blur(10px);
+            transition: all 0.3s;
         }
         .resource-card:hover {
-            border-color: rgba(99,102,241,0.4);
-            box-shadow: 0 8px 30px rgba(99,102,241,0.15);
+            border-color: rgba(99,102,241,0.45);
+            box-shadow: 0 6px 24px rgba(99,102,241,0.18);
+            transform: translateY(-2px);
         }
-        .resource-title {
-            font-size: 13px; font-weight: 600; color: #a78bfa;
-            margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+        .resource-host {
+            font-size: 12px; font-weight: 600; color: #a78bfa;
+            margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .resource-bar {
-            height: 8px; border-radius: 4px;
-            background: rgba(255,255,255,0.08); margin: 6px 0;
-            overflow: hidden;
+        .resource-host i { font-size: 11px; opacity: 0.7; }
+        .resource-rings {
+            display: flex; justify-content: space-around; align-items: center;
         }
-        .resource-bar-fill {
-            height: 100%; border-radius: 4px;
-            transition: width 0.6s ease;
+        .ring-item {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
         }
-        .bar-normal { background: linear-gradient(90deg, #10b981, #34d399); }
-        .bar-warning { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-        .bar-danger { background: linear-gradient(90deg, #ef4444, #f87171); }
-        .resource-detail {
-            font-size: 12px; color: rgba(255,255,255,0.5);
-            display: flex; justify-content: space-between;
+        .ring-svg {
+            width: 52px; height: 52px; transform: rotate(-90deg);
+        }
+        .ring-bg {
+            fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 5;
+        }
+        .ring-fg {
+            fill: none; stroke-width: 5; stroke-linecap: round;
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s;
+        }
+        .ring-fg.ring-normal { stroke: #34d399; }
+        .ring-fg.ring-warning { stroke: #fbbf24; }
+        .ring-fg.ring-danger { stroke: #f87171; }
+        .ring-pct {
+            font-size: 11px; font-weight: 700; color: #fff;
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .ring-wrap {
+            position: relative; width: 52px; height: 52px;
+        }
+        .ring-label {
+            font-size: 10px; color: rgba(255,255,255,0.5);
+            text-transform: uppercase; letter-spacing: 0.3px;
         }
 
         /* ====== 加载状态 ====== */
@@ -228,6 +247,65 @@
             text-align: center; padding: 30px;
             color: rgba(255,255,255,0.4); font-size: 14px;
         }
+
+        /* ====== 数据说明按钮 & Modal ====== */
+        .info-btn {
+            background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25);
+            color: #a78bfa; border-radius: 8px; padding: 6px 12px;
+            font-size: 12px; cursor: pointer; transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .info-btn:hover {
+            background: rgba(99,102,241,0.25); color: #fff;
+            box-shadow: 0 3px 12px rgba(99,102,241,0.2);
+        }
+        .info-modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(10,8,30,0.85); z-index: 10000;
+            display: none; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .info-modal-overlay.show { display: flex; }
+        .info-modal {
+            background: linear-gradient(160deg, #1e1e3f 0%, #16213e 100%);
+            border: 1px solid rgba(99,102,241,0.3);
+            border-radius: 18px; padding: 28px 32px;
+            max-width: 680px; width: 100%; max-height: 80vh; overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .info-modal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .info-modal-title {
+            font-size: 17px; font-weight: 700; color: #fff;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .info-modal-close {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.6); width: 32px; height: 32px;
+            border-radius: 8px; cursor: pointer; font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .info-modal-close:hover { background: rgba(239,68,68,0.2); color: #f87171; border-color: rgba(239,68,68,0.3); }
+        .info-section {
+            margin-bottom: 16px; padding: 14px 16px;
+            background: rgba(99,102,241,0.05); border-radius: 12px;
+            border: 1px solid rgba(99,102,241,0.1);
+        }
+        .info-section-title {
+            font-size: 13px; font-weight: 600; color: #818cf8;
+            margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+        }
+        .info-section-body {
+            font-size: 12px; color: rgba(255,255,255,0.7); line-height: 1.8;
+        }
+        .info-section-body code {
+            background: rgba(99,102,241,0.15); color: #c4b5fd;
+            padding: 1px 6px; border-radius: 4px; font-size: 11px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
     </style>
 </head>
 <body>
@@ -237,8 +315,9 @@
 
     <div class="page-header">
         <div class="page-title"><i class="fa fa-tachometer" style="margin-right:8px;"></i>Dashboard</div>
-        <div style="display:flex;align-items:center;gap:12px;">
+        <div style="display:flex;align-items:center;gap:10px;">
             <span class="refresh-info" id="refreshInfo">--</span>
+            <button class="info-btn" onclick="showInfoModal()"><i class="fa fa-question-circle"></i>数据说明</button>
             <button class="refresh-btn" onclick="loadDashboard()"><i class="fa fa-refresh"></i> 刷新</button>
         </div>
     </div>
@@ -263,7 +342,7 @@
         <div class="stat-card card-qps">
             <div class="stat-icon"><i class="fa fa-bolt"></i></div>
             <div class="stat-label">当前总吞吐</div>
-            <div class="stat-value" id="statQps">--<span class="unit">msg/s</span></div>
+            <div class="stat-value" id="statQps">--<span class="unit">次/10秒</span></div>
         </div>
         <div class="stat-card card-ips">
             <div class="stat-icon"><i class="fa fa-server"></i></div>
@@ -360,7 +439,7 @@ function renderStats(d) {
     $('#statQueues').text(d.total_queues || 0);
     $('#statConsumers').text(d.total_consumers || 0);
     $('#statBacklog').text(formatNum(d.total_backlog));
-    $('#statQps').html((d.total_qps || 0) + '<span class="unit">msg/s</span>');
+    $('#statQps').html((d.total_qps || 0) + '<span class="unit">次/10秒</span>');
     $('#statIps').html((d.total_consumer_ips || 0) + '<span class="unit">台</span>');
 }
 
@@ -413,7 +492,7 @@ function renderThroughputChart(list) {
             formatter: function(params) {
                 var idx = params[0].dataIndex;
                 var item = top10[idx];
-                return item.queue_name + '<br/>吞吐: <b>' + item.qps + ' msg/s</b>';
+                return item.queue_name + '<br/>吞吐: <b>' + item.qps + ' 次/10秒</b>';
             }
         },
         grid: { left: '3%', right: '8%', bottom: '3%', top: '3%', containLabel: true },
@@ -465,7 +544,7 @@ function renderThroughputList(list) {
                 + '<span class="list-item-name" title="' + item.queue_name + '">'
                 + (i + 1) + '. ' + shortQueueName(item.queue_name)
                 + '</span><span class="list-item-value info">'
-                + item.qps + ' <small style="color:rgba(255,255,255,0.4)">msg/s</small>'
+                + item.qps + ' <small style="color:rgba(255,255,255,0.4)">次/10秒</small>'
                 + (item.qps_fail > 0 ? ' <small style="color:#f87171">(' + item.qps_fail + ' fail)</small>' : '')
                 + '</span></div>';
         }
@@ -485,16 +564,32 @@ function renderResources(list) {
         var mem = r.mem || 0;
         var disk = r.disk || 0;
         html += '<div class="resource-card">'
-            + '<div class="resource-title"><i class="fa fa-server"></i>' + (r.ip || 'unknown') + '</div>'
-            + '<div class="resource-detail"><span>CPU</span><span>' + cpu.toFixed(1) + '%</span></div>'
-            + '<div class="resource-bar"><div class="resource-bar-fill ' + getBarClass(cpu) + '" style="width:' + cpu + '%"></div></div>'
-            + '<div class="resource-detail"><span>内存</span><span>' + mem.toFixed(1) + '%</span></div>'
-            + '<div class="resource-bar"><div class="resource-bar-fill ' + getBarClass(mem) + '" style="width:' + mem + '%"></div></div>'
-            + '<div class="resource-detail"><span>磁盘</span><span>' + disk.toFixed(1) + '%</span></div>'
-            + '<div class="resource-bar"><div class="resource-bar-fill ' + getBarClass(disk) + '" style="width:' + disk + '%"></div></div>'
-            + '</div>';
+            + '<div class="resource-host"><i class="fa fa-server"></i>' + (r.ip || 'unknown') + '</div>'
+            + '<div class="resource-rings">'
+            + buildRing(cpu, 'CPU')
+            + buildRing(mem, 'MEM')
+            + buildRing(disk, 'DISK')
+            + '</div></div>';
     }
     $('#resourceRow').html(html);
+}
+
+function buildRing(pct, label) {
+    var r = 21, circ = 2 * Math.PI * r;
+    var offset = circ * (1 - pct / 100);
+    var cls = pct >= 90 ? 'ring-danger' : (pct >= 70 ? 'ring-warning' : 'ring-normal');
+    return '<div class="ring-item">'
+        + '<div class="ring-wrap">'
+        + '<svg class="ring-svg" viewBox="0 0 52 52">'
+        + '<circle class="ring-bg" cx="26" cy="26" r="' + r + '"/>'
+        + '<circle class="ring-fg ' + cls + '" cx="26" cy="26" r="' + r + '" '
+        + 'stroke-dasharray="' + circ.toFixed(2) + '" '
+        + 'stroke-dashoffset="' + offset.toFixed(2) + '"/>'
+        + '</svg>'
+        + '<span class="ring-pct">' + pct.toFixed(0) + '%</span>'
+        + '</div>'
+        + '<span class="ring-label">' + label + '</span>'
+        + '</div>';
 }
 
 // 窗口 resize 重绘图表
@@ -503,11 +598,84 @@ $(window).on('resize', function() {
     if (throughputChart) throughputChart.resize();
 });
 
+function showInfoModal() { $('#infoModalOverlay').addClass('show'); }
+function hideInfoModal() { $('#infoModalOverlay').removeClass('show'); }
+
 // 启动
 $(document).ready(function() {
     loadDashboard();
     setInterval(loadDashboard, 10000);
+    $('#infoModalOverlay').on('click', function(e) {
+        if (e.target === this) hideInfoModal();
+    });
 });
 </script>
+
+<!-- 数据说明 Modal -->
+<div class="info-modal-overlay" id="infoModalOverlay">
+    <div class="info-modal">
+        <div class="info-modal-header">
+            <div class="info-modal-title"><i class="fa fa-info-circle" style="color:#818cf8;"></i>Dashboard 数据来源说明</div>
+            <button class="info-modal-close" onclick="hideInfoModal()">&times;</button>
+        </div>
+
+        <div class="info-section">
+            <div class="info-section-title"><i class="fa fa-list"></i>队列总数 / 活跃消费者 / 消费者节点</div>
+            <div class="info-section-body">
+                数据来源：Redis Hash <code>funboost_queue__consumer_parmas</code><br>
+                每个消费者启动时会将自身的队列参数写入此 Hash。<br>
+                活跃消费者通过心跳 Set 中 <code>hearbeat_timestamp</code> 判断是否在线（15秒超时）。<br>
+                消费者节点数统计心跳数据中 <code>computer_ip</code> 字段的去重 IP 数量。
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="info-section-title"><i class="fa fa-inbox"></i>消息积压总量</div>
+            <div class="info-section-body">
+                数据来源：Redis Hash <code>funboost_queue__msg_count_map</code><br>
+                各队列当前待消费消息数量之和。由消费者心跳周期性采集并更新（每10秒）。
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="info-section-title"><i class="fa fa-bolt"></i>当前总吞吐</div>
+            <div class="info-section-body">
+                数据来源：消费者心跳中的 <code>last_x_s_execute_count</code> 字段<br>
+                每个消费者周期性上报自己在最近 10 秒内的总执行次数（含成功和失败），后端汇总该队列下所有活跃消费者的值，得出队列级吞吐。<br>
+                总吞吐 = 所有队列吞吐之和，单位：次/10秒。
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="info-section-title"><i class="fa fa-bar-chart"></i>队列积压 Top / 队列吞吐 Top</div>
+            <div class="info-section-body">
+                积压排行：取 <code>funboost_queue__msg_count_map</code> 中所有队列的待消费数量，降序排列。<br>
+                吞吐排行：汇总每个队列下所有活跃消费者的 QPS，降序排列。<br>
+                图表展示 Top 10，列表展示 Top 15。
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="info-section-title"><i class="fa fa-microchip"></i>系统资源概览 (CPU / 内存 / 磁盘)</div>
+            <div class="info-section-body">
+                数据来源：Redis Sorted Set <code>funboost:funweb:monitor:{ip}:metrics</code><br>
+                由 <code>system_monitor</code> 后台线程每 10 秒采集一次 psutil 指标，写入 Redis。<br>
+                Dashboard 取各 IP 的最新一条记录（ZREVRANGE 0 0）展示。<br>
+                已知 IP 列表来自 Redis Set <code>funboost_all_ips</code>（消费者启动时自动注册）。<br>
+                <span style="color:rgba(255,255,255,0.4);">需要至少一个节点运行 psutil 采集器才有数据。</span>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="info-section-title"><i class="fa fa-clock-o"></i>数据刷新频率</div>
+            <div class="info-section-body">
+                Dashboard 前端每 <code>10 秒</code> 自动拉取一次 <code>/api/dashboard/summary</code> 接口。<br>
+                后端数据实时性取决于消费者心跳上报间隔（默认 10 秒）。<br>
+                所有数据来源均为 <strong>Redis</strong>，不依赖 MongoDB。
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

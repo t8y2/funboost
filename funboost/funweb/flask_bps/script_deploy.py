@@ -32,7 +32,7 @@ def _strip_ansi(text):
 
 
 def _key_prefix():
-    return f'script_deploy:{LOCAL_IP}'
+    return f'funboost:funweb:deploy:{LOCAL_IP}'
 
 
 def _config_key(name):

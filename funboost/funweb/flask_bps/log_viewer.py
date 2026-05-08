@@ -25,7 +25,7 @@ _MAX_SCAN_BYTES = 50 * 1024 * 1024
 
 
 def _folders_key():
-    return f'funweb:{LOCAL_IP}:log_folders'
+    return f'funboost:funweb:logviwer:{LOCAL_IP}:folders'
 
 
 # ======================== 安全校验 ========================

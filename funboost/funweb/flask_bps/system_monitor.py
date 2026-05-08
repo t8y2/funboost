@@ -34,11 +34,11 @@ _HEARTBEAT_TTL = 35                 # 心跳 TTL
 
 
 def _zset_key(ip=None):
-    return f'monitor:{ip or LOCAL_IP}'
+    return f'funboost:funweb:monitor:{ip or LOCAL_IP}:metrics'
 
 
 def _heartbeat_key(ip=None):
-    return f'monitor:{ip or LOCAL_IP}:heartbeat'
+    return f'funboost:funweb:monitor:{ip or LOCAL_IP}:heartbeat'
 
 
 def _get_root_path():
@@ -168,9 +168,9 @@ def monitor_hosts():
     raw_ips = _redis.smembers(RedisKeys.FUNBOOST_ALL_IPS)
     for ip_raw in raw_ips:
         ip = ip_raw.decode() if isinstance(ip_raw, bytes) else ip_raw
-        if _redis.exists(f'monitor:{ip}'):
+        if _redis.exists(_zset_key(ip)):
             ips.add(ip)
-    if _redis.exists(f'monitor:{LOCAL_IP}'):
+    if _redis.exists(_zset_key()):
         ips.add(LOCAL_IP)
     ip_list = sorted(ips)
     if LOCAL_IP not in ip_list:
