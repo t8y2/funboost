@@ -21,7 +21,7 @@ from funboost.publishers.base_publisher import AbstractPublisher
 from rocketmq import ClientConfiguration, Credentials, Producer, Message
 
 
-class RocketmqPublisher(AbstractPublisher):
+class Rocketmq5Publisher(AbstractPublisher):
     """
     RocketMQ 5.x 发布者，使用 rocketmq-python-client 包
     

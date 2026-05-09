@@ -1,5 +1,32 @@
 # AI 重大设计更新记录
 
+## 2026-05-09: NATS broker 升级为 nats-py 官方客户端 + 新增 NATS JetStream broker
+
+### 改动范围
+- 修改 `funboost/consumers/nats_consumer.py` — 使用 `nats-py` (asyncio) 替代废弃的 `pynats`
+- 修改 `funboost/publishers/nats_publisher.py` — 同上
+- 修改 `funboost/core/lazy_impoter.py` — NatsImporter 改为 import nats
+- 新增 `funboost/contrib/register_custom_broker_contrib/nats_jetstream_broker.py` — NATS JetStream 持久化 broker
+
+### 背景
+原有 NATS 实现使用的是 2019 年的 `pynats` 包（同步、无 JetStream 支持、已停止维护）。
+有用户在 GitHub issue 中反馈该包过旧。
+
+### 设计
+1. **NATS Core**（`BrokerEnum.NATS`）：升级为 `nats-py` 官方 asyncio 客户端，保持原有行为（无持久化、无ACK）
+2. **NATS JetStream**（`BROKER_KIND_NATS_JETSTREAM`）：新增 contrib broker，支持：
+   - 消息持久化（Stream）
+   - 消费确认（ACK/NAK）
+   - 持久化消费者（durable，重启不丢失消费位置）
+   - 消费者组（多实例分摊消息）
+   - Pull 模式拉取
+   - 可配置 ack_wait、max_deliver
+
+### 依赖
+- `pip install nats-py`（替代 `pip install nats-python`/`pynats`）
+
+---
+
 ## 2026-05-07: 修复 get_cols() 在 MongoDB 不可用时队列名为空的问题
 
 ### 改动范围

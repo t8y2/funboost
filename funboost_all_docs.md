@@ -1,8 +1,10 @@
 ﻿
 # 🤖 AI 上下文阅读协议 (由 nb_ai_context 生成)
 
+> **此文档生成时间**：2026-05-09 19:32:13
 > **系统指令**：你正在解析一份由工具 **`nb_ai_context`** 自动生成的**结构化项目快照**。
-> **文档性质**：这**不是**一份普通的面向人类的文档，而是专为 AI 大模型（LLM）设计的上下文数据流。它将项目文档、源代码和 AST 架构元数据进行了特殊的结构化合并，请开启“代码解析器”的心智模式。
+> **文档性质**：这**不是**一份普通的面向人类的文档，而是专为 AI 大模型（LLM）设计的上下文数据流。它将项目文档、源代码和 AST 架构元数据进行了特殊的结构化合并，请开启"代码解析器"的心智模式。
+
 
 ## 🧠 AI 认知与解析准则
 
@@ -655,7 +657,7 @@ funboost也内置支持了各种python三方包和消费框架作为broker,例�
 用户也可以按照文档4.21章节,轻松扩展任何物质概念作为funboost的broker.
 `````
 
-**Class Variables (53):**
+**Class Variables (54):**
 - `EMPTY = 'EMPTY'`
 - `RABBITMQ_AMQPSTORM = 'RABBITMQ_AMQPSTORM'`
 - `RABBITMQ = RABBITMQ_AMQPSTORM`
@@ -696,7 +698,8 @@ funboost也内置支持了各种python三方包和消费框架作为broker,例�
 - `TCP = 'TCP'`
 - `HTTP = 'HTTP'`
 - `GRPC = 'GRPC'`
-- `NATS = 'NATS'`
+- `NATS_CORE = 'NATS_CORE'`
+- `NATS_JETSTREAM = 'NATS_JETSTREAM'`
 - `TXT_FILE = 'TXT_FILE'`
 - `PEEWEE = 'PEEWEE'`
 - `CELERY = 'CELERY'`
@@ -711,7 +714,7 @@ funboost也内置支持了各种python三方包和消费框架作为broker,例�
 - `WEBSOCKET = 'WEBSOCKET'`
 
 ##### 📌 `class ConcurrentModeEnum`
-*Line: 199*
+*Line: 201*
 
 **Docstring:**
 `````
@@ -730,7 +733,7 @@ funboost的多进程和多线程 asyncio是叠加的，不是互斥的。
 - `SOLO = SINGLE_THREAD`
 
 ##### 📌 `class FunctionKind`
-*Line: 217*
+*Line: 219*
 
 **Docstring:**
 `````
@@ -745,7 +748,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `COMMON_FUNCTION = 'COMMON_FUNCTION'`
 
 ##### 📌 `class ConstStrForClassMethod`
-*Line: 228*
+*Line: 230*
 
 **Class Variables (5):**
 - `FIRST_PARAM_NAME = 'first_param_name'`
@@ -755,7 +758,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `CLS_FILE = 'cls_file'`
 
 ##### 📌 `class RedisKeys`
-*Line: 236*
+*Line: 238*
 
 **Public Methods (9):**
 - `def gen_funboost_apscheduler_redis_lock_key_by_queue_name(queue_name)` `staticmethod`
@@ -792,7 +795,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `FUNBOOST_UNACK_REGISTRY_PREFIX = 'funboost_unack_registry:'`
 
 ##### 📌 `class ConsumingFuncInputParamsCheckerField`
-*Line: 300*
+*Line: 302*
 
 **Class Variables (6):**
 - `is_manual_func_input_params = 'is_manual_func_input_params'`
@@ -803,14 +806,14 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `func_position = 'func_position'`
 
 ##### 📌 `class MongoDbName`
-*Line: 309*
+*Line: 311*
 
 **Class Variables (2):**
 - `TASK_STATUS_DB = 'funboost_task_status'`
 - `MONGOMQ_DB = 'funboost_mongomq'`
 
 ##### 📌 `class StrConst`
-*Line: 313*
+*Line: 315*
 
 **Class Variables (4):**
 - `BOOSTER_REGISTRY_NAME_DEFAULT = 'booster_registry_default'`
@@ -819,7 +822,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `FILTERED_TASK_RESULT = 'filtered_task_result'`
 
 ##### 📌 `class EnvConst`
-*Line: 319*
+*Line: 321*
 
 **Class Variables (2):**
 - `FUNBOOST_FAAS_CARE_PROJECT_NAME = 'funboost.faas.care_project_name'`
@@ -3198,16 +3201,16 @@ Entry Points (not imported by other project files):
 ============================================================
   行1: # 3.框架详细介绍
   行4: ## 3.1 各种中间件选择的场景和优势
-  行202: ## 3.2 框架支持的函数调度并发模式种类详细介绍
-  行217: # 这种是多进程方式，一次编写能够兼容win和linux的运行。
-  行232: ## 3.3 框架最最重要的boost装饰器的BoosterParams参数入参大全
-  行460: ### 3.3.1 funboost_config.py 配置文件内容
-  行474: # -*- coding: utf-8 -*-
-  行585: ### 3.3.2 funboost 重要公有方法大全介绍
-  行635: ### 3.3.3 boost装饰器 的 concurrent_num 和 qps 之间的关系。
-  行686: ## 3.4 框架的乞丐精简版实现方式
-  行729: ## 3.5 框架的任务消费确认
-  行752: ## 3.6 框架的设计规范原则
+  行212: ## 3.2 框架支持的函数调度并发模式种类详细介绍
+  行227: # 这种是多进程方式，一次编写能够兼容win和linux的运行。
+  行242: ## 3.3 框架最最重要的boost装饰器的BoosterParams参数入参大全
+  行470: ### 3.3.1 funboost_config.py 配置文件内容
+  行484: # -*- coding: utf-8 -*-
+  行595: ### 3.3.2 funboost 重要公有方法大全介绍
+  行645: ### 3.3.3 boost装饰器 的 concurrent_num 和 qps 之间的关系。
+  行696: ## 3.4 框架的乞丐精简版实现方式
+  行739: ## 3.5 框架的任务消费确认
+  行762: ## 3.6 框架的设计规范原则
 
 ============================================================
 文件: c4.md
@@ -10268,13 +10271,16 @@ class BrokerEnum:
     REDIS = 'REDIS'  # 使用 redis 的 list结构，brpop 作为分布式消息队列。随意重启和关闭会丢失大量消息，不支持消费确认。注重性能不在乎丢失消息可以选这个redis方案。
     REDIS_ACK_ABLE = 'REDIS_ACK_ABLE'  # 基于redis的 list + 临时unack的set队列，采用了 lua脚本操持了取任务和加到pengding为原子性，,基于进程心跳消失判断消息是否为掉线进程的，随意重启和掉线不会丢失任务。
     REIDS_ACK_USING_TIMEOUT = 'reids_ack_using_timeout'  # 基于redis的 list + 临时unack的set队列，使用超时多少秒没确认消费就自动重回队列，请注意 ack_timeout的设置值和函数耗时大小，否则会发生反复重回队列的后果,boost可以设置ack超时，broker_exclusive_config={'ack_timeout': 1800}.缺点是无法区分执行太慢还是真宕机
+    REDIS_ACK_USING_TIMEOUT = REIDS_ACK_USING_TIMEOUT  # 兼容别名，上面的拼写错了
     REDIS_PRIORITY = 'REDIS_PRIORITY'  # # 基于redis的多 list + 临时unack的set队列，blpop监听多个key，和rabbitmq的x-max-priority属性一样，支持任务优先级。看文档4.29优先级队列说明。
     REDIS_STREAM = 'REDIS_STREAM'  # 基于redis 5.0 版本以后，使用 stream 数据结构作为分布式消息队列，支持消费确认和持久化和分组消费，是redis官方推荐的消息队列形式，比list结构更适合。
     REDIS_BRPOP_LPUSH = 'RedisBrpopLpush'  # 基于redis的list结构但是采用 brpoplpush 双队列形式，和 redis_ack_able的实现差不多，实现上采用了原生命令就不需要lua脚本来实现取出和加入unack了。
     REDIS_PUBSUB = 'REDIS_PUBSUB'  # 基于redis 发布订阅的，发布一个消息多个消费者都能收到同一条消息，但不支持持久化
+    REDIS_ZSET_PRIORITY = 'REDIS_ZSET_PRIORITY'  # 基于redis的zset结构，支持任务优先级,无级优先级队列（非常适合随意插队），不需要提前声明最大能支持的优先级参数x-max-priority。 实现和用法见 redis_zset_broker.py
+    REDIS_ZSET_DELAY = 'REDIS_ZSET_DELAY'  # 基于redis的zset结构，支持任务延迟。不依赖funboost自身的延时任务用法所依赖的apscheduler。这个比funboost自身的延时任务好处是：不怕由于队列前面其他已有的大量普通消息堆积，导致后进入的延时消息无法及时取出来交给apscheduler调度，导致不能及时运行。 实现和用法见 redis_zset_broker.py
     
     """
-    MEMORY_QUEUE: （funboost中最最最核心的broker，没有之一）
+    MEMORY_QUEUE: （funboost中最最最核心的sss级broker，没有之一）
     python内存队列,虽然不支持跨进程 跨脚本 跨机器共享任务，不支持持久化，
     但是 MEMORY_QUEUE 作为broker 是funboost最最最重要的broker，绝非玩具和只适合简单场景使用，其在funboost中的用途广泛性远超那些正经服务端mq。
     MEMORY_QUEUE 在 funboost 中的重要性是 sss级，重要性远超 redis kafka rabbbitmq等作为broker.
@@ -10290,12 +10296,17 @@ class BrokerEnum:
     5.celery为什么不推荐把memory作为broker？因为celery worker通常在控制台用命令行单独启动，和普通的python脚本中发布任务压根是跨进程跨python解释器了，无法跨程序共享内存队列任务。
       而funboost启动消费就是普通的python程序，业务脚本发送消息和启动消费就是处在一个进程中，所以可以共享一个内存queue。
       由于2个框架启动消费方式的区别，memory queue在 celery中是六等公民，但在 funboost 中是超一等公民。
+    6.特殊功能支持
+     - 支持RPC模式下的结果获取，不依赖Redis等外部存储
+     - 可以通过 get_future() 和 get_aio_future() 方法实现结果获取，不依赖redis rpc获取结果
+     - 高性能配合微批处理模式，提高吞吐量
     """
     MEMORY_QUEUE = 'MEMORY_QUEUE'  # 使用python queue.Queue实现的基于当前python进程的消息队列，不支持跨进程 跨脚本 跨机器共享任务，不支持持久化，适合一次性短期简单任务。
     LOCAL_PYTHON_QUEUE = MEMORY_QUEUE  # 别名，python本地queue就是基于python自带的语言的queue.Queue，消息存在python程序的内存中，不支持重启断点接续。
     
-    # 高性能内存队列，使用 collections.deque 代替 queue.Queue，去除不必要的 task_done/join 开销
+    # 高性能内存队列，使用 collections.deque 代替 queue.Queue，去除不必要的 task_done/join 开销。
     # 性能比 MEMORY_QUEUE 提升 2-5 倍，支持批量拉取消息（通过 broker_exclusive_config={'pull_msg_batch_size': 1000}）
+    # 不推荐用户用FASTEST_MEM_QUEUE，如果要用内存队列，一般用MEMORY_QUEUE模式就好了。
     FASTEST_MEM_QUEUE = 'FASTEST_MEM_QUEUE'
 
     RABBITMQ_PIKA = 'RABBITMQ_PIKA'  # 使用pika包操作rabbitmq  作为 分布式消息队列。，不建议使用
@@ -10318,7 +10329,8 @@ class BrokerEnum:
     SQLACHEMY = 'SQLACHEMY'  # 基于SQLACHEMY 的连接作为分布式消息队列中间件支持持久化和消费确认。支持mysql oracle sqlserver等5种数据库。
 
     ROCKETMQ = 'ROCKETMQ'  # 基于 rocketmq 作为分布式消息队列，这个中间件必须在linux下运行，win不支持。
-
+    ROCKETMQ5 = 'ROCKETMQ5'  # 基于 rocketmq 5.x 作为分布式消息队列，使用SimpleConsumer类，适合独立单条ack
+    
     ZEROMQ = 'ZEROMQ'  # 基于zeromq作为分布式消息队列，不需要安装中间件，可以支持跨机器但不支持持久化。
 
 
@@ -10352,7 +10364,9 @@ class BrokerEnum:
 
     GRPC = 'GRPC' # 使用知名grpc作为broker,可以使用 sync_call 方法同步获取grpc的结果, 简单程度暴击用户手写原生的 grpc客户端 服务端
 
-    NATS = 'NATS'  # 高性能中间件nats,中间件服务端性能很好,。
+    NATS_CORE = 'NATS_CORE'  # 高性能中间件nats Core模式(无持久化),使用nats-py官方asyncio客户端。pip install nats-py
+
+    NATS_JETSTREAM = 'NATS_JETSTREAM'  # NATS JetStream持久化模式,支持消费确认/持久化/消费者组。用法见 contrib/register_custom_broker_contrib/nats_jetstream_broker.py
 
     TXT_FILE = 'TXT_FILE'  # 磁盘txt文件作为消息队列，支持单机持久化，不支持多机分布式。不建议这个，用sqlite。
 
@@ -10384,8 +10398,7 @@ class BrokerEnum:
     日志文件、文件系统变更（inotify）、甚至是硬件传感器的信号，按照4.21章节文档，都可以被封装成一个 funboost 的 Broker。
 
     充分说明 funboost 有能力化身为 通用的、事件驱动的函数调度平台,而非仅仅是celery这种传统的消息驱动.
-    """
-    """
+  
     funboost 有能力消费canal发到kafka的binlog消息,也能不依赖canal,自己捕获cdc数据
     """
     MYSQL_CDC = 'MYSQL_CDC'
@@ -10401,7 +10414,7 @@ class BrokerEnum:
     """
     POSTGRES = 'POSTGRES'
     
-    WATCHDOG = 'WATCHDOG' # 使用python watchdog 库监控文件夹文件变更事件,自动触发消费
+    WATCHDOG = 'WATCHDOG' # 使用python watchdog 库监控文件夹文件变更事件,自动触发python函数消费。支持已存在文件和防抖，原生watchdog不支持。
     
     WEBSOCKET = 'WEBSOCKET' # 使用websocket作为broker,支持实时双向通信  
 

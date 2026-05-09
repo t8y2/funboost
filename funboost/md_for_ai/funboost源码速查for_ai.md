@@ -2,7 +2,7 @@
 
 > 本文档专为 AI 设计，用于快速定位 funboost 源码中的类、函数、模块位置。
 >
-> 生成时间: 2026-04-17 （请注意时间，部分代码文件的行号有可能会随时间发生小幅变化）
+> 生成时间: 2026-05-09 （请注意时间，部分代码文件的行号有可能会随时间发生小幅变化）
 >
 > 源码根目录: `funboost/funboost/`
 >
@@ -86,7 +86,7 @@ funboost/
 │   ├── pulsar_consumer.py         # Pulsar
 │   ├── nsq_consumer.py            # NSQ
 │   ├── mqtt_consumer.py           # MQTT
-│   ├── nats_consumer.py           # NATS
+│   ├── (已移至 contrib/register_custom_broker_contrib/nats_core_broker.py)
 │   ├── zeromq_consumer.py         # ZeroMQ
 │   ├── mongomq_consumer.py        # MongoDB
 │   ├── persist_queue_consumer.py  # SQLite (persistqueue)
@@ -135,7 +135,7 @@ funboost/
 │   ├── pulsar_publisher.py        # Pulsar
 │   ├── nsq_publisher.py           # NSQ
 │   ├── mqtt_publisher.py          # MQTT
-│   ├── nats_publisher.py          # NATS
+│   ├── (已移至 contrib/register_custom_broker_contrib/nats_core_broker.py)
 │   ├── zeromq_publisher.py        # ZeroMQ
 │   ├── mongomq_publisher.py       # MongoDB
 │   ├── persist_queue_publisher.py # SQLite (persistqueue)
@@ -219,6 +219,14 @@ funboost/
 │   ├── register_custom_broker_contrib/    # 自定义broker
 │   │   ├── watchdog_broker.py     # WatchdogPublisher/Consumer 文件监控
 │   │   └── websocket_broker.py    # WebSocketPublisher/Consumer
+│   ├── funspider/                         # 爬虫辅助扩展(httpx+SQLModel)
+│   │   ├── __init__.py            # 导出 SimpleSpiderClient, AsyncSpiderClient, SpiderItem
+│   │   ├── http.py                # SpiderResponse, SimpleSpiderClient, AsyncSpiderClient
+│   │   ├── item.py                # SpiderItem (SQLModel ORM, sync/async insert/upsert)
+│   │   ├── README.md              # funspider说明文档
+│   │   └── funspider_demos/       # 爬虫示例
+│   │       ├── funspider_demo1.py # 新闻爬虫完整示例(同步+异步混用)
+│   │       └── fake_news_site.py  # 模拟新闻网站(FastAPI)
 │   └── save_function_result_status/       # 结果持久化
 │       ├── readme.md                      # 结果持久化说明
 │       ├── save_result_status_to_sqldb.py
@@ -252,7 +260,8 @@ funboost/
 │   │   ├── web_helper.py          # IP/hostname
 │   │   ├── system_monitor.py      # 系统监控API
 │   │   ├── script_deploy.py       # 脚本部署CRUD
-│   │   └── log_viewer.py          # 日志查看器
+│   │   ├── log_viewer.py          # 日志查看器
+│   │   └── queue_alerts.py        # 队列告警系统(积压/QPS/掉线/失败率/耗时)
 │   ├── templates/                 # 15个HTML模板
 │   │   ├── index.html             # 首页
 │   │   ├── login.html             # 登录页
@@ -269,6 +278,7 @@ funboost/
 │   │   ├── deploy_detail.html     # 部署详情
 │   │   ├── log_viewer.html        # 日志查看器
 │   │   ├── system_monitor.html    # 系统监控
+│   │   ├── queue_alerts.html      # 告警配置页面(规则CRUD+告警记录+测试通知)
 │   │   └── app.py中仍在使用的路由.md  # 路由参考文档
 │   ├── _ai_do_tasks_md/           # AI任务备忘
 │   │   ├── ai写web必须遵守的.md
@@ -422,7 +432,7 @@ RPC:  is_using_rpc_mode, rpc_result_expire_seconds, rpc_timeout
 | RabbitMQ | `RABBITMQ_AMQPSTORM`(=`RABBITMQ`), `RABBITMQ_COMPLEX_ROUTING` |
 | Kafka | `KAFKA`, `KAFKA_CONFLUENT` |
 | RocketMQ | `ROCKETMQ`, `ROCKETMQ5` |
-| 其他MQ | `PULSAR`, `NSQ`, `MQTT`, `NATS`, `ZEROMQ`, `SQS`, `HTTPSQS` |
+| 其他MQ | `PULSAR`, `NSQ`, `MQTT`, `NATS_CORE`, `NATS_JETSTREAM`, `ZEROMQ`, `SQS`, `HTTPSQS` |
 | 内存/文件 | `MEMORY_QUEUE`, `FASTEST_MEM_QUEUE`, `SQLITE_QUEUE`(=`PERSISTQUEUE`), `TXT_FILE` |
 | 数据库 | `MONGOMQ`, `SQLACHEMY`, `POSTGRES`, `PEEWEE` |
 | 网络协议 | `TCP`, `UDP`, `HTTP`, `GRPC`, `WEBSOCKET` |
@@ -863,7 +873,19 @@ def generate_broker_exclusive_config()           # 生成merged配置
 | `redis_hash_update_broker.py` | `RedisHashUpdatePublisher`, `RedisHashUpdateConsumer` | Redis HASH 可更新覆盖消息(latest-wins语义) |
 | `celery_pool_as_funboost_broker.py` | `CeleryPoolPublisher`, `CeleryPoolConsumer` | 复用 CeleryPool 作为 funboost broker |
 
-### 8.3 其他 Contrib
+### 8.3 funspider 爬虫辅助扩展 (`contrib/funspider/`)
+
+> 基于 httpx + SQLModel 的爬虫辅助组件，提供 ORM 模型与同步/异步双引擎客户端。
+> 导入路径: `from funboost.contrib.funspider import SimpleSpiderClient, AsyncSpiderClient, SpiderItem, Field, create_engine, create_async_engine`
+
+| 文件 | 核心类 | 功能 |
+|------|--------|------|
+| `http.py` | `SpiderResponse` | 统一封装 httpx 响应，内置 `.xpath()`/`.css()`/`.re()`/`.resp_dict` |
+| `http.py` | `SimpleSpiderClient` | 同步爬虫客户端(httpx.Client)，支持重试+代理函数列表+随机UA |
+| `http.py` | `AsyncSpiderClient` | 异步爬虫客户端(httpx.AsyncClient)，同上 |
+| `item.py` | `SpiderItem` | SQLModel ORM 基类，`.insert()`/`.upsert()`/`.aio_insert()`/`.aio_upsert()` |
+
+### 8.4 其他 Contrib
 
 | 文件 | 功能 |
 |------|------|
@@ -1000,6 +1022,7 @@ start_funboost_web_manager()   # 启动Web管理界面
 | `system_monitor.py` | Redis心跳采集, 系统监控API |
 | `script_deploy.py` | 脚本部署CRUD, Git操作, 进程控制, 日志tail |
 | `log_viewer.py` | 日志查看器(文件夹白名单, tail, grep, stream) |
+| `queue_alerts.py` | 队列告警系统: 5种告警类型(积压/QPS骤降/消费者掉线/失败率飙升/耗时过高)，多通道通知(钉钉/企微/飞书/Webhook)，告警去抖，后台10秒轮询检查 |
 | `web_helper.py` | IP/hostname辅助函数 |
 
 ---
@@ -1039,7 +1062,8 @@ start_funboost_web_manager()   # 启动Web管理界面
 | `PULSAR` | `PulsarConsumer` | `consumers/pulsar_consumer.py` | `PulsarPublisher` | `publishers/pulsar_publisher.py` |
 | `NSQ` | `NsqConsumer` | `consumers/nsq_consumer.py` | `NsqPublisher` | `publishers/nsq_publisher.py` |
 | `MQTT` | `MqttConsumer` | `consumers/mqtt_consumer.py` | `MqttPublisher` | `publishers/mqtt_publisher.py` |
-| `NATS` | `NatsConsumer` | `consumers/nats_consumer.py` | `NatsPublisher` | `publishers/nats_publisher.py` |
+| `NATS_CORE` | `NatsConsumer` | `contrib/register_custom_broker_contrib/nats_core_broker.py` | `NatsPublisher` | 同文件 |
+| `NATS_JETSTREAM` | `NatsJetStreamConsumer` | `contrib/register_custom_broker_contrib/nats_jetstream_broker.py` | `NatsJetStreamPublisher` | 同文件 |
 | `ZEROMQ` | `ZeromqConsumer` | `consumers/zeromq_consumer.py` | `ZeromqPublisher` | `publishers/zeromq_publisher.py` |
 | `SQLITE_QUEUE` | `PersistQueueConsumer` | `consumers/persist_queue_consumer.py` | `PersistQueuePublisher` | `publishers/persist_queue_publisher.py` |
 | `MONGOMQ` | `MongoMqConsumer` | `consumers/mongomq_consumer.py` | `MongoMqPublisher` | `publishers/mongomq_publisher.py` |
@@ -1223,6 +1247,10 @@ BoosterParams.consumer_override_cls = MyMixin
 | 怎么接OpenTelemetry / 链路追踪 | OpenTelemetry, tracing, 链路 | `contrib/override_publisher_consumer_cls/funboost_otel_mixin.py` |
 | 怎么监听文件变化触发任务 | 文件监控, watchdog, 文件变化 | `contrib/register_custom_broker_contrib/watchdog_broker.py` |
 | 怎么用WebSocket | WebSocket, ws | `contrib/register_custom_broker_contrib/websocket_broker.py` |
+| 怎么用NATS Core / NATS无持久化 | NATS, nats-py, Core | `contrib/register_custom_broker_contrib/nats_core_broker.py` |
+| 怎么用NATS JetStream / NATS持久化 | NATS, JetStream, nats-py, 持久化 | `contrib/register_custom_broker_contrib/nats_jetstream_broker.py` |
+| 怎么用funboost做爬虫 / 爬虫辅助 | 爬虫, spider, 爬取, httpx, funspider | `contrib/funspider/` (SimpleSpiderClient, AsyncSpiderClient, SpiderItem) |
+| 怎么配置队列告警 / 积压告警 / 掉线告警 | 告警, alert, 积压, 掉线, 通知 | `funweb/flask_bps/queue_alerts.py` |
 | 怎么远程部署 | 部署, deploy, fabric | `core/fabric_deploy_helper.py` L17 `fabric_deploy` |
 | Web管理界面怎么启动 | web, 管理界面, funweb, 后台 | `funweb/app.py` → `start_funboost_web_manager` |
 | 命令行怎么用 / CLI | 命令行, CLI, python -m | `core/cli/funboost_fire.py` L15 `BoosterFire` |
@@ -1282,6 +1310,10 @@ BoosterParams.consumer_override_cls = MyMixin
 | 告警通知 | `contrib/override_publisher_consumer_cls/alert_notifier_mixin.py` |
 | Watchdog broker | `contrib/register_custom_broker_contrib/watchdog_broker.py` |
 | WebSocket broker | `contrib/register_custom_broker_contrib/websocket_broker.py` |
+| NATS Core broker | `contrib/register_custom_broker_contrib/nats_core_broker.py` |
+| NATS JetStream | `contrib/register_custom_broker_contrib/nats_jetstream_broker.py` |
+| 爬虫辅助(funspider) | `contrib/funspider/` → `SimpleSpiderClient`, `AsyncSpiderClient`, `SpiderItem` |
+| 队列告警 | `funweb/flask_bps/queue_alerts.py` → `alert_bp`, `_check_rules_once` |
 | Redis管理 | `utils/redis_manager.py` → `RedisManager` (L35) / `RedisMixin` (L77) |
 | MongoDB | `utils/mongo_util.py` → `MongoMixin` (L20) |
 | 装饰器工具 | `utils/decorators.py` → `keep_circulating` (L102) 等 |

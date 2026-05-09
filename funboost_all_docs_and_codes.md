@@ -1,8 +1,10 @@
 ﻿
 # 🤖 AI 上下文阅读协议 (由 nb_ai_context 生成)
 
+> **此文档生成时间**：2026-05-09 19:32:13
 > **系统指令**：你正在解析一份由工具 **`nb_ai_context`** 自动生成的**结构化项目快照**。
-> **文档性质**：这**不是**一份普通的面向人类的文档，而是专为 AI 大模型（LLM）设计的上下文数据流。它将项目文档、源代码和 AST 架构元数据进行了特殊的结构化合并，请开启“代码解析器”的心智模式。
+> **文档性质**：这**不是**一份普通的面向人类的文档，而是专为 AI 大模型（LLM）设计的上下文数据流。它将项目文档、源代码和 AST 架构元数据进行了特殊的结构化合并，请开启"代码解析器"的心智模式。
+
 
 ## 🧠 AI 认知与解析准则
 
@@ -655,7 +657,7 @@ funboost也内置支持了各种python三方包和消费框架作为broker,例�
 用户也可以按照文档4.21章节,轻松扩展任何物质概念作为funboost的broker.
 `````
 
-**Class Variables (53):**
+**Class Variables (54):**
 - `EMPTY = 'EMPTY'`
 - `RABBITMQ_AMQPSTORM = 'RABBITMQ_AMQPSTORM'`
 - `RABBITMQ = RABBITMQ_AMQPSTORM`
@@ -696,7 +698,8 @@ funboost也内置支持了各种python三方包和消费框架作为broker,例�
 - `TCP = 'TCP'`
 - `HTTP = 'HTTP'`
 - `GRPC = 'GRPC'`
-- `NATS = 'NATS'`
+- `NATS_CORE = 'NATS_CORE'`
+- `NATS_JETSTREAM = 'NATS_JETSTREAM'`
 - `TXT_FILE = 'TXT_FILE'`
 - `PEEWEE = 'PEEWEE'`
 - `CELERY = 'CELERY'`
@@ -711,7 +714,7 @@ funboost也内置支持了各种python三方包和消费框架作为broker,例�
 - `WEBSOCKET = 'WEBSOCKET'`
 
 ##### 📌 `class ConcurrentModeEnum`
-*Line: 199*
+*Line: 201*
 
 **Docstring:**
 `````
@@ -730,7 +733,7 @@ funboost的多进程和多线程 asyncio是叠加的，不是互斥的。
 - `SOLO = SINGLE_THREAD`
 
 ##### 📌 `class FunctionKind`
-*Line: 217*
+*Line: 219*
 
 **Docstring:**
 `````
@@ -745,7 +748,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `COMMON_FUNCTION = 'COMMON_FUNCTION'`
 
 ##### 📌 `class ConstStrForClassMethod`
-*Line: 228*
+*Line: 230*
 
 **Class Variables (5):**
 - `FIRST_PARAM_NAME = 'first_param_name'`
@@ -755,7 +758,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `CLS_FILE = 'cls_file'`
 
 ##### 📌 `class RedisKeys`
-*Line: 236*
+*Line: 238*
 
 **Public Methods (9):**
 - `def gen_funboost_apscheduler_redis_lock_key_by_queue_name(queue_name)` `staticmethod`
@@ -792,7 +795,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `FUNBOOST_UNACK_REGISTRY_PREFIX = 'funboost_unack_registry:'`
 
 ##### 📌 `class ConsumingFuncInputParamsCheckerField`
-*Line: 300*
+*Line: 302*
 
 **Class Variables (6):**
 - `is_manual_func_input_params = 'is_manual_func_input_params'`
@@ -803,14 +806,14 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `func_position = 'func_position'`
 
 ##### 📌 `class MongoDbName`
-*Line: 309*
+*Line: 311*
 
 **Class Variables (2):**
 - `TASK_STATUS_DB = 'funboost_task_status'`
 - `MONGOMQ_DB = 'funboost_mongomq'`
 
 ##### 📌 `class StrConst`
-*Line: 313*
+*Line: 315*
 
 **Class Variables (4):**
 - `BOOSTER_REGISTRY_NAME_DEFAULT = 'booster_registry_default'`
@@ -819,7 +822,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `FILTERED_TASK_RESULT = 'filtered_task_result'`
 
 ##### 📌 `class EnvConst`
-*Line: 319*
+*Line: 321*
 
 **Class Variables (2):**
 - `FUNBOOST_FAAS_CARE_PROJECT_NAME = 'funboost.faas.care_project_name'`
@@ -3198,16 +3201,16 @@ Entry Points (not imported by other project files):
 ============================================================
   行1: # 3.框架详细介绍
   行4: ## 3.1 各种中间件选择的场景和优势
-  行202: ## 3.2 框架支持的函数调度并发模式种类详细介绍
-  行217: # 这种是多进程方式，一次编写能够兼容win和linux的运行。
-  行232: ## 3.3 框架最最重要的boost装饰器的BoosterParams参数入参大全
-  行460: ### 3.3.1 funboost_config.py 配置文件内容
-  行474: # -*- coding: utf-8 -*-
-  行585: ### 3.3.2 funboost 重要公有方法大全介绍
-  行635: ### 3.3.3 boost装饰器 的 concurrent_num 和 qps 之间的关系。
-  行686: ## 3.4 框架的乞丐精简版实现方式
-  行729: ## 3.5 框架的任务消费确认
-  行752: ## 3.6 框架的设计规范原则
+  行212: ## 3.2 框架支持的函数调度并发模式种类详细介绍
+  行227: # 这种是多进程方式，一次编写能够兼容win和linux的运行。
+  行242: ## 3.3 框架最最重要的boost装饰器的BoosterParams参数入参大全
+  行470: ### 3.3.1 funboost_config.py 配置文件内容
+  行484: # -*- coding: utf-8 -*-
+  行595: ### 3.3.2 funboost 重要公有方法大全介绍
+  行645: ### 3.3.3 boost装饰器 的 concurrent_num 和 qps 之间的关系。
+  行696: ## 3.4 框架的乞丐精简版实现方式
+  行739: ## 3.5 框架的任务消费确认
+  行762: ## 3.6 框架的设计规范原则
 
 ============================================================
 文件: c4.md
@@ -10268,13 +10271,16 @@ class BrokerEnum:
     REDIS = 'REDIS'  # 使用 redis 的 list结构，brpop 作为分布式消息队列。随意重启和关闭会丢失大量消息，不支持消费确认。注重性能不在乎丢失消息可以选这个redis方案。
     REDIS_ACK_ABLE = 'REDIS_ACK_ABLE'  # 基于redis的 list + 临时unack的set队列，采用了 lua脚本操持了取任务和加到pengding为原子性，,基于进程心跳消失判断消息是否为掉线进程的，随意重启和掉线不会丢失任务。
     REIDS_ACK_USING_TIMEOUT = 'reids_ack_using_timeout'  # 基于redis的 list + 临时unack的set队列，使用超时多少秒没确认消费就自动重回队列，请注意 ack_timeout的设置值和函数耗时大小，否则会发生反复重回队列的后果,boost可以设置ack超时，broker_exclusive_config={'ack_timeout': 1800}.缺点是无法区分执行太慢还是真宕机
+    REDIS_ACK_USING_TIMEOUT = REIDS_ACK_USING_TIMEOUT  # 兼容别名，上面的拼写错了
     REDIS_PRIORITY = 'REDIS_PRIORITY'  # # 基于redis的多 list + 临时unack的set队列，blpop监听多个key，和rabbitmq的x-max-priority属性一样，支持任务优先级。看文档4.29优先级队列说明。
     REDIS_STREAM = 'REDIS_STREAM'  # 基于redis 5.0 版本以后，使用 stream 数据结构作为分布式消息队列，支持消费确认和持久化和分组消费，是redis官方推荐的消息队列形式，比list结构更适合。
     REDIS_BRPOP_LPUSH = 'RedisBrpopLpush'  # 基于redis的list结构但是采用 brpoplpush 双队列形式，和 redis_ack_able的实现差不多，实现上采用了原生命令就不需要lua脚本来实现取出和加入unack了。
     REDIS_PUBSUB = 'REDIS_PUBSUB'  # 基于redis 发布订阅的，发布一个消息多个消费者都能收到同一条消息，但不支持持久化
+    REDIS_ZSET_PRIORITY = 'REDIS_ZSET_PRIORITY'  # 基于redis的zset结构，支持任务优先级,无级优先级队列（非常适合随意插队），不需要提前声明最大能支持的优先级参数x-max-priority。 实现和用法见 redis_zset_broker.py
+    REDIS_ZSET_DELAY = 'REDIS_ZSET_DELAY'  # 基于redis的zset结构，支持任务延迟。不依赖funboost自身的延时任务用法所依赖的apscheduler。这个比funboost自身的延时任务好处是：不怕由于队列前面其他已有的大量普通消息堆积，导致后进入的延时消息无法及时取出来交给apscheduler调度，导致不能及时运行。 实现和用法见 redis_zset_broker.py
     
     """
-    MEMORY_QUEUE: （funboost中最最最核心的broker，没有之一）
+    MEMORY_QUEUE: （funboost中最最最核心的sss级broker，没有之一）
     python内存队列,虽然不支持跨进程 跨脚本 跨机器共享任务，不支持持久化，
     但是 MEMORY_QUEUE 作为broker 是funboost最最最重要的broker，绝非玩具和只适合简单场景使用，其在funboost中的用途广泛性远超那些正经服务端mq。
     MEMORY_QUEUE 在 funboost 中的重要性是 sss级，重要性远超 redis kafka rabbbitmq等作为broker.
@@ -10290,12 +10296,17 @@ class BrokerEnum:
     5.celery为什么不推荐把memory作为broker？因为celery worker通常在控制台用命令行单独启动，和普通的python脚本中发布任务压根是跨进程跨python解释器了，无法跨程序共享内存队列任务。
       而funboost启动消费就是普通的python程序，业务脚本发送消息和启动消费就是处在一个进程中，所以可以共享一个内存queue。
       由于2个框架启动消费方式的区别，memory queue在 celery中是六等公民，但在 funboost 中是超一等公民。
+    6.特殊功能支持
+     - 支持RPC模式下的结果获取，不依赖Redis等外部存储
+     - 可以通过 get_future() 和 get_aio_future() 方法实现结果获取，不依赖redis rpc获取结果
+     - 高性能配合微批处理模式，提高吞吐量
     """
     MEMORY_QUEUE = 'MEMORY_QUEUE'  # 使用python queue.Queue实现的基于当前python进程的消息队列，不支持跨进程 跨脚本 跨机器共享任务，不支持持久化，适合一次性短期简单任务。
     LOCAL_PYTHON_QUEUE = MEMORY_QUEUE  # 别名，python本地queue就是基于python自带的语言的queue.Queue，消息存在python程序的内存中，不支持重启断点接续。
     
-    # 高性能内存队列，使用 collections.deque 代替 queue.Queue，去除不必要的 task_done/join 开销
+    # 高性能内存队列，使用 collections.deque 代替 queue.Queue，去除不必要的 task_done/join 开销。
     # 性能比 MEMORY_QUEUE 提升 2-5 倍，支持批量拉取消息（通过 broker_exclusive_config={'pull_msg_batch_size': 1000}）
+    # 不推荐用户用FASTEST_MEM_QUEUE，如果要用内存队列，一般用MEMORY_QUEUE模式就好了。
     FASTEST_MEM_QUEUE = 'FASTEST_MEM_QUEUE'
 
     RABBITMQ_PIKA = 'RABBITMQ_PIKA'  # 使用pika包操作rabbitmq  作为 分布式消息队列。，不建议使用
@@ -10318,7 +10329,8 @@ class BrokerEnum:
     SQLACHEMY = 'SQLACHEMY'  # 基于SQLACHEMY 的连接作为分布式消息队列中间件支持持久化和消费确认。支持mysql oracle sqlserver等5种数据库。
 
     ROCKETMQ = 'ROCKETMQ'  # 基于 rocketmq 作为分布式消息队列，这个中间件必须在linux下运行，win不支持。
-
+    ROCKETMQ5 = 'ROCKETMQ5'  # 基于 rocketmq 5.x 作为分布式消息队列，使用SimpleConsumer类，适合独立单条ack
+    
     ZEROMQ = 'ZEROMQ'  # 基于zeromq作为分布式消息队列，不需要安装中间件，可以支持跨机器但不支持持久化。
 
 
@@ -10352,7 +10364,9 @@ class BrokerEnum:
 
     GRPC = 'GRPC' # 使用知名grpc作为broker,可以使用 sync_call 方法同步获取grpc的结果, 简单程度暴击用户手写原生的 grpc客户端 服务端
 
-    NATS = 'NATS'  # 高性能中间件nats,中间件服务端性能很好,。
+    NATS_CORE = 'NATS_CORE'  # 高性能中间件nats Core模式(无持久化),使用nats-py官方asyncio客户端。pip install nats-py
+
+    NATS_JETSTREAM = 'NATS_JETSTREAM'  # NATS JetStream持久化模式,支持消费确认/持久化/消费者组。用法见 contrib/register_custom_broker_contrib/nats_jetstream_broker.py
 
     TXT_FILE = 'TXT_FILE'  # 磁盘txt文件作为消息队列，支持单机持久化，不支持多机分布式。不建议这个，用sqlite。
 
@@ -10384,8 +10398,7 @@ class BrokerEnum:
     日志文件、文件系统变更（inotify）、甚至是硬件传感器的信号，按照4.21章节文档，都可以被封装成一个 funboost 的 Broker。
 
     充分说明 funboost 有能力化身为 通用的、事件驱动的函数调度平台,而非仅仅是celery这种传统的消息驱动.
-    """
-    """
+  
     funboost 有能力消费canal发到kafka的binlog消息,也能不依赖canal,自己捕获cdc数据
     """
     MYSQL_CDC = 'MYSQL_CDC'
@@ -10401,7 +10414,7 @@ class BrokerEnum:
     """
     POSTGRES = 'POSTGRES'
     
-    WATCHDOG = 'WATCHDOG' # 使用python watchdog 库监控文件夹文件变更事件,自动触发消费
+    WATCHDOG = 'WATCHDOG' # 使用python watchdog 库监控文件夹文件变更事件,自动触发python函数消费。支持已存在文件和防抖，原生watchdog不支持。
     
     WEBSOCKET = 'WEBSOCKET' # 使用websocket作为broker,支持实时双向通信  
 
@@ -25055,8 +25068,10 @@ boost_scrapy 就是这样的框架，使用 funboost的引擎来封装的，封�
 ﻿
 # 🤖 AI 上下文阅读协议 (由 nb_ai_context 生成)
 
+> **此文档生成时间**：2026-05-09 19:32:12
 > **系统指令**：你正在解析一份由工具 **`nb_ai_context`** 自动生成的**结构化项目快照**。
-> **文档性质**：这**不是**一份普通的面向人类的文档，而是专为 AI 大模型（LLM）设计的上下文数据流。它将项目文档、源代码和 AST 架构元数据进行了特殊的结构化合并，请开启“代码解析器”的心智模式。
+> **文档性质**：这**不是**一份普通的面向人类的文档，而是专为 AI 大模型（LLM）设计的上下文数据流。它将项目文档、源代码和 AST 架构元数据进行了特殊的结构化合并，请开启"代码解析器"的心智模式。
+
 
 ## 🧠 AI 认知与解析准则
 
@@ -25709,7 +25724,7 @@ funboost也内置支持了各种python三方包和消费框架作为broker,例�
 用户也可以按照文档4.21章节,轻松扩展任何物质概念作为funboost的broker.
 `````
 
-**Class Variables (53):**
+**Class Variables (54):**
 - `EMPTY = 'EMPTY'`
 - `RABBITMQ_AMQPSTORM = 'RABBITMQ_AMQPSTORM'`
 - `RABBITMQ = RABBITMQ_AMQPSTORM`
@@ -25750,7 +25765,8 @@ funboost也内置支持了各种python三方包和消费框架作为broker,例�
 - `TCP = 'TCP'`
 - `HTTP = 'HTTP'`
 - `GRPC = 'GRPC'`
-- `NATS = 'NATS'`
+- `NATS_CORE = 'NATS_CORE'`
+- `NATS_JETSTREAM = 'NATS_JETSTREAM'`
 - `TXT_FILE = 'TXT_FILE'`
 - `PEEWEE = 'PEEWEE'`
 - `CELERY = 'CELERY'`
@@ -25765,7 +25781,7 @@ funboost也内置支持了各种python三方包和消费框架作为broker,例�
 - `WEBSOCKET = 'WEBSOCKET'`
 
 ##### 📌 `class ConcurrentModeEnum`
-*Line: 199*
+*Line: 201*
 
 **Docstring:**
 `````
@@ -25784,7 +25800,7 @@ funboost的多进程和多线程 asyncio是叠加的，不是互斥的。
 - `SOLO = SINGLE_THREAD`
 
 ##### 📌 `class FunctionKind`
-*Line: 217*
+*Line: 219*
 
 **Docstring:**
 `````
@@ -25799,7 +25815,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `COMMON_FUNCTION = 'COMMON_FUNCTION'`
 
 ##### 📌 `class ConstStrForClassMethod`
-*Line: 228*
+*Line: 230*
 
 **Class Variables (5):**
 - `FIRST_PARAM_NAME = 'first_param_name'`
@@ -25809,7 +25825,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `CLS_FILE = 'cls_file'`
 
 ##### 📌 `class RedisKeys`
-*Line: 236*
+*Line: 238*
 
 **Public Methods (9):**
 - `def gen_funboost_apscheduler_redis_lock_key_by_queue_name(queue_name)` `staticmethod`
@@ -25846,7 +25862,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `FUNBOOST_UNACK_REGISTRY_PREFIX = 'funboost_unack_registry:'`
 
 ##### 📌 `class ConsumingFuncInputParamsCheckerField`
-*Line: 300*
+*Line: 302*
 
 **Class Variables (6):**
 - `is_manual_func_input_params = 'is_manual_func_input_params'`
@@ -25857,14 +25873,14 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `func_position = 'func_position'`
 
 ##### 📌 `class MongoDbName`
-*Line: 309*
+*Line: 311*
 
 **Class Variables (2):**
 - `TASK_STATUS_DB = 'funboost_task_status'`
 - `MONGOMQ_DB = 'funboost_mongomq'`
 
 ##### 📌 `class StrConst`
-*Line: 313*
+*Line: 315*
 
 **Class Variables (4):**
 - `BOOSTER_REGISTRY_NAME_DEFAULT = 'booster_registry_default'`
@@ -25873,7 +25889,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `FILTERED_TASK_RESULT = 'filtered_task_result'`
 
 ##### 📌 `class EnvConst`
-*Line: 319*
+*Line: 321*
 
 **Class Variables (2):**
 - `FUNBOOST_FAAS_CARE_PROJECT_NAME = 'funboost.faas.care_project_name'`
@@ -28882,7 +28898,7 @@ class BoosterParams(BaseJsonAbleModel):
 
 > 本文档专为 AI 设计，用于快速定位 funboost 源码中的类、函数、模块位置。
 >
-> 生成时间: 2026-04-17 （请注意时间，部分代码文件的行号有可能会随时间发生小幅变化）
+> 生成时间: 2026-05-09 （请注意时间，部分代码文件的行号有可能会随时间发生小幅变化）
 >
 > 源码根目录: `funboost/funboost/`
 >
@@ -28966,7 +28982,7 @@ funboost/
 │   ├── pulsar_consumer.py         # Pulsar
 │   ├── nsq_consumer.py            # NSQ
 │   ├── mqtt_consumer.py           # MQTT
-│   ├── nats_consumer.py           # NATS
+│   ├── (已移至 contrib/register_custom_broker_contrib/nats_core_broker.py)
 │   ├── zeromq_consumer.py         # ZeroMQ
 │   ├── mongomq_consumer.py        # MongoDB
 │   ├── persist_queue_consumer.py  # SQLite (persistqueue)
@@ -29015,7 +29031,7 @@ funboost/
 │   ├── pulsar_publisher.py        # Pulsar
 │   ├── nsq_publisher.py           # NSQ
 │   ├── mqtt_publisher.py          # MQTT
-│   ├── nats_publisher.py          # NATS
+│   ├── (已移至 contrib/register_custom_broker_contrib/nats_core_broker.py)
 │   ├── zeromq_publisher.py        # ZeroMQ
 │   ├── mongomq_publisher.py       # MongoDB
 │   ├── persist_queue_publisher.py # SQLite (persistqueue)
@@ -29099,6 +29115,14 @@ funboost/
 │   ├── register_custom_broker_contrib/    # 自定义broker
 │   │   ├── watchdog_broker.py     # WatchdogPublisher/Consumer 文件监控
 │   │   └── websocket_broker.py    # WebSocketPublisher/Consumer
+│   ├── funspider/                         # 爬虫辅助扩展(httpx+SQLModel)
+│   │   ├── __init__.py            # 导出 SimpleSpiderClient, AsyncSpiderClient, SpiderItem
+│   │   ├── http.py                # SpiderResponse, SimpleSpiderClient, AsyncSpiderClient
+│   │   ├── item.py                # SpiderItem (SQLModel ORM, sync/async insert/upsert)
+│   │   ├── README.md              # funspider说明文档
+│   │   └── funspider_demos/       # 爬虫示例
+│   │       ├── funspider_demo1.py # 新闻爬虫完整示例(同步+异步混用)
+│   │       └── fake_news_site.py  # 模拟新闻网站(FastAPI)
 │   └── save_function_result_status/       # 结果持久化
 │       ├── readme.md                      # 结果持久化说明
 │       ├── save_result_status_to_sqldb.py
@@ -29132,7 +29156,8 @@ funboost/
 │   │   ├── web_helper.py          # IP/hostname
 │   │   ├── system_monitor.py      # 系统监控API
 │   │   ├── script_deploy.py       # 脚本部署CRUD
-│   │   └── log_viewer.py          # 日志查看器
+│   │   ├── log_viewer.py          # 日志查看器
+│   │   └── queue_alerts.py        # 队列告警系统(积压/QPS/掉线/失败率/耗时)
 │   ├── templates/                 # 15个HTML模板
 │   │   ├── index.html             # 首页
 │   │   ├── login.html             # 登录页
@@ -29149,6 +29174,7 @@ funboost/
 │   │   ├── deploy_detail.html     # 部署详情
 │   │   ├── log_viewer.html        # 日志查看器
 │   │   ├── system_monitor.html    # 系统监控
+│   │   ├── queue_alerts.html      # 告警配置页面(规则CRUD+告警记录+测试通知)
 │   │   └── app.py中仍在使用的路由.md  # 路由参考文档
 │   ├── _ai_do_tasks_md/           # AI任务备忘
 │   │   ├── ai写web必须遵守的.md
@@ -29302,7 +29328,7 @@ RPC:  is_using_rpc_mode, rpc_result_expire_seconds, rpc_timeout
 | RabbitMQ | `RABBITMQ_AMQPSTORM`(=`RABBITMQ`), `RABBITMQ_COMPLEX_ROUTING` |
 | Kafka | `KAFKA`, `KAFKA_CONFLUENT` |
 | RocketMQ | `ROCKETMQ`, `ROCKETMQ5` |
-| 其他MQ | `PULSAR`, `NSQ`, `MQTT`, `NATS`, `ZEROMQ`, `SQS`, `HTTPSQS` |
+| 其他MQ | `PULSAR`, `NSQ`, `MQTT`, `NATS_CORE`, `NATS_JETSTREAM`, `ZEROMQ`, `SQS`, `HTTPSQS` |
 | 内存/文件 | `MEMORY_QUEUE`, `FASTEST_MEM_QUEUE`, `SQLITE_QUEUE`(=`PERSISTQUEUE`), `TXT_FILE` |
 | 数据库 | `MONGOMQ`, `SQLACHEMY`, `POSTGRES`, `PEEWEE` |
 | 网络协议 | `TCP`, `UDP`, `HTTP`, `GRPC`, `WEBSOCKET` |
@@ -29743,7 +29769,19 @@ def generate_broker_exclusive_config()           # 生成merged配置
 | `redis_hash_update_broker.py` | `RedisHashUpdatePublisher`, `RedisHashUpdateConsumer` | Redis HASH 可更新覆盖消息(latest-wins语义) |
 | `celery_pool_as_funboost_broker.py` | `CeleryPoolPublisher`, `CeleryPoolConsumer` | 复用 CeleryPool 作为 funboost broker |
 
-### 8.3 其他 Contrib
+### 8.3 funspider 爬虫辅助扩展 (`contrib/funspider/`)
+
+> 基于 httpx + SQLModel 的爬虫辅助组件，提供 ORM 模型与同步/异步双引擎客户端。
+> 导入路径: `from funboost.contrib.funspider import SimpleSpiderClient, AsyncSpiderClient, SpiderItem, Field, create_engine, create_async_engine`
+
+| 文件 | 核心类 | 功能 |
+|------|--------|------|
+| `http.py` | `SpiderResponse` | 统一封装 httpx 响应，内置 `.xpath()`/`.css()`/`.re()`/`.resp_dict` |
+| `http.py` | `SimpleSpiderClient` | 同步爬虫客户端(httpx.Client)，支持重试+代理函数列表+随机UA |
+| `http.py` | `AsyncSpiderClient` | 异步爬虫客户端(httpx.AsyncClient)，同上 |
+| `item.py` | `SpiderItem` | SQLModel ORM 基类，`.insert()`/`.upsert()`/`.aio_insert()`/`.aio_upsert()` |
+
+### 8.4 其他 Contrib
 
 | 文件 | 功能 |
 |------|------|
@@ -29880,6 +29918,7 @@ start_funboost_web_manager()   # 启动Web管理界面
 | `system_monitor.py` | Redis心跳采集, 系统监控API |
 | `script_deploy.py` | 脚本部署CRUD, Git操作, 进程控制, 日志tail |
 | `log_viewer.py` | 日志查看器(文件夹白名单, tail, grep, stream) |
+| `queue_alerts.py` | 队列告警系统: 5种告警类型(积压/QPS骤降/消费者掉线/失败率飙升/耗时过高)，多通道通知(钉钉/企微/飞书/Webhook)，告警去抖，后台10秒轮询检查 |
 | `web_helper.py` | IP/hostname辅助函数 |
 
 ---
@@ -29919,7 +29958,8 @@ start_funboost_web_manager()   # 启动Web管理界面
 | `PULSAR` | `PulsarConsumer` | `consumers/pulsar_consumer.py` | `PulsarPublisher` | `publishers/pulsar_publisher.py` |
 | `NSQ` | `NsqConsumer` | `consumers/nsq_consumer.py` | `NsqPublisher` | `publishers/nsq_publisher.py` |
 | `MQTT` | `MqttConsumer` | `consumers/mqtt_consumer.py` | `MqttPublisher` | `publishers/mqtt_publisher.py` |
-| `NATS` | `NatsConsumer` | `consumers/nats_consumer.py` | `NatsPublisher` | `publishers/nats_publisher.py` |
+| `NATS_CORE` | `NatsConsumer` | `contrib/register_custom_broker_contrib/nats_core_broker.py` | `NatsPublisher` | 同文件 |
+| `NATS_JETSTREAM` | `NatsJetStreamConsumer` | `contrib/register_custom_broker_contrib/nats_jetstream_broker.py` | `NatsJetStreamPublisher` | 同文件 |
 | `ZEROMQ` | `ZeromqConsumer` | `consumers/zeromq_consumer.py` | `ZeromqPublisher` | `publishers/zeromq_publisher.py` |
 | `SQLITE_QUEUE` | `PersistQueueConsumer` | `consumers/persist_queue_consumer.py` | `PersistQueuePublisher` | `publishers/persist_queue_publisher.py` |
 | `MONGOMQ` | `MongoMqConsumer` | `consumers/mongomq_consumer.py` | `MongoMqPublisher` | `publishers/mongomq_publisher.py` |
@@ -30103,6 +30143,10 @@ BoosterParams.consumer_override_cls = MyMixin
 | 怎么接OpenTelemetry / 链路追踪 | OpenTelemetry, tracing, 链路 | `contrib/override_publisher_consumer_cls/funboost_otel_mixin.py` |
 | 怎么监听文件变化触发任务 | 文件监控, watchdog, 文件变化 | `contrib/register_custom_broker_contrib/watchdog_broker.py` |
 | 怎么用WebSocket | WebSocket, ws | `contrib/register_custom_broker_contrib/websocket_broker.py` |
+| 怎么用NATS Core / NATS无持久化 | NATS, nats-py, Core | `contrib/register_custom_broker_contrib/nats_core_broker.py` |
+| 怎么用NATS JetStream / NATS持久化 | NATS, JetStream, nats-py, 持久化 | `contrib/register_custom_broker_contrib/nats_jetstream_broker.py` |
+| 怎么用funboost做爬虫 / 爬虫辅助 | 爬虫, spider, 爬取, httpx, funspider | `contrib/funspider/` (SimpleSpiderClient, AsyncSpiderClient, SpiderItem) |
+| 怎么配置队列告警 / 积压告警 / 掉线告警 | 告警, alert, 积压, 掉线, 通知 | `funweb/flask_bps/queue_alerts.py` |
 | 怎么远程部署 | 部署, deploy, fabric | `core/fabric_deploy_helper.py` L17 `fabric_deploy` |
 | Web管理界面怎么启动 | web, 管理界面, funweb, 后台 | `funweb/app.py` → `start_funboost_web_manager` |
 | 命令行怎么用 / CLI | 命令行, CLI, python -m | `core/cli/funboost_fire.py` L15 `BoosterFire` |
@@ -30162,6 +30206,10 @@ BoosterParams.consumer_override_cls = MyMixin
 | 告警通知 | `contrib/override_publisher_consumer_cls/alert_notifier_mixin.py` |
 | Watchdog broker | `contrib/register_custom_broker_contrib/watchdog_broker.py` |
 | WebSocket broker | `contrib/register_custom_broker_contrib/websocket_broker.py` |
+| NATS Core broker | `contrib/register_custom_broker_contrib/nats_core_broker.py` |
+| NATS JetStream | `contrib/register_custom_broker_contrib/nats_jetstream_broker.py` |
+| 爬虫辅助(funspider) | `contrib/funspider/` → `SimpleSpiderClient`, `AsyncSpiderClient`, `SpiderItem` |
+| 队列告警 | `funweb/flask_bps/queue_alerts.py` → `alert_bp`, `_check_rules_once` |
 | Redis管理 | `utils/redis_manager.py` → `RedisManager` (L35) / `RedisMixin` (L77) |
 | MongoDB | `utils/mongo_util.py` → `MongoMixin` (L20) |
 | 装饰器工具 | `utils/decorators.py` → `keep_circulating` (L102) 等 |
@@ -30511,7 +30559,6 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
     │   ├── mqtt_consumer.py
     │   ├── mysql_cdc_consumer.py
     │   ├── nameko_consumer.py
-    │   ├── nats_consumer.py
     │   ├── nsq_consumer.py
     │   ├── peewee_conusmer.py
     │   ├── persist_queue_consumer.py
@@ -30548,6 +30595,14 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
     │   │   └── mysql2mysql.py
     │   ├── django_db_deco.py
     │   ├── funboost框架的额外贡献功能.md
+    │   ├── funspider
+    │   │   ├── README.md
+    │   │   ├── __init__.py
+    │   │   ├── funspider_demos
+    │   │   │   ├── fake_news_site.py
+    │   │   │   └── funspider_demo1.py
+    │   │   ├── http.py
+    │   │   └── item.py
     │   ├── override_publisher_consumer_cls
     │   │   ├── README.md
     │   │   ├── __init__.py
@@ -30562,6 +30617,8 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
     │   ├── redis_consume_latest_msg_broker.py
     │   ├── register_custom_broker_contrib
     │   │   ├── celery_pool_as_funboost_broker.py
+    │   │   ├── nats_core_broker.py
+    │   │   ├── nats_jetstream_broker.py
     │   │   ├── redis_hash_update_broker.py
     │   │   ├── redis_zset_broker.py
     │   │   ├── watchdog_broker.py
@@ -30617,14 +30674,6 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
     │   ├── README.md
     │   ├── app.py
     │   └── functions.py
-    ├── funspider
-    │   ├── README.md
-    │   ├── __init__.py
-    │   ├── funspider_demos
-    │   │   ├── fake_news_site.py
-    │   │   └── funspider_demo1.py
-    │   ├── http.py
-    │   └── item.py
     ├── funweb
     │   ├── README.md
     │   ├── _ai_do_tasks_md
@@ -30661,7 +30710,6 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
     │   ├── mqtt_publisher.py
     │   ├── mysql_cdc_publisher.py
     │   ├── nameko_publisher.py
-    │   ├── nats_publisher.py
     │   ├── nsq_publisher.py
     │   ├── peewee_publisher.py
     │   ├── persist_queue_publisher.py
@@ -30876,8 +30924,6 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
 
 - `funboost/consumers/nameko_consumer.py`
 
-- `funboost/consumers/nats_consumer.py`
-
 - `funboost/consumers/nsq_consumer.py`
 
 - `funboost/consumers/peewee_conusmer.py`
@@ -30952,6 +30998,18 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
 
 - `funboost/contrib/cdc/__init__.py`
 
+- `funboost/contrib/funspider/http.py`
+
+- `funboost/contrib/funspider/item.py`
+
+- `funboost/contrib/funspider/README.md`
+
+- `funboost/contrib/funspider/__init__.py`
+
+- `funboost/contrib/funspider/funspider_demos/fake_news_site.py`
+
+- `funboost/contrib/funspider/funspider_demos/funspider_demo1.py`
+
 - `funboost/contrib/override_publisher_consumer_cls/alert_notifier_mixin.py`
 
 - `funboost/contrib/override_publisher_consumer_cls/circuit_breaker_mixin.py`
@@ -30971,6 +31029,10 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
 - `funboost/contrib/override_publisher_consumer_cls/__init__.py`
 
 - `funboost/contrib/register_custom_broker_contrib/celery_pool_as_funboost_broker.py`
+
+- `funboost/contrib/register_custom_broker_contrib/nats_core_broker.py`
+
+- `funboost/contrib/register_custom_broker_contrib/nats_jetstream_broker.py`
 
 - `funboost/contrib/register_custom_broker_contrib/redis_hash_update_broker.py`
 
@@ -31068,18 +31130,6 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
 
 - `funboost/funboost_web_manager/README.md`
 
-- `funboost/funspider/http.py`
-
-- `funboost/funspider/item.py`
-
-- `funboost/funspider/README.md`
-
-- `funboost/funspider/__init__.py`
-
-- `funboost/funspider/funspider_demos/fake_news_site.py`
-
-- `funboost/funspider/funspider_demos/funspider_demo1.py`
-
 - `funboost/funweb/app.py`
 
 - `funboost/funweb/app_debug_start.py`
@@ -31139,8 +31189,6 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
 - `funboost/publishers/mysql_cdc_publisher.py`
 
 - `funboost/publishers/nameko_publisher.py`
-
-- `funboost/publishers/nats_publisher.py`
 
 - `funboost/publishers/nsq_publisher.py`
 
@@ -31439,7 +31487,9 @@ class BrokerEnum:
 
     GRPC = 'GRPC' # 使用知名grpc作为broker,可以使用 sync_call 方法同步获取grpc的结果, 简单程度暴击用户手写原生的 grpc客户端 服务端
 
-    NATS = 'NATS'  # 高性能中间件nats,中间件服务端性能很好,。
+    NATS_CORE = 'NATS_CORE'  # 高性能中间件nats Core模式(无持久化),使用nats-py官方asyncio客户端。pip install nats-py
+
+    NATS_JETSTREAM = 'NATS_JETSTREAM'  # NATS JetStream持久化模式,支持消费确认/持久化/消费者组。用法见 contrib/register_custom_broker_contrib/nats_jetstream_broker.py
 
     TXT_FILE = 'TXT_FILE'  # 磁盘txt文件作为消息队列，支持单机持久化，不支持多机分布式。不建议这个，用sqlite。
 
@@ -39262,51 +39312,6 @@ def batch_start_nameko_service_in_new_process(boost_fun_list: typing.List, proce
 ---
 
 
---- **start of file: funboost/consumers/nats_consumer.py** (project: funboost) --- 
-
-`````python
-﻿import json
-# from pynats import NATSClient, NATSMessage  # noqa
-
-from funboost.consumers.base_consumer import AbstractConsumer
-from funboost.core.lazy_impoter import NatsImporter
-from funboost.funboost_config_deafult import BrokerConnConfig
-
-
-class NatsConsumer(AbstractConsumer):
-    """
-    nats作为中间件实现的。
-    """
-
-
-    def _dispatch_task(self):
-        # print(88888888888888)
-        nats_client = NatsImporter().NATSClient(BrokerConnConfig.NATS_URL, socket_timeout=600, socket_keepalive=True)
-        nats_client.connect()
-
-        def callback(msg: NatsImporter().NATSMessage):
-            # print(type(msg))
-            # print(msg.reply)
-            # print(f"Received a message with subject {msg.subject}: {msg.payload}")
-            kw = {'body': msg.payload}
-            self._submit_task(kw)
-
-        nats_client.subscribe(subject=self.queue_name, callback=callback)
-        nats_client.wait()
-
-    def _confirm_consume(self, kw):
-        pass   # 没有确认消费
-
-    def _requeue(self, kw):
-        self.publisher_of_same_queue.publish(kw['body'])
-
-`````
-
---- **end of file: funboost/consumers/nats_consumer.py** (project: funboost) --- 
-
----
-
-
 --- **start of file: funboost/consumers/nsq_consumer.py** (project: funboost) --- 
 
 `````python
@@ -40936,7 +40941,7 @@ except ImportError:
         '需要安装 rocketmq-python-client 包: pip install rocketmq-python-client\n'
         '这是 RocketMQ 5.x 的官方 Python SDK，支持 Windows/Linux/macOS'
     )
-class RocketmqConsumer(AbstractConsumer):
+class Rocketmq5Consumer(AbstractConsumer):
     """
     RocketMQ 5.x 消费者，使用 SimpleConsumer 模式
     
@@ -42037,6 +42042,774 @@ class MySql2Mysql:
 `````
 
 --- **end of file: funboost/contrib/cdc/__init__.py** (project: funboost) --- 
+
+---
+
+
+--- **start of file: funboost/contrib/funspider/http.py** (project: funboost) --- 
+
+`````python
+import json
+import random
+import httpx
+from parsel import Selector
+from typing import Optional, Dict, List, Callable
+from funboost.core.loggers import get_funboost_file_logger
+
+logger = get_funboost_file_logger('funspider.http')
+
+USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+]
+
+
+class SpiderResponse:
+    """统一封装 httpx 响应，提供 xpath/css/re 解析"""
+    def __init__(self, resp: httpx.Response):
+        self.status_code = resp.status_code
+        self.url = str(resp.url)
+        self._text = resp.text
+        self._selector: Optional[Selector] = None
+        self._resp_dict: Optional[dict] = None
+
+    @property
+    def selector(self) -> Selector:
+        if self._selector is None:
+            self._selector = Selector(text=self._text)
+        return self._selector
+
+    @property
+    def text(self) -> str:
+        return self._text
+
+    @property
+    def resp_dict(self) -> dict:
+        if self._resp_dict is None:
+            self._resp_dict = json.loads(self._text)
+        return self._resp_dict
+
+    def xpath(self, query: str) -> list:
+        return self.selector.xpath(query)
+
+    def css(self, query: str) -> list:
+        return self.selector.css(query)
+
+    def re(self, pattern: str) -> List[str]:
+        return self.selector.re(pattern)
+
+    def re_first(self, pattern: str) -> Optional[str]:
+        return self.selector.re_first(pattern)
+
+
+class BaseSpiderClient:
+    def __init__(
+        self,
+        retry_times: int = 2,
+        timeout: float = 30,
+        proxy_getter_list: Optional[List[Callable[[], Optional[str]]]] = None,
+        user_agents: Optional[List[str]] = None,
+    ):
+        self.retry_times = retry_times
+        self.timeout = timeout
+        self._proxy_getter_list = proxy_getter_list or []
+        self._proxy_index = 0
+        self._user_agents = user_agents or USER_AGENTS
+
+    def _random_ua(self) -> str:
+        return random.choice(self._user_agents)
+
+    def _merge_headers(self, headers: Dict[str, str]) -> Dict[str, str]:
+        h = {"User-Agent": self._random_ua()}
+        h.update(headers or {})
+        return h
+
+    def _get_proxy(self) -> Optional[str]:
+        if not self._proxy_getter_list:
+            return None
+        func = self._proxy_getter_list[self._proxy_index % len(self._proxy_getter_list)]
+        self._proxy_index += 1
+        return func()
+
+
+class SimpleSpiderClient(BaseSpiderClient):
+    """同步爬虫客户端 (httpx.Client)"""
+    def __init__(
+        self,
+        retry_times: int = 2,
+        timeout: float = 30,
+        proxy_getter_list: Optional[List[Callable[[], Optional[str]]]] = None,
+        user_agents: Optional[List[str]] = None,
+    ):
+        super().__init__(retry_times, timeout, proxy_getter_list, user_agents)
+        self.client = httpx.Client(timeout=self.timeout)
+
+    def request(self, method: str, url: str, **kwargs) -> SpiderResponse:
+        headers = self._merge_headers(kwargs.pop('headers', {}))
+        last_exc = None
+        for attempt in range(self.retry_times + 1):
+            try:
+                proxy = self._get_proxy()
+                if proxy:
+                    kwargs['proxy'] = proxy
+                resp = self.client.request(method, url, headers=headers, **kwargs)
+                resp.raise_for_status()
+                return SpiderResponse(resp)
+            except Exception as e:
+                last_exc = e
+                logger.warning(f"[Sync] {url} 请求失败 (第{attempt+1}次): {e}")
+        raise last_exc
+
+    def get(self, url: str, **kwargs) -> SpiderResponse:
+        return self.request("GET", url, **kwargs)
+
+    def post(self, url: str, **kwargs) -> SpiderResponse:
+        return self.request("POST", url, **kwargs)
+
+    def close(self):
+        self.client.close()
+
+
+class AsyncSpiderClient(BaseSpiderClient):
+    """异步爬虫客户端 (httpx.AsyncClient) – 不绑定 Loop，可在 Funboost ASYNC 模式自由使用"""
+    def __init__(
+        self,
+        retry_times: int = 2,
+        timeout: float = 30,
+        proxy_getter_list: Optional[List[Callable[[], Optional[str]]]] = None,
+        user_agents: Optional[List[str]] = None,
+    ):
+        super().__init__(retry_times, timeout, proxy_getter_list, user_agents)
+        self.client = httpx.AsyncClient(timeout=self.timeout)
+
+    async def request(self, method: str, url: str, **kwargs) -> SpiderResponse:
+        headers = self._merge_headers(kwargs.pop('headers', {}))
+        last_exc = None
+        for attempt in range(self.retry_times + 1):
+            try:
+                proxy = self._get_proxy()
+                if proxy:
+                    kwargs['proxy'] = proxy
+                resp = await self.client.request(method, url, headers=headers, **kwargs)
+                resp.raise_for_status()
+                return SpiderResponse(resp)
+            except Exception as e:
+                last_exc = e
+                logger.warning(f"[Async] {url} 请求失败 (第{attempt+1}次): {e}")
+        raise last_exc
+
+    async def get(self, url: str, **kwargs) -> SpiderResponse:
+        return await self.request("GET", url, **kwargs)
+
+    async def post(self, url: str, **kwargs) -> SpiderResponse:
+        return await self.request("POST", url, **kwargs)
+
+    async def aclose(self):
+        await self.client.aclose()
+`````
+
+--- **end of file: funboost/contrib/funspider/http.py** (project: funboost) --- 
+
+---
+
+
+--- **start of file: funboost/contrib/funspider/item.py** (project: funboost) --- 
+
+`````python
+import json
+from typing import List, Optional,Union
+from sqlmodel import SQLModel, Session, select,create_engine
+from sqlalchemy import Engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, AsyncEngine
+from sqlalchemy.orm import sessionmaker
+from funboost.core.loggers import get_funboost_file_logger
+
+logger = get_funboost_file_logger('funspider.item')
+
+class SpiderItem(SQLModel, table=False):
+    """
+    爬虫 Item 基类 – 同步/异步双引擎。
+    子类通过 __engine__ 绑定同步数据库，__async_engine__ 绑定异步数据库。
+    """
+
+    __engine__: Optional[Engine] = None  # 同步数据库引擎
+    __async_engine__: Optional[AsyncEngine] = None  # 异步数据库引擎
+    __async_session_factory__ = None  # 异步会话工厂（懒加载）
+    __default_upsert_unique_fields__: List[str] = []  # upsert 去重字段默认值，子类可覆盖。你如果不写的话 upsert时候需要传递 unique_fields 参数。
+
+    @classmethod
+    def _get_class_engine(cls) -> Engine:
+        if cls.__engine__ is not None:
+            return cls.__engine__
+        from sqlmodel import create_engine
+        return create_engine("sqlite:///funspider_default.db")
+
+    @classmethod
+    def _get_class_async_engine(cls):
+        if cls.__async_engine__ is not None:
+            return cls.__async_engine__
+        raise RuntimeError(f"{cls.__name__} 未设置 __async_engine__，无法使用异步方法。")
+
+    @classmethod
+    def _get_async_session_factory(cls):
+        if cls.__async_session_factory__ is None:
+            engine = cls._get_class_async_engine()
+            cls.__async_session_factory__ = sessionmaker(
+                engine, class_=AsyncSession, expire_on_commit=False
+            )
+        return cls.__async_session_factory__
+
+    @classmethod
+    def create_table(cls):
+        eng = cls._get_class_engine()
+        SQLModel.metadata.create_all(eng, tables=[cls.__table__])
+        logger.info(f"表 {cls.__tablename__} 已创建 (引擎: {eng.url})")
+
+    @classmethod
+    def _get_session(cls, engine: Engine):
+        return Session(engine)
+
+    def _resolve_engine(self, engine: Engine = None) -> Engine:
+        if engine is not None:
+            return engine
+        return self.__class__._get_class_engine()
+
+    def to_dict(self, exclude_unset: bool = False) -> dict:
+        if hasattr(self, "model_dump"):
+            return self.model_dump(exclude_unset=exclude_unset)
+        return self.dict(exclude_unset=exclude_unset)
+
+    def to_json(self, exclude_unset: bool = False) -> str:
+        return json.dumps(self.to_dict(exclude_unset=exclude_unset), ensure_ascii=False)
+
+    # ---------- 同步 ----------
+    def insert(self, engine: Engine = None):
+        eng = self._resolve_engine(engine)
+        with self._get_session(eng) as session:
+            session.add(self)
+            session.commit()
+            session.refresh(self)
+        return self
+
+    def upsert(self, unique_fields: List[str] = None, engine: Engine = None):
+        unique_fields = unique_fields or self.__class__.__default_upsert_unique_fields__
+        if not unique_fields:
+            raise ValueError(f"{self.__class__.__name__} 未设置 __default_upsert_unique_fields__，且调用 upsert 时未传 unique_fields")
+        eng = self._resolve_engine(engine)
+        with self._get_session(eng) as session:
+            filters = {f: getattr(self, f) for f in unique_fields}
+            stmt = select(type(self)).filter_by(**filters)
+            existing = session.exec(stmt).first()
+            if existing:
+                for key, val in self.to_dict(exclude_unset=True).items():
+                    setattr(existing, key, val)
+                session.add(existing)
+                session.commit()
+                session.refresh(existing)
+                return existing
+            session.add(self)
+            session.commit()
+            session.refresh(self)
+            return self
+
+    # ---------- 异步 ----------
+    async def aio_insert(self):
+        factory = self.__class__._get_async_session_factory()
+        async with factory() as session:
+            session.add(self)
+            await session.commit()
+            await session.refresh(self)
+        return self
+
+    async def aio_upsert(self, unique_fields: List[str] = None):
+        unique_fields = unique_fields or self.__class__.__default_upsert_unique_fields__
+        if not unique_fields:
+            raise ValueError(f"{self.__class__.__name__} 未设置 __default_upsert_unique_fields__，且调用 aio_upsert 时未传 unique_fields")
+        factory = self.__class__._get_async_session_factory()
+        async with factory() as session:
+            filters = {f: getattr(self, f) for f in unique_fields}
+            stmt = select(type(self)).filter_by(**filters)
+            result = await session.execute(stmt)
+            existing = result.scalar_one_or_none()
+            if existing:
+                for key, val in self.to_dict(exclude_unset=True).items():
+                    setattr(existing, key, val)
+                session.add(existing)
+                await session.commit()
+                await session.refresh(existing)
+                return existing
+            session.add(self)
+            await session.commit()
+            await session.refresh(self)
+            return self
+`````
+
+--- **end of file: funboost/contrib/funspider/item.py** (project: funboost) --- 
+
+---
+
+
+--- **start of file: funboost/contrib/funspider/README.md** (project: funboost) --- 
+
+`````markdown
+
+# 🕷️ funspider – Funboost 爬虫辅助扩展
+
+> **基于 `Funboost` 的工程化爬虫辅助组件，提供 ORM 模型与双引擎客户端。**
+
+**`funspider`** 是 `Funboost` 分布式函数调度框架的一个用户贡献扩展。如果说 `boost_spider` 代表着极致的**自由与简洁**，那么 `funspider` 则提供了一种**结构化与强类型**的辅助选择。
+
+它不是 `boost_spider` 的替代品，而是为偏爱 **ORM 模型驱动** 和 **异步协程收发** 的开发者提供的另一种趁手工具。
+
+---
+
+## ✨ 核心定位
+
+- ✅ **范式互补**：`boost_spider` 推崇纯字典流和极致自由；`funspider` 额外提供 SQLModel ORM 封装的选项，为复杂数据关系提供类型安全保障。
+- ✅ **双引擎客户端**：基于 `httpx`，内置 `SimpleSpiderClient`（同步）与 `AsyncSpiderClient`（异步），可在同一个爬虫项目中按需混用。
+- ✅ **强类型数据模型**：基于 `SQLModel`，支持 `VARCHAR(n)`、索引、外键等精确字段定义，享受 IDE 智能补全与静态检查。
+- ✅ **增强响应解析**：`SpiderResponse` 对象内置 `.xpath()`、`.css()`、`.re()` 等方法，无需切换工具即可快速提取数据。
+- ✅ **灵活代理接入**：支持传入自定义代理获取函数列表，轻松对接阿布云、快代理等任意商业代理服务。
+
+---
+
+## 📦 安装
+
+`funspider` 代码随 `funboost` 一起发布，但默认不安装其依赖项。
+
+**1. 安装 Funboost**
+```bash
+pip install funboost
+```
+
+**2. 按需安装相关依赖**
+```bash
+# 安装 funspider 所需的所有依赖
+pip install sqlmodel httpx parsel
+
+# 根据需求安装数据库驱动
+pip install pymysql aiomysql        # MySQL
+pip install psycopg2-binary         # PostgreSQL
+```
+
+---
+
+## 🚀 快速上手
+
+以下示例展示了 `funspider` 的核心用法：继承 `BoosterParams` 复用配置、使用强类型 `SpiderItem` 模型入库，以及混用同步和异步客户端。
+
+### 1. 定义数据模型 (ORM)
+
+```python
+from funboost.contrib.funspider import SpiderItem, Field, create_engine, create_async_engine
+
+class NewsItem(SpiderItem, table=True):
+    __tablename__ = "news"
+    __engine__ = create_engine("mysql+pymysql://user:pass@localhost/db")
+    __async_engine__ = create_async_engine("mysql+aiomysql://user:pass@localhost/db")
+    __default_upsert_unique_fields__ = ["news_id"]
+
+    id: int | None = Field(default=None, primary_key=True)
+    news_id: int = Field(unique=True)
+    title: str = Field(max_length=200)   # 精确控制 VARCHAR(200)
+    url: str = Field(max_length=500)
+    content: str                         # TEXT
+```
+
+### 2. 编写爬虫函数 (同步 + 异步混用)
+
+```python
+from funboost import boost, BoosterParams, BoostersManager, BrokerEnum, ConcurrentModeEnum
+from funboost.contrib.funspider import SimpleSpiderClient, AsyncSpiderClient
+
+NEWS_GROUP = "news_crawler"
+
+class NewsCrawlerParams(BoosterParams):
+    broker_kind: str = BrokerEnum.REDIS_ACK_ABLE
+    booster_group: str = NEWS_GROUP
+
+base_url = "https://example.com"
+
+def abuyun_proxy():
+    return "http://user:pass@proxy.abuyun.com:9020"
+
+def redis_pool_proxy():
+    import redis
+    r = redis.Redis(host="localhost", port=6379, db=0)
+    return r.srandmember("proxy_pool")
+
+sync_client = SimpleSpiderClient(proxy_getter_list=[abuyun_proxy, redis_pool_proxy], retry_times=3)
+async_client = AsyncSpiderClient(proxy_getter_list=[abuyun_proxy, redis_pool_proxy], retry_times=3)
+
+@boost(NewsCrawlerParams(queue_name="list", qps=2))
+def crawl_list(page: int):
+    resp = sync_client.get(f"{base_url}/list?page={page}")
+    for url in resp.css("a.detail::attr(href)").getall():
+        crawl_detail.push(detail_url=url)
+
+@boost(NewsCrawlerParams(queue_name="detail", qps=5))
+def crawl_detail(detail_url: str):
+    resp = sync_client.get(detail_url)
+    title = resp.xpath("//h1/text()").get()
+    news_id = int(resp.re_first(r"news/(\d+)"))
+    NewsItem(news_id=news_id, title=title, url=detail_url).upsert()
+    crawl_comments.push(news_id=news_id)
+
+@boost(NewsCrawlerParams(queue_name="comments", qps=10, concurrent_mode=ConcurrentModeEnum.ASYNC,
+                         do_task_filtering=True, task_filtering_expire_seconds=3600))
+async def crawl_comments(news_id: int):
+    resp = await async_client.get(f"{base_url}/comments/{news_id}")
+    for comment in resp.resp_dict["list"]:
+        await CommentItem(...).aio_upsert()
+```
+
+### 3. 启动消费
+
+```python
+if __name__ == "__main__":
+    BoostersManager.consume_group(NEWS_GROUP)
+    crawl_list.push(page=1)
+```
+
+---
+
+## 🔧 进阶配置
+
+### 自定义代理
+
+```python
+def abuyun_proxy():
+    return "http://user:pass@proxy.abuyun.com:9020"
+
+client = SimpleSpiderClient(proxy_getter_list=[abuyun_proxy])
+```
+
+---
+
+## 🆚 与 `boost_spider` 的风格对比
+
+`funspider` 和 `boost_spider` 都是基于 `Funboost` 的生产级爬虫解决方案。核心差异在于**设计哲学和开发范式**，而非能力强弱：
+
+| 特性 | `boost_spider` | `funspider` |
+|------|----------------|------------|
+| **设计理念** | **自由至上、极简字典流**。以最原生、最直接的方式让开发者掌控一切。 | **ORM 辅助、强类型流**。为习惯使用 ORM 模型管理数据的开发者提供便利封装。 |
+| **数据模型** | 纯 Python 字典。开发者可完全自定义如何建表和校验（如手写 DDL 或结合 SQLAlchemy）。 | SQLModel 模型类。将数据定义、字段校验和数据库同步集成在类属性中。 |
+| **字段控制** | 灵活。你完全控制建表语句，想约束什么字段长度和索引都行。 | 直观。在 ORM 模型中声明 `Field(max_length=200)`，IDE 自动补全。 |
+| **HTTP 客户端** | 同步 `RequestClient`，内置丰富代理、重试功能。 | 同步 + 异步双客户端，基于 `httpx`。 |
+| **代理配置** | 对象化配置，优雅简洁。 | 函数式注入，灵活自由。 |
+| **开发偏好** | 喜欢直接、轻量、完全掌控的纯粹 Python 体验。 | 偏好在大型项目中通过 ORM 标准管理数据库结构和关系。 |
+| **生产环境** | ✅ **完全胜任**，性能卓越，久经考验。 | ✅ **完全胜任**，结构清晰，便于团队协作。 |
+
+**选型建议**：
+-   如果你喜欢 `funboost` 那种“不加修饰、直接赋能”的爽快感，**`boost_spider`** 是无脑首选。
+-   如果你所在团队重度使用 SQLAlchemy/SQLModel，且希望爬虫的数据模型也能无缝融入项目 ORM 体系，**`funspider`** 会是更顺手的选择。
+
+---
+
+## 📖 完整示例
+
+参见源码目录下的演示文件：
+- 入口文件：`funspider/funspider_demos/funspider_demo1.py`
+- 模拟网站：`funspider/funspider_demos/fake_news_site.py`
+
+演示内容：
+- 新闻列表页（同步） → 详情页（同步） → 评论页（异步）
+- 同步/异步客户端混用
+- SQLModel 数据入库
+
+---
+
+## 🧠 设计哲学
+
+`funspider` 提供的仅仅是 `SpiderItem`, `SpiderResponse`, `SimpleSpiderClient`, `AsyncSpiderClient` 这几个**辅助类**。
+
+真正的核心竞争力——分布式调度、QPS 控频、自动重试、断点续传——完全由 **`Funboost`** 核心引擎驱动。
+
+我们希望你的爬虫代码是平铺直叙的函数，而不是层层嵌套的回调。
+`````
+
+--- **end of file: funboost/contrib/funspider/README.md** (project: funboost) --- 
+
+---
+
+
+--- **start of file: funboost/contrib/funspider/__init__.py** (project: funboost) --- 
+
+`````python
+from .http import SimpleSpiderClient, AsyncSpiderClient, SpiderResponse
+from .item import SpiderItem
+
+
+from sqlmodel import  Field, create_engine
+from sqlalchemy.ext.asyncio import create_async_engine
+
+`````
+
+--- **end of file: funboost/contrib/funspider/__init__.py** (project: funboost) --- 
+
+---
+
+
+--- **start of file: funboost/contrib/funspider/funspider_demos/fake_news_site.py** (project: funboost) --- 
+
+`````python
+import uvicorn
+from fastapi import FastAPI, Query
+from fastapi.responses import HTMLResponse, JSONResponse
+
+app = FastAPI()
+
+NEWS_DATA = [
+    {"id": i, "title": f"第{i}条新闻：{'人工智能' if i % 3 == 0 else '量子计算' if i % 3 == 1 else '航天探索'}领域重大突破", "summary": f"这是第{i}条新闻的摘要内容，涵盖了最新的科技动态。"}
+    for i in range(1, 51)
+]
+
+COMMENTS_DATA = {
+    i: [
+        {"id": j, "news_id": i, "user": f"user_{i}_{j}", "content": f"这是对第{i}条新闻的第{j}条评论，{'说得好！' if j % 2 == 0 else '有不同看法。'}", "like_count": (i * j) % 100}
+        for j in range(1, (i % 5) + 3)
+    ]
+    for i in range(1, 51)
+}
+
+
+@app.get("/", response_class=HTMLResponse)
+def index():
+    return '<h1>Fake News Site</h1><p><a href="/news/list?page=1">新闻列表</a></p>'
+
+
+@app.get("/news/list", response_class=HTMLResponse)
+def news_list(page: int = Query(1, ge=1), page_size: int = Query(10, ge=1, le=50)):
+    start = (page - 1) * page_size
+    end = start + page_size
+    items = NEWS_DATA[start:end]
+    total_pages = (len(NEWS_DATA) + page_size - 1) // page_size
+
+    rows = ""
+    for item in items:
+        rows += f'''
+        <tr>
+            <td>{item['id']}</td>
+            <td><a href="/news/detail/{item['id']}">{item['title']}</a></td>
+            <td>{item['summary'][:20]}...</td>
+        </tr>'''
+
+    nav = ""
+    if page > 1:
+        nav += f'<a class="prev-page" href="/news/list?page={page-1}&page_size={page_size}">上一页</a> '
+    if page < total_pages:
+        nav += f'<a class="next-page" href="/news/list?page={page+1}&page_size={page_size}">下一页</a>'
+
+    return f'''
+    <html><body>
+    <h1>新闻列表 - 第{page}页/共{total_pages}页</h1>
+    <table border="1" cellpadding="5">
+        <tr><th>ID</th><th>标题</th><th>摘要</th></tr>
+        {rows}
+    </table>
+    <p>{nav}</p>
+    </body></html>'''
+
+
+@app.get("/news/detail/{news_id}", response_class=HTMLResponse)
+def news_detail(news_id: int):
+    news = NEWS_DATA[news_id - 1] if 1 <= news_id <= len(NEWS_DATA) else None
+    if not news:
+        return HTMLResponse("<h1>404 新闻不存在</h1>", status_code=404)
+
+    comments = COMMENTS_DATA.get(news_id, [])
+    comment_rows = ""
+    for c in comments:
+        comment_rows += f'''
+        <tr>
+            <td>{c['user']}</td>
+            <td>{c['content']}</td>
+            <td>{c['like_count']}</td>
+        </tr>'''
+
+    return f'''
+    <html><body>
+    <h1>{news['title']}</h1>
+    <div class="content">
+        <p>{news['summary']}</p>
+        <p>这是第{news_id}条新闻的完整正文内容。当前新闻涉及领域正在经历快速发展，
+        多项关键技术取得突破性进展。专家表示，这一趋势将在未来几年持续加速，
+        对整个行业产生深远影响。</p>
+        <p>发布时间：2025-01-{news_id:02d} 10:00:00</p>
+        <p>作者：记者_{news_id}</p>
+        <p>分类：{"科技" if news_id % 2 == 0 else "社会"}</p>
+    </div>
+    <h2>评论 ({len(comments)}条)</h2>
+    <p><a href="/news/comments/{news_id}">查看全部评论</a></p>
+    <table border="1" cellpadding="5">
+        <tr><th>用户</th><th>内容</th><th>点赞</th></tr>
+        {comment_rows}
+    </table>
+    <p><a href="/news/list?page=1">返回列表</a></p>
+    </body></html>'''
+
+
+@app.get("/news/comments/{news_id}", response_class=JSONResponse)
+def news_comments(news_id: int):
+    if news_id not in COMMENTS_DATA:
+        return {"news_id": news_id, "comments": [], "total": 0}
+    comments = COMMENTS_DATA[news_id]
+    return {"news_id": news_id, "comments": comments, "total": len(comments)}
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8888)
+
+`````
+
+--- **end of file: funboost/contrib/funspider/funspider_demos/fake_news_site.py** (project: funboost) --- 
+
+---
+
+
+--- **start of file: funboost/contrib/funspider/funspider_demos/funspider_demo1.py** (project: funboost) --- 
+
+`````python
+import re
+from typing import ClassVar, Optional
+from funboost import boost, BoosterParams, BoostersManager, BrokerEnum, ctrl_c_recv, ConcurrentModeEnum
+from funboost.contrib.funspider import SimpleSpiderClient, AsyncSpiderClient, SpiderItem, create_engine, create_async_engine, Field
+
+NEWS_GROUP = "news_crawler"
+
+
+class NewsCrawlerParams(BoosterParams):
+    broker_kind: str = BrokerEnum.REDIS_ACK_ABLE
+    booster_group: str = NEWS_GROUP
+
+# ---------- 数据库 ----------
+MYSQL_ENGINE = create_engine("mysql+pymysql://root:123456@127.0.0.1:3306/testdb")
+ASYNC_MYSQL_ENGINE = create_async_engine("mysql+aiomysql://root:123456@127.0.0.1:3306/testdb")
+
+
+class NewsItem(SpiderItem, table=True):
+    __tablename__: ClassVar[str] = "news"
+    __engine__ = MYSQL_ENGINE
+    __async_engine__ = ASYNC_MYSQL_ENGINE
+    __default_upsert_unique_fields__ = ["news_id"]
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    news_id: int = Field(unique=True)
+    title: str
+    summary: str
+    content: str
+    author: str
+    category: str
+    publish_time: str
+    url: str
+
+
+class CommentItem(SpiderItem, table=True):
+    __tablename__: ClassVar[str] = "comments"
+    __engine__ = MYSQL_ENGINE
+    __async_engine__ = ASYNC_MYSQL_ENGINE
+    __default_upsert_unique_fields__ = ["comment_id"]
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    comment_id: int = Field(unique=True)
+    news_id: int
+    user: str
+    content: str
+    like_count: int
+
+
+NewsItem.create_table()
+CommentItem.create_table()
+
+def get_proxy_abuyun():
+    return "http://userxx:passwdxx@http-pro.abuyun.com:9000"
+
+def get_proxy_none():
+    return None
+
+# ---------- 客户端 ----------
+sync_client = SimpleSpiderClient(proxy_getter_list=[
+    # get_proxy_abuyun,
+ get_proxy_none
+ ])
+async_client = AsyncSpiderClient(proxy_getter_list=[
+    # get_proxy_abuyun,
+ get_proxy_none
+ ])
+
+BASE_URL = "http://127.0.0.1:8888"
+
+
+# ---------- 列表页爬虫（同步）：解析列表页，推送详情页任务 ----------
+@boost(NewsCrawlerParams(queue_name="news_list", qps=2))
+def crawl_list(page: int):
+    resp = sync_client.get(f"{BASE_URL}/news/list?page={page}")
+    links = resp.css("table a::attr(href)").getall()
+    for href in links:
+        if href and "/news/detail/" in href:
+            detail_url = f"{BASE_URL}{href}" if href.startswith("/") else href
+            crawl_detail.push(detail_url=detail_url)
+    next_href = resp.css("a.next-page::attr(href)").get("")
+    if next_href:
+        crawl_list.push(page=page + 1)
+
+
+# ---------- 详情页爬虫（同步）：解析新闻详情，保存新闻 + 推送评论任务 ----------
+@boost(NewsCrawlerParams(queue_name="news_detail", qps=5))
+def crawl_detail(detail_url: str):
+    resp = sync_client.get(detail_url)
+    title = resp.css("h1::text").get("").strip()
+    content_p = resp.css("div.content p::text").getall()
+    content = "\n".join(content_p) if content_p else ""
+    author = ""
+    category = ""
+    publish_time = ""
+    for p_text in content_p:
+        if p_text.startswith("作者："):
+            author = p_text.replace("作者：", "").strip()
+        elif p_text.startswith("分类："):
+            category = p_text.replace("分类：", "").strip()
+        elif p_text.startswith("发布时间："):
+            publish_time = p_text.replace("发布时间：", "").strip()
+    summary = content_p[0] if content_p else ""
+
+    news_id = int(re.search(r"/news/detail/(\d+)", detail_url).group(1))
+
+    NewsItem(
+        news_id=news_id, title=title, summary=summary,
+        content=content, author=author, category=category,
+        publish_time=publish_time, url=detail_url,
+    ).upsert()
+
+    crawl_comments.push(news_id=news_id)
+
+
+# ---------- 评论页爬虫（异步）：请求评论接口，保存评论 ----------
+@boost(NewsCrawlerParams(queue_name="news_comments", qps=10, concurrent_mode=ConcurrentModeEnum.ASYNC,
+                         do_task_filtering=True, task_filtering_expire_seconds=3600))
+async def crawl_comments(news_id: int):
+    resp = await async_client.get(f"{BASE_URL}/news/comments/{news_id}")
+    data = resp.resp_dict
+    for c in data.get("comments", []):
+        item = CommentItem(
+            comment_id=c["id"], news_id=c["news_id"],
+            user=c["user"], content=c["content"],
+            like_count=c["like_count"],
+        )
+        await item.aio_upsert()
+
+
+if __name__ == '__main__':
+    BoostersManager.consume_group(NEWS_GROUP)
+
+    crawl_list.push(page=1)
+
+    ctrl_c_recv()
+
+`````
+
+--- **end of file: funboost/contrib/funspider/funspider_demos/funspider_demo1.py** (project: funboost) --- 
 
 ---
 
@@ -45251,6 +46024,356 @@ if __name__ == '__main__':
 `````
 
 --- **end of file: funboost/contrib/register_custom_broker_contrib/celery_pool_as_funboost_broker.py** (project: funboost) --- 
+
+---
+
+
+--- **start of file: funboost/contrib/register_custom_broker_contrib/nats_core_broker.py** (project: funboost) --- 
+
+`````python
+# -*- coding: utf-8 -*-
+"""
+NATS Core Broker - 基于 NATS Core 的轻量级消息队列
+
+设计理念：
+    - 使用 nats-py (官方asyncio客户端) 实现 NATS Core 发布/订阅
+    - 轻量高性能，适用于对延迟敏感但不需要持久化的场景
+    - 不支持持久化和消费确认，消息丢失风险由业务层自行处理
+
+使用方式：
+    from funboost import boost, BoosterParams, BrokerEnum
+
+    @boost(BoosterParams(
+        queue_name='nats_core_queue',
+        broker_kind=BrokerEnum.NATS_CORE,
+    ))
+    def process_message(x, y):
+        return x + y
+
+    如需持久化+ACK，请使用 BrokerEnum.NATS_JETSTREAM
+
+依赖：
+    pip install nats-py
+"""
+
+import asyncio
+import threading
+
+import nats
+
+from funboost import register_custom_broker, AbstractConsumer, AbstractPublisher, BrokerEnum
+from funboost.funboost_config_deafult import BrokerConnConfig
+
+
+class NatsPublisher(AbstractPublisher):
+    """NATS Core 发布者，使用 nats-py 官方 asyncio 客户端"""
+
+    def custom_init(self):
+        self._loop = asyncio.new_event_loop()
+        self._loop_thread = threading.Thread(target=self._loop.run_forever, daemon=True)
+        self._loop_thread.start()
+
+        async def _connect():
+            self._nc = await nats.connect(
+                BrokerConnConfig.NATS_URL,
+                reconnect_time_wait=2,
+                max_reconnect_attempts=-1,
+            )
+
+        future = asyncio.run_coroutine_threadsafe(_connect(), self._loop)
+        future.result(timeout=10)
+        self.logger.info(f'NATS Core Publisher 连接成功: {BrokerConnConfig.NATS_URL}')
+
+    def _publish_impl(self, msg):
+        async def _pub():
+            await self._nc.publish(self.queue_name, msg.encode() if isinstance(msg, str) else msg)
+
+        future = asyncio.run_coroutine_threadsafe(_pub(), self._loop)
+        future.result(timeout=5)
+
+    def clear(self):
+        pass
+
+    def get_message_count(self):
+        return -1
+
+    def close(self):
+        if hasattr(self, '_nc'):
+            async def _close():
+                await self._nc.close()
+            try:
+                future = asyncio.run_coroutine_threadsafe(_close(), self._loop)
+                future.result(timeout=5)
+            except Exception:
+                pass
+        if hasattr(self, '_loop'):
+            self._loop.call_soon_threadsafe(self._loop.stop)
+
+
+class NatsConsumer(AbstractConsumer):
+    """
+    NATS Core 消费者，使用 nats-py 官方 asyncio 客户端。
+
+    注意: NATS Core 模式不支持持久化和消费确认。
+    如需持久化+ACK，请使用 NATS_JETSTREAM broker。
+    """
+
+    def _dispatch_task(self):
+        async def _run():
+            nc = await nats.connect(
+                BrokerConnConfig.NATS_URL,
+                reconnect_time_wait=2,
+                max_reconnect_attempts=-1,
+            )
+            self.logger.info(f'NATS Core 连接成功: {BrokerConnConfig.NATS_URL}')
+
+            async def message_handler(msg):
+                kw = {'body': msg.data}
+                self._submit_task(kw)
+
+            await nc.subscribe(self.queue_name, cb=message_handler)
+
+            stop_event = asyncio.Event()
+            await stop_event.wait()
+
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(_run())
+
+    def _confirm_consume(self, kw):
+        pass
+
+    def _requeue(self, kw):
+        self.publisher_of_same_queue.publish(kw['body'])
+
+
+register_custom_broker(BrokerEnum.NATS_CORE, NatsPublisher, NatsConsumer)
+
+`````
+
+--- **end of file: funboost/contrib/register_custom_broker_contrib/nats_core_broker.py** (project: funboost) --- 
+
+---
+
+
+--- **start of file: funboost/contrib/register_custom_broker_contrib/nats_jetstream_broker.py** (project: funboost) --- 
+
+`````python
+# -*- coding: utf-8 -*-
+"""
+NATS JetStream Broker - 基于 NATS JetStream 的持久化消息队列
+
+设计理念：
+    - 使用 NATS JetStream 实现消息持久化、消费确认、分组消费
+    - 比 NATS Core 更可靠，支持 ACK、消息回放、持久化订阅
+    - 适用于需要可靠消息传递但不想部署 RabbitMQ/Kafka 重型中间件的场景
+
+使用方式：
+    from funboost.contrib.register_custom_broker_contrib.nats_jetstream_broker import BROKER_KIND_NATS_JETSTREAM
+    
+    @boost(BoosterParams(
+        queue_name='jetstream_queue',
+        broker_kind=BROKER_KIND_NATS_JETSTREAM,
+        broker_exclusive_config={
+            'nats_url': 'nats://localhost:4222',  # 可选，默认从 BrokerConnConfig.NATS_URL 读
+            'stream_name': 'funboost',            # 可选，默认 'funboost'
+            'consumer_group': 'default',          # 可选，消费者组名
+            'ack_wait': 60,                       # 可选，ACK 超时秒数
+            'max_deliver': 3,                     # 可选，最大重投次数
+        }
+    ))
+    def process_message(x, y):
+        return x + y
+
+依赖：
+    pip install nats-py
+"""
+
+import asyncio
+import threading
+
+import nats
+import nats.errors
+from nats.js.api import ConsumerConfig
+
+from funboost import register_custom_broker, AbstractConsumer, AbstractPublisher, BrokerEnum
+from funboost.core.broker_kind__exclusive_config_default_define import register_broker_exclusive_config_default
+from funboost.funboost_config_deafult import BrokerConnConfig
+
+BROKER_KIND_NATS_JETSTREAM = BrokerEnum.NATS_JETSTREAM
+
+register_broker_exclusive_config_default(BROKER_KIND_NATS_JETSTREAM, {
+    'nats_url': '',
+    'stream_name': 'funboost',
+    'consumer_group': 'default',
+    'ack_wait': 60,
+    'max_deliver': 3,
+})
+
+
+class NatsJetStreamPublisher(AbstractPublisher):
+    """NATS JetStream 发布者，消息持久化到 Stream"""
+
+    def custom_init(self):
+        config = self.publisher_params.broker_exclusive_config
+        self._nats_url = config.get('nats_url') or BrokerConnConfig.NATS_URL
+        self._stream_name = config.get('stream_name', 'funboost')
+
+        self._loop = asyncio.new_event_loop()
+        self._loop_thread = threading.Thread(target=self._loop.run_forever, daemon=True)
+        self._loop_thread.start()
+
+        async def _init():
+            self._nc = await nats.connect(
+                self._nats_url,
+                reconnect_time_wait=2,
+                max_reconnect_attempts=-1,
+            )
+            self._js = self._nc.jetstream()
+            try:
+                await self._js.find_stream_name_by_subject(self._subject)
+            except Exception:
+                await self._js.add_stream(
+                    name=self._stream_name,
+                    subjects=[f"{self._stream_name}.*"],
+                    retention="workqueue",
+                )
+
+        future = asyncio.run_coroutine_threadsafe(_init(), self._loop)
+        future.result(timeout=15)
+        self.logger.info(f'NATS JetStream Publisher 初始化完成, stream={self._stream_name}')
+
+    @property
+    def _subject(self):
+        return f"{self._stream_name}.{self.queue_name}"
+
+    def _publish_impl(self, msg):
+        async def _pub():
+            data = msg.encode() if isinstance(msg, str) else msg
+            await self._js.publish(self._subject, data)
+
+        future = asyncio.run_coroutine_threadsafe(_pub(), self._loop)
+        future.result(timeout=10)
+
+    def clear(self):
+        async def _purge():
+            try:
+                await self._js.purge_stream(self._stream_name, subject=self._subject)
+            except Exception as e:
+                self.logger.warning(f'清空 JetStream 消息失败: {e}')
+
+        future = asyncio.run_coroutine_threadsafe(_purge(), self._loop)
+        future.result(timeout=10)
+
+    def get_message_count(self):
+        return -1
+
+    def close(self):
+        if hasattr(self, '_nc'):
+            async def _close():
+                await self._nc.close()
+            try:
+                future = asyncio.run_coroutine_threadsafe(_close(), self._loop)
+                future.result(timeout=5)
+            except Exception:
+                pass
+        if hasattr(self, '_loop'):
+            self._loop.call_soon_threadsafe(self._loop.stop)
+
+
+class NatsJetStreamConsumer(AbstractConsumer):
+    """
+    NATS JetStream 消费者
+
+    特点：
+    - 持久化消费（durable consumer），重启不丢失消费位置
+    - 支持消费确认（ACK），未确认的消息会重投
+    - 支持消费者组（多个消费者分摊消息）
+    - Pull 模式拉取消息
+    """
+
+    def custom_init(self):
+        config = self.consumer_params.broker_exclusive_config
+        self._nats_url = config.get('nats_url') or BrokerConnConfig.NATS_URL
+        self._stream_name = config.get('stream_name', 'funboost')
+        self._consumer_group = config.get('consumer_group', 'default')
+        self._ack_wait = config.get('ack_wait', 60)
+        self._max_deliver = config.get('max_deliver', 3)
+
+    @property
+    def _subject(self):
+        return f"{self._stream_name}.{self.queue_name}"
+
+    @property
+    def _durable_name(self):
+        return f"{self.queue_name}_{self._consumer_group}"
+
+    def _dispatch_task(self):
+        self._loop = asyncio.new_event_loop()
+
+        async def _run():
+            nc = await nats.connect(
+                self._nats_url,
+                reconnect_time_wait=2,
+                max_reconnect_attempts=-1,
+            )
+            js = nc.jetstream()
+
+            try:
+                await js.find_stream_name_by_subject(self._subject)
+            except Exception:
+                await js.add_stream(
+                    name=self._stream_name,
+                    subjects=[f"{self._stream_name}.*"],
+                    retention="workqueue",
+                )
+
+            sub = await js.pull_subscribe(
+                self._subject,
+                durable=self._durable_name,
+                config=ConsumerConfig(
+                    ack_wait=self._ack_wait,
+                    max_deliver=self._max_deliver,
+                ),
+            )
+            self.logger.info(
+                f'NATS JetStream 消费者启动, subject={self._subject}, '
+                f'durable={self._durable_name}'
+            )
+
+            while True:
+                try:
+                    msgs = await sub.fetch(batch=1, timeout=5)
+                    for msg in msgs:
+                        kw = {'body': msg.data, '_nats_msg': msg}
+                        self._submit_task(kw)
+                except nats.errors.TimeoutError:
+                    pass
+                except Exception as e:
+                    self.logger.error(f'JetStream 拉取消息异常: {e}')
+                    await asyncio.sleep(1)
+
+        asyncio.set_event_loop(self._loop)
+        self._loop.run_until_complete(_run())
+
+    def _confirm_consume(self, kw):
+        nats_msg = kw.get('_nats_msg')
+        if nats_msg:
+            future = asyncio.run_coroutine_threadsafe(nats_msg.ack(), self._loop)
+            future.result(timeout=5)
+
+    def _requeue(self, kw):
+        nats_msg = kw.get('_nats_msg')
+        if nats_msg:
+            future = asyncio.run_coroutine_threadsafe(nats_msg.nak(), self._loop)
+            future.result(timeout=5)
+
+
+register_custom_broker(BROKER_KIND_NATS_JETSTREAM, NatsJetStreamPublisher, NatsJetStreamConsumer)
+
+`````
+
+--- **end of file: funboost/contrib/register_custom_broker_contrib/nats_jetstream_broker.py** (project: funboost) --- 
 
 ---
 
@@ -51062,14 +52185,6 @@ class AioHttpImporter:
         self.Request = Request
 
 
-@singleton_no_lock
-class NatsImporter:
-    def __init__(self):
-        """pip install nats-python """
-        from pynats import NATSClient, NATSMessage
-        self.NATSClient = NATSClient
-        self.NATSMessage = NATSMessage
-
 
 @singleton_no_lock
 class GnsqImporter:
@@ -56428,7 +57543,6 @@ import typing
 
 from funboost.publishers.empty_publisher import EmptyPublisher
 
-from funboost.publishers.nats_publisher import NatsPublisher
 from funboost.publishers.peewee_publisher import PeeweePublisher
 from funboost.publishers.redis_publisher_lpush import RedisPublisherLpush
 from funboost.publishers.redis_publisher_priority import RedisPriorityPublisher
@@ -56460,7 +57574,6 @@ from funboost.consumers.kafka_consumer import KafkaConsumer
 from funboost.consumers.local_python_queue_consumer import LocalPythonQueueConsumer
 from funboost.consumers.fastest_mem_queue_consumer import FastestMemQueueConsumer
 from funboost.consumers.mongomq_consumer import MongoMqConsumer
-from funboost.consumers.nats_consumer import NatsConsumer
 
 from funboost.consumers.peewee_conusmer import PeeweeConsumer
 from funboost.consumers.persist_queue_consumer import PersistQueueConsumer
@@ -56504,7 +57617,6 @@ broker_kind__publsiher_consumer_type_map = {
     BrokerEnum.UDP: (UDPPublisher, UDPConsumer),
     BrokerEnum.TCP: (TCPPublisher, TCPConsumer),
 
-    BrokerEnum.NATS: (NatsPublisher, NatsConsumer),
     BrokerEnum.TXT_FILE: (TxtFilePublisher, TxtFileConsumer),
     BrokerEnum.PEEWEE: (PeeweePublisher, PeeweeConsumer),
     BrokerEnum.REDIS_PUBSUB: (RedisPubSubPublisher, RedisPbSubConsumer),
@@ -56539,6 +57651,8 @@ def regist_to_funboost(broker_kind: str):
     这样当用户需要使用某些三方包中间件作为消息队列时候，按照import报错信息，用户自己去pip安装好。或者 pip install funboost[all] 一次性安装所有中间件。
     建议按照 https://github.com/ydf0509/funboost/blob/master/setup.py 中的 extra_brokers 和 install_requires 里面的版本号来安装三方包版本.
     """
+
+
     if broker_kind == BrokerEnum.RABBITMQ_AMQPSTORM:
         from funboost.publishers.rabbitmq_amqpstorm_publisher import RabbitmqPublisherUsingAmqpStorm
         from funboost.consumers.rabbitmq_amqpstorm_consumer import RabbitmqConsumerAmqpStorm
@@ -56663,7 +57777,12 @@ def regist_to_funboost(broker_kind: str):
         
     if broker_kind in [BrokerEnum.REDIS_ZSET_PRIORITY, BrokerEnum.REDIS_ZSET_DELAY]:
         import funboost.contrib.register_custom_broker_contrib.redis_zset_broker # 已经在 redis_zset_broker.py 中注册了
-        
+
+    if broker_kind == BrokerEnum.NATS_JETSTREAM:
+        import funboost.contrib.register_custom_broker_contrib.nats_jetstream_broker  # 已经在 nats_jetstream_broker.py 中注册了
+    
+    if broker_kind == BrokerEnum.NATS_CORE:
+        import funboost.contrib.register_custom_broker_contrib.nats_core_broker  # 已经在 nats_core_broker.py 中注册了
 
 if __name__ == '__main__':
     import sys
@@ -56876,774 +57995,6 @@ funboost_web_manager名字太长了，用这个funweb做个简化，是一样的
 `````
 
 --- **end of file: funboost/funboost_web_manager/README.md** (project: funboost) --- 
-
----
-
-
---- **start of file: funboost/funspider/http.py** (project: funboost) --- 
-
-`````python
-import json
-import random
-import httpx
-from parsel import Selector
-from typing import Optional, Dict, List, Callable
-from funboost.core.loggers import get_funboost_file_logger
-
-logger = get_funboost_file_logger('funspider.http')
-
-USER_AGENTS = [
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-]
-
-
-class SpiderResponse:
-    """统一封装 httpx 响应，提供 xpath/css/re 解析"""
-    def __init__(self, resp: httpx.Response):
-        self.status_code = resp.status_code
-        self.url = str(resp.url)
-        self._text = resp.text
-        self._selector: Optional[Selector] = None
-        self._resp_dict: Optional[dict] = None
-
-    @property
-    def selector(self) -> Selector:
-        if self._selector is None:
-            self._selector = Selector(text=self._text)
-        return self._selector
-
-    @property
-    def text(self) -> str:
-        return self._text
-
-    @property
-    def resp_dict(self) -> dict:
-        if self._resp_dict is None:
-            self._resp_dict = json.loads(self._text)
-        return self._resp_dict
-
-    def xpath(self, query: str) -> list:
-        return self.selector.xpath(query)
-
-    def css(self, query: str) -> list:
-        return self.selector.css(query)
-
-    def re(self, pattern: str) -> List[str]:
-        return self.selector.re(pattern)
-
-    def re_first(self, pattern: str) -> Optional[str]:
-        return self.selector.re_first(pattern)
-
-
-class BaseSpiderClient:
-    def __init__(
-        self,
-        retry_times: int = 2,
-        timeout: float = 30,
-        proxy_getter_list: Optional[List[Callable[[], Optional[str]]]] = None,
-        user_agents: Optional[List[str]] = None,
-    ):
-        self.retry_times = retry_times
-        self.timeout = timeout
-        self._proxy_getter_list = proxy_getter_list or []
-        self._proxy_index = 0
-        self._user_agents = user_agents or USER_AGENTS
-
-    def _random_ua(self) -> str:
-        return random.choice(self._user_agents)
-
-    def _merge_headers(self, headers: Dict[str, str]) -> Dict[str, str]:
-        h = {"User-Agent": self._random_ua()}
-        h.update(headers or {})
-        return h
-
-    def _get_proxy(self) -> Optional[str]:
-        if not self._proxy_getter_list:
-            return None
-        func = self._proxy_getter_list[self._proxy_index % len(self._proxy_getter_list)]
-        self._proxy_index += 1
-        return func()
-
-
-class SimpleSpiderClient(BaseSpiderClient):
-    """同步爬虫客户端 (httpx.Client)"""
-    def __init__(
-        self,
-        retry_times: int = 2,
-        timeout: float = 30,
-        proxy_getter_list: Optional[List[Callable[[], Optional[str]]]] = None,
-        user_agents: Optional[List[str]] = None,
-    ):
-        super().__init__(retry_times, timeout, proxy_getter_list, user_agents)
-        self.client = httpx.Client(timeout=self.timeout)
-
-    def request(self, method: str, url: str, **kwargs) -> SpiderResponse:
-        headers = self._merge_headers(kwargs.pop('headers', {}))
-        last_exc = None
-        for attempt in range(self.retry_times + 1):
-            try:
-                proxy = self._get_proxy()
-                if proxy:
-                    kwargs['proxy'] = proxy
-                resp = self.client.request(method, url, headers=headers, **kwargs)
-                resp.raise_for_status()
-                return SpiderResponse(resp)
-            except Exception as e:
-                last_exc = e
-                logger.warning(f"[Sync] {url} 请求失败 (第{attempt+1}次): {e}")
-        raise last_exc
-
-    def get(self, url: str, **kwargs) -> SpiderResponse:
-        return self.request("GET", url, **kwargs)
-
-    def post(self, url: str, **kwargs) -> SpiderResponse:
-        return self.request("POST", url, **kwargs)
-
-    def close(self):
-        self.client.close()
-
-
-class AsyncSpiderClient(BaseSpiderClient):
-    """异步爬虫客户端 (httpx.AsyncClient) – 不绑定 Loop，可在 Funboost ASYNC 模式自由使用"""
-    def __init__(
-        self,
-        retry_times: int = 2,
-        timeout: float = 30,
-        proxy_getter_list: Optional[List[Callable[[], Optional[str]]]] = None,
-        user_agents: Optional[List[str]] = None,
-    ):
-        super().__init__(retry_times, timeout, proxy_getter_list, user_agents)
-        self.client = httpx.AsyncClient(timeout=self.timeout)
-
-    async def request(self, method: str, url: str, **kwargs) -> SpiderResponse:
-        headers = self._merge_headers(kwargs.pop('headers', {}))
-        last_exc = None
-        for attempt in range(self.retry_times + 1):
-            try:
-                proxy = self._get_proxy()
-                if proxy:
-                    kwargs['proxy'] = proxy
-                resp = await self.client.request(method, url, headers=headers, **kwargs)
-                resp.raise_for_status()
-                return SpiderResponse(resp)
-            except Exception as e:
-                last_exc = e
-                logger.warning(f"[Async] {url} 请求失败 (第{attempt+1}次): {e}")
-        raise last_exc
-
-    async def get(self, url: str, **kwargs) -> SpiderResponse:
-        return await self.request("GET", url, **kwargs)
-
-    async def post(self, url: str, **kwargs) -> SpiderResponse:
-        return await self.request("POST", url, **kwargs)
-
-    async def aclose(self):
-        await self.client.aclose()
-`````
-
---- **end of file: funboost/funspider/http.py** (project: funboost) --- 
-
----
-
-
---- **start of file: funboost/funspider/item.py** (project: funboost) --- 
-
-`````python
-import json
-from typing import List, Optional,Union
-from sqlmodel import SQLModel, Session, select,create_engine
-from sqlalchemy import Engine
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, AsyncEngine
-from sqlalchemy.orm import sessionmaker
-from funboost.core.loggers import get_funboost_file_logger
-
-logger = get_funboost_file_logger('funspider.item')
-
-class SpiderItem(SQLModel, table=False):
-    """
-    爬虫 Item 基类 – 同步/异步双引擎。
-    子类通过 __engine__ 绑定同步数据库，__async_engine__ 绑定异步数据库。
-    """
-
-    __engine__: Optional[Engine] = None  # 同步数据库引擎
-    __async_engine__: Optional[AsyncEngine] = None  # 异步数据库引擎
-    __async_session_factory__ = None  # 异步会话工厂（懒加载）
-    __default_upsert_unique_fields__: List[str] = []  # upsert 去重字段默认值，子类可覆盖。你如果不写的话 upsert时候需要传递 unique_fields 参数。
-
-    @classmethod
-    def _get_class_engine(cls) -> Engine:
-        if cls.__engine__ is not None:
-            return cls.__engine__
-        from sqlmodel import create_engine
-        return create_engine("sqlite:///funspider_default.db")
-
-    @classmethod
-    def _get_class_async_engine(cls):
-        if cls.__async_engine__ is not None:
-            return cls.__async_engine__
-        raise RuntimeError(f"{cls.__name__} 未设置 __async_engine__，无法使用异步方法。")
-
-    @classmethod
-    def _get_async_session_factory(cls):
-        if cls.__async_session_factory__ is None:
-            engine = cls._get_class_async_engine()
-            cls.__async_session_factory__ = sessionmaker(
-                engine, class_=AsyncSession, expire_on_commit=False
-            )
-        return cls.__async_session_factory__
-
-    @classmethod
-    def create_table(cls):
-        eng = cls._get_class_engine()
-        SQLModel.metadata.create_all(eng, tables=[cls.__table__])
-        logger.info(f"表 {cls.__tablename__} 已创建 (引擎: {eng.url})")
-
-    @classmethod
-    def _get_session(cls, engine: Engine):
-        return Session(engine)
-
-    def _resolve_engine(self, engine: Engine = None) -> Engine:
-        if engine is not None:
-            return engine
-        return self.__class__._get_class_engine()
-
-    def to_dict(self, exclude_unset: bool = False) -> dict:
-        if hasattr(self, "model_dump"):
-            return self.model_dump(exclude_unset=exclude_unset)
-        return self.dict(exclude_unset=exclude_unset)
-
-    def to_json(self, exclude_unset: bool = False) -> str:
-        return json.dumps(self.to_dict(exclude_unset=exclude_unset), ensure_ascii=False)
-
-    # ---------- 同步 ----------
-    def insert(self, engine: Engine = None):
-        eng = self._resolve_engine(engine)
-        with self._get_session(eng) as session:
-            session.add(self)
-            session.commit()
-            session.refresh(self)
-        return self
-
-    def upsert(self, unique_fields: List[str] = None, engine: Engine = None):
-        unique_fields = unique_fields or self.__class__.__default_upsert_unique_fields__
-        if not unique_fields:
-            raise ValueError(f"{self.__class__.__name__} 未设置 __default_upsert_unique_fields__，且调用 upsert 时未传 unique_fields")
-        eng = self._resolve_engine(engine)
-        with self._get_session(eng) as session:
-            filters = {f: getattr(self, f) for f in unique_fields}
-            stmt = select(type(self)).filter_by(**filters)
-            existing = session.exec(stmt).first()
-            if existing:
-                for key, val in self.to_dict(exclude_unset=True).items():
-                    setattr(existing, key, val)
-                session.add(existing)
-                session.commit()
-                session.refresh(existing)
-                return existing
-            session.add(self)
-            session.commit()
-            session.refresh(self)
-            return self
-
-    # ---------- 异步 ----------
-    async def aio_insert(self):
-        factory = self.__class__._get_async_session_factory()
-        async with factory() as session:
-            session.add(self)
-            await session.commit()
-            await session.refresh(self)
-        return self
-
-    async def aio_upsert(self, unique_fields: List[str] = None):
-        unique_fields = unique_fields or self.__class__.__default_upsert_unique_fields__
-        if not unique_fields:
-            raise ValueError(f"{self.__class__.__name__} 未设置 __default_upsert_unique_fields__，且调用 aio_upsert 时未传 unique_fields")
-        factory = self.__class__._get_async_session_factory()
-        async with factory() as session:
-            filters = {f: getattr(self, f) for f in unique_fields}
-            stmt = select(type(self)).filter_by(**filters)
-            result = await session.execute(stmt)
-            existing = result.scalar_one_or_none()
-            if existing:
-                for key, val in self.to_dict(exclude_unset=True).items():
-                    setattr(existing, key, val)
-                session.add(existing)
-                await session.commit()
-                await session.refresh(existing)
-                return existing
-            session.add(self)
-            await session.commit()
-            await session.refresh(self)
-            return self
-`````
-
---- **end of file: funboost/funspider/item.py** (project: funboost) --- 
-
----
-
-
---- **start of file: funboost/funspider/README.md** (project: funboost) --- 
-
-`````markdown
-
-# 🕷️ funspider – Funboost 爬虫辅助扩展
-
-> **基于 `Funboost` 的工程化爬虫辅助组件，提供 ORM 模型与双引擎客户端。**
-
-**`funspider`** 是 `Funboost` 分布式函数调度框架的一个用户贡献扩展。如果说 `boost_spider` 代表着极致的**自由与简洁**，那么 `funspider` 则提供了一种**结构化与强类型**的辅助选择。
-
-它不是 `boost_spider` 的替代品，而是为偏爱 **ORM 模型驱动** 和 **异步协程收发** 的开发者提供的另一种趁手工具。
-
----
-
-## ✨ 核心定位
-
-- ✅ **范式互补**：`boost_spider` 推崇纯字典流和极致自由；`funspider` 额外提供 SQLModel ORM 封装的选项，为复杂数据关系提供类型安全保障。
-- ✅ **双引擎客户端**：基于 `httpx`，内置 `SimpleSpiderClient`（同步）与 `AsyncSpiderClient`（异步），可在同一个爬虫项目中按需混用。
-- ✅ **强类型数据模型**：基于 `SQLModel`，支持 `VARCHAR(n)`、索引、外键等精确字段定义，享受 IDE 智能补全与静态检查。
-- ✅ **增强响应解析**：`SpiderResponse` 对象内置 `.xpath()`、`.css()`、`.re()` 等方法，无需切换工具即可快速提取数据。
-- ✅ **灵活代理接入**：支持传入自定义代理获取函数列表，轻松对接阿布云、快代理等任意商业代理服务。
-
----
-
-## 📦 安装
-
-`funspider` 代码随 `funboost` 一起发布，但默认不安装其依赖项。
-
-**1. 安装 Funboost**
-```bash
-pip install funboost
-```
-
-**2. 按需安装相关依赖**
-```bash
-# 安装 funspider 所需的所有依赖
-pip install sqlmodel httpx parsel
-
-# 根据需求安装数据库驱动
-pip install pymysql aiomysql        # MySQL
-pip install psycopg2-binary         # PostgreSQL
-```
-
----
-
-## 🚀 快速上手
-
-以下示例展示了 `funspider` 的核心用法：继承 `BoosterParams` 复用配置、使用强类型 `SpiderItem` 模型入库，以及混用同步和异步客户端。
-
-### 1. 定义数据模型 (ORM)
-
-```python
-from funboost.funspider import SpiderItem, Field, create_engine, create_async_engine
-
-class NewsItem(SpiderItem, table=True):
-    __tablename__ = "news"
-    __engine__ = create_engine("mysql+pymysql://user:pass@localhost/db")
-    __async_engine__ = create_async_engine("mysql+aiomysql://user:pass@localhost/db")
-    __default_upsert_unique_fields__ = ["news_id"]
-
-    id: int | None = Field(default=None, primary_key=True)
-    news_id: int = Field(unique=True)
-    title: str = Field(max_length=200)   # 精确控制 VARCHAR(200)
-    url: str = Field(max_length=500)
-    content: str                         # TEXT
-```
-
-### 2. 编写爬虫函数 (同步 + 异步混用)
-
-```python
-from funboost import boost, BoosterParams, BoostersManager, BrokerEnum, ConcurrentModeEnum
-from funboost.funspider import SimpleSpiderClient, AsyncSpiderClient
-
-NEWS_GROUP = "news_crawler"
-
-class NewsCrawlerParams(BoosterParams):
-    broker_kind: str = BrokerEnum.REDIS_ACK_ABLE
-    booster_group: str = NEWS_GROUP
-
-base_url = "https://example.com"
-
-def abuyun_proxy():
-    return "http://user:pass@proxy.abuyun.com:9020"
-
-def redis_pool_proxy():
-    import redis
-    r = redis.Redis(host="localhost", port=6379, db=0)
-    return r.srandmember("proxy_pool")
-
-sync_client = SimpleSpiderClient(proxy_getter_list=[abuyun_proxy, redis_pool_proxy], retry_times=3)
-async_client = AsyncSpiderClient(proxy_getter_list=[abuyun_proxy, redis_pool_proxy], retry_times=3)
-
-@boost(NewsCrawlerParams(queue_name="list", qps=2))
-def crawl_list(page: int):
-    resp = sync_client.get(f"{base_url}/list?page={page}")
-    for url in resp.css("a.detail::attr(href)").getall():
-        crawl_detail.push(detail_url=url)
-
-@boost(NewsCrawlerParams(queue_name="detail", qps=5))
-def crawl_detail(detail_url: str):
-    resp = sync_client.get(detail_url)
-    title = resp.xpath("//h1/text()").get()
-    news_id = int(resp.re_first(r"news/(\d+)"))
-    NewsItem(news_id=news_id, title=title, url=detail_url).upsert()
-    crawl_comments.push(news_id=news_id)
-
-@boost(NewsCrawlerParams(queue_name="comments", qps=10, concurrent_mode=ConcurrentModeEnum.ASYNC,
-                         do_task_filtering=True, task_filtering_expire_seconds=3600))
-async def crawl_comments(news_id: int):
-    resp = await async_client.get(f"{base_url}/comments/{news_id}")
-    for comment in resp.resp_dict["list"]:
-        await CommentItem(...).aio_upsert()
-```
-
-### 3. 启动消费
-
-```python
-if __name__ == "__main__":
-    BoostersManager.consume_group(NEWS_GROUP)
-    crawl_list.push(page=1)
-```
-
----
-
-## 🔧 进阶配置
-
-### 自定义代理
-
-```python
-def abuyun_proxy():
-    return "http://user:pass@proxy.abuyun.com:9020"
-
-client = SimpleSpiderClient(proxy_getter_list=[abuyun_proxy])
-```
-
----
-
-## 🆚 与 `boost_spider` 的风格对比
-
-`funspider` 和 `boost_spider` 都是基于 `Funboost` 的生产级爬虫解决方案。核心差异在于**设计哲学和开发范式**，而非能力强弱：
-
-| 特性 | `boost_spider` | `funspider` |
-|------|----------------|------------|
-| **设计理念** | **自由至上、极简字典流**。以最原生、最直接的方式让开发者掌控一切。 | **ORM 辅助、强类型流**。为习惯使用 ORM 模型管理数据的开发者提供便利封装。 |
-| **数据模型** | 纯 Python 字典。开发者可完全自定义如何建表和校验（如手写 DDL 或结合 SQLAlchemy）。 | SQLModel 模型类。将数据定义、字段校验和数据库同步集成在类属性中。 |
-| **字段控制** | 灵活。你完全控制建表语句，想约束什么字段长度和索引都行。 | 直观。在 ORM 模型中声明 `Field(max_length=200)`，IDE 自动补全。 |
-| **HTTP 客户端** | 同步 `RequestClient`，内置丰富代理、重试功能。 | 同步 + 异步双客户端，基于 `httpx`。 |
-| **代理配置** | 对象化配置，优雅简洁。 | 函数式注入，灵活自由。 |
-| **开发偏好** | 喜欢直接、轻量、完全掌控的纯粹 Python 体验。 | 偏好在大型项目中通过 ORM 标准管理数据库结构和关系。 |
-| **生产环境** | ✅ **完全胜任**，性能卓越，久经考验。 | ✅ **完全胜任**，结构清晰，便于团队协作。 |
-
-**选型建议**：
--   如果你喜欢 `funboost` 那种“不加修饰、直接赋能”的爽快感，**`boost_spider`** 是无脑首选。
--   如果你所在团队重度使用 SQLAlchemy/SQLModel，且希望爬虫的数据模型也能无缝融入项目 ORM 体系，**`funspider`** 会是更顺手的选择。
-
----
-
-## 📖 完整示例
-
-参见源码目录下的演示文件：
-- 入口文件：`funspider/funspider_demos/funspider_demo1.py`
-- 模拟网站：`funspider/funspider_demos/fake_news_site.py`
-
-演示内容：
-- 新闻列表页（同步） → 详情页（同步） → 评论页（异步）
-- 同步/异步客户端混用
-- SQLModel 数据入库
-
----
-
-## 🧠 设计哲学
-
-`funspider` 提供的仅仅是 `SpiderItem`, `SpiderResponse`, `SimpleSpiderClient`, `AsyncSpiderClient` 这几个**辅助类**。
-
-真正的核心竞争力——分布式调度、QPS 控频、自动重试、断点续传——完全由 **`Funboost`** 核心引擎驱动。
-
-我们希望你的爬虫代码是平铺直叙的函数，而不是层层嵌套的回调。
-`````
-
---- **end of file: funboost/funspider/README.md** (project: funboost) --- 
-
----
-
-
---- **start of file: funboost/funspider/__init__.py** (project: funboost) --- 
-
-`````python
-from .http import SimpleSpiderClient, AsyncSpiderClient, SpiderResponse
-from .item import SpiderItem
-
-
-from sqlmodel import  Field, create_engine
-from sqlalchemy.ext.asyncio import create_async_engine
-
-`````
-
---- **end of file: funboost/funspider/__init__.py** (project: funboost) --- 
-
----
-
-
---- **start of file: funboost/funspider/funspider_demos/fake_news_site.py** (project: funboost) --- 
-
-`````python
-import uvicorn
-from fastapi import FastAPI, Query
-from fastapi.responses import HTMLResponse, JSONResponse
-
-app = FastAPI()
-
-NEWS_DATA = [
-    {"id": i, "title": f"第{i}条新闻：{'人工智能' if i % 3 == 0 else '量子计算' if i % 3 == 1 else '航天探索'}领域重大突破", "summary": f"这是第{i}条新闻的摘要内容，涵盖了最新的科技动态。"}
-    for i in range(1, 51)
-]
-
-COMMENTS_DATA = {
-    i: [
-        {"id": j, "news_id": i, "user": f"user_{i}_{j}", "content": f"这是对第{i}条新闻的第{j}条评论，{'说得好！' if j % 2 == 0 else '有不同看法。'}", "like_count": (i * j) % 100}
-        for j in range(1, (i % 5) + 3)
-    ]
-    for i in range(1, 51)
-}
-
-
-@app.get("/", response_class=HTMLResponse)
-def index():
-    return '<h1>Fake News Site</h1><p><a href="/news/list?page=1">新闻列表</a></p>'
-
-
-@app.get("/news/list", response_class=HTMLResponse)
-def news_list(page: int = Query(1, ge=1), page_size: int = Query(10, ge=1, le=50)):
-    start = (page - 1) * page_size
-    end = start + page_size
-    items = NEWS_DATA[start:end]
-    total_pages = (len(NEWS_DATA) + page_size - 1) // page_size
-
-    rows = ""
-    for item in items:
-        rows += f'''
-        <tr>
-            <td>{item['id']}</td>
-            <td><a href="/news/detail/{item['id']}">{item['title']}</a></td>
-            <td>{item['summary'][:20]}...</td>
-        </tr>'''
-
-    nav = ""
-    if page > 1:
-        nav += f'<a class="prev-page" href="/news/list?page={page-1}&page_size={page_size}">上一页</a> '
-    if page < total_pages:
-        nav += f'<a class="next-page" href="/news/list?page={page+1}&page_size={page_size}">下一页</a>'
-
-    return f'''
-    <html><body>
-    <h1>新闻列表 - 第{page}页/共{total_pages}页</h1>
-    <table border="1" cellpadding="5">
-        <tr><th>ID</th><th>标题</th><th>摘要</th></tr>
-        {rows}
-    </table>
-    <p>{nav}</p>
-    </body></html>'''
-
-
-@app.get("/news/detail/{news_id}", response_class=HTMLResponse)
-def news_detail(news_id: int):
-    news = NEWS_DATA[news_id - 1] if 1 <= news_id <= len(NEWS_DATA) else None
-    if not news:
-        return HTMLResponse("<h1>404 新闻不存在</h1>", status_code=404)
-
-    comments = COMMENTS_DATA.get(news_id, [])
-    comment_rows = ""
-    for c in comments:
-        comment_rows += f'''
-        <tr>
-            <td>{c['user']}</td>
-            <td>{c['content']}</td>
-            <td>{c['like_count']}</td>
-        </tr>'''
-
-    return f'''
-    <html><body>
-    <h1>{news['title']}</h1>
-    <div class="content">
-        <p>{news['summary']}</p>
-        <p>这是第{news_id}条新闻的完整正文内容。当前新闻涉及领域正在经历快速发展，
-        多项关键技术取得突破性进展。专家表示，这一趋势将在未来几年持续加速，
-        对整个行业产生深远影响。</p>
-        <p>发布时间：2025-01-{news_id:02d} 10:00:00</p>
-        <p>作者：记者_{news_id}</p>
-        <p>分类：{"科技" if news_id % 2 == 0 else "社会"}</p>
-    </div>
-    <h2>评论 ({len(comments)}条)</h2>
-    <p><a href="/news/comments/{news_id}">查看全部评论</a></p>
-    <table border="1" cellpadding="5">
-        <tr><th>用户</th><th>内容</th><th>点赞</th></tr>
-        {comment_rows}
-    </table>
-    <p><a href="/news/list?page=1">返回列表</a></p>
-    </body></html>'''
-
-
-@app.get("/news/comments/{news_id}", response_class=JSONResponse)
-def news_comments(news_id: int):
-    if news_id not in COMMENTS_DATA:
-        return {"news_id": news_id, "comments": [], "total": 0}
-    comments = COMMENTS_DATA[news_id]
-    return {"news_id": news_id, "comments": comments, "total": len(comments)}
-
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8888)
-
-`````
-
---- **end of file: funboost/funspider/funspider_demos/fake_news_site.py** (project: funboost) --- 
-
----
-
-
---- **start of file: funboost/funspider/funspider_demos/funspider_demo1.py** (project: funboost) --- 
-
-`````python
-import re
-from typing import ClassVar, Optional
-from funboost import boost, BoosterParams, BoostersManager, BrokerEnum, ctrl_c_recv, ConcurrentModeEnum
-from funboost.funspider import SimpleSpiderClient, AsyncSpiderClient, SpiderItem, create_engine, create_async_engine, Field
-
-NEWS_GROUP = "news_crawler"
-
-
-class NewsCrawlerParams(BoosterParams):
-    broker_kind: str = BrokerEnum.REDIS_ACK_ABLE
-    booster_group: str = NEWS_GROUP
-
-# ---------- 数据库 ----------
-MYSQL_ENGINE = create_engine("mysql+pymysql://root:123456@127.0.0.1:3306/testdb")
-ASYNC_MYSQL_ENGINE = create_async_engine("mysql+aiomysql://root:123456@127.0.0.1:3306/testdb")
-
-
-class NewsItem(SpiderItem, table=True):
-    __tablename__: ClassVar[str] = "news"
-    __engine__ = MYSQL_ENGINE
-    __async_engine__ = ASYNC_MYSQL_ENGINE
-    __default_upsert_unique_fields__ = ["news_id"]
-
-    id: Optional[int] = Field(default=None, primary_key=True)
-    news_id: int = Field(unique=True)
-    title: str
-    summary: str
-    content: str
-    author: str
-    category: str
-    publish_time: str
-    url: str
-
-
-class CommentItem(SpiderItem, table=True):
-    __tablename__: ClassVar[str] = "comments"
-    __engine__ = MYSQL_ENGINE
-    __async_engine__ = ASYNC_MYSQL_ENGINE
-    __default_upsert_unique_fields__ = ["comment_id"]
-
-    id: Optional[int] = Field(default=None, primary_key=True)
-    comment_id: int = Field(unique=True)
-    news_id: int
-    user: str
-    content: str
-    like_count: int
-
-
-NewsItem.create_table()
-CommentItem.create_table()
-
-def get_proxy_abuyun():
-    return "http://userxx:passwdxx@http-pro.abuyun.com:9000"
-
-def get_proxy_none():
-    return None
-
-# ---------- 客户端 ----------
-sync_client = SimpleSpiderClient(proxy_getter_list=[
-    # get_proxy_abuyun,
- get_proxy_none
- ])
-async_client = AsyncSpiderClient(proxy_getter_list=[
-    # get_proxy_abuyun,
- get_proxy_none
- ])
-
-BASE_URL = "http://127.0.0.1:8888"
-
-
-# ---------- 列表页爬虫（同步）：解析列表页，推送详情页任务 ----------
-@boost(NewsCrawlerParams(queue_name="news_list", qps=2))
-def crawl_list(page: int):
-    resp = sync_client.get(f"{BASE_URL}/news/list?page={page}")
-    links = resp.css("table a::attr(href)").getall()
-    for href in links:
-        if href and "/news/detail/" in href:
-            detail_url = f"{BASE_URL}{href}" if href.startswith("/") else href
-            crawl_detail.push(detail_url=detail_url)
-    next_href = resp.css("a.next-page::attr(href)").get("")
-    if next_href:
-        crawl_list.push(page=page + 1)
-
-
-# ---------- 详情页爬虫（同步）：解析新闻详情，保存新闻 + 推送评论任务 ----------
-@boost(NewsCrawlerParams(queue_name="news_detail", qps=5))
-def crawl_detail(detail_url: str):
-    resp = sync_client.get(detail_url)
-    title = resp.css("h1::text").get("").strip()
-    content_p = resp.css("div.content p::text").getall()
-    content = "\n".join(content_p) if content_p else ""
-    author = ""
-    category = ""
-    publish_time = ""
-    for p_text in content_p:
-        if p_text.startswith("作者："):
-            author = p_text.replace("作者：", "").strip()
-        elif p_text.startswith("分类："):
-            category = p_text.replace("分类：", "").strip()
-        elif p_text.startswith("发布时间："):
-            publish_time = p_text.replace("发布时间：", "").strip()
-    summary = content_p[0] if content_p else ""
-
-    news_id = int(re.search(r"/news/detail/(\d+)", detail_url).group(1))
-
-    NewsItem(
-        news_id=news_id, title=title, summary=summary,
-        content=content, author=author, category=category,
-        publish_time=publish_time, url=detail_url,
-    ).upsert()
-
-    crawl_comments.push(news_id=news_id)
-
-
-# ---------- 评论页爬虫（异步）：请求评论接口，保存评论 ----------
-@boost(NewsCrawlerParams(queue_name="news_comments", qps=10, concurrent_mode=ConcurrentModeEnum.ASYNC,
-                         do_task_filtering=True, task_filtering_expire_seconds=3600))
-async def crawl_comments(news_id: int):
-    resp = await async_client.get(f"{BASE_URL}/news/comments/{news_id}")
-    data = resp.resp_dict
-    for c in data.get("comments", []):
-        item = CommentItem(
-            comment_id=c["id"], news_id=c["news_id"],
-            user=c["user"], content=c["content"],
-            like_count=c["like_count"],
-        )
-        await item.aio_upsert()
-
-
-if __name__ == '__main__':
-    BoostersManager.consume_group(NEWS_GROUP)
-
-    crawl_list.push(page=1)
-
-    ctrl_c_recv()
-
-`````
-
---- **end of file: funboost/funspider/funspider_demos/funspider_demo1.py** (project: funboost) --- 
 
 ---
 
@@ -59221,7 +59572,7 @@ class BoosterParams(BaseJsonAbleModel):
 
 > 本文档专为 AI 设计，用于快速定位 funboost 源码中的类、函数、模块位置。
 >
-> 生成时间: 2026-04-17 （请注意时间，部分代码文件的行号有可能会随时间发生小幅变化）
+> 生成时间: 2026-05-09 （请注意时间，部分代码文件的行号有可能会随时间发生小幅变化）
 >
 > 源码根目录: `funboost/funboost/`
 >
@@ -59305,7 +59656,7 @@ funboost/
 │   ├── pulsar_consumer.py         # Pulsar
 │   ├── nsq_consumer.py            # NSQ
 │   ├── mqtt_consumer.py           # MQTT
-│   ├── nats_consumer.py           # NATS
+│   ├── (已移至 contrib/register_custom_broker_contrib/nats_core_broker.py)
 │   ├── zeromq_consumer.py         # ZeroMQ
 │   ├── mongomq_consumer.py        # MongoDB
 │   ├── persist_queue_consumer.py  # SQLite (persistqueue)
@@ -59354,7 +59705,7 @@ funboost/
 │   ├── pulsar_publisher.py        # Pulsar
 │   ├── nsq_publisher.py           # NSQ
 │   ├── mqtt_publisher.py          # MQTT
-│   ├── nats_publisher.py          # NATS
+│   ├── (已移至 contrib/register_custom_broker_contrib/nats_core_broker.py)
 │   ├── zeromq_publisher.py        # ZeroMQ
 │   ├── mongomq_publisher.py       # MongoDB
 │   ├── persist_queue_publisher.py # SQLite (persistqueue)
@@ -59438,6 +59789,14 @@ funboost/
 │   ├── register_custom_broker_contrib/    # 自定义broker
 │   │   ├── watchdog_broker.py     # WatchdogPublisher/Consumer 文件监控
 │   │   └── websocket_broker.py    # WebSocketPublisher/Consumer
+│   ├── funspider/                         # 爬虫辅助扩展(httpx+SQLModel)
+│   │   ├── __init__.py            # 导出 SimpleSpiderClient, AsyncSpiderClient, SpiderItem
+│   │   ├── http.py                # SpiderResponse, SimpleSpiderClient, AsyncSpiderClient
+│   │   ├── item.py                # SpiderItem (SQLModel ORM, sync/async insert/upsert)
+│   │   ├── README.md              # funspider说明文档
+│   │   └── funspider_demos/       # 爬虫示例
+│   │       ├── funspider_demo1.py # 新闻爬虫完整示例(同步+异步混用)
+│   │       └── fake_news_site.py  # 模拟新闻网站(FastAPI)
 │   └── save_function_result_status/       # 结果持久化
 │       ├── readme.md                      # 结果持久化说明
 │       ├── save_result_status_to_sqldb.py
@@ -59471,7 +59830,8 @@ funboost/
 │   │   ├── web_helper.py          # IP/hostname
 │   │   ├── system_monitor.py      # 系统监控API
 │   │   ├── script_deploy.py       # 脚本部署CRUD
-│   │   └── log_viewer.py          # 日志查看器
+│   │   ├── log_viewer.py          # 日志查看器
+│   │   └── queue_alerts.py        # 队列告警系统(积压/QPS/掉线/失败率/耗时)
 │   ├── templates/                 # 15个HTML模板
 │   │   ├── index.html             # 首页
 │   │   ├── login.html             # 登录页
@@ -59488,6 +59848,7 @@ funboost/
 │   │   ├── deploy_detail.html     # 部署详情
 │   │   ├── log_viewer.html        # 日志查看器
 │   │   ├── system_monitor.html    # 系统监控
+│   │   ├── queue_alerts.html      # 告警配置页面(规则CRUD+告警记录+测试通知)
 │   │   └── app.py中仍在使用的路由.md  # 路由参考文档
 │   ├── _ai_do_tasks_md/           # AI任务备忘
 │   │   ├── ai写web必须遵守的.md
@@ -59641,7 +60002,7 @@ RPC:  is_using_rpc_mode, rpc_result_expire_seconds, rpc_timeout
 | RabbitMQ | `RABBITMQ_AMQPSTORM`(=`RABBITMQ`), `RABBITMQ_COMPLEX_ROUTING` |
 | Kafka | `KAFKA`, `KAFKA_CONFLUENT` |
 | RocketMQ | `ROCKETMQ`, `ROCKETMQ5` |
-| 其他MQ | `PULSAR`, `NSQ`, `MQTT`, `NATS`, `ZEROMQ`, `SQS`, `HTTPSQS` |
+| 其他MQ | `PULSAR`, `NSQ`, `MQTT`, `NATS_CORE`, `NATS_JETSTREAM`, `ZEROMQ`, `SQS`, `HTTPSQS` |
 | 内存/文件 | `MEMORY_QUEUE`, `FASTEST_MEM_QUEUE`, `SQLITE_QUEUE`(=`PERSISTQUEUE`), `TXT_FILE` |
 | 数据库 | `MONGOMQ`, `SQLACHEMY`, `POSTGRES`, `PEEWEE` |
 | 网络协议 | `TCP`, `UDP`, `HTTP`, `GRPC`, `WEBSOCKET` |
@@ -60082,7 +60443,19 @@ def generate_broker_exclusive_config()           # 生成merged配置
 | `redis_hash_update_broker.py` | `RedisHashUpdatePublisher`, `RedisHashUpdateConsumer` | Redis HASH 可更新覆盖消息(latest-wins语义) |
 | `celery_pool_as_funboost_broker.py` | `CeleryPoolPublisher`, `CeleryPoolConsumer` | 复用 CeleryPool 作为 funboost broker |
 
-### 8.3 其他 Contrib
+### 8.3 funspider 爬虫辅助扩展 (`contrib/funspider/`)
+
+> 基于 httpx + SQLModel 的爬虫辅助组件，提供 ORM 模型与同步/异步双引擎客户端。
+> 导入路径: `from funboost.contrib.funspider import SimpleSpiderClient, AsyncSpiderClient, SpiderItem, Field, create_engine, create_async_engine`
+
+| 文件 | 核心类 | 功能 |
+|------|--------|------|
+| `http.py` | `SpiderResponse` | 统一封装 httpx 响应，内置 `.xpath()`/`.css()`/`.re()`/`.resp_dict` |
+| `http.py` | `SimpleSpiderClient` | 同步爬虫客户端(httpx.Client)，支持重试+代理函数列表+随机UA |
+| `http.py` | `AsyncSpiderClient` | 异步爬虫客户端(httpx.AsyncClient)，同上 |
+| `item.py` | `SpiderItem` | SQLModel ORM 基类，`.insert()`/`.upsert()`/`.aio_insert()`/`.aio_upsert()` |
+
+### 8.4 其他 Contrib
 
 | 文件 | 功能 |
 |------|------|
@@ -60219,6 +60592,7 @@ start_funboost_web_manager()   # 启动Web管理界面
 | `system_monitor.py` | Redis心跳采集, 系统监控API |
 | `script_deploy.py` | 脚本部署CRUD, Git操作, 进程控制, 日志tail |
 | `log_viewer.py` | 日志查看器(文件夹白名单, tail, grep, stream) |
+| `queue_alerts.py` | 队列告警系统: 5种告警类型(积压/QPS骤降/消费者掉线/失败率飙升/耗时过高)，多通道通知(钉钉/企微/飞书/Webhook)，告警去抖，后台10秒轮询检查 |
 | `web_helper.py` | IP/hostname辅助函数 |
 
 ---
@@ -60258,7 +60632,8 @@ start_funboost_web_manager()   # 启动Web管理界面
 | `PULSAR` | `PulsarConsumer` | `consumers/pulsar_consumer.py` | `PulsarPublisher` | `publishers/pulsar_publisher.py` |
 | `NSQ` | `NsqConsumer` | `consumers/nsq_consumer.py` | `NsqPublisher` | `publishers/nsq_publisher.py` |
 | `MQTT` | `MqttConsumer` | `consumers/mqtt_consumer.py` | `MqttPublisher` | `publishers/mqtt_publisher.py` |
-| `NATS` | `NatsConsumer` | `consumers/nats_consumer.py` | `NatsPublisher` | `publishers/nats_publisher.py` |
+| `NATS_CORE` | `NatsConsumer` | `contrib/register_custom_broker_contrib/nats_core_broker.py` | `NatsPublisher` | 同文件 |
+| `NATS_JETSTREAM` | `NatsJetStreamConsumer` | `contrib/register_custom_broker_contrib/nats_jetstream_broker.py` | `NatsJetStreamPublisher` | 同文件 |
 | `ZEROMQ` | `ZeromqConsumer` | `consumers/zeromq_consumer.py` | `ZeromqPublisher` | `publishers/zeromq_publisher.py` |
 | `SQLITE_QUEUE` | `PersistQueueConsumer` | `consumers/persist_queue_consumer.py` | `PersistQueuePublisher` | `publishers/persist_queue_publisher.py` |
 | `MONGOMQ` | `MongoMqConsumer` | `consumers/mongomq_consumer.py` | `MongoMqPublisher` | `publishers/mongomq_publisher.py` |
@@ -60442,6 +60817,10 @@ BoosterParams.consumer_override_cls = MyMixin
 | 怎么接OpenTelemetry / 链路追踪 | OpenTelemetry, tracing, 链路 | `contrib/override_publisher_consumer_cls/funboost_otel_mixin.py` |
 | 怎么监听文件变化触发任务 | 文件监控, watchdog, 文件变化 | `contrib/register_custom_broker_contrib/watchdog_broker.py` |
 | 怎么用WebSocket | WebSocket, ws | `contrib/register_custom_broker_contrib/websocket_broker.py` |
+| 怎么用NATS Core / NATS无持久化 | NATS, nats-py, Core | `contrib/register_custom_broker_contrib/nats_core_broker.py` |
+| 怎么用NATS JetStream / NATS持久化 | NATS, JetStream, nats-py, 持久化 | `contrib/register_custom_broker_contrib/nats_jetstream_broker.py` |
+| 怎么用funboost做爬虫 / 爬虫辅助 | 爬虫, spider, 爬取, httpx, funspider | `contrib/funspider/` (SimpleSpiderClient, AsyncSpiderClient, SpiderItem) |
+| 怎么配置队列告警 / 积压告警 / 掉线告警 | 告警, alert, 积压, 掉线, 通知 | `funweb/flask_bps/queue_alerts.py` |
 | 怎么远程部署 | 部署, deploy, fabric | `core/fabric_deploy_helper.py` L17 `fabric_deploy` |
 | Web管理界面怎么启动 | web, 管理界面, funweb, 后台 | `funweb/app.py` → `start_funboost_web_manager` |
 | 命令行怎么用 / CLI | 命令行, CLI, python -m | `core/cli/funboost_fire.py` L15 `BoosterFire` |
@@ -60501,6 +60880,10 @@ BoosterParams.consumer_override_cls = MyMixin
 | 告警通知 | `contrib/override_publisher_consumer_cls/alert_notifier_mixin.py` |
 | Watchdog broker | `contrib/register_custom_broker_contrib/watchdog_broker.py` |
 | WebSocket broker | `contrib/register_custom_broker_contrib/websocket_broker.py` |
+| NATS Core broker | `contrib/register_custom_broker_contrib/nats_core_broker.py` |
+| NATS JetStream | `contrib/register_custom_broker_contrib/nats_jetstream_broker.py` |
+| 爬虫辅助(funspider) | `contrib/funspider/` → `SimpleSpiderClient`, `AsyncSpiderClient`, `SpiderItem` |
+| 队列告警 | `funweb/flask_bps/queue_alerts.py` → `alert_bp`, `_check_rules_once` |
 | Redis管理 | `utils/redis_manager.py` → `RedisManager` (L35) / `RedisMixin` (L77) |
 | MongoDB | `utils/mongo_util.py` → `MongoMixin` (L20) |
 | 装饰器工具 | `utils/decorators.py` → `keep_circulating` (L102) 等 |
@@ -62526,45 +62909,6 @@ class NamekoPublisher(AbstractPublisher):
 ---
 
 
---- **start of file: funboost/publishers/nats_publisher.py** (project: funboost) --- 
-
-`````python
-﻿from funboost.core.lazy_impoter import NatsImporter
-from funboost.publishers.base_publisher import AbstractPublisher
-from funboost.funboost_config_deafult import BrokerConnConfig
-
-
-class NatsPublisher(AbstractPublisher, ):
-    """
-    使用nats作为中间件
-    """
-
-    # noinspection PyAttributeOutsideInit
-    def custom_init(self):
-        self.nats_client = NatsImporter().NATSClient(BrokerConnConfig.NATS_URL)
-        self.nats_client.connect()
-
-    def _publish_impl(self, msg):
-        # print(msg)
-        self.nats_client.publish(subject=self.queue_name, payload=msg.encode())
-
-    def clear(self):
-        pass
-
-    def get_message_count(self):
-        return -1
-
-    def close(self):
-        # self.redis_db7.connection_pool.disconnect()
-        pass
-
-`````
-
---- **end of file: funboost/publishers/nats_publisher.py** (project: funboost) --- 
-
----
-
-
 --- **start of file: funboost/publishers/nsq_publisher.py** (project: funboost) --- 
 
 `````python
@@ -63626,7 +63970,7 @@ from funboost.publishers.base_publisher import AbstractPublisher
 from rocketmq import ClientConfiguration, Credentials, Producer, Message
 
 
-class RocketmqPublisher(AbstractPublisher):
+class Rocketmq5Publisher(AbstractPublisher):
     """
     RocketMQ 5.x 发布者，使用 rocketmq-python-client 包
     

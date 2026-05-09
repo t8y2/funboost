@@ -2,7 +2,6 @@ import typing
 
 from funboost.publishers.empty_publisher import EmptyPublisher
 
-from funboost.publishers.nats_publisher import NatsPublisher
 from funboost.publishers.peewee_publisher import PeeweePublisher
 from funboost.publishers.redis_publisher_lpush import RedisPublisherLpush
 from funboost.publishers.redis_publisher_priority import RedisPriorityPublisher
@@ -34,7 +33,6 @@ from funboost.consumers.kafka_consumer import KafkaConsumer
 from funboost.consumers.local_python_queue_consumer import LocalPythonQueueConsumer
 from funboost.consumers.fastest_mem_queue_consumer import FastestMemQueueConsumer
 from funboost.consumers.mongomq_consumer import MongoMqConsumer
-from funboost.consumers.nats_consumer import NatsConsumer
 
 from funboost.consumers.peewee_conusmer import PeeweeConsumer
 from funboost.consumers.persist_queue_consumer import PersistQueueConsumer
@@ -78,7 +76,6 @@ broker_kind__publsiher_consumer_type_map = {
     BrokerEnum.UDP: (UDPPublisher, UDPConsumer),
     BrokerEnum.TCP: (TCPPublisher, TCPConsumer),
 
-    BrokerEnum.NATS: (NatsPublisher, NatsConsumer),
     BrokerEnum.TXT_FILE: (TxtFilePublisher, TxtFileConsumer),
     BrokerEnum.PEEWEE: (PeeweePublisher, PeeweeConsumer),
     BrokerEnum.REDIS_PUBSUB: (RedisPubSubPublisher, RedisPbSubConsumer),
@@ -113,6 +110,8 @@ def regist_to_funboost(broker_kind: str):
     这样当用户需要使用某些三方包中间件作为消息队列时候，按照import报错信息，用户自己去pip安装好。或者 pip install funboost[all] 一次性安装所有中间件。
     建议按照 https://github.com/ydf0509/funboost/blob/master/setup.py 中的 extra_brokers 和 install_requires 里面的版本号来安装三方包版本.
     """
+
+
     if broker_kind == BrokerEnum.RABBITMQ_AMQPSTORM:
         from funboost.publishers.rabbitmq_amqpstorm_publisher import RabbitmqPublisherUsingAmqpStorm
         from funboost.consumers.rabbitmq_amqpstorm_consumer import RabbitmqConsumerAmqpStorm
@@ -237,7 +236,12 @@ def regist_to_funboost(broker_kind: str):
         
     if broker_kind in [BrokerEnum.REDIS_ZSET_PRIORITY, BrokerEnum.REDIS_ZSET_DELAY]:
         import funboost.contrib.register_custom_broker_contrib.redis_zset_broker # 已经在 redis_zset_broker.py 中注册了
-        
+
+    if broker_kind == BrokerEnum.NATS_JETSTREAM:
+        import funboost.contrib.register_custom_broker_contrib.nats_jetstream_broker  # 已经在 nats_jetstream_broker.py 中注册了
+    
+    if broker_kind == BrokerEnum.NATS_CORE:
+        import funboost.contrib.register_custom_broker_contrib.nats_core_broker  # 已经在 nats_core_broker.py 中注册了
 
 if __name__ == '__main__':
     import sys

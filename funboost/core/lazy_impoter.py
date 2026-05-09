@@ -115,14 +115,6 @@ class AioHttpImporter:
         self.Request = Request
 
 
-@singleton_no_lock
-class NatsImporter:
-    def __init__(self):
-        """pip install nats-python """
-        from pynats import NATSClient, NATSMessage
-        self.NATSClient = NATSClient
-        self.NATSMessage = NATSMessage
-
 
 @singleton_no_lock
 class GnsqImporter:

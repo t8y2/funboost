@@ -28,7 +28,7 @@ except ImportError:
         '需要安装 rocketmq-python-client 包: pip install rocketmq-python-client\n'
         '这是 RocketMQ 5.x 的官方 Python SDK，支持 Windows/Linux/macOS'
     )
-class RocketmqConsumer(AbstractConsumer):
+class Rocketmq5Consumer(AbstractConsumer):
     """
     RocketMQ 5.x 消费者，使用 SimpleConsumer 模式
     
