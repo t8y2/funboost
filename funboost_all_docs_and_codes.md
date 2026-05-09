@@ -30533,6 +30533,13 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
     │   ├── README.md
     │   ├── app.py
     │   └── functions.py
+    ├── funspider
+    │   ├── __init__.py
+    │   ├── funspider_demos
+    │   │   ├── fake_news_site.py
+    │   │   └── funspider_demo1.py
+    │   ├── http.py
+    │   └── item.py
     ├── funweb
     │   ├── README.md
     │   ├── _ai_do_tasks_md
@@ -30655,7 +30662,7 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
 ---
 
 
-## funboost (relative dir: `funboost`)  Included Files (total: 264 files)
+## funboost (relative dir: `funboost`)  Included Files (total: 269 files)
 
 
 - `funboost/constant.py`
@@ -30975,6 +30982,16 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
 - `funboost/funboost_web_manager/functions.py`
 
 - `funboost/funboost_web_manager/README.md`
+
+- `funboost/funspider/http.py`
+
+- `funboost/funspider/item.py`
+
+- `funboost/funspider/__init__.py`
+
+- `funboost/funspider/funspider_demos/fake_news_site.py`
+
+- `funboost/funspider/funspider_demos/funspider_demo1.py`
 
 - `funboost/funweb/app.py`
 
@@ -56772,6 +56789,586 @@ funboost_web_manager名字太长了，用这个funweb做个简化，是一样的
 `````
 
 --- **end of file: funboost/funboost_web_manager/README.md** (project: funboost) --- 
+
+---
+
+
+--- **start of file: funboost/funspider/http.py** (project: funboost) --- 
+
+`````python
+import json
+import random
+import httpx
+from parsel import Selector
+from typing import Optional, Dict, List, Callable
+from funboost.core.loggers import get_funboost_file_logger
+
+logger = get_funboost_file_logger('funspider.http')
+
+USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+]
+
+
+class SpiderResponse:
+    """统一封装 httpx 响应，提供 xpath/css/re 解析"""
+    def __init__(self, resp: httpx.Response):
+        self.status_code = resp.status_code
+        self.url = str(resp.url)
+        self._text = resp.text
+        self._selector: Optional[Selector] = None
+        self._resp_dict: Optional[dict] = None
+
+    @property
+    def selector(self) -> Selector:
+        if self._selector is None:
+            self._selector = Selector(text=self._text)
+        return self._selector
+
+    @property
+    def text(self) -> str:
+        return self._text
+
+    @property
+    def resp_dict(self) -> dict:
+        if self._resp_dict is None:
+            self._resp_dict = json.loads(self._text)
+        return self._resp_dict
+
+    def xpath(self, query: str) -> list:
+        return self.selector.xpath(query)
+
+    def css(self, query: str) -> list:
+        return self.selector.css(query)
+
+    def re(self, pattern: str) -> List[str]:
+        return self.selector.re(pattern)
+
+    def re_first(self, pattern: str) -> Optional[str]:
+        return self.selector.re_first(pattern)
+
+
+class BaseSpiderClient:
+    def __init__(
+        self,
+        retry_times: int = 2,
+        timeout: float = 30,
+        proxy_getter_list: Optional[List[Callable[[], Optional[str]]]] = None,
+        user_agents: Optional[List[str]] = None,
+    ):
+        self.retry_times = retry_times
+        self.timeout = timeout
+        self._proxy_getter_list = proxy_getter_list or []
+        self._proxy_index = 0
+        self._user_agents = user_agents or USER_AGENTS
+
+    def _random_ua(self) -> str:
+        return random.choice(self._user_agents)
+
+    def _merge_headers(self, headers: Dict[str, str]) -> Dict[str, str]:
+        h = {"User-Agent": self._random_ua()}
+        h.update(headers or {})
+        return h
+
+    def _get_proxy(self) -> Optional[str]:
+        if not self._proxy_getter_list:
+            return None
+        func = self._proxy_getter_list[self._proxy_index % len(self._proxy_getter_list)]
+        self._proxy_index += 1
+        return func()
+
+
+class SimpleSpiderClient(BaseSpiderClient):
+    """同步爬虫客户端 (httpx.Client)"""
+    def __init__(
+        self,
+        retry_times: int = 2,
+        timeout: float = 30,
+        proxy_getter_list: Optional[List[Callable[[], Optional[str]]]] = None,
+        user_agents: Optional[List[str]] = None,
+    ):
+        super().__init__(retry_times, timeout, proxy_getter_list, user_agents)
+        self.client = httpx.Client(timeout=self.timeout)
+
+    def request(self, method: str, url: str, **kwargs) -> SpiderResponse:
+        headers = self._merge_headers(kwargs.pop('headers', {}))
+        last_exc = None
+        for attempt in range(self.retry_times + 1):
+            try:
+                proxy = self._get_proxy()
+                if proxy:
+                    kwargs['proxy'] = proxy
+                resp = self.client.request(method, url, headers=headers, **kwargs)
+                resp.raise_for_status()
+                return SpiderResponse(resp)
+            except Exception as e:
+                last_exc = e
+                logger.warning(f"[Sync] {url} 请求失败 (第{attempt+1}次): {e}")
+        raise last_exc
+
+    def get(self, url: str, **kwargs) -> SpiderResponse:
+        return self.request("GET", url, **kwargs)
+
+    def post(self, url: str, **kwargs) -> SpiderResponse:
+        return self.request("POST", url, **kwargs)
+
+    def close(self):
+        self.client.close()
+
+
+class AsyncSpiderClient(BaseSpiderClient):
+    """异步爬虫客户端 (httpx.AsyncClient) – 不绑定 Loop，可在 Funboost ASYNC 模式自由使用"""
+    def __init__(
+        self,
+        retry_times: int = 2,
+        timeout: float = 30,
+        proxy_getter_list: Optional[List[Callable[[], Optional[str]]]] = None,
+        user_agents: Optional[List[str]] = None,
+    ):
+        super().__init__(retry_times, timeout, proxy_getter_list, user_agents)
+        self.client = httpx.AsyncClient(timeout=self.timeout)
+
+    async def request(self, method: str, url: str, **kwargs) -> SpiderResponse:
+        headers = self._merge_headers(kwargs.pop('headers', {}))
+        last_exc = None
+        for attempt in range(self.retry_times + 1):
+            try:
+                proxy = self._get_proxy()
+                if proxy:
+                    kwargs['proxy'] = proxy
+                resp = await self.client.request(method, url, headers=headers, **kwargs)
+                resp.raise_for_status()
+                return SpiderResponse(resp)
+            except Exception as e:
+                last_exc = e
+                logger.warning(f"[Async] {url} 请求失败 (第{attempt+1}次): {e}")
+        raise last_exc
+
+    async def get(self, url: str, **kwargs) -> SpiderResponse:
+        return await self.request("GET", url, **kwargs)
+
+    async def post(self, url: str, **kwargs) -> SpiderResponse:
+        return await self.request("POST", url, **kwargs)
+
+    async def aclose(self):
+        await self.client.aclose()
+`````
+
+--- **end of file: funboost/funspider/http.py** (project: funboost) --- 
+
+---
+
+
+--- **start of file: funboost/funspider/item.py** (project: funboost) --- 
+
+`````python
+import json
+from typing import List, Optional,Union
+from sqlmodel import SQLModel, Session, select,create_engine
+from sqlalchemy import Engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, AsyncEngine
+from sqlalchemy.orm import sessionmaker
+from funboost.core.loggers import get_funboost_file_logger
+
+logger = get_funboost_file_logger('funspider.item')
+
+class SpiderItem(SQLModel, table=False):
+    """
+    爬虫 Item 基类 – 同步/异步双引擎。
+    子类通过 __engine__ 绑定同步数据库，__async_engine__ 绑定异步数据库。
+    """
+
+    __engine__: Optional[Engine] = None  # 同步数据库引擎
+    __async_engine__: Optional[AsyncEngine] = None  # 异步数据库引擎
+    __async_session_factory__ = None  # 异步会话工厂（懒加载）
+    __default_upsert_unique_fields__: List[str] = []  # upsert 去重字段默认值，子类可覆盖。你如果不写的话 upsert时候需要传递 unique_fields 参数。
+
+    @classmethod
+    def _get_class_engine(cls) -> Engine:
+        if cls.__engine__ is not None:
+            return cls.__engine__
+        from sqlmodel import create_engine
+        return create_engine("sqlite:///funspider_default.db")
+
+    @classmethod
+    def _get_class_async_engine(cls):
+        if cls.__async_engine__ is not None:
+            return cls.__async_engine__
+        raise RuntimeError(f"{cls.__name__} 未设置 __async_engine__，无法使用异步方法。")
+
+    @classmethod
+    def _get_async_session_factory(cls):
+        if cls.__async_session_factory__ is None:
+            engine = cls._get_class_async_engine()
+            cls.__async_session_factory__ = sessionmaker(
+                engine, class_=AsyncSession, expire_on_commit=False
+            )
+        return cls.__async_session_factory__
+
+    @classmethod
+    def create_table(cls):
+        eng = cls._get_class_engine()
+        SQLModel.metadata.create_all(eng, tables=[cls.__table__])
+        logger.info(f"表 {cls.__tablename__} 已创建 (引擎: {eng.url})")
+
+    @classmethod
+    def _get_session(cls, engine: Engine):
+        return Session(engine)
+
+    def _resolve_engine(self, engine: Engine = None) -> Engine:
+        if engine is not None:
+            return engine
+        return self.__class__._get_class_engine()
+
+    def to_dict(self, exclude_unset: bool = False) -> dict:
+        if hasattr(self, "model_dump"):
+            return self.model_dump(exclude_unset=exclude_unset)
+        return self.dict(exclude_unset=exclude_unset)
+
+    def to_json(self, exclude_unset: bool = False) -> str:
+        return json.dumps(self.to_dict(exclude_unset=exclude_unset), ensure_ascii=False)
+
+    # ---------- 同步 ----------
+    def insert(self, engine: Engine = None):
+        eng = self._resolve_engine(engine)
+        with self._get_session(eng) as session:
+            session.add(self)
+            session.commit()
+            session.refresh(self)
+        return self
+
+    def upsert(self, unique_fields: List[str] = None, engine: Engine = None):
+        unique_fields = unique_fields or self.__class__.__default_upsert_unique_fields__
+        if not unique_fields:
+            raise ValueError(f"{self.__class__.__name__} 未设置 __default_upsert_unique_fields__，且调用 upsert 时未传 unique_fields")
+        eng = self._resolve_engine(engine)
+        with self._get_session(eng) as session:
+            filters = {f: getattr(self, f) for f in unique_fields}
+            stmt = select(type(self)).filter_by(**filters)
+            existing = session.exec(stmt).first()
+            if existing:
+                for key, val in self.to_dict(exclude_unset=True).items():
+                    setattr(existing, key, val)
+                session.add(existing)
+                session.commit()
+                session.refresh(existing)
+                return existing
+            session.add(self)
+            session.commit()
+            session.refresh(self)
+            return self
+
+    # ---------- 异步 ----------
+    async def aio_insert(self):
+        factory = self.__class__._get_async_session_factory()
+        async with factory() as session:
+            session.add(self)
+            await session.commit()
+            await session.refresh(self)
+        return self
+
+    async def aio_upsert(self, unique_fields: List[str] = None):
+        unique_fields = unique_fields or self.__class__.__default_upsert_unique_fields__
+        if not unique_fields:
+            raise ValueError(f"{self.__class__.__name__} 未设置 __default_upsert_unique_fields__，且调用 aio_upsert 时未传 unique_fields")
+        factory = self.__class__._get_async_session_factory()
+        async with factory() as session:
+            filters = {f: getattr(self, f) for f in unique_fields}
+            stmt = select(type(self)).filter_by(**filters)
+            result = await session.execute(stmt)
+            existing = result.scalar_one_or_none()
+            if existing:
+                for key, val in self.to_dict(exclude_unset=True).items():
+                    setattr(existing, key, val)
+                session.add(existing)
+                await session.commit()
+                await session.refresh(existing)
+                return existing
+            session.add(self)
+            await session.commit()
+            await session.refresh(self)
+            return self
+`````
+
+--- **end of file: funboost/funspider/item.py** (project: funboost) --- 
+
+---
+
+
+--- **start of file: funboost/funspider/__init__.py** (project: funboost) --- 
+
+`````python
+from .http import SimpleSpiderClient, AsyncSpiderClient, SpiderResponse
+from .item import SpiderItem
+
+
+from sqlmodel import  Field, create_engine
+from sqlalchemy.ext.asyncio import create_async_engine
+
+`````
+
+--- **end of file: funboost/funspider/__init__.py** (project: funboost) --- 
+
+---
+
+
+--- **start of file: funboost/funspider/funspider_demos/fake_news_site.py** (project: funboost) --- 
+
+`````python
+import uvicorn
+from fastapi import FastAPI, Query
+from fastapi.responses import HTMLResponse, JSONResponse
+
+app = FastAPI()
+
+NEWS_DATA = [
+    {"id": i, "title": f"第{i}条新闻：{'人工智能' if i % 3 == 0 else '量子计算' if i % 3 == 1 else '航天探索'}领域重大突破", "summary": f"这是第{i}条新闻的摘要内容，涵盖了最新的科技动态。"}
+    for i in range(1, 51)
+]
+
+COMMENTS_DATA = {
+    i: [
+        {"id": j, "news_id": i, "user": f"user_{i}_{j}", "content": f"这是对第{i}条新闻的第{j}条评论，{'说得好！' if j % 2 == 0 else '有不同看法。'}", "like_count": (i * j) % 100}
+        for j in range(1, (i % 5) + 3)
+    ]
+    for i in range(1, 51)
+}
+
+
+@app.get("/", response_class=HTMLResponse)
+def index():
+    return '<h1>Fake News Site</h1><p><a href="/news/list?page=1">新闻列表</a></p>'
+
+
+@app.get("/news/list", response_class=HTMLResponse)
+def news_list(page: int = Query(1, ge=1), page_size: int = Query(10, ge=1, le=50)):
+    start = (page - 1) * page_size
+    end = start + page_size
+    items = NEWS_DATA[start:end]
+    total_pages = (len(NEWS_DATA) + page_size - 1) // page_size
+
+    rows = ""
+    for item in items:
+        rows += f'''
+        <tr>
+            <td>{item['id']}</td>
+            <td><a href="/news/detail/{item['id']}">{item['title']}</a></td>
+            <td>{item['summary'][:20]}...</td>
+        </tr>'''
+
+    nav = ""
+    if page > 1:
+        nav += f'<a class="prev-page" href="/news/list?page={page-1}&page_size={page_size}">上一页</a> '
+    if page < total_pages:
+        nav += f'<a class="next-page" href="/news/list?page={page+1}&page_size={page_size}">下一页</a>'
+
+    return f'''
+    <html><body>
+    <h1>新闻列表 - 第{page}页/共{total_pages}页</h1>
+    <table border="1" cellpadding="5">
+        <tr><th>ID</th><th>标题</th><th>摘要</th></tr>
+        {rows}
+    </table>
+    <p>{nav}</p>
+    </body></html>'''
+
+
+@app.get("/news/detail/{news_id}", response_class=HTMLResponse)
+def news_detail(news_id: int):
+    news = NEWS_DATA[news_id - 1] if 1 <= news_id <= len(NEWS_DATA) else None
+    if not news:
+        return HTMLResponse("<h1>404 新闻不存在</h1>", status_code=404)
+
+    comments = COMMENTS_DATA.get(news_id, [])
+    comment_rows = ""
+    for c in comments:
+        comment_rows += f'''
+        <tr>
+            <td>{c['user']}</td>
+            <td>{c['content']}</td>
+            <td>{c['like_count']}</td>
+        </tr>'''
+
+    return f'''
+    <html><body>
+    <h1>{news['title']}</h1>
+    <div class="content">
+        <p>{news['summary']}</p>
+        <p>这是第{news_id}条新闻的完整正文内容。当前新闻涉及领域正在经历快速发展，
+        多项关键技术取得突破性进展。专家表示，这一趋势将在未来几年持续加速，
+        对整个行业产生深远影响。</p>
+        <p>发布时间：2025-01-{news_id:02d} 10:00:00</p>
+        <p>作者：记者_{news_id}</p>
+        <p>分类：{"科技" if news_id % 2 == 0 else "社会"}</p>
+    </div>
+    <h2>评论 ({len(comments)}条)</h2>
+    <p><a href="/news/comments/{news_id}">查看全部评论</a></p>
+    <table border="1" cellpadding="5">
+        <tr><th>用户</th><th>内容</th><th>点赞</th></tr>
+        {comment_rows}
+    </table>
+    <p><a href="/news/list?page=1">返回列表</a></p>
+    </body></html>'''
+
+
+@app.get("/news/comments/{news_id}", response_class=JSONResponse)
+def news_comments(news_id: int):
+    if news_id not in COMMENTS_DATA:
+        return {"news_id": news_id, "comments": [], "total": 0}
+    comments = COMMENTS_DATA[news_id]
+    return {"news_id": news_id, "comments": comments, "total": len(comments)}
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8888)
+
+`````
+
+--- **end of file: funboost/funspider/funspider_demos/fake_news_site.py** (project: funboost) --- 
+
+---
+
+
+--- **start of file: funboost/funspider/funspider_demos/funspider_demo1.py** (project: funboost) --- 
+
+`````python
+from typing import ClassVar
+from funboost import boost, BoosterParams, ctrl_c_recv, ConcurrentModeEnum
+from funboost.funspider import SimpleSpiderClient, AsyncSpiderClient, SpiderItem, create_engine, create_async_engine, Field
+
+
+from typing import Optional
+
+# ---------- 数据库 ----------
+MYSQL_ENGINE = create_engine("mysql+pymysql://root:123456@127.0.0.1:3306/testdb")
+ASYNC_MYSQL_ENGINE = create_async_engine("mysql+aiomysql://root:123456@127.0.0.1:3306/testdb")
+
+
+class NewsItem(SpiderItem, table=True):
+    __tablename__: ClassVar[str] = "news"
+    __engine__ = MYSQL_ENGINE
+    __async_engine__ = ASYNC_MYSQL_ENGINE
+    __default_upsert_unique_fields__ = ["news_id"]
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    news_id: int = Field(unique=True)
+    title: str
+    summary: str
+    content: str
+    author: str
+    category: str
+    publish_time: str
+    url: str
+
+
+class CommentItem(SpiderItem, table=True):
+    __tablename__: ClassVar[str] = "comments"
+    __engine__ = MYSQL_ENGINE
+    __async_engine__ = ASYNC_MYSQL_ENGINE
+    __default_upsert_unique_fields__ = ["comment_id"]
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    comment_id: int = Field(unique=True)
+    news_id: int
+    user: str
+    content: str
+    like_count: int
+
+
+NewsItem.create_table()
+CommentItem.create_table()
+
+def get_proxy_abuyun():
+    return "http://userxx:passwdxx@http-pro.abuyun.com:9000"
+
+def get_proxy_none():
+    return None
+
+# ---------- 客户端 ----------
+sync_client = SimpleSpiderClient(proxy_getter_list=[
+    # get_proxy_abuyun,
+ get_proxy_none
+ ])
+async_client = AsyncSpiderClient(proxy_getter_list=[
+    # get_proxy_abuyun,
+ get_proxy_none
+ ])
+
+BASE_URL = "http://127.0.0.1:8888"
+
+
+# ---------- 列表页爬虫（同步）：解析列表页，推送详情页任务 ----------
+@boost(BoosterParams(queue_name="news_list", qps=2))
+def crawl_list(page: int):
+    resp = sync_client.get(f"{BASE_URL}/news/list?page={page}")
+    links = resp.css("table a::attr(href)").getall()
+    for href in links:
+        if href and "/news/detail/" in href:
+            detail_url = f"{BASE_URL}{href}" if href.startswith("/") else href
+            crawl_detail.push(detail_url=detail_url)
+    next_href = resp.css("a.next-page::attr(href)").get("")
+    if next_href:
+        crawl_list.push(page=page + 1)
+
+
+# ---------- 详情页爬虫（同步）：解析新闻详情，保存新闻 + 推送评论任务 ----------
+@boost(BoosterParams(queue_name="news_detail", qps=5))
+def crawl_detail(detail_url: str):
+    resp = sync_client.get(detail_url)
+    title = resp.css("h1::text").get("").strip()
+    content_p = resp.css("div.content p::text").getall()
+    content = "\n".join(content_p) if content_p else ""
+    author = ""
+    category = ""
+    publish_time = ""
+    for p_text in content_p:
+        if p_text.startswith("作者："):
+            author = p_text.replace("作者：", "").strip()
+        elif p_text.startswith("分类："):
+            category = p_text.replace("分类：", "").strip()
+        elif p_text.startswith("发布时间："):
+            publish_time = p_text.replace("发布时间：", "").strip()
+    summary = content_p[0] if content_p else ""
+
+    news_id = int(resp.re_first(r"/news/detail/(\d+)"))
+
+    NewsItem(
+        news_id=news_id, title=title, summary=summary,
+        content=content, author=author, category=category,
+        publish_time=publish_time, url=detail_url,
+    ).upsert()
+
+    crawl_comments.push(news_id=news_id)
+
+
+# ---------- 评论页爬虫（异步）：请求评论接口，保存评论 ----------
+@boost(BoosterParams(queue_name="news_comments", qps=10, concurrent_mode=ConcurrentModeEnum.ASYNC))
+async def crawl_comments(news_id: int):
+    resp = await async_client.get(f"{BASE_URL}/news/comments/{news_id}")
+    data = resp.resp_dict
+    for c in data.get("comments", []):
+        item = CommentItem(
+            comment_id=c["id"], news_id=c["news_id"],
+            user=c["user"], content=c["content"],
+            like_count=c["like_count"],
+        )
+        await item.aio_upsert()
+
+
+if __name__ == '__main__':
+    crawl_list.consume()
+    crawl_detail.consume()
+    crawl_comments.consume()
+
+    crawl_list.push(page=1)
+
+    ctrl_c_recv()
+
+`````
+
+--- **end of file: funboost/funspider/funspider_demos/funspider_demo1.py** (project: funboost) --- 
 
 ---
 
