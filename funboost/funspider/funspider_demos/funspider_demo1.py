@@ -1,9 +1,14 @@
-from typing import ClassVar
-from funboost import boost, BoosterParams, ctrl_c_recv, ConcurrentModeEnum
+import re
+from typing import ClassVar, Optional
+from funboost import boost, BoosterParams, BoostersManager, BrokerEnum, ctrl_c_recv, ConcurrentModeEnum
 from funboost.funspider import SimpleSpiderClient, AsyncSpiderClient, SpiderItem, create_engine, create_async_engine, Field
 
+NEWS_GROUP = "news_crawler"
 
-from typing import Optional
+
+class NewsCrawlerParams(BoosterParams):
+    broker_kind: str = BrokerEnum.REDIS_ACK_ABLE
+    booster_group: str = NEWS_GROUP
 
 # ---------- 数据库 ----------
 MYSQL_ENGINE = create_engine("mysql+pymysql://root:123456@127.0.0.1:3306/testdb")
@@ -64,7 +69,7 @@ BASE_URL = "http://127.0.0.1:8888"
 
 
 # ---------- 列表页爬虫（同步）：解析列表页，推送详情页任务 ----------
-@boost(BoosterParams(queue_name="news_list", qps=2))
+@boost(NewsCrawlerParams(queue_name="news_list", qps=2))
 def crawl_list(page: int):
     resp = sync_client.get(f"{BASE_URL}/news/list?page={page}")
     links = resp.css("table a::attr(href)").getall()
@@ -78,7 +83,7 @@ def crawl_list(page: int):
 
 
 # ---------- 详情页爬虫（同步）：解析新闻详情，保存新闻 + 推送评论任务 ----------
-@boost(BoosterParams(queue_name="news_detail", qps=5))
+@boost(NewsCrawlerParams(queue_name="news_detail", qps=5))
 def crawl_detail(detail_url: str):
     resp = sync_client.get(detail_url)
     title = resp.css("h1::text").get("").strip()
@@ -96,7 +101,7 @@ def crawl_detail(detail_url: str):
             publish_time = p_text.replace("发布时间：", "").strip()
     summary = content_p[0] if content_p else ""
 
-    news_id = int(resp.re_first(r"/news/detail/(\d+)"))
+    news_id = int(re.search(r"/news/detail/(\d+)", detail_url).group(1))
 
     NewsItem(
         news_id=news_id, title=title, summary=summary,
@@ -108,7 +113,8 @@ def crawl_detail(detail_url: str):
 
 
 # ---------- 评论页爬虫（异步）：请求评论接口，保存评论 ----------
-@boost(BoosterParams(queue_name="news_comments", qps=10, concurrent_mode=ConcurrentModeEnum.ASYNC))
+@boost(NewsCrawlerParams(queue_name="news_comments", qps=10, concurrent_mode=ConcurrentModeEnum.ASYNC,
+                         do_task_filtering=True, task_filtering_expire_seconds=3600))
 async def crawl_comments(news_id: int):
     resp = await async_client.get(f"{BASE_URL}/news/comments/{news_id}")
     data = resp.resp_dict
@@ -122,9 +128,7 @@ async def crawl_comments(news_id: int):
 
 
 if __name__ == '__main__':
-    crawl_list.consume()
-    crawl_detail.consume()
-    crawl_comments.consume()
+    BoostersManager.consume_group(NEWS_GROUP)
 
     crawl_list.push(page=1)
 

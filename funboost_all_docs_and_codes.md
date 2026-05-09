@@ -3554,84 +3554,85 @@ Entry Points (not imported by other project files):
 ============================================================
   行3: # 8.用于爬虫
   行7: ## 8.0 funboost 用于爬虫前序
-  行30: ### funboost scrapy 两种框架写爬虫代码方式代码明显对比
-  行32: #### funboost框架是自由框架的证据:
-  行72: #### scrapy是框架奴役的证据:
-  行91: ### 8.0.1 tips : 202309 新增boost_spider爬虫框架
-  行121: ### 8.0.2 funboost 降维打击仿scrapy api爬虫框架
-  行152: #### funboost 太省时间
-  行159: #### @boost 一键赋能你的函数，功能远超爬虫框架
-  行165: #### funboost 打破数据孤岛：秒变微服务，Java/Go 随时调用
-  行173: #### 有人怀疑 funboost没有http请求中间件，这恰好是对scrapy的最大优势
-  行212: #### funboost能轻松自然完成，而scrapy无法完成的爬虫场景1，浏览器多轮交互
-  行234: #### 总结下funboost和scrapy在小项目和大项目：
-  行244: ### 8.0.3 讨scrapy檄文：Funboost兴，Scrapy亡，天下爬虫，当顺天命！
-  行317: ### 8.0.4 很多人问这个框架能不能爬虫？
-  行338: ### 8.0.5 为什么 funboost 用来爬虫时候，扩展性简单性 远超 scrapy api式的一众传统爬虫框架？
-  行410: ### 8.0.6 主动集中简要回答驳斥一些scrapy 优势更大的观点
-  行414: #### **你质疑funboost 没有 http middware ？**
-  行422: #### **你质疑funboost 没有 pipeline，质疑保存数据麻烦？**
-  行444: #### **你说Scrapy 插件生态丰富，质疑Funboost 没有三方包插件生态不够？**
-  行491: #### 你项目下的 utils 文件夹的工具类是黄金还是废铁？取决于你用什么哲学的框架
-  行499: #### **你说scrapy社区支持，有庞大的专门各种问题的讨论？质疑funboost没有社区？**
-  行512: #### **你羡慕scrapy的response有自带.xpath .css .extract_first .extract_all 方法？**
-  行519: #### **scrapy twisted 性能强悍？担心funboost爬取不快？**
-  行525: #### **你质疑scrapy重试功能强大？**
-  行531: #### **你怀疑scrapy稳定，funboost不稳定？**
-  行540: #### **你质疑scrapy自带去重，funboost不能去重？**
-  行548: #### **你质疑funboost不能断点续爬？**
-  行558: ### 8.0.7 funboost爬虫时候是任何方面超过scrapy,不接受辩证法说scrapy也有优势
-  行567: ### 8.0.8 国内爬虫框架突破很小,不是有意抄袭巧合,而是情不自禁模仿scrapy api
-  行590: ## 8.0b 你的 utils 文件夹是黄金还是废铁？取决于你用什么哲学的框架
-  行660: ## 8.1 演示获取汽车之家资讯的 新闻 导购 和 评测 3个板块 的 文章。
-  行816: ## 8.2 演示经典的豆瓣top250电影的爬虫
-  行875: ### 8.2.2 funboost 对比网上的 scrapy 爬取 douban代码
-  行893: ## 8.3 演示3种最常见代码思维方式爬取汽车之家资讯
-  行903: ### 8.3.1 每次临时手写rquests + 多线程,使用low爬虫方式的缺点
-  行919: ### 8.3.2 scrapy 爬虫框架来实现缺点
-  行933: ### 8.3.3 scrapy 框架 和 分布式函数调度框架爬虫对比
-  行1051: ### 8.3.4 临时low方法手写爬虫全流程的代码 （手写多线程 + queue 分发调度 ）
-  行1199: ### 8.3.5 scrapy爬虫代码
-  行1580: ### 8.3.6 分布式函数调度框架的代码
-  行1648: ## 8.7 scrapy 和 仿scrapy api 式爬虫框架 回调地狱，代码写法思维反直觉
-  行1680: ## 8.8 详细说明为什么 Scrapy 爬虫代码不是直观的"平铺直叙"写法？
-  行1849: ## 8.9 仿scrapy api框架中无法完成的需求真实例子2，token有效期太短
-  行2044: ## 8.10 scrapy的 response.meta 字典传参无法ide自动补全提示
-  行2107: ## 8.11 funboost中反爬虫换代理ip 请求头 破解等 容易程度暴击专用爬虫框架scrapy
-  行2111: ### 8.11.1 scrapy中换代理ip和请求头代码
-  行2162: ### 8.11.2 用户自己自由封装一个换代理ip和请求头的request函数，自然又简单
-  行2190: ### 8.11.3 为什么scrapy换代理IP和请求头的高难度分析my_request
-  行2259: ## 8.12 scrapy 可直接运行测试验证性很差
-  行2282: ## 8.13 funboost 断点接续运行能力吊打scrapy-redis 的 blpop （funboost支持确认消费）
-  行2285: ### 8.13.1 为什么 funboost的断点续爬完胜 scrapy-redis的断点续爬(防丢数据1)
-  行2294: ### 8.13.2 funboost的函数重试功能远远暴击scrapy的url重试功能(防丢数据2)
-  行2305: ## 8.14 其他funboost 吊打 scrapy原因 详细介绍
-  行2306: ### 8.14.1 为什么funboost的去重功能远远吊打scrapy的Request对象指纹去重？
-  行2308: #### 8.14.1.1 funboost 支持有效期过滤
-  行2313: #### 8.14.1.2 scrapy无法过滤url中的噪音入参，例如ts时间戳，rd随机数，追踪来源id
-  行2410: ### 8.14.2 详细驳斥 Scrapy 插件生态丰富，质疑Funboost 没有三方扩展
-  行2526: ### 8.14.3 架构级碾压：Funboost 天然就是 FaaS 微服务，而 Scrapy 只是数据孤岛
-  行2535: #### 8.14.3.1 Funboost 的实现方式：微服务式的天然解耦
-  行2554: #### 8.14.3.2 Scrapy 的实现方式：反直觉的高耦合代码
-  行2598: #### 8.14.3.3 场景扩展：数据补采与调试
-  行2605: #### 8.14.3.4 总结
-  行2614: #### 8.14.3.5 架构选型结论
-  行2626: ## 8.15 funboost的调度、去重、并发、反爬定制，各方面吊打了scrapy,非专业框架竟然虐专业框架?
-  行2709: ## 8.16 为什么funboost 在面对反爬虫网站时候 吊打 scrapy?
-  行2861: ## 8.16b  `funboost` + `boost_spider` 在反爬方面，完胜 `scrapy` 这种所谓的专业爬虫框架
-  行2871: ### 8.16b.1 🛡️ 反爬虫能力全方位对比表：boost_spider vs scrapy
-  行2889: ## 8.17 如果禁止使用搜索 ai外部辅助,人工默写scrapy和funboost爬虫,哪个更难?
-  行2991: ## 8.30 为什么 funboost 能用于爬虫 的本质原因
-  行3034: ## 8.31 `boost_spider`  (powered by `funboost`) 专业爬虫工具库介绍
-  行3072: ### 8.31.1 `boost_spider` 的 `RequestClient` 类介绍
-  行3079: ### 8.31.2 `boost_spider` 的 `SpiderResponse`  类介绍
-  行3089: ### 8.31.2b **boost_spider/http/request_client.py 中的 RequestClient 和 SpiderResponse 功能如下:**
-  行3108: ### 8.31.3  `boost_spider` 内置了各种类型的数据库sink,全部只需要一行代码就能把字典入库.
-  行3122: ### 8.31.4 `boost_spider` 写法demo (写法完全和`funboost`一样)
-  行3165: ### 8.31.5 补充这个 `boost_spider`内容 是为了打消用户质疑
-  行3182: ## 8.40 集中总结的 Funboost vs. Scrapy 优势快速对比 (表格版)
-  行3408: ## 8.40b 集中总结 funboost vs scrapy 优势快速对比（文字版）
-  行3488: ## 8.41 Funboost vs. Scrapy 爬虫能力全方位对比（百分制评分）
+  行33: ### funboost scrapy 两种框架写爬虫代码方式代码明显对比
+  行35: #### funboost框架是自由框架的证据:
+  行75: #### scrapy是框架奴役的证据:
+  行94: ### 8.0.1 tips : 202309 新增boost_spider爬虫框架
+  行124: ### 8.0.2 funboost 降维打击仿scrapy api爬虫框架
+  行155: #### funboost 太省时间
+  行162: #### @boost 一键赋能你的函数，功能远超爬虫框架
+  行168: #### funboost 打破数据孤岛：秒变微服务，Java/Go 随时调用
+  行176: #### 有人怀疑 funboost没有http请求中间件，这恰好是对scrapy的最大优势
+  行215: #### funboost能轻松自然完成，而scrapy无法完成的爬虫场景1，浏览器多轮交互
+  行237: #### 总结下funboost和scrapy在小项目和大项目：
+  行247: ### 8.0.3 讨scrapy檄文：Funboost兴，Scrapy亡，天下爬虫，当顺天命！
+  行320: ### 8.0.4 很多人问这个框架能不能爬虫？
+  行341: ### 8.0.5 为什么 funboost 用来爬虫时候，扩展性简单性 远超 scrapy api式的一众传统爬虫框架？
+  行413: ### 8.0.6 主动集中简要回答驳斥一些scrapy 优势更大的观点
+  行417: #### **你质疑funboost 没有 http middware ？**
+  行425: #### **你质疑funboost 没有 pipeline，质疑保存数据麻烦？**
+  行447: #### **你说Scrapy 插件生态丰富，质疑Funboost 没有三方包插件生态不够？**
+  行494: #### 你项目下的 utils 文件夹的工具类是黄金还是废铁？取决于你用什么哲学的框架
+  行502: #### **你说scrapy社区支持，有庞大的专门各种问题的讨论？质疑funboost没有社区？**
+  行515: #### **你羡慕scrapy的response有自带.xpath .css .extract_first .extract_all 方法？**
+  行522: #### **scrapy twisted 性能强悍？担心funboost爬取不快？**
+  行528: #### **你质疑scrapy重试功能强大？**
+  行534: #### **你怀疑scrapy稳定，funboost不稳定？**
+  行543: #### **你质疑scrapy自带去重，funboost不能去重？**
+  行551: #### **你质疑funboost不能断点续爬？**
+  行561: ### 8.0.7 funboost爬虫时候是任何方面超过scrapy,不接受辩证法说scrapy也有优势
+  行570: ### 8.0.8 国内爬虫框架突破很小,不是有意抄袭巧合,而是情不自禁模仿scrapy api
+  行593: ## 8.0b 你的 utils 文件夹是黄金还是废铁？取决于你用什么哲学的框架
+  行663: ## 8.1 演示获取汽车之家资讯的 新闻 导购 和 评测 3个板块 的 文章。
+  行819: ## 8.2 演示经典的豆瓣top250电影的爬虫
+  行878: ### 8.2.2 funboost 对比网上的 scrapy 爬取 douban代码
+  行896: ## 8.3 演示3种最常见代码思维方式爬取汽车之家资讯
+  行906: ### 8.3.1 每次临时手写rquests + 多线程,使用low爬虫方式的缺点
+  行922: ### 8.3.2 scrapy 爬虫框架来实现缺点
+  行936: ### 8.3.3 scrapy 框架 和 分布式函数调度框架爬虫对比
+  行1054: ### 8.3.4 临时low方法手写爬虫全流程的代码 （手写多线程 + queue 分发调度 ）
+  行1202: ### 8.3.5 scrapy爬虫代码
+  行1583: ### 8.3.6 分布式函数调度框架的代码
+  行1651: ## 8.7 scrapy 和 仿scrapy api 式爬虫框架 回调地狱，代码写法思维反直觉
+  行1683: ## 8.8 详细说明为什么 Scrapy 爬虫代码不是直观的"平铺直叙"写法？
+  行1852: ## 8.9 仿scrapy api框架中无法完成的需求真实例子2，token有效期太短
+  行2047: ## 8.10 scrapy的 response.meta 字典传参无法ide自动补全提示
+  行2110: ## 8.11 funboost中反爬虫换代理ip 请求头 破解等 容易程度暴击专用爬虫框架scrapy
+  行2114: ### 8.11.1 scrapy中换代理ip和请求头代码
+  行2165: ### 8.11.2 用户自己自由封装一个换代理ip和请求头的request函数，自然又简单
+  行2193: ### 8.11.3 为什么scrapy换代理IP和请求头的高难度分析my_request
+  行2262: ## 8.12 scrapy 可直接运行测试验证性很差
+  行2285: ## 8.13 funboost 断点接续运行能力吊打scrapy-redis 的 blpop （funboost支持确认消费）
+  行2288: ### 8.13.1 为什么 funboost的断点续爬完胜 scrapy-redis的断点续爬(防丢数据1)
+  行2297: ### 8.13.2 funboost的函数重试功能远远暴击scrapy的url重试功能(防丢数据2)
+  行2308: ## 8.14 其他funboost 吊打 scrapy原因 详细介绍
+  行2309: ### 8.14.1 为什么funboost的去重功能远远吊打scrapy的Request对象指纹去重？
+  行2311: #### 8.14.1.1 funboost 支持有效期过滤
+  行2316: #### 8.14.1.2 scrapy无法过滤url中的噪音入参，例如ts时间戳，rd随机数，追踪来源id
+  行2413: ### 8.14.2 详细驳斥 Scrapy 插件生态丰富，质疑Funboost 没有三方扩展
+  行2529: ### 8.14.3 架构级碾压：Funboost 天然就是 FaaS 微服务，而 Scrapy 只是数据孤岛
+  行2538: #### 8.14.3.1 Funboost 的实现方式：微服务式的天然解耦
+  行2557: #### 8.14.3.2 Scrapy 的实现方式：反直觉的高耦合代码
+  行2601: #### 8.14.3.3 场景扩展：数据补采与调试
+  行2608: #### 8.14.3.4 总结
+  行2617: #### 8.14.3.5 架构选型结论
+  行2629: ## 8.15 funboost的调度、去重、并发、反爬定制，各方面吊打了scrapy,非专业框架竟然虐专业框架?
+  行2712: ## 8.16 为什么funboost 在面对反爬虫网站时候 吊打 scrapy?
+  行2864: ## 8.16b  `funboost` + `boost_spider` 在反爬方面，完胜 `scrapy` 这种所谓的专业爬虫框架
+  行2874: ### 8.16b.1 🛡️ 反爬虫能力全方位对比表：boost_spider vs scrapy
+  行2892: ## 8.17 如果禁止使用搜索 ai外部辅助,人工默写scrapy和funboost爬虫,哪个更难?
+  行2994: ## 8.30 为什么 funboost 能用于爬虫 的本质原因
+  行3037: ## 8.31 `boost_spider`  (powered by `funboost`) 专业爬虫工具库介绍
+  行3075: ### 8.31.1 `boost_spider` 的 `RequestClient` 类介绍
+  行3082: ### 8.31.2 `boost_spider` 的 `SpiderResponse`  类介绍
+  行3092: ### 8.31.2b **boost_spider/http/request_client.py 中的 RequestClient 和 SpiderResponse 功能如下:**
+  行3111: ### 8.31.3  `boost_spider` 内置了各种类型的数据库sink,全部只需要一行代码就能把字典入库.
+  行3125: ### 8.31.4 `boost_spider` 写法demo (写法完全和`funboost`一样)
+  行3168: ### 8.31.5 补充这个 `boost_spider`内容 是为了打消用户质疑
+  行3183: ## 8.32 funspider 介绍
+  行3198: ## 8.40 集中总结的 Funboost vs. Scrapy 优势快速对比 (表格版)
+  行3424: ## 8.40b 集中总结 funboost vs scrapy 优势快速对比（文字版）
+  行3504: ## 8.41 Funboost vs. Scrapy 爬虫能力全方位对比（百分制评分）
 
 ============================================================
 文件: c9.md
@@ -20430,7 +20431,10 @@ funweb页面中也可以配置告警，原理是复用已有的上报到redis中
 
 - **Funboost 是“写函数就能爬虫”，Scrapy 是“写框架才能爬虫”。**  
 
-- **funboost/boost_spider 对仿scrapy api框架最大优势是 自由编程暴击框架奴役， 能复用用户自己的utils文件夹下的 宝贵资产**
+- **funspider** 是 funboost项目里面内置的爬虫辅助，整体思想理念和`boost_spider`这个独立三方包很像，都是 `powered by funboost`。
+  `funspider` 提供的仅仅是 `SpiderItem`, `SpiderResponse`, `SimpleSpiderClient`, `AsyncSpiderClient` 这几个**辅助类**。
+
+- **funboost/funspider/boost_spider 对仿scrapy api框架最大优势是 自由编程暴击框架奴役， 能复用用户自己的utils文件夹下的 宝贵资产**
 
 - funboost/boost_spider 和 scrapy 难度差异: 【对于一个刚刚掌握了 Python 基础语法（变量、列表、元组、if/else、for循环）的新手来说】
   - **boost_spider**： 难度要低很多,就和练手手写requests单个小脚本的思路一样，加一行@boost装饰器万事大吉。
@@ -23594,6 +23598,19 @@ def crawl_detail_page(user_id):
 **小结:**  
 以后不要再说  `funboost` 是通用函数调度框架就一定不如专用爬虫框架了, `boost_spider` 已经包含了请求 反爬 自动cookie保持、数据库插入、xpath css解析 这些爬虫所需要的元素.  
 
+
+## 8.32 funspider 介绍
+
+| 项目 | 发布时间 | 定位 | 依赖关系 |
+| :--- | :--- | :--- | :--- |
+| **boost_spider** | 2024年 | 独立三方包 | 依赖 funboost 驱动 |
+| **funspider** | 2026年 | funboost 内置模块 | 随 funboost 安装即可使用 |
+
+`funspider` 和 `boost_spider` 高度一致，主要区别：
+- **辅助类**有所不同
+- **分发方式**不同：`funspider` 为内置模块，`boost_spider` 为独立三方包
+
+📖 `funspider` 用法详见：[funspider用法](https://github.com/ydf0509/funboost/blob/master/funboost/funspider/README.md)
 
 
 
@@ -30534,6 +30551,7 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
     │   ├── app.py
     │   └── functions.py
     ├── funspider
+    │   ├── README.md
     │   ├── __init__.py
     │   ├── funspider_demos
     │   │   ├── fake_news_site.py
@@ -30662,7 +30680,7 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
 ---
 
 
-## funboost (relative dir: `funboost`)  Included Files (total: 269 files)
+## funboost (relative dir: `funboost`)  Included Files (total: 270 files)
 
 
 - `funboost/constant.py`
@@ -30986,6 +31004,8 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
 - `funboost/funspider/http.py`
 
 - `funboost/funspider/item.py`
+
+- `funboost/funspider/README.md`
 
 - `funboost/funspider/__init__.py`
 
@@ -57097,6 +57117,190 @@ class SpiderItem(SQLModel, table=False):
 ---
 
 
+--- **start of file: funboost/funspider/README.md** (project: funboost) --- 
+
+`````markdown
+
+# 🕷️ funspider – Funboost 爬虫辅助扩展
+
+> **基于 `Funboost` 的工程化爬虫辅助组件，提供 ORM 模型与双引擎客户端。**
+
+**`funspider`** 是 `Funboost` 分布式函数调度框架的一个用户贡献扩展。如果说 `boost_spider` 代表着极致的**自由与简洁**，那么 `funspider` 则提供了一种**结构化与强类型**的辅助选择。
+
+它不是 `boost_spider` 的替代品，而是为偏爱 **ORM 模型驱动** 和 **异步协程收发** 的开发者提供的另一种趁手工具。
+
+---
+
+## ✨ 核心定位
+
+- ✅ **范式互补**：`boost_spider` 推崇纯字典流和极致自由；`funspider` 额外提供 SQLModel ORM 封装的选项，为复杂数据关系提供类型安全保障。
+- ✅ **双引擎客户端**：基于 `httpx`，内置 `SimpleSpiderClient`（同步）与 `AsyncSpiderClient`（异步），可在同一个爬虫项目中按需混用。
+- ✅ **强类型数据模型**：基于 `SQLModel`，支持 `VARCHAR(n)`、索引、外键等精确字段定义，享受 IDE 智能补全与静态检查。
+- ✅ **增强响应解析**：`SpiderResponse` 对象内置 `.xpath()`、`.css()`、`.re()` 等方法，无需切换工具即可快速提取数据。
+- ✅ **灵活代理接入**：支持传入自定义代理获取函数列表，轻松对接阿布云、快代理等任意商业代理服务。
+
+---
+
+## 📦 安装
+
+`funspider` 代码随 `funboost` 一起发布，但默认不安装其依赖项。
+
+**1. 安装 Funboost**
+```bash
+pip install funboost
+```
+
+**2. 按需安装相关依赖**
+```bash
+# 安装 funspider 所需的所有依赖
+pip install sqlmodel httpx parsel
+
+# 根据需求安装数据库驱动
+pip install pymysql aiomysql        # MySQL
+pip install psycopg2-binary         # PostgreSQL
+```
+
+---
+
+## 🚀 快速上手
+
+以下示例展示了 `funspider` 的核心用法：继承 `BoosterParams` 复用配置、使用强类型 `SpiderItem` 模型入库，以及混用同步和异步客户端。
+
+### 1. 定义数据模型 (ORM)
+
+```python
+from funboost.funspider import SpiderItem, Field, create_engine, create_async_engine
+
+class NewsItem(SpiderItem, table=True):
+    __tablename__ = "news"
+    __engine__ = create_engine("mysql+pymysql://user:pass@localhost/db")
+    __async_engine__ = create_async_engine("mysql+aiomysql://user:pass@localhost/db")
+    __default_upsert_unique_fields__ = ["news_id"]
+
+    id: int | None = Field(default=None, primary_key=True)
+    news_id: int = Field(unique=True)
+    title: str = Field(max_length=200)   # 精确控制 VARCHAR(200)
+    url: str = Field(max_length=500)
+    content: str                         # TEXT
+```
+
+### 2. 编写爬虫函数 (同步 + 异步混用)
+
+```python
+from funboost import boost, BoosterParams, BoostersManager, BrokerEnum, ConcurrentModeEnum
+from funboost.funspider import SimpleSpiderClient, AsyncSpiderClient
+
+NEWS_GROUP = "news_crawler"
+
+class NewsCrawlerParams(BoosterParams):
+    broker_kind: str = BrokerEnum.REDIS_ACK_ABLE
+    booster_group: str = NEWS_GROUP
+
+base_url = "https://example.com"
+
+def abuyun_proxy():
+    return "http://user:pass@proxy.abuyun.com:9020"
+
+def redis_pool_proxy():
+    import redis
+    r = redis.Redis(host="localhost", port=6379, db=0)
+    return r.srandmember("proxy_pool")
+
+sync_client = SimpleSpiderClient(proxy_getter_list=[abuyun_proxy, redis_pool_proxy], retry_times=3)
+async_client = AsyncSpiderClient(proxy_getter_list=[abuyun_proxy, redis_pool_proxy], retry_times=3)
+
+@boost(NewsCrawlerParams(queue_name="list", qps=2))
+def crawl_list(page: int):
+    resp = sync_client.get(f"{base_url}/list?page={page}")
+    for url in resp.css("a.detail::attr(href)").getall():
+        crawl_detail.push(detail_url=url)
+
+@boost(NewsCrawlerParams(queue_name="detail", qps=5))
+def crawl_detail(detail_url: str):
+    resp = sync_client.get(detail_url)
+    title = resp.xpath("//h1/text()").get()
+    news_id = int(resp.re_first(r"news/(\d+)"))
+    NewsItem(news_id=news_id, title=title, url=detail_url).upsert()
+    crawl_comments.push(news_id=news_id)
+
+@boost(NewsCrawlerParams(queue_name="comments", qps=10, concurrent_mode=ConcurrentModeEnum.ASYNC,
+                         do_task_filtering=True, task_filtering_expire_seconds=3600))
+async def crawl_comments(news_id: int):
+    resp = await async_client.get(f"{base_url}/comments/{news_id}")
+    for comment in resp.resp_dict["list"]:
+        await CommentItem(...).aio_upsert()
+```
+
+### 3. 启动消费
+
+```python
+if __name__ == "__main__":
+    BoostersManager.consume_group(NEWS_GROUP)
+    crawl_list.push(page=1)
+```
+
+---
+
+## 🔧 进阶配置
+
+### 自定义代理
+
+```python
+def abuyun_proxy():
+    return "http://user:pass@proxy.abuyun.com:9020"
+
+client = SimpleSpiderClient(proxy_getter_list=[abuyun_proxy])
+```
+
+---
+
+## 🆚 与 `boost_spider` 的风格对比
+
+`funspider` 和 `boost_spider` 都是基于 `Funboost` 的生产级爬虫解决方案。核心差异在于**设计哲学和开发范式**，而非能力强弱：
+
+| 特性 | `boost_spider` | `funspider` |
+|------|----------------|------------|
+| **设计理念** | **自由至上、极简字典流**。以最原生、最直接的方式让开发者掌控一切。 | **ORM 辅助、强类型流**。为习惯使用 ORM 模型管理数据的开发者提供便利封装。 |
+| **数据模型** | 纯 Python 字典。开发者可完全自定义如何建表和校验（如手写 DDL 或结合 SQLAlchemy）。 | SQLModel 模型类。将数据定义、字段校验和数据库同步集成在类属性中。 |
+| **字段控制** | 灵活。你完全控制建表语句，想约束什么字段长度和索引都行。 | 直观。在 ORM 模型中声明 `Field(max_length=200)`，IDE 自动补全。 |
+| **HTTP 客户端** | 同步 `RequestClient`，内置丰富代理、重试功能。 | 同步 + 异步双客户端，基于 `httpx`。 |
+| **代理配置** | 对象化配置，优雅简洁。 | 函数式注入，灵活自由。 |
+| **开发偏好** | 喜欢直接、轻量、完全掌控的纯粹 Python 体验。 | 偏好在大型项目中通过 ORM 标准管理数据库结构和关系。 |
+| **生产环境** | ✅ **完全胜任**，性能卓越，久经考验。 | ✅ **完全胜任**，结构清晰，便于团队协作。 |
+
+**选型建议**：
+-   如果你喜欢 `funboost` 那种“不加修饰、直接赋能”的爽快感，**`boost_spider`** 是无脑首选。
+-   如果你所在团队重度使用 SQLAlchemy/SQLModel，且希望爬虫的数据模型也能无缝融入项目 ORM 体系，**`funspider`** 会是更顺手的选择。
+
+---
+
+## 📖 完整示例
+
+参见源码目录下的演示文件：
+- 入口文件：`funspider/funspider_demos/funspider_demo1.py`
+- 模拟网站：`funspider/funspider_demos/fake_news_site.py`
+
+演示内容：
+- 新闻列表页（同步） → 详情页（同步） → 评论页（异步）
+- 同步/异步客户端混用
+- SQLModel 数据入库
+
+---
+
+## 🧠 设计哲学
+
+`funspider` 提供的仅仅是 `SpiderItem`, `SpiderResponse`, `SimpleSpiderClient`, `AsyncSpiderClient` 这几个**辅助类**。
+
+真正的核心竞争力——分布式调度、QPS 控频、自动重试、断点续传——完全由 **`Funboost`** 核心引擎驱动。
+
+我们希望你的爬虫代码是平铺直叙的函数，而不是层层嵌套的回调。
+`````
+
+--- **end of file: funboost/funspider/README.md** (project: funboost) --- 
+
+---
+
+
 --- **start of file: funboost/funspider/__init__.py** (project: funboost) --- 
 
 `````python
@@ -57234,12 +57438,17 @@ if __name__ == "__main__":
 --- **start of file: funboost/funspider/funspider_demos/funspider_demo1.py** (project: funboost) --- 
 
 `````python
-from typing import ClassVar
-from funboost import boost, BoosterParams, ctrl_c_recv, ConcurrentModeEnum
+import re
+from typing import ClassVar, Optional
+from funboost import boost, BoosterParams, BoostersManager, BrokerEnum, ctrl_c_recv, ConcurrentModeEnum
 from funboost.funspider import SimpleSpiderClient, AsyncSpiderClient, SpiderItem, create_engine, create_async_engine, Field
 
+NEWS_GROUP = "news_crawler"
 
-from typing import Optional
+
+class NewsCrawlerParams(BoosterParams):
+    broker_kind: str = BrokerEnum.REDIS_ACK_ABLE
+    booster_group: str = NEWS_GROUP
 
 # ---------- 数据库 ----------
 MYSQL_ENGINE = create_engine("mysql+pymysql://root:123456@127.0.0.1:3306/testdb")
@@ -57300,7 +57509,7 @@ BASE_URL = "http://127.0.0.1:8888"
 
 
 # ---------- 列表页爬虫（同步）：解析列表页，推送详情页任务 ----------
-@boost(BoosterParams(queue_name="news_list", qps=2))
+@boost(NewsCrawlerParams(queue_name="news_list", qps=2))
 def crawl_list(page: int):
     resp = sync_client.get(f"{BASE_URL}/news/list?page={page}")
     links = resp.css("table a::attr(href)").getall()
@@ -57314,7 +57523,7 @@ def crawl_list(page: int):
 
 
 # ---------- 详情页爬虫（同步）：解析新闻详情，保存新闻 + 推送评论任务 ----------
-@boost(BoosterParams(queue_name="news_detail", qps=5))
+@boost(NewsCrawlerParams(queue_name="news_detail", qps=5))
 def crawl_detail(detail_url: str):
     resp = sync_client.get(detail_url)
     title = resp.css("h1::text").get("").strip()
@@ -57332,7 +57541,7 @@ def crawl_detail(detail_url: str):
             publish_time = p_text.replace("发布时间：", "").strip()
     summary = content_p[0] if content_p else ""
 
-    news_id = int(resp.re_first(r"/news/detail/(\d+)"))
+    news_id = int(re.search(r"/news/detail/(\d+)", detail_url).group(1))
 
     NewsItem(
         news_id=news_id, title=title, summary=summary,
@@ -57344,7 +57553,8 @@ def crawl_detail(detail_url: str):
 
 
 # ---------- 评论页爬虫（异步）：请求评论接口，保存评论 ----------
-@boost(BoosterParams(queue_name="news_comments", qps=10, concurrent_mode=ConcurrentModeEnum.ASYNC))
+@boost(NewsCrawlerParams(queue_name="news_comments", qps=10, concurrent_mode=ConcurrentModeEnum.ASYNC,
+                         do_task_filtering=True, task_filtering_expire_seconds=3600))
 async def crawl_comments(news_id: int):
     resp = await async_client.get(f"{BASE_URL}/news/comments/{news_id}")
     data = resp.resp_dict
@@ -57358,9 +57568,7 @@ async def crawl_comments(news_id: int):
 
 
 if __name__ == '__main__':
-    crawl_list.consume()
-    crawl_detail.consume()
-    crawl_comments.consume()
+    BoostersManager.consume_group(NEWS_GROUP)
 
     crawl_list.push(page=1)
 
