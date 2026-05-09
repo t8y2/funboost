@@ -472,14 +472,14 @@ BoosterParams 是 funboost 最核心的入参模型，掌握了 BoosterParams �
 - `table_name: typing.Optional[str] = None`
 
 ##### 📌 `class BoosterParamsFieldsAssit`
-*Line: 56*
+*Line: 44*
 
 **Class Variables (2):**
 - `has_been_deleted_fields = ['retry_interval', 'is_do_not_run_by_specify_time_effect', 'do_not_run_by_specify_time']`
 - `rename_fields = {'is_send_consumer_hearbeat_to_redis': 'is_send_consumer_heartbeat_to_redis', 'consumin_function_decorator': 'consuming_function_decorator', 'msg_expire_senconds': 'msg_expire_seconds'}`
 
 ##### 📌 `class BoosterParams(BaseJsonAbleModel)`
-*Line: 72*
+*Line: 60*
 
 **Docstring:**
 `````
@@ -554,7 +554,7 @@ pydatinc pycharm编程代码补全,请安装 pydantic插件, 在pycharm的  file
 - `booster_registry_name: str = StrConst.BOOSTER_REGISTRY_NAME_DEFAULT`
 
 ##### 📌 `class BoosterParamsComplete(BoosterParams)`
-*Line: 346*
+*Line: 334*
 
 **Docstring:**
 `````
@@ -576,7 +576,7 @@ specify_concurrent_pool 同一个进程的不同booster函数,共用一个线程
 - `specify_concurrent_pool: FunboostBaseConcurrentPool = Field(default_factory=functools.partial(ConcurrentPoolBuilder.get_pool, FlexibleThreadPool, 500))`
 
 ##### 📌 `class TaskOptions(BaseJsonAbleModel)`
-*Line: 366*
+*Line: 354*
 
 **Docstring:**
 `````
@@ -608,7 +608,7 @@ specify_concurrent_pool 同一个进程的不同booster函数,共用一个线程
 - `otel_context: typing.Optional[dict] = None`
 
 ##### 📌 `class PublisherParams(BaseJsonAbleModel)`
-*Line: 421*
+*Line: 409*
 
 **Class Variables (21):**
 - `queue_name: str`
@@ -1828,7 +1828,7 @@ MetricCalculation 是统计消费函数执行次数、失败次数、平均耗�
 - `UNIT_TIME_FOR_COUNT = 10`
 
 ##### 📌 `class DistributedConsumerStatistics(RedisMixin, FunboostFileLoggerMixin)`
-*Line: 1495*
+*Line: 1496*
 
 **Docstring:**
 `````
@@ -1951,7 +1951,6 @@ care_project_name 的作用是：
 
 **Public Methods (4):**
 - `def get_all_queue_names(self) -> list`
-  - *获取所有队列名称，带30秒缓存（类级别缓存，所有实例共享）*
 - `def get_queue_names_by_project_name(self, project_name: str) -> list`
   - *根据项目名称获取队列名称，带30秒缓存（类级别缓存，所有实例共享）*
 - `def hmget_many_by_all_queue_names(self, key)`
@@ -1961,20 +1960,24 @@ care_project_name 的作用是：
 - `@property all_queue_names`
 - `@property project_name_queues`
 
-**Class Variables (4):**
+**Class Variables (6):**
 - `_cache_all_queue_names = None`
 - `_cache_all_queue_names_ts = 0`
 - `_cache_queue_names_by_project = {}`
+- `_cache_no_project_queue_names = None`
+- `_cache_no_project_queue_names_ts = 0`
 - `_cache_ttl = 30`
 
 ##### 📌 `class ActiveCousumerProcessInfoGetter(RedisMixin, RedisReportInfoGetterMixin, FunboostFileLoggerMixin)`
-*Line: 181*
+*Line: 180*
 
 **Docstring:**
 `````
 获取分布式环境中的消费进程信息。
 使用这里面的4个方法需要相应函数的@boost装饰器设置 is_send_consumer_heartbeat_to_redis=True，这样会自动发送活跃心跳到redis。否则查询不到该函数的消费者进程信息。
 要想使用消费者进程信息统计功能，用户无论使用何种消息队列中间件类型，用户都必须安装redis，并在 funboost_config.py 中配置好redis链接信息
+
+所有 的last_x_s指标 代表最近10秒内的统计信息
 `````
 
 **🔧 Constructor (`__init__`):**
@@ -2017,7 +2020,7 @@ care_project_name 的作用是：
   - *获取所有机器ip对应的活跃消费者进程信息，按机器ip划分,不需要传入机器ip，自动扫描redis键。请不要在 funboost_config.py 的redis 指定的db中放太多其他业务的缓存键值对*
 
 ##### 📌 `class QueuesConusmerParamsGetter(RedisMixin, RedisReportInfoGetterMixin, FunboostFileLoggerMixin)`
-*Line: 282*
+*Line: 283*
 
 **Docstring:**
 `````
@@ -2042,7 +2045,7 @@ care_project_name 的作用是：
 - `def cycle_get_queues_params_and_active_consumers_and_report(self, daemon = True)`
 
 ##### 📌 `class SingleQueueConusmerParamsGetter(RedisMixin, RedisReportInfoGetterMixin, FunboostFileLoggerMixin)`
-*Line: 405*
+*Line: 406*
 
 **Docstring:**
 `````
@@ -3522,11 +3525,12 @@ Entry Points (not imported by other project files):
   行2352: ### 6.30.4 使用funboost的 MongoAlertMonitor 实现错误告警
   行2373: #### 6.30.4.1 MongoAlertMonitor 使用例子，发到内置实现的 企业微信 钉钉 飞书
   行2443: #### 6.30.4.2 MongoAlertMonitor 使用例子，发到自定义的渠道
-  行2463: ### 6.30.5 elk + grafana 实现错误告警
-  行2469: ### 6.30.6 错误触发警告的方式选择
-  行2475: ## 6.31 怎么知道 Funboost 发布者生成的最终消息内容格式是什么样？
-  行2477: ### 6.31.1 方式一：直接查看 Broker
-  行2481: ### 6.31.2 方式二：预览消息（不真正发送）
+  行2463: ### 6.30.5 在funweb 页面中配置告警
+  行2469: ### 6.30.6 elk + grafana 实现错误告警
+  行2475: ### 6.30.10 错误触发警告的方式选择
+  行2481: ## 6.31 怎么知道 Funboost 发布者生成的最终消息内容格式是什么样？
+  行2483: ### 6.31.1 方式一：直接查看 Broker
+  行2487: ### 6.31.2 方式二：预览消息（不真正发送）
 
 ============================================================
 文件: c7.md
@@ -7238,7 +7242,7 @@ funweb 系统功能-资源监控 截图
   **注意**：要用google ai studio网址，不要用gemini官网 https://gemini.google.com/ ，gemini官网的gemini 3.0pro模型在2026年1月实测对funboost教程文档推理，任然幻觉严重。
   - 或者打开 deepseek 官方网页， [chat.deepseek.com](https://chat.deepseek.com/) （2026年deepseek已经支持1000k token上下文）
   - 或者打开 qwen 官方网页， [chat.qwen.ai](https://chat.qwen.ai/) （2026年qwen3.5已经支持1000k token上下文）
-  - 使用腾讯ima知识库 + deepseek [【ima知识库】funboost 网页连接](https://ima.qq.com/wiki/?shareId=aafc6364ae0f34ae237e4e2aa756e57d301d6461e51db030e0522cda3dc8729e)
+  - 使用腾讯ima知识库 
 - 2.丢入 `funboost_all_docs_and_codes.md`。
 - 3.别在 IDE 里问，别在gemini官网问，否则 别怪AI 不行，是你不行！
 
@@ -7361,7 +7365,7 @@ funboost 合并文档 `funboost_all_docs_and_codes.md` 就是使用 `nb_ai_conte
 | 大模型 | 网址                                                                                                                     | 评分 | 简要评价                                                                                                    |
 | --- |------------------------------------------------------------------------------------------------------------------------| --- |---------------------------------------------------------------------------------------------------------|
 | gemini-3.0pro | [Google AI Studio](https://aistudio.google.com/app/prompts)                                                            | 90 | 最强,知我心者gemini也。<br>1000k窗口,一次吞下源码和教程绰绰有余,<br>幻觉很少,能准确写代码并且不乱造方法名和入参,<br>跨章节全局连贯推理能力也非常强<br>真原生超长上下文秒RAG |
-| ima知识库 + deepseek v3.2 | [腾讯ima+funboost知识库](https://ima.qq.com/wiki/?shareId=aafc6364ae0f34ae237e4e2aa756e57d301d6461e51db030e0522cda3dc8729e) | 80 | 很强,rag能快速检索找到相关用法,<br>幻觉相对少,但全局连贯推理能力没有真1000K 上下文的模型强                                               |
+| ima知识库 | [腾讯ima+funboost知识库] | 80 | 很强,rag能快速检索找到相关用法,<br>幻觉相对少,但全局连贯推理能力没有真1000K 上下文的模型强                                               |
 | qwen3.5 | [千问国际版](https://chat.qwen.ai/)                                                                                         | 85 | 2026年2月 qwen3.5 支持1000k token上下文, 直接上传文档 <br> 实测推理速度有点慢，没有deepseek快 |
 | deepseek  | [deepseek官网](https://chat.deepseek.com/)                                                                                         | 95 | deepseek官网 2026年以后原生支持1000k token上下文, 直接上传文档  <br> deepseek 2026年初的mhc + engram技术，实测阅读funboost教程文档能力很强，回答和生成代码又快又准|
                       
@@ -19311,13 +19315,19 @@ EmailAlertMonitor(
 
 ```
 
-### 6.30.5 elk + grafana 实现错误告警
+### 6.30.5 在funweb 页面中配置告警
+
+funweb页面中也可以配置告警，原理是复用已有的上报到redis中的数据，用户在页面上针对队列名字，可以配置 积压超标、qps骤降、消费者掉线、失败率飙升、平均耗时高 5种告警指标。
+
+![alt text](image-10.png)
+
+### 6.30.6 elk + grafana 实现错误告警
 
 将 Funboost 的日志文件夹通过 Filebeat/Logstash 采集到 Elasticsearch，然后在 Grafana 中配置 Elasticsearch 数据源的ERROR日志比例或者个数，告警规则。这种方式适合已有 ELK 体系的环境。
 
 懂elk和grafana的人都知道怎么做，无需我长篇展开。
 
-### 6.30.6 错误触发警告的方式选择
+### 6.30.10 错误触发警告的方式选择
 
 以上5种方式可根据实际条件来使用，实现从实时通知到趋势告警的全方位失败监控。 
 例如你公司没有 promethus ,公司没有运维帮你搭建elk 和 grafana，你只是一名个体用户开发者，可以选择其他不依赖这些高端运维组件的错误告警方式。
@@ -20382,6 +20392,20 @@ funboost发布性能是celery的22倍，消费性能是celery的46倍。
 - 新增支持 `map()` 方法
 - `submit()` 方法增加返回 `concurrent.futures.Future` 对象
 - 新增 `aio_submit()` 方法，返回 `asyncio.Future` 对象
+
+## 7.79 2026-05 优化funboost pydantic model 在ide 下的自动补全和提示
+
+专门新增了pyi文件， `funboost/core/func_params_model.pyi` ，用于在ide 下自动补全和提示。
+因为pydantic model定义没有写 __init__ 方法，所以model实例化时候，ide不能自动补全提示，需要用户付出一些高级技巧才能使ide自动补全提示。
+现在优化成了不依赖pycharm pydantic插件，不依赖vscode 的高级的lsp和设置settings.json 来配置。
+
+例如 BoosterParams 这个类是funboost最核心的，现在能无门槛ide自动补全提示了。funboost很注重简单性和用户体验。
+
+## 7.80 2026-05 funweb增加高进配置功能
+
+funweb页面中也可以配置告警，原理是复用已有的上报到redis中的数据，用户在页面上针对队列名字，可以配置 积压超标、qps骤降、消费者掉线、失败率飙升、平均耗时高 5种告警指标。
+
+详见`6.30.5`章节教程。
 `````
 
 --- **end of file: source/articles/c7.md** (project: funboost_docs) --- 
@@ -25418,14 +25442,14 @@ BoosterParams 是 funboost 最核心的入参模型，掌握了 BoosterParams �
 - `table_name: typing.Optional[str] = None`
 
 ##### 📌 `class BoosterParamsFieldsAssit`
-*Line: 56*
+*Line: 44*
 
 **Class Variables (2):**
 - `has_been_deleted_fields = ['retry_interval', 'is_do_not_run_by_specify_time_effect', 'do_not_run_by_specify_time']`
 - `rename_fields = {'is_send_consumer_hearbeat_to_redis': 'is_send_consumer_heartbeat_to_redis', 'consumin_function_decorator': 'consuming_function_decorator', 'msg_expire_senconds': 'msg_expire_seconds'}`
 
 ##### 📌 `class BoosterParams(BaseJsonAbleModel)`
-*Line: 72*
+*Line: 60*
 
 **Docstring:**
 `````
@@ -25500,7 +25524,7 @@ pydatinc pycharm编程代码补全,请安装 pydantic插件, 在pycharm的  file
 - `booster_registry_name: str = StrConst.BOOSTER_REGISTRY_NAME_DEFAULT`
 
 ##### 📌 `class BoosterParamsComplete(BoosterParams)`
-*Line: 346*
+*Line: 334*
 
 **Docstring:**
 `````
@@ -25522,7 +25546,7 @@ specify_concurrent_pool 同一个进程的不同booster函数,共用一个线程
 - `specify_concurrent_pool: FunboostBaseConcurrentPool = Field(default_factory=functools.partial(ConcurrentPoolBuilder.get_pool, FlexibleThreadPool, 500))`
 
 ##### 📌 `class TaskOptions(BaseJsonAbleModel)`
-*Line: 366*
+*Line: 354*
 
 **Docstring:**
 `````
@@ -25554,7 +25578,7 @@ specify_concurrent_pool 同一个进程的不同booster函数,共用一个线程
 - `otel_context: typing.Optional[dict] = None`
 
 ##### 📌 `class PublisherParams(BaseJsonAbleModel)`
-*Line: 421*
+*Line: 409*
 
 **Class Variables (21):**
 - `queue_name: str`
@@ -26774,7 +26798,7 @@ MetricCalculation 是统计消费函数执行次数、失败次数、平均耗�
 - `UNIT_TIME_FOR_COUNT = 10`
 
 ##### 📌 `class DistributedConsumerStatistics(RedisMixin, FunboostFileLoggerMixin)`
-*Line: 1495*
+*Line: 1496*
 
 **Docstring:**
 `````
@@ -26897,7 +26921,6 @@ care_project_name 的作用是：
 
 **Public Methods (4):**
 - `def get_all_queue_names(self) -> list`
-  - *获取所有队列名称，带30秒缓存（类级别缓存，所有实例共享）*
 - `def get_queue_names_by_project_name(self, project_name: str) -> list`
   - *根据项目名称获取队列名称，带30秒缓存（类级别缓存，所有实例共享）*
 - `def hmget_many_by_all_queue_names(self, key)`
@@ -26907,20 +26930,24 @@ care_project_name 的作用是：
 - `@property all_queue_names`
 - `@property project_name_queues`
 
-**Class Variables (4):**
+**Class Variables (6):**
 - `_cache_all_queue_names = None`
 - `_cache_all_queue_names_ts = 0`
 - `_cache_queue_names_by_project = {}`
+- `_cache_no_project_queue_names = None`
+- `_cache_no_project_queue_names_ts = 0`
 - `_cache_ttl = 30`
 
 ##### 📌 `class ActiveCousumerProcessInfoGetter(RedisMixin, RedisReportInfoGetterMixin, FunboostFileLoggerMixin)`
-*Line: 181*
+*Line: 180*
 
 **Docstring:**
 `````
 获取分布式环境中的消费进程信息。
 使用这里面的4个方法需要相应函数的@boost装饰器设置 is_send_consumer_heartbeat_to_redis=True，这样会自动发送活跃心跳到redis。否则查询不到该函数的消费者进程信息。
 要想使用消费者进程信息统计功能，用户无论使用何种消息队列中间件类型，用户都必须安装redis，并在 funboost_config.py 中配置好redis链接信息
+
+所有 的last_x_s指标 代表最近10秒内的统计信息
 `````
 
 **🔧 Constructor (`__init__`):**
@@ -26963,7 +26990,7 @@ care_project_name 的作用是：
   - *获取所有机器ip对应的活跃消费者进程信息，按机器ip划分,不需要传入机器ip，自动扫描redis键。请不要在 funboost_config.py 的redis 指定的db中放太多其他业务的缓存键值对*
 
 ##### 📌 `class QueuesConusmerParamsGetter(RedisMixin, RedisReportInfoGetterMixin, FunboostFileLoggerMixin)`
-*Line: 282*
+*Line: 283*
 
 **Docstring:**
 `````
@@ -26988,7 +27015,7 @@ care_project_name 的作用是：
 - `def cycle_get_queues_params_and_active_consumers_and_report(self, daemon = True)`
 
 ##### 📌 `class SingleQueueConusmerParamsGetter(RedisMixin, RedisReportInfoGetterMixin, FunboostFileLoggerMixin)`
-*Line: 405*
+*Line: 406*
 
 **Docstring:**
 `````
@@ -37039,6 +37066,7 @@ class MetricCalculation:
         self.current_time_for_execute_task_times_every_unit_time = time.time()
         self.consuming_function_cost_time_total_every_unit_time_tmp = 0
         self.last_execute_task_time = time.time()  # 最近一次执行任务的时间。
+        # last_x_s 代表最近10秒
         self.last_x_s_execute_count = 0
         self.last_x_s_execute_count_fail = 0
         self.last_x_s_avarage_function_spend_time = None
@@ -46945,11 +46973,12 @@ booster_registry_for_faas = BoosterRegistry(
 
 
 class RedisReportInfoGetterMixin:
-    # 类属性：所有实例共享的缓存
     _cache_all_queue_names = None
     _cache_all_queue_names_ts = 0
-    _cache_queue_names_by_project = {}  # {project_name: {'data': [...], 'ts': timestamp}}
-    _cache_ttl = 30  # 缓存30秒
+    _cache_queue_names_by_project = {}
+    _cache_no_project_queue_names = None
+    _cache_no_project_queue_names_ts = 0
+    _cache_ttl = 30
     
     def _init(self,care_project_name:typing.Optional[str]=None,):
         """
@@ -46965,24 +46994,22 @@ class RedisReportInfoGetterMixin:
             self.care_project_name = CareProjectNameEnv.get()
 
     def get_all_queue_names(self) ->list:
-        """获取所有队列名称，带30秒缓存（类级别缓存，所有实例共享）"""
         current_time = time.time()
         
-        # 检查缓存是否有效
-        if self._cache_all_queue_names is not None and (current_time - self._cache_all_queue_names_ts) < self._cache_ttl:
-            return self._cache_all_queue_names
-        
-        # 缓存失效，重新从redis获取
         if self.care_project_name:
+            if self._cache_all_queue_names is not None and (current_time - self._cache_all_queue_names_ts) < self._cache_ttl:
+                return self._cache_all_queue_names
             result = self.project_name_queues
+            self.__class__._cache_all_queue_names = result
+            self.__class__._cache_all_queue_names_ts = current_time
+            return result
         else:
+            if self._cache_no_project_queue_names is not None and (current_time - self._cache_no_project_queue_names_ts) < self._cache_ttl:
+                return self._cache_no_project_queue_names
             result = list(self.redis_db_frame.smembers(RedisKeys.FUNBOOST_ALL_QUEUE_NAMES))
-        
-        # 更新缓存
-        self.__class__._cache_all_queue_names = result
-        self.__class__._cache_all_queue_names_ts = current_time
-        
-        return result
+            self.__class__._cache_no_project_queue_names = result
+            self.__class__._cache_no_project_queue_names_ts = current_time
+            return result
 
     def get_queue_names_by_project_name(self,project_name:str) ->list:
         """根据项目名称获取队列名称，带30秒缓存（类级别缓存，所有实例共享）"""
@@ -47070,6 +47097,8 @@ class ActiveCousumerProcessInfoGetter(RedisMixin,RedisReportInfoGetterMixin,Funb
     获取分布式环境中的消费进程信息。
     使用这里面的4个方法需要相应函数的@boost装饰器设置 is_send_consumer_heartbeat_to_redis=True，这样会自动发送活跃心跳到redis。否则查询不到该函数的消费者进程信息。
     要想使用消费者进程信息统计功能，用户无论使用何种消息队列中间件类型，用户都必须安装redis，并在 funboost_config.py 中配置好redis链接信息
+    
+    所有 的last_x_s指标 代表最近10秒内的统计信息
     """
 
     def __init__(self,care_project_name:typing.Optional[str]=None):
@@ -49601,7 +49630,7 @@ if __name__ == "__main__":
     def greet(name):
         return f"Hello, {name}"
 
-    # 能执行asyncio函数，而且能支持指定asyncio loop，能自动启动指定的asyncio loop，例如某些aio的连接池的包，需要实例化和发请求在同一个loop。
+    # funboostpool能执行asyncio函数，而且能支持指定asyncio loop，能自动启动指定的asyncio loop，例如某些aio的连接池的包，需要实例化和发请求在同一个loop。
     async def aio_fun(x):
         await asyncio.sleep(1)
         return x * 10
@@ -50028,18 +50057,6 @@ class FunctionResultStatusPersistanceConfig(BaseJsonAbleModel):
         return self
 
 
-booster_params_has_been_deleted_fields = [
-    # 功能删除的字段
-    'retry_interval',
-    'is_do_not_run_by_specify_time_effect',
-    'do_not_run_by_specify_time',
-    # 字段名拼写错误修正：旧版拼写有误，新版已修正，旧 redis 元信息里存的是错误拼写的 key
-    'is_send_consumer_hearbeat_to_redis',  # 正确拼写: is_send_consumer_heartbeat_to_redis
-    'consumin_function_decorator',         # 正确拼写: consuming_function_decorator
-    'msg_expire_senconds',                 # 正确拼写: msg_expire_seconds
-]
-
-
 class BoosterParamsFieldsAssit:
     # 已经删除的字段，被别的字段功能替代了。
     has_been_deleted_fields = [
@@ -50456,7 +50473,7 @@ if __name__ == '__main__':
         "table_name": "3213"
     },
     is_fake_booster=True,
-    is_do_not_run_by_specify_time_effect=False,
+    
                         
                         specify_concurrent_pool=FlexibleThreadPool(100)).json_pre())
     # print(PublisherParams.schema_json())  # 注释掉，因为 PublisherParams 包含 Callable 类型字段，无法生成 JSON Schema
@@ -56815,6 +56832,8 @@ from funboost.faas import flask_blueprint
 from funboost.funweb.flask_bps.script_deploy import deploy_bp
 from funboost.funweb.flask_bps.system_monitor import monitor_bp
 from funboost.funweb.flask_bps.log_viewer import log_bp
+from funboost.funweb.flask_bps.dashboard import dashboard_bp
+from funboost.funweb.flask_bps.queue_alerts import alert_bp
 
 app = Flask(__name__)
 app.secret_key =  os.getenv('FUNWEB_SECRET_KEY', "mtfy54321")
@@ -56833,6 +56852,8 @@ app.register_blueprint(flask_blueprint)
 app.register_blueprint(deploy_bp)
 app.register_blueprint(monitor_bp)
 app.register_blueprint(log_bp)
+app.register_blueprint(dashboard_bp)
+app.register_blueprint(alert_bp)
 
 
 
@@ -56978,6 +56999,7 @@ def serve_template(template):
 
 
 @app.route("/queue/get_time_series_data/<queue_name>", methods=["GET"])
+@login_required
 def get_time_series_data_by_queue_name(
     queue_name,
 ):
@@ -57103,7 +57125,7 @@ from funboost.funweb.app import (
 CareProjectNameEnv.set('test_project1')
 
 
-a=4
+
 
 if __name__ == '__main__':
     QueuesConusmerParamsGetter().cycle_get_queues_params_and_active_consumers_and_report(daemon=True)
@@ -57148,6 +57170,36 @@ from funboost.utils import time_util, decorators  # LoggerMixin 已废弃，Stat
 from funboost.utils.mongo_util import MongoMixin
 from funboost.utils.redis_manager import RedisMixin
 from funboost.core.active_cousumer_info_getter import QueuesConusmerParamsGetter, SingleQueueConusmerParamsGetter
+
+
+_mongo_available_cache = {'available': None, 'check_ts': 0}
+
+
+def _is_mongo_available(timeout_ms=3000, cache_ttl=30):
+    """
+    快速检测 MongoDB 是否可连接，结果缓存 cache_ttl 秒。
+    使用独立的短超时客户端探测，避免阻塞主逻辑。
+    """
+    now = time.time()
+    if _mongo_available_cache['available'] is not None and (now - _mongo_available_cache['check_ts']) < cache_ttl:
+        return _mongo_available_cache['available']
+
+    try:
+        import pymongo
+        from funboost.funboost_config_deafult import BrokerConnConfig
+        client = pymongo.MongoClient(
+            BrokerConnConfig.MONGO_CONNECT_URL,
+            serverSelectionTimeoutMS=timeout_ms,
+            connectTimeoutMS=timeout_ms,
+            socketTimeoutMS=timeout_ms,
+        )
+        client.admin.command('ping')
+        client.close()
+        _mongo_available_cache['available'] = True
+    except Exception:
+        _mongo_available_cache['available'] = False
+    _mongo_available_cache['check_ts'] = now
+    return _mongo_available_cache['available']
 
 # from test_frame.my_patch_frame_config import do_patch_frame_config
 #
@@ -57195,27 +57247,30 @@ def get_cols(queue_name_search: str):
     
     不再使用 db.list_collection_names()，而是从队列配置中获取表名
     注意：因为多个队列可能共享同一个表，所以查询时必须加上 queue_name 条件
-    """
-    db = MongoMixin().mongo_db_task_status
     
-    # 从队列配置获取所有队列及其对应的表名
+    当 MongoDB 不可用时，仍然返回队列名列表（count 为 -1 表示 MongoDB 不可用）
+    """
     queue_table_map = get_all_queue_table_info()
+
+    db = None
+    if _is_mongo_available():
+        db = MongoMixin().mongo_db_task_status
     
     result = []
     for queue_name, table_name in queue_table_map.items():
-        # 根据搜索条件过滤
         if queue_name_search and queue_name_search not in queue_name:
             continue
         
-        try:
-            # 必须加上 queue_name 条件，因为多个队列可能共享同一个表
-            count = db.get_collection(table_name).count_documents({'queue_name': queue_name})
-        except Exception:
-            count = 0
+        count = -1
+        if db is not None:
+            try:
+                count = db.get_collection(table_name).count_documents({'queue_name': queue_name})
+            except Exception:
+                count = 0
         
         result.append({
-            'collection_name': queue_name,  # 返回队列名（用于前端显示和后续查询）
-            'table_name': table_name,       # 实际的 MongoDB 表名
+            'collection_name': queue_name,
+            'table_name': table_name,
             'count': count
         })
     
@@ -57235,6 +57290,8 @@ def query_result(queue_name, start_time, end_time, is_success, function_params: 
     t0 = time.time()
     if not queue_name:
         return []
+    if not _is_mongo_available():
+        return {'error': 'MongoDB 不可用，无法查询执行结果'}
     db = MongoMixin().mongo_db_task_status
     
     # 根据队列名获取实际的 MongoDB 表名
@@ -57278,6 +57335,8 @@ def get_speed(queue_name, start_time, end_time):
     
     注意：因为多个队列可能共享同一个表，所以查询时必须加上 queue_name 条件
     """
+    if not _is_mongo_available():
+        return {'error': 'MongoDB 不可用，无法查询速率统计'}
     db = MongoMixin().mongo_db_task_status
     
     # 根据队列名获取实际的 MongoDB 表名
@@ -57324,6 +57383,8 @@ def get_consume_speed_curve(queue_name: str, start_time: str, end_time: str, gra
             'granularity': str
         }
     """
+    if not _is_mongo_available():
+        return {'error': 'MongoDB 不可用，无法查询消费速率曲线'}
     db = MongoMixin().mongo_db_task_status
     
     # 根据队列名获取实际的 MongoDB 表名
@@ -57483,11 +57544,13 @@ tags: []
 
 ---
 
-1. 前端不允许引入网络 cdn js和css资源
+1. 前端不允许引入网络 cdn js和css资源。
 
-2. 新写的代码，要参考之前的html的ui风格
+2. 新写的代码，要参考之前的html的ui风格；每个元素的设计都要很酷炫美观
 
-3. 要充分利用 RedisMixin 来操作redis，不要直接用pyredis
+3. 要充分利用 RedisMixin 来操作redis，不要直接用pyredis。 redis的key名字设计要合理，要参考现有的key名字设计。
+
+
 `````
 
 --- **end of file: funboost/funweb/_ai_do_tasks_md/ai写web必须遵守的.md** (project: funboost) --- 
@@ -64407,7 +64470,7 @@ from funboost.timing_job import FsdfBackgroundScheduler
 
 `````python
 from apscheduler.jobstores.redis import RedisJobStore
-from funboost.utils.redis_manager import RedisMixin,get_redis_conn_kwargs
+from funboost.utils.redis_manager import RedisMixin,get_redis_conn_kwargs_safe
 
 from funboost.timing_job import FunboostBackgroundScheduler
 from funboost.funboost_config_deafult import BrokerConnConfig, FunboostCommonConfig
@@ -64475,16 +64538,17 @@ class FunboostBackgroundSchedulerProcessJobsWithinRedisLock(FunboostBackgroundSc
             return 0.1
 
 
-jobstores = {
-    "default": RedisJobStore(**get_redis_conn_kwargs(),
-                             jobs_key='funboost.apscheduler.jobs',run_times_key="funboost.apscheduler.run_times")
-}
 
-"""
-建议不要亲自使用这个 funboost_background_scheduler_redis_store 对象，而是 ApsJobAdder来添加定时任务，自动多个apscheduler对象实例，
-尤其是redis作为jobstores时候，使用不同的jobstores，每个消费函数使用各自单独的jobs_key和 run_times_key
-"""
-funboost_background_scheduler_redis_store = FunboostBackgroundSchedulerProcessJobsWithinRedisLock(timezone=FunboostCommonConfig.TIMEZONE, daemon=False, jobstores=jobstores)
+# jobstores = {
+#     "default": RedisJobStore(**get_redis_conn_kwargs_safe(),
+#                              jobs_key='funboost.apscheduler.jobs',run_times_key="funboost.apscheduler.run_times")
+# }
+
+# """
+# 建议不要亲自使用这个 funboost_background_scheduler_redis_store 对象，而是 ApsJobAdder来添加定时任务，自动多个apscheduler对象实例，
+# 尤其是redis作为jobstores时候，使用不同的jobstores，每个消费函数使用各自单独的jobs_key和 run_times_key
+# """
+# funboost_background_scheduler_redis_store = FunboostBackgroundSchedulerProcessJobsWithinRedisLock(timezone=FunboostCommonConfig.TIMEZONE, daemon=False, jobstores=jobstores)
 
 
 
@@ -64707,7 +64771,7 @@ class FunboostBackgroundScheduler(BackgroundScheduler):
 
 
 FsdfBackgroundScheduler = FunboostBackgroundScheduler  # 兼容一下名字，fsdf是 function-scheduling-distributed-framework 老框架名字的缩写
-# funboost_aps_scheduler定时配置基于内存的，不可以跨机器远程动态添加/修改/删除定时任务配置。如果需要动态增删改查定时任务，可以使用funboost_background_scheduler_redis_store
+# funboost_aps_scheduler定时配置基于内存的，不可以跨机器远程动态添加/修改/删除定时任务配置。如果需要动态增删改查定时任务，可以使用redis作为jobstores的 ApsJobAdder
 
 """
 建议不要亲自使用这个 funboost_aps_scheduler 对象，而是 ApsJobAdder来添加定时任务，自动多个apscheduler对象实例，
@@ -64728,10 +64792,9 @@ if __name__ == '__main__':
 
     # 定时运行消费演示
     import datetime
-    from funboost import boost, BrokerEnum, fsdf_background_scheduler, timing_publish_deco, run_forever
+    from funboost import  BrokerEnum,boost
 
-
-    @Booster(boost_params=BoosterParams(queue_name='queue_test_666', broker_kind=BrokerEnum.LOCAL_PYTHON_QUEUE))
+    @boost(BoosterParams(queue_name='queue_test_666', broker_kind=BrokerEnum.LOCAL_PYTHON_QUEUE))
     def consume_func(x, y):
         print(f'{x} + {y} = {x + y}')
 
@@ -64755,8 +64818,7 @@ if __name__ == '__main__':
 
     # 启动消费
     consume_func.consume()
-    run_forever()
-
+   
 `````
 
 --- **end of file: funboost/timing_job/timing_job_base.py** (project: funboost) --- 
@@ -64828,7 +64890,7 @@ class ApsJobAdder:
             return cls.queue__redis_aps_map[queue_name]
         redis_jobstores = {
 
-            "default": RedisJobStore(**redis_manager.get_redis_conn_kwargs(),
+            "default": RedisJobStore(**redis_manager.get_redis_conn_kwargs_safe(),
                                     jobs_key=RedisKeys.gen_funboost_redis_apscheduler_jobs_key_by_queue_name(queue_name),
                                     run_times_key=RedisKeys.gen_funboost_redis_apscheduler_run_times_key_by_queue_name(queue_name),
                                      )
@@ -67491,15 +67553,36 @@ from funboost.utils import decorators
 
 def get_redis_conn_kwargs():
     return {'host': BrokerConnConfig.REDIS_HOST, 'port': BrokerConnConfig.REDIS_PORT,
-            'username': BrokerConnConfig.REDIS_USERNAME,'ssl' : BrokerConnConfig.REDIS_SSL,
+            'username': BrokerConnConfig.REDIS_USERNAME,
+            'ssl' : BrokerConnConfig.REDIS_SSL,
             'password': BrokerConnConfig.REDIS_PASSWORD, 'db': BrokerConnConfig.REDIS_DB,
             
             # 增强redis稳定性的，尤其外网redis
             'health_check_interval' :30,
             'socket_keepalive' :True,
             # 'socket_timeout':120,  # 不要设置socket_timeout，rpc blpop 等待可以设置很长的时间,和这冲突
-
             }
+
+
+def _get_redis_major_version():
+    """获取标准 redis 包的版本号，因为 RedisJobStore 等第三方库使用的是 redis 包而非 redis5"""
+    try:
+        import redis
+        return int(redis.__version__.split('.')[0])
+    except (AttributeError, ValueError, ImportError):
+        return 2
+
+
+def get_redis_conn_kwargs_safe():
+    """返回兼容低版本 redis 的连接参数，供第三方库（如 apscheduler RedisJobStore）使用"""
+    kwargs = get_redis_conn_kwargs()
+    major_version = _get_redis_major_version()
+    if major_version < 3:
+        for key in ('username', 'ssl', 'health_check_interval', 'socket_keepalive'):
+            kwargs.pop(key, None)
+    elif major_version < 4:
+        kwargs.pop('username', None)
+    return kwargs
 
 
 def _get_redis_conn_kwargs_by_db(db):

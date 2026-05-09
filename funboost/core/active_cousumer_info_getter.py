@@ -59,11 +59,12 @@ booster_registry_for_faas = BoosterRegistry(
 
 
 class RedisReportInfoGetterMixin:
-    # 类属性：所有实例共享的缓存
     _cache_all_queue_names = None
     _cache_all_queue_names_ts = 0
-    _cache_queue_names_by_project = {}  # {project_name: {'data': [...], 'ts': timestamp}}
-    _cache_ttl = 30  # 缓存30秒
+    _cache_queue_names_by_project = {}
+    _cache_no_project_queue_names = None
+    _cache_no_project_queue_names_ts = 0
+    _cache_ttl = 30
     
     def _init(self,care_project_name:typing.Optional[str]=None,):
         """
@@ -79,24 +80,22 @@ class RedisReportInfoGetterMixin:
             self.care_project_name = CareProjectNameEnv.get()
 
     def get_all_queue_names(self) ->list:
-        """获取所有队列名称，带30秒缓存（类级别缓存，所有实例共享）"""
         current_time = time.time()
         
-        # 检查缓存是否有效
-        if self._cache_all_queue_names is not None and (current_time - self._cache_all_queue_names_ts) < self._cache_ttl:
-            return self._cache_all_queue_names
-        
-        # 缓存失效，重新从redis获取
         if self.care_project_name:
+            if self._cache_all_queue_names is not None and (current_time - self._cache_all_queue_names_ts) < self._cache_ttl:
+                return self._cache_all_queue_names
             result = self.project_name_queues
+            self.__class__._cache_all_queue_names = result
+            self.__class__._cache_all_queue_names_ts = current_time
+            return result
         else:
+            if self._cache_no_project_queue_names is not None and (current_time - self._cache_no_project_queue_names_ts) < self._cache_ttl:
+                return self._cache_no_project_queue_names
             result = list(self.redis_db_frame.smembers(RedisKeys.FUNBOOST_ALL_QUEUE_NAMES))
-        
-        # 更新缓存
-        self.__class__._cache_all_queue_names = result
-        self.__class__._cache_all_queue_names_ts = current_time
-        
-        return result
+            self.__class__._cache_no_project_queue_names = result
+            self.__class__._cache_no_project_queue_names_ts = current_time
+            return result
 
     def get_queue_names_by_project_name(self,project_name:str) ->list:
         """根据项目名称获取队列名称，带30秒缓存（类级别缓存，所有实例共享）"""

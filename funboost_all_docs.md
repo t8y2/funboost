@@ -472,14 +472,14 @@ BoosterParams 是 funboost 最核心的入参模型，掌握了 BoosterParams �
 - `table_name: typing.Optional[str] = None`
 
 ##### 📌 `class BoosterParamsFieldsAssit`
-*Line: 56*
+*Line: 44*
 
 **Class Variables (2):**
 - `has_been_deleted_fields = ['retry_interval', 'is_do_not_run_by_specify_time_effect', 'do_not_run_by_specify_time']`
 - `rename_fields = {'is_send_consumer_hearbeat_to_redis': 'is_send_consumer_heartbeat_to_redis', 'consumin_function_decorator': 'consuming_function_decorator', 'msg_expire_senconds': 'msg_expire_seconds'}`
 
 ##### 📌 `class BoosterParams(BaseJsonAbleModel)`
-*Line: 72*
+*Line: 60*
 
 **Docstring:**
 `````
@@ -554,7 +554,7 @@ pydatinc pycharm编程代码补全,请安装 pydantic插件, 在pycharm的  file
 - `booster_registry_name: str = StrConst.BOOSTER_REGISTRY_NAME_DEFAULT`
 
 ##### 📌 `class BoosterParamsComplete(BoosterParams)`
-*Line: 346*
+*Line: 334*
 
 **Docstring:**
 `````
@@ -576,7 +576,7 @@ specify_concurrent_pool 同一个进程的不同booster函数,共用一个线程
 - `specify_concurrent_pool: FunboostBaseConcurrentPool = Field(default_factory=functools.partial(ConcurrentPoolBuilder.get_pool, FlexibleThreadPool, 500))`
 
 ##### 📌 `class TaskOptions(BaseJsonAbleModel)`
-*Line: 366*
+*Line: 354*
 
 **Docstring:**
 `````
@@ -608,7 +608,7 @@ specify_concurrent_pool 同一个进程的不同booster函数,共用一个线程
 - `otel_context: typing.Optional[dict] = None`
 
 ##### 📌 `class PublisherParams(BaseJsonAbleModel)`
-*Line: 421*
+*Line: 409*
 
 **Class Variables (21):**
 - `queue_name: str`
@@ -1828,7 +1828,7 @@ MetricCalculation 是统计消费函数执行次数、失败次数、平均耗�
 - `UNIT_TIME_FOR_COUNT = 10`
 
 ##### 📌 `class DistributedConsumerStatistics(RedisMixin, FunboostFileLoggerMixin)`
-*Line: 1495*
+*Line: 1496*
 
 **Docstring:**
 `````
@@ -1951,7 +1951,6 @@ care_project_name 的作用是：
 
 **Public Methods (4):**
 - `def get_all_queue_names(self) -> list`
-  - *获取所有队列名称，带30秒缓存（类级别缓存，所有实例共享）*
 - `def get_queue_names_by_project_name(self, project_name: str) -> list`
   - *根据项目名称获取队列名称，带30秒缓存（类级别缓存，所有实例共享）*
 - `def hmget_many_by_all_queue_names(self, key)`
@@ -1961,20 +1960,24 @@ care_project_name 的作用是：
 - `@property all_queue_names`
 - `@property project_name_queues`
 
-**Class Variables (4):**
+**Class Variables (6):**
 - `_cache_all_queue_names = None`
 - `_cache_all_queue_names_ts = 0`
 - `_cache_queue_names_by_project = {}`
+- `_cache_no_project_queue_names = None`
+- `_cache_no_project_queue_names_ts = 0`
 - `_cache_ttl = 30`
 
 ##### 📌 `class ActiveCousumerProcessInfoGetter(RedisMixin, RedisReportInfoGetterMixin, FunboostFileLoggerMixin)`
-*Line: 181*
+*Line: 180*
 
 **Docstring:**
 `````
 获取分布式环境中的消费进程信息。
 使用这里面的4个方法需要相应函数的@boost装饰器设置 is_send_consumer_heartbeat_to_redis=True，这样会自动发送活跃心跳到redis。否则查询不到该函数的消费者进程信息。
 要想使用消费者进程信息统计功能，用户无论使用何种消息队列中间件类型，用户都必须安装redis，并在 funboost_config.py 中配置好redis链接信息
+
+所有 的last_x_s指标 代表最近10秒内的统计信息
 `````
 
 **🔧 Constructor (`__init__`):**
@@ -2017,7 +2020,7 @@ care_project_name 的作用是：
   - *获取所有机器ip对应的活跃消费者进程信息，按机器ip划分,不需要传入机器ip，自动扫描redis键。请不要在 funboost_config.py 的redis 指定的db中放太多其他业务的缓存键值对*
 
 ##### 📌 `class QueuesConusmerParamsGetter(RedisMixin, RedisReportInfoGetterMixin, FunboostFileLoggerMixin)`
-*Line: 282*
+*Line: 283*
 
 **Docstring:**
 `````
@@ -2042,7 +2045,7 @@ care_project_name 的作用是：
 - `def cycle_get_queues_params_and_active_consumers_and_report(self, daemon = True)`
 
 ##### 📌 `class SingleQueueConusmerParamsGetter(RedisMixin, RedisReportInfoGetterMixin, FunboostFileLoggerMixin)`
-*Line: 405*
+*Line: 406*
 
 **Docstring:**
 `````
@@ -3522,11 +3525,12 @@ Entry Points (not imported by other project files):
   行2352: ### 6.30.4 使用funboost的 MongoAlertMonitor 实现错误告警
   行2373: #### 6.30.4.1 MongoAlertMonitor 使用例子，发到内置实现的 企业微信 钉钉 飞书
   行2443: #### 6.30.4.2 MongoAlertMonitor 使用例子，发到自定义的渠道
-  行2463: ### 6.30.5 elk + grafana 实现错误告警
-  行2469: ### 6.30.6 错误触发警告的方式选择
-  行2475: ## 6.31 怎么知道 Funboost 发布者生成的最终消息内容格式是什么样？
-  行2477: ### 6.31.1 方式一：直接查看 Broker
-  行2481: ### 6.31.2 方式二：预览消息（不真正发送）
+  行2463: ### 6.30.5 在funweb 页面中配置告警
+  行2469: ### 6.30.6 elk + grafana 实现错误告警
+  行2475: ### 6.30.10 错误触发警告的方式选择
+  行2481: ## 6.31 怎么知道 Funboost 发布者生成的最终消息内容格式是什么样？
+  行2483: ### 6.31.1 方式一：直接查看 Broker
+  行2487: ### 6.31.2 方式二：预览消息（不真正发送）
 
 ============================================================
 文件: c7.md
@@ -7238,7 +7242,7 @@ funweb 系统功能-资源监控 截图
   **注意**：要用google ai studio网址，不要用gemini官网 https://gemini.google.com/ ，gemini官网的gemini 3.0pro模型在2026年1月实测对funboost教程文档推理，任然幻觉严重。
   - 或者打开 deepseek 官方网页， [chat.deepseek.com](https://chat.deepseek.com/) （2026年deepseek已经支持1000k token上下文）
   - 或者打开 qwen 官方网页， [chat.qwen.ai](https://chat.qwen.ai/) （2026年qwen3.5已经支持1000k token上下文）
-  - 使用腾讯ima知识库 + deepseek [【ima知识库】funboost 网页连接](https://ima.qq.com/wiki/?shareId=aafc6364ae0f34ae237e4e2aa756e57d301d6461e51db030e0522cda3dc8729e)
+  - 使用腾讯ima知识库 
 - 2.丢入 `funboost_all_docs_and_codes.md`。
 - 3.别在 IDE 里问，别在gemini官网问，否则 别怪AI 不行，是你不行！
 
@@ -7361,7 +7365,7 @@ funboost 合并文档 `funboost_all_docs_and_codes.md` 就是使用 `nb_ai_conte
 | 大模型 | 网址                                                                                                                     | 评分 | 简要评价                                                                                                    |
 | --- |------------------------------------------------------------------------------------------------------------------------| --- |---------------------------------------------------------------------------------------------------------|
 | gemini-3.0pro | [Google AI Studio](https://aistudio.google.com/app/prompts)                                                            | 90 | 最强,知我心者gemini也。<br>1000k窗口,一次吞下源码和教程绰绰有余,<br>幻觉很少,能准确写代码并且不乱造方法名和入参,<br>跨章节全局连贯推理能力也非常强<br>真原生超长上下文秒RAG |
-| ima知识库 + deepseek v3.2 | [腾讯ima+funboost知识库](https://ima.qq.com/wiki/?shareId=aafc6364ae0f34ae237e4e2aa756e57d301d6461e51db030e0522cda3dc8729e) | 80 | 很强,rag能快速检索找到相关用法,<br>幻觉相对少,但全局连贯推理能力没有真1000K 上下文的模型强                                               |
+| ima知识库 | [腾讯ima+funboost知识库] | 80 | 很强,rag能快速检索找到相关用法,<br>幻觉相对少,但全局连贯推理能力没有真1000K 上下文的模型强                                               |
 | qwen3.5 | [千问国际版](https://chat.qwen.ai/)                                                                                         | 85 | 2026年2月 qwen3.5 支持1000k token上下文, 直接上传文档 <br> 实测推理速度有点慢，没有deepseek快 |
 | deepseek  | [deepseek官网](https://chat.deepseek.com/)                                                                                         | 95 | deepseek官网 2026年以后原生支持1000k token上下文, 直接上传文档  <br> deepseek 2026年初的mhc + engram技术，实测阅读funboost教程文档能力很强，回答和生成代码又快又准|
                       
@@ -19311,13 +19315,19 @@ EmailAlertMonitor(
 
 ```
 
-### 6.30.5 elk + grafana 实现错误告警
+### 6.30.5 在funweb 页面中配置告警
+
+funweb页面中也可以配置告警，原理是复用已有的上报到redis中的数据，用户在页面上针对队列名字，可以配置 积压超标、qps骤降、消费者掉线、失败率飙升、平均耗时高 5种告警指标。
+
+![alt text](image-10.png)
+
+### 6.30.6 elk + grafana 实现错误告警
 
 将 Funboost 的日志文件夹通过 Filebeat/Logstash 采集到 Elasticsearch，然后在 Grafana 中配置 Elasticsearch 数据源的ERROR日志比例或者个数，告警规则。这种方式适合已有 ELK 体系的环境。
 
 懂elk和grafana的人都知道怎么做，无需我长篇展开。
 
-### 6.30.6 错误触发警告的方式选择
+### 6.30.10 错误触发警告的方式选择
 
 以上5种方式可根据实际条件来使用，实现从实时通知到趋势告警的全方位失败监控。 
 例如你公司没有 promethus ,公司没有运维帮你搭建elk 和 grafana，你只是一名个体用户开发者，可以选择其他不依赖这些高端运维组件的错误告警方式。
@@ -20382,6 +20392,20 @@ funboost发布性能是celery的22倍，消费性能是celery的46倍。
 - 新增支持 `map()` 方法
 - `submit()` 方法增加返回 `concurrent.futures.Future` 对象
 - 新增 `aio_submit()` 方法，返回 `asyncio.Future` 对象
+
+## 7.79 2026-05 优化funboost pydantic model 在ide 下的自动补全和提示
+
+专门新增了pyi文件， `funboost/core/func_params_model.pyi` ，用于在ide 下自动补全和提示。
+因为pydantic model定义没有写 __init__ 方法，所以model实例化时候，ide不能自动补全提示，需要用户付出一些高级技巧才能使ide自动补全提示。
+现在优化成了不依赖pycharm pydantic插件，不依赖vscode 的高级的lsp和设置settings.json 来配置。
+
+例如 BoosterParams 这个类是funboost最核心的，现在能无门槛ide自动补全提示了。funboost很注重简单性和用户体验。
+
+## 7.80 2026-05 funweb增加高进配置功能
+
+funweb页面中也可以配置告警，原理是复用已有的上报到redis中的数据，用户在页面上针对队列名字，可以配置 积压超标、qps骤降、消费者掉线、失败率飙升、平均耗时高 5种告警指标。
+
+详见`6.30.5`章节教程。
 `````
 
 --- **end of file: source/articles/c7.md** (project: funboost_docs) --- 

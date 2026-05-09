@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import os
 import time
 import uuid
 import threading
@@ -9,13 +10,13 @@ from flask_login import login_required
 
 from funboost.utils.redis_manager import RedisMixin
 from funboost.utils.notify_util import Notifier
-from funboost.core.active_cousumer_info_getter import QueuesConusmerParamsGetter, CareProjectNameEnv
+from funboost.core.active_cousumer_info_getter import QueuesConusmerParamsGetter
 from funboost.funweb.flask_bps.web_helper import LOCAL_IP
 from funboost.core.loggers import logger_notify
 
 logger = logger_notify
 
-alert_bp = Blueprint('redis_alert', __name__)
+alert_bp = Blueprint('queue_alerts', __name__)
 
 _redis = RedisMixin().redis_db_frame
 
@@ -94,8 +95,7 @@ def _check_rules_once():
         return
 
     try:
-        care_project = CareProjectNameEnv.get()
-        getter = QueuesConusmerParamsGetter(care_project_name=care_project)
+        getter = QueuesConusmerParamsGetter()
         queues_info = getter.get_queues_params_and_active_consumers()
     except Exception as e:
         logger.error(f'FunboostAlert get queues info failed: {e}')
@@ -176,6 +176,7 @@ def _check_rules_once():
                     detail,
                     f'告警时间: {now_str}',
                     f'告警规则: {rule.get("rule_name", rule_id)}',
+                    f'告警来源: {LOCAL_IP} (PID: {os.getpid()})',
                 ])
                 _send_notification(alert_app, webhook_url, message)
 
@@ -286,8 +287,7 @@ def get_alert_log():
 @login_required
 def get_queue_names():
     try:
-        care_project = CareProjectNameEnv.get()
-        getter = QueuesConusmerParamsGetter(care_project_name=care_project)
+        getter = QueuesConusmerParamsGetter()
         queues_info = getter.get_queues_params_and_active_consumers()
         queue_names = sorted(queues_info.keys())
         return jsonify({'succ': True, 'data': queue_names})
@@ -301,7 +301,7 @@ def test_notify():
     data = request.get_json(force=True)
     alert_app = data.get('alert_app', 'wechat')
     webhook_url = data.get('webhook_url', '')
-    message = '🔔 [测试] Funboost 告警通知测试 - 如果您看到此消息，说明通知通道配置正确。'
+    message = f'🔔 [测试] Funboost 告警通知测试 - 如果您看到此消息，说明通知通道配置正确。\n告警来源: {LOCAL_IP} (PID: {os.getpid()})'
     try:
         _send_notification(alert_app, webhook_url, message)
         return jsonify({'succ': True})

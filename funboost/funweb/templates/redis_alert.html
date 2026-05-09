@@ -477,7 +477,7 @@
         <div class="explain-item">
             <div class="explain-item-label">📉 QPS 骤降 (qps_drop)</div>
             <div class="explain-item-desc">
-                数据来自消费者心跳上报的 <code>last_x_s_execute_count</code>（近 10 秒执行总次数），除以 10 得到真实 QPS。仅在有活跃消费者时检测。
+                数据来自消费者心跳上报的 <code>all_consumers_last_x_s_execute_count</code>（近 10 秒执行总次数），除以 10 得到真实 QPS。仅在有活跃消费者时检测。
             </div>
         </div>
         <div class="explain-item">
@@ -489,13 +489,13 @@
         <div class="explain-item">
             <div class="explain-item-label">📈 失败率飙升 (fail_spike)</div>
             <div class="explain-item-desc">
-                数据来自 <code>last_x_s_execute_count</code>（近 10 秒成功次数）和 <code>last_x_s_execute_count_fail</code>（近 10 秒失败次数），计算失败率 = 失败/总数。需满足最小调用次数才触发。
+                数据来自 <code>all_consumers_last_x_s_execute_count</code>（近 10 秒成功次数）和 <code>all_consumers_last_x_s_execute_count_fail</code>（近 10 秒失败次数），计算失败率 = 失败/总数。需满足最小调用次数才触发。
             </div>
         </div>
         <div class="explain-item">
             <div class="explain-item-label">⏱ 耗时过高 (avg_time_high)</div>
             <div class="explain-item-desc">
-                数据来自 <code>last_x_s_avarage_function_spend_time</code>（近 10 秒平均函数执行耗时，单位秒）。反映的是近期真实耗时，非历史累计均值。
+                数据来自 <code>all_consumers_last_x_s_avarage_function_spend_time</code>（近 10 秒平均函数执行耗时，单位秒）。反映的是近期真实耗时，非历史累计均值。
             </div>
         </div>
         <div class="explain-item">

@@ -358,7 +358,42 @@
             border: 1px solid rgba(99, 102, 241, 0.2);
             border-radius: 16px;
             padding: 5px;
-            overflow: hidden;
+            position: relative;
+        }
+
+        .top-scrollbar-wrapper {
+            overflow-x: auto;
+            overflow-y: hidden;
+            height: 14px;
+            background: rgba(20, 20, 40, 0.9);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.15);
+            border-radius: 12px 12px 0 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .top-scrollbar-content {
+            height: 1px;
+        }
+
+        .top-scrollbar-wrapper::-webkit-scrollbar {
+            height: 14px;
+        }
+
+        .top-scrollbar-wrapper::-webkit-scrollbar-track {
+            background: rgba(20, 20, 40, 0.8);
+            border-radius: 7px;
+        }
+
+        .top-scrollbar-wrapper::-webkit-scrollbar-thumb {
+            background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 7px;
+            border: 2px solid rgba(20, 20, 40, 0.8);
+        }
+
+        .top-scrollbar-wrapper::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(90deg, #818cf8 0%, #a78bfa 100%);
         }
 
         /* Tabulator 表格样式 */
@@ -833,6 +868,9 @@
 
         <!-- 表格容器 -->
         <div class="table-container">
+            <div class="top-scrollbar-wrapper" id="topScrollbarWrapper">
+                <div class="top-scrollbar-content" id="topScrollbarContent"></div>
+            </div>
             <div id="queue-table"></div>
         </div>
     </div>
@@ -1035,6 +1073,45 @@
             $('#total_msg_count').text(hasMsgData ? totalMsg.toLocaleString() : '-');
         }
 
+        function syncTopScrollbar() {
+            var tableHolder = document.querySelector('#queue-table .tabulator-tableholder');
+            var topWrapper = document.getElementById('topScrollbarWrapper');
+            var topContent = document.getElementById('topScrollbarContent');
+            if (tableHolder && topWrapper && topContent) {
+                topContent.style.width = tableHolder.scrollWidth + 'px';
+            }
+        }
+
+        function setupTopScrollbarSync() {
+            var tableHolder = document.querySelector('#queue-table .tabulator-tableholder');
+            var topWrapper = document.getElementById('topScrollbarWrapper');
+            if (!tableHolder || !topWrapper) return;
+
+            var isSyncingTop = false;
+            var isSyncingTable = false;
+
+            topWrapper.addEventListener('scroll', function() {
+                if (isSyncingTable) return;
+                isSyncingTop = true;
+                tableHolder.scrollLeft = topWrapper.scrollLeft;
+                isSyncingTop = false;
+            });
+
+            tableHolder.addEventListener('scroll', function() {
+                if (isSyncingTop) return;
+                isSyncingTable = true;
+                topWrapper.scrollLeft = tableHolder.scrollLeft;
+                isSyncingTable = false;
+            });
+
+            var resizeObserver = new ResizeObserver(function() {
+                syncTopScrollbar();
+            });
+            resizeObserver.observe(tableHolder);
+
+            syncTopScrollbar();
+        }
+
         var table = new Tabulator("#queue-table", {
             ajaxURL: "/funboost/queues_params_and_active_consumers",
             ajaxResponse: function(url, params, response) {
@@ -1067,15 +1144,17 @@
             responsiveLayout: false,
             pagination: true,
             paginationSize: 100,
-            height: "auto",
+            height: "calc(100vh - 280px)",
             locale: true,
             dataLoaded: function(data) {
                 setTimeout(function() {
                     updateTableFilters();
+                    syncTopScrollbar();
                 }, 100);
             },
             tableBuilt: function() {
                 this.initialized = true;
+                setupTopScrollbarSync();
             },
             langs: {
                 "zh-cn": {

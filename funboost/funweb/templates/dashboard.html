@@ -549,7 +549,7 @@ $(document).ready(function() {
         <div class="info-section">
             <div class="info-section-title"><i class="fa fa-bolt"></i>当前总吞吐</div>
             <div class="info-section-body">
-                数据来源：消费者心跳中的 <code>last_x_s_execute_count</code> 字段<br>
+                数据来源：消费者心跳中的 <code>all_consumers_last_x_s_execute_count</code> 字段<br>
                 每个消费者周期性上报自己在最近 10 秒内的总执行次数（含成功和失败），后端汇总该队列下所有活跃消费者的值，得出队列级吞吐。<br>
                 总吞吐 = 所有队列吞吐之和，单位：次/10秒。
             </div>
