@@ -47,7 +47,7 @@ pip install psycopg2-binary         # PostgreSQL
 ### 1. 定义数据模型 (ORM)
 
 ```python
-from funboost.funspider import SpiderItem, Field, create_engine, create_async_engine
+from funboost.contrib.funspider import SpiderItem, Field, create_engine, create_async_engine
 
 class NewsItem(SpiderItem, table=True):
     __tablename__ = "news"
@@ -66,7 +66,7 @@ class NewsItem(SpiderItem, table=True):
 
 ```python
 from funboost import boost, BoosterParams, BoostersManager, BrokerEnum, ConcurrentModeEnum
-from funboost.funspider import SimpleSpiderClient, AsyncSpiderClient
+from funboost.contrib.funspider import SimpleSpiderClient, AsyncSpiderClient
 
 NEWS_GROUP = "news_crawler"
 

@@ -1,7 +1,7 @@
 import re
 from typing import ClassVar, Optional
 from funboost import boost, BoosterParams, BoostersManager, BrokerEnum, ctrl_c_recv, ConcurrentModeEnum
-from funboost.funspider import SimpleSpiderClient, AsyncSpiderClient, SpiderItem, create_engine, create_async_engine, Field
+from funboost.contrib.funspider import SimpleSpiderClient, AsyncSpiderClient, SpiderItem, create_engine, create_async_engine, Field
 
 NEWS_GROUP = "news_crawler"
 
