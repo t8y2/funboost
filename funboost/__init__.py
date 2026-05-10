@@ -26,8 +26,6 @@ from funboost.core.func_params_model import (BoosterParams, BoosterParamsComplet
                                              TaskOptions, PublisherParams, BoosterParamsComplete)
 from funboost.funboost_config_deafult import FunboostCommonConfig, BrokerConnConfig
 
-# from funboost.core.fabric_deploy_helper import fabric_deploy, kill_all_remote_tasks # fabric2还没适配python3.12以上版本，不在这里导入，否则高版本python报错。
-from funboost.utils.paramiko_util import ParamikoFolderUploader
 
 from funboost.consumers.base_consumer import (wait_for_possible_has_finish_all_tasks_by_conusmer_list,
                                               FunctionResultStatus, AbstractConsumer)
@@ -67,3 +65,8 @@ from funboost.core.funboost_pool import MemoryFunboostPool,FunboostPool,Funboost
 
 
 
+# from funboost.core.fabric_deploy_helper import fabric_deploy, kill_all_remote_tasks # fabric2还没适配python3.12以上版本，不在这里导入，否则高版本python报错。
+try:
+    from funboost.utils.paramiko_util import ParamikoFolderUploader
+except ImportError:
+    pass

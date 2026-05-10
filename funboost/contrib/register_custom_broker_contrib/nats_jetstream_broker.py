@@ -54,9 +54,10 @@ class NatsJetStreamPublisher(AbstractPublisher):
     """NATS JetStream 发布者，消息持久化到 Stream"""
 
     def custom_init(self):
+        super().custom_init()
         config = self.publisher_params.broker_exclusive_config
-        self._nats_url = config.get('nats_url') or BrokerConnConfig.NATS_URL
-        self._stream_name = config.get('stream_name', 'funboost')
+        self._nats_url = config['nats_url'] or BrokerConnConfig.NATS_URL
+        self._stream_name = config['stream_name']
 
         self._loop = asyncio.new_event_loop()
         self._loop_thread = threading.Thread(target=self._loop.run_forever, daemon=True)
@@ -130,14 +131,16 @@ class NatsJetStreamConsumer(AbstractConsumer):
     - 支持消费者组（多个消费者分摊消息）
     - Pull 模式拉取消息
     """
+    _REQUEUE_IS_NATIVE_NACK = True
 
     def custom_init(self):
+        super().custom_init()
         config = self.consumer_params.broker_exclusive_config
-        self._nats_url = config.get('nats_url') or BrokerConnConfig.NATS_URL
-        self._stream_name = config.get('stream_name', 'funboost')
-        self._consumer_group = config.get('consumer_group', 'default')
-        self._ack_wait = config.get('ack_wait', 60)
-        self._max_deliver = config.get('max_deliver', 3)
+        self._nats_url = config['nats_url'] or BrokerConnConfig.NATS_URL
+        self._stream_name = config['stream_name']
+        self._consumer_group = config['consumer_group']
+        self._ack_wait = config['ack_wait']
+        self._max_deliver = config['max_deliver']
 
     @property
     def _subject(self):
@@ -196,16 +199,14 @@ class NatsJetStreamConsumer(AbstractConsumer):
         self._loop.run_until_complete(_run())
 
     def _confirm_consume(self, kw):
-        nats_msg = kw.get('_nats_msg')
-        if nats_msg:
-            future = asyncio.run_coroutine_threadsafe(nats_msg.ack(), self._loop)
-            future.result(timeout=5)
+        nats_msg = kw['_nats_msg']
+        future = asyncio.run_coroutine_threadsafe(nats_msg.ack(), self._loop)
+        future.result(timeout=5)
 
     def _requeue(self, kw):
-        nats_msg = kw.get('_nats_msg')
-        if nats_msg:
-            future = asyncio.run_coroutine_threadsafe(nats_msg.nak(), self._loop)
-            future.result(timeout=5)
+        nats_msg = kw['_nats_msg']
+        future = asyncio.run_coroutine_threadsafe(nats_msg.nak(), self._loop)
+        future.result(timeout=5)
 
 
 register_custom_broker(BROKER_KIND_NATS_JETSTREAM, NatsJetStreamPublisher, NatsJetStreamConsumer)

@@ -1,5 +1,57 @@
 # AI 重大设计更新记录
 
+## 2026-05-10: 引入 _REQUEUE_IS_NATIVE_NACK 类属性，修复 requeue 后仍 ACK 的问题
+
+### 改动范围
+- 修改 `funboost/consumers/base_consumer.py` — AbstractConsumer 新增 `_REQUEUE_IS_NATIVE_NACK = False` 类属性，替换第 913/1079 行的硬编码 broker 类型列表
+- 修改 `funboost/consumers/rabbitmq_amqpstorm_consumer.py` — 设 `_REQUEUE_IS_NATIVE_NACK = True`
+- 修改 `funboost/consumers/rabbitmq_pika_consumer.py` — 设 `_REQUEUE_IS_NATIVE_NACK = True`
+- 修改 `funboost/consumers/rabbitmq_rabbitpy_consumer.py` — 设 `_REQUEUE_IS_NATIVE_NACK = True`
+- 修改 `funboost/consumers/rabbitmq_amqp_consumer.py` — 设 `_REQUEUE_IS_NATIVE_NACK = True`（此前未在硬编码列表中，属于已有 bug 修复）
+- 修改 `funboost/contrib/register_custom_broker_contrib/nats_jetstream_broker.py` — 设 `_REQUEUE_IS_NATIVE_NACK = True`
+- 修改 `funboost/consumers/pulsar_consumer.py` — 设 `_REQUEUE_IS_NATIVE_NACK = True`
+- 修改 `funboost/consumers/nsq_consumer.py` — 设 `_REQUEUE_IS_NATIVE_NACK = True`
+- 修改 `funboost/consumers/kombu_consumer.py` — 设 `_REQUEUE_IS_NATIVE_NACK = True`
+- 修改 `funboost/consumers/rocketmq5_consumer.py` — 设 `_REQUEUE_IS_NATIVE_NACK = True`
+- 修改 `funboost/consumers/persist_queue_consumer.py` — 设 `_REQUEUE_IS_NATIVE_NACK = True`
+- 修改 `funboost/consumers/mongomq_consumer.py` — 设 `_REQUEUE_IS_NATIVE_NACK = True`
+- 修改 `funboost/consumers/postgres_consumer.py` — 设 `_REQUEUE_IS_NATIVE_NACK = True`
+- 修改 `funboost/consumers/peewee_conusmer.py` — 设 `_REQUEUE_IS_NATIVE_NACK = True`
+- 修改 `funboost/consumers/sqlachemy_consumer.py` — 设 `_REQUEUE_IS_NATIVE_NACK = True`
+
+### 背景
+原 `base_consumer.py` 中在消息处理完后决定是否 ACK 时，使用硬编码列表 `[BrokerEnum.RABBITMQ_AMQPSTORM, RABBITMQ_PIKA, RABBITMQ_RABBITPY]` 判断。
+只有这三种 RabbitMQ broker 在 `_requeue`（NACK）后会跳过 `_confirm_consume`（ACK）。
+其他使用原生 NACK 机制的 broker（如 NATS JetStream、RabbitmqAmqpConsumer、Pulsar、NSQ 等）会先 NACK 再 ACK，导致消息不会重投。
+
+### 设计
+- 新增 `AbstractConsumer._REQUEUE_IS_NATIVE_NACK = False` 类属性
+- 含义：`_requeue` 是否使用了 broker 原生 NACK/reject 机制，已 requeue 的消息不应再调用 `_confirm_consume`
+- 子类覆盖为 `True` 即可，无需再修改 `base_consumer.py` 的判断逻辑
+- 共 14 个消费者设为 True：RabbitMQ×4、Pulsar、NSQ、Kombu、RocketMQ5、NATS JetStream、PersistQueue、MongoDB、Postgres、Peewee、SQLAlchemy
+- 未设置的消费者（Redis系列、Kafka、SQS、内存队列等）的 `_requeue` 使用重新发布方式，不与 ACK 冲突
+
+---
+
+## 2026-05-10: NATS Core broker 新增 Queue Group（消费者组）可配置支持
+
+### 改动范围
+- 修改 `funboost/contrib/register_custom_broker_contrib/nats_core_broker.py`
+
+### 背景
+原 NATS Core broker 的消费者使用 `nc.subscribe(subject, cb=handler)` 订阅，没有传 `queue` 参数。
+这导致多个消费者实例会收到相同的消息（广播模式），不符合 funboost 作为任务队列"多消费者分摊消息"的默认预期。
+
+### 设计
+1. 通过 `register_broker_exclusive_config_default` 注册 NATS Core 专属配置：
+   - `nats_url`：可覆盖全局 `BrokerConnConfig.NATS_URL`
+   - `queue_group`：消费者组名，默认 `'default'`
+2. 默认行为为**负载均衡**（与 Redis、RabbitMQ 等 broker 一致）
+3. 用户如需广播模式，设 `broker_exclusive_config={'queue_group': ''}` 即可
+4. Publisher 和 Consumer 都支持从 `broker_exclusive_config` 读取 `nats_url`
+
+---
+
 ## 2026-05-09: NATS broker 升级为 nats-py 官方客户端 + 新增 NATS JetStream broker
 
 ### 改动范围

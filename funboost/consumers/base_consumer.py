@@ -101,6 +101,7 @@ class GlobalVars:
 class AbstractConsumer(metaclass=abc.ABCMeta, ):
     _time_interval_for_check_allow_run_by_cron = 60
     BROKER_KIND = None
+    _REQUEUE_IS_NATIVE_NACK = False  # 子类覆盖为True表示_requeue使用了broker原生NACK机制（如RabbitMQ basic_nack/reject、NATS JetStream nak），已requeue的消息不应再调用_confirm_consume
 
     @property
     def publisher_of_same_queue(self):
@@ -910,7 +911,7 @@ class AbstractConsumer(metaclass=abc.ABCMeta, ):
                     if interval:
                         if not self._wait_before_retry(kw, current_retry_times, interval):
                             break
-            if not (current_function_result_status._has_requeue and self.BROKER_KIND in [BrokerEnum.RABBITMQ_AMQPSTORM, BrokerEnum.RABBITMQ_PIKA, BrokerEnum.RABBITMQ_RABBITPY]):  # 已经nack了，不能ack，否则rabbitmq delevar tag 报错
+            if not (current_function_result_status._has_requeue and self._REQUEUE_IS_NATIVE_NACK):
                 self._confirm_consume(kw)
             current_function_result_status.run_status = RunStatus.finish
             current_function_result_status.time_end = time.time()
@@ -1075,7 +1076,7 @@ class AbstractConsumer(metaclass=abc.ABCMeta, ):
                         if not await self._async_wait_before_retry(kw, current_retry_times, interval):
                             break
 
-            if not (current_function_result_status._has_requeue and self.BROKER_KIND in [BrokerEnum.RABBITMQ_AMQPSTORM, BrokerEnum.RABBITMQ_PIKA, BrokerEnum.RABBITMQ_RABBITPY]):
+            if not (current_function_result_status._has_requeue and self._REQUEUE_IS_NATIVE_NACK):
                 await simple_run_in_executor(self._confirm_consume, kw)
             current_function_result_status.run_status = RunStatus.finish
             current_function_result_status.time_end = time.time()

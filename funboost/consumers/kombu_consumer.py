@@ -80,6 +80,7 @@ class KombuConsumer(AbstractConsumer, ):
     """
     使用kombu作为中间件,这个能直接一次性支持很多种小众中间件，但性能很差，除非是分布式函数调度框架没实现的中间件种类用户才可以用这种，用户也可以自己对比性能。
     """
+    _REQUEUE_IS_NATIVE_NACK = True
 
 
     def custom_init(self):

@@ -21,6 +21,7 @@ class PostgresConsumer(AbstractConsumer):
     2. LISTEN/NOTIFY: 实时通知机制，比轮询更高效
     3. 使用原生 psycopg2 连接池
     """
+    _REQUEUE_IS_NATIVE_NACK = True
 
     BROKER_KIND = None  # 会被框架自动设置
 

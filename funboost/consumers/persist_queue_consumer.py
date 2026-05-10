@@ -12,6 +12,7 @@ class PersistQueueConsumer(AbstractConsumer):
     """
     persist queue包实现的本地持久化消息队列。
     """
+    _REQUEUE_IS_NATIVE_NACK = True
 
     def _dispatch_task(self):
         pub = PersistQueuePublisher(publisher_params=PublisherParams(queue_name=self.queue_name))
