@@ -381,10 +381,11 @@ class QueuesConusmerParamsGetter(RedisMixin, RedisReportInfoGetterMixin,Funboost
                 
                 queue_params_and_active_consumers = self.get_queues_params_and_active_consumers()
                 for queue,item in queue_params_and_active_consumers.items():
-                    if len(item['active_consumers']) == 0:
+                    active_consumer_count = len(item['active_consumers'])
+                    if active_consumer_count == 0:
                         continue
                     report_data = {k:v for k,v in item.items() if k not in ['queue_params','active_consumers']}
-                    
+                    report_data['active_consumer_count'] = active_consumer_count
                     report_data['report_ts'] = report_ts
                     self.redis_db_frame.zadd(RedisKeys.gen_funboost_queue_time_series_data_key_by_queue_name(queue),
                                             {Serialization.to_json_str(report_data):report_ts} )

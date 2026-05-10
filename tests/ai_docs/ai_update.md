@@ -1,5 +1,63 @@
 # AI 重大设计更新记录
 
+## 2026-05-10: 告警系统重构 — 提取 AlertRuleStore / AlertLogStore / TimeSeriesEvaluator 三大类
+
+### 改动范围
+- 修改 `funboost/funweb/flask_bps/queue_alerts.py` — 将零散函数组织为三个职责清晰的类
+
+### 背景
+原 queue_alerts.py 中 rule 的 CRUD（`_gen_rule_id`、`_load_rules`、`_save_rule`、`_delete_rule`）和
+日志管理（`_append_alert_log`）散落为模块级函数，Flask 路由中存在重复的 hget+json.loads 代码。
+
+### 设计
+1. **AlertRuleStore** — 规则 CRUD 管理器
+   - `gen_id()` / `load_all()` / `get(rule_id)` / `save(rule_id, rule_dict)` / `delete(rule_id)`
+   - `get()` 封装了之前路由中重复的 hget+decode+json.loads 逻辑
+   - 支持注入 `redis_client`，便于测试
+2. **AlertLogStore** — 告警日志管理器
+   - `append(entry)` / `query(start_ts, end_ts, limit=200)`
+   - `query()` 封装了之前 `get_alert_log` 路由中散写的 zrevrangebyscore + 反序列化逻辑
+3. **TimeSeriesEvaluator** — 已有，实例化时自动取数据（上一轮改造）
+4. **`_send_notification`** — 保持独立函数不变（纯通知工具，不属于 rule/log 管理）
+5. Flask 路由变为薄层，只做 HTTP 参数解析 + 调用类方法 + 返回 JSON
+
+### 优势
+- 整个模块 3 个类 + 薄路由 + 1 个通知工具函数，职责清晰
+- 消除 `update_rule`、`toggle_rule` 路由中重复的 Redis 操作代码
+- 所有类都支持注入 `redis_client`，可独立 mock 测试
+
+---
+
+## 2026-05-10: 告警系统改造 — 复用时序数据 + 多点聚合判断
+
+### 改动范围
+- 修改 `funboost/core/active_cousumer_info_getter.py` — 时序数据采集增加 `active_consumer_count` 字段
+- 重写 `funboost/funweb/flask_bps/queue_alerts.py` — 告警检查从时序数据读取，改为多点聚合判断
+- 修改 `funboost/funweb/templates/queue_alerts.html` — 前端新增 `check_window_count` 配置项
+
+### 背景
+原告警系统每 10 秒独立调用 `get_queues_params_and_active_consumers()` 做一次完整 Redis 聚合查询，
+与已有的时序数据采集线程做完全重复的工作。且只基于单一 10 秒快照判断，瞬时抖动容易误报。
+
+### 设计
+1. **复用时序数据**：告警线程不再独立查询，而是读取 `funboost_queue_time_series_data:{queue_name}` 中已采集的时序数据
+2. **多点聚合判断**：读取最近 N 个周期（可配 `check_window_count`，默认 3 = 30 秒），按告警类型做不同聚合策略：
+   - `backlog`（积压）：全部超阈值才触发
+   - `qps_drop`（QPS 骤降）：平均 QPS <= 阈值
+   - `consumer_lost`（消费者掉线）：全部无消费者 或 时序数据停止更新超 60 秒
+   - `fail_spike`（失败率飙升）：汇总 N 个周期的总成功/失败数计算失败率
+   - `avg_time_high`（耗时过高）：N 个周期平均耗时 >= 阈值
+3. **时序数据增加 `active_consumer_count`**：采集时记录消费者数量（整数），供 `consumer_lost` 判断
+4. **前端新增"检查窗口"**：用户可配置连续几个周期异常才触发告警，带实时秒数提示
+5. **兼容处理**：`consumer_lost` 类型因消费者全停后采集也停，特殊处理为"时序数据超时 60 秒即视为掉线"
+
+### 优势
+- 减少 Redis 查询负载（从完整聚合查询降为 O(1) 的 zrevrange）
+- 告警和监控面板使用同源数据，保证一致性
+- 多点聚合消除瞬时抖动误报
+
+---
+
 ## 2026-05-10: 引入 _REQUEUE_IS_NATIVE_NACK 类属性，修复 requeue 后仍 ACK 的问题
 
 ### 改动范围
