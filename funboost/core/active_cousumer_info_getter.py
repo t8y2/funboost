@@ -80,22 +80,15 @@ class RedisReportInfoGetterMixin:
             self.care_project_name = CareProjectNameEnv.get()
 
     def get_all_queue_names(self) ->list:
-        current_time = time.time()
-        
         if self.care_project_name:
-            if self._cache_all_queue_names is not None and (current_time - self._cache_all_queue_names_ts) < self._cache_ttl:
-                return self._cache_all_queue_names
-            result = self.project_name_queues
-            self.__class__._cache_all_queue_names = result
-            self.__class__._cache_all_queue_names_ts = current_time
-            return result
-        else:
-            if self._cache_no_project_queue_names is not None and (current_time - self._cache_no_project_queue_names_ts) < self._cache_ttl:
-                return self._cache_no_project_queue_names
-            result = list(self.redis_db_frame.smembers(RedisKeys.FUNBOOST_ALL_QUEUE_NAMES))
-            self.__class__._cache_no_project_queue_names = result
-            self.__class__._cache_no_project_queue_names_ts = current_time
-            return result
+            return self.project_name_queues
+        current_time = time.time()
+        if self._cache_no_project_queue_names is not None and (current_time - self._cache_no_project_queue_names_ts) < self._cache_ttl:
+            return self._cache_no_project_queue_names
+        result = list(self.redis_db_frame.smembers(RedisKeys.FUNBOOST_ALL_QUEUE_NAMES))
+        self.__class__._cache_no_project_queue_names = result
+        self.__class__._cache_no_project_queue_names_ts = current_time
+        return result
 
     def get_queue_names_by_project_name(self,project_name:str) ->list:
         """根据项目名称获取队列名称，带30秒缓存（类级别缓存，所有实例共享）"""
@@ -140,9 +133,8 @@ class RedisReportInfoGetterMixin:
             """
             self.logger.error(err_msg)
             return {}
-        ret_list = self.redis_db_frame.hmget(key,self.all_queue_names)
-        ret_list_exlude_none = [i for i in ret_list if i is not None]
-        return  dict(zip(self.all_queue_names, ret_list_exlude_none))
+        ret_list = self.redis_db_frame.hmget(key, self.all_queue_names)
+        return {k: v for k, v in zip(self.all_queue_names, ret_list) if v is not None}
     
     def get_all_project_names(self):
         return list(self.redis_db_frame.smembers(RedisKeys.FUNBOOST_ALL_PROJECT_NAMES))

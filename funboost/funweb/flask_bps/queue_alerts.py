@@ -180,31 +180,30 @@ class TimeSeriesEvaluator:
     def evaluate_consumer_lost(self, now=0):
         """
         消费者掉线：
-        - 有时序数据时，检查 active_consumer_count 是否全部为 0
-        - 无时序数据时（消费者全停后采集也停），检查最后一条时序数据是否已超时
+        1. 先检查最新时序数据是否已过期（采集线程在 active_consumer_count==0 时不存数据，
+           所以消费者全停后时序数据会停止更新，需通过 report_ts 检测）
+        2. 再检查窗口内 active_consumer_count 是否全部为 0（兼容旧数据或采集逻辑变更后）
         """
+        if now <= 0:
+            return False, ''
         if self.series:
+            latest_ts = self.series[0].get('report_ts', 0)
+            if latest_ts and now - latest_ts > 60:
+                return True, f'无活跃消费者（时序数据已停止更新 {int(now - latest_ts)}s）'
             all_lost = all(s.get('active_consumer_count', 0) == 0 for s in self.series)
             if all_lost:
                 n = len(self.series)
                 return True, f'无活跃消费者（连续 {n} 个周期/{n * 10}s）'
             return False, ''
-        if self.queue_name and now > 0:
-            key = RedisKeys.gen_funboost_queue_time_series_data_key_by_queue_name(self.queue_name)
-            last_entry = _redis.zrevrange(key, 0, 0, withscores=True)
-            if last_entry:
-                last_ts = last_entry[0][1]
-                if now - last_ts > 60:
-                    return True, f'无活跃消费者（时序数据已停止更新 {int(now - last_ts)}s）'
         return False, ''
 
     def evaluate_fail_spike(self, threshold=0, min_calls=5):
         """失败率飙升：汇总近 N 个周期的总成功/失败数计算失败率"""
         if not self.series:
             return False, ''
-        total_succ = sum(s.get('all_consumers_last_x_s_execute_count', 0) or 0 for s in self.series)
+        total_exec = sum(s.get('all_consumers_last_x_s_execute_count', 0) or 0 for s in self.series)
         total_fail = sum(s.get('all_consumers_last_x_s_execute_count_fail', 0) or 0 for s in self.series)
-        total = total_succ + total_fail
+        total = total_exec
         if total < min_calls or total == 0:
             return False, ''
         fail_rate = total_fail / total
@@ -243,7 +242,7 @@ def _check_rules_once():
 
     try:
         getter = QueuesConusmerParamsGetter()
-        all_queue_names = sorted(getter.get_all_queue_names())
+        all_queue_names = sorted(getter.get_queues_params().keys())
     except Exception as e:
         logger.error(f'FunboostAlert get queue names failed: {e}')
         return
@@ -404,8 +403,7 @@ def get_alert_log():
 def get_queue_names():
     try:
         getter = QueuesConusmerParamsGetter()
-        queues_info = getter.get_queues_params_and_active_consumers()
-        queue_names = sorted(queues_info.keys())
+        queue_names = sorted(getter.get_queues_params().keys())
         return jsonify({'succ': True, 'data': queue_names})
     except Exception as e:
         return jsonify({'succ': False, 'error': str(e)})

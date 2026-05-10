@@ -120,8 +120,8 @@ class TestEvaluateFailSpike:
 
     def test_high_fail_rate(self):
         ev = _mock_evaluator([
-            {'all_consumers_last_x_s_execute_count': 50, 'all_consumers_last_x_s_execute_count_fail': 50},
-            {'all_consumers_last_x_s_execute_count': 40, 'all_consumers_last_x_s_execute_count_fail': 60},
+            {'all_consumers_last_x_s_execute_count': 100, 'all_consumers_last_x_s_execute_count_fail': 50},
+            {'all_consumers_last_x_s_execute_count': 100, 'all_consumers_last_x_s_execute_count_fail': 60},
         ])
         triggered, detail = ev.evaluate_fail_spike(threshold=20, min_calls=5)
         assert triggered
@@ -130,14 +130,14 @@ class TestEvaluateFailSpike:
 
     def test_low_fail_rate(self):
         ev = _mock_evaluator([
-            {'all_consumers_last_x_s_execute_count': 95, 'all_consumers_last_x_s_execute_count_fail': 5},
+            {'all_consumers_last_x_s_execute_count': 100, 'all_consumers_last_x_s_execute_count_fail': 5},
         ] * 3)
         triggered, _ = ev.evaluate_fail_spike(threshold=20, min_calls=5)
         assert not triggered
 
     def test_exact_threshold(self):
         ev = _mock_evaluator([
-            {'all_consumers_last_x_s_execute_count': 80, 'all_consumers_last_x_s_execute_count_fail': 20},
+            {'all_consumers_last_x_s_execute_count': 100, 'all_consumers_last_x_s_execute_count_fail': 20},
         ])
         triggered, _ = ev.evaluate_fail_spike(threshold=20, min_calls=5)
         assert triggered
@@ -184,19 +184,38 @@ class TestEvaluateAvgTimeHigh:
 
 
 class TestEvaluateConsumerLost:
-    def test_all_lost(self):
-        ev = _mock_evaluator([{'active_consumer_count': 0}] * 3)
+    def test_all_lost_via_active_count(self):
+        ev = _mock_evaluator([{'active_consumer_count': 0, 'report_ts': 1700000000}] * 3)
         triggered, detail = ev.evaluate_consumer_lost(now=1700000000)
         assert triggered
         assert '连续 3' in detail
 
     def test_has_consumers(self):
-        ev = _mock_evaluator([{'active_consumer_count': 2}] * 3)
+        ev = _mock_evaluator([{'active_consumer_count': 2, 'report_ts': 1700000000}] * 3)
         triggered, _ = ev.evaluate_consumer_lost(now=1700000000)
         assert not triggered
 
-    def test_empty_series_no_timeout(self):
+    def test_stale_data_triggers(self):
+        """消费者停了之后时序数据不再更新，report_ts 过期应触发告警"""
+        ev = _mock_evaluator([{'active_consumer_count': 2, 'report_ts': 1700000000}] * 3)
+        triggered, detail = ev.evaluate_consumer_lost(now=1700000000 + 120)
+        assert triggered
+        assert '停止更新' in detail
+        assert '120s' in detail
+
+    def test_fresh_data_with_consumers_not_triggered(self):
+        """数据新鲜且有消费者在线，不应触发"""
+        ev = _mock_evaluator([{'active_consumer_count': 5, 'report_ts': 1700000000}] * 3)
+        triggered, _ = ev.evaluate_consumer_lost(now=1700000000 + 5)
+        assert not triggered
+
+    def test_empty_series(self):
         ev = _mock_evaluator([])
+        triggered, _ = ev.evaluate_consumer_lost(now=1700000000)
+        assert not triggered
+
+    def test_now_zero_returns_false(self):
+        ev = _mock_evaluator([{'active_consumer_count': 0, 'report_ts': 1700000000}] * 3)
         triggered, _ = ev.evaluate_consumer_lost(now=0)
         assert not triggered
 

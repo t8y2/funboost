@@ -1,5 +1,45 @@
 # AI 重大设计更新记录
 
+## 2026-05-10: 修复 active_cousumer_info_getter.py 三个 bug
+
+### Bug 1: hmget_many_by_all_queue_names 键值对错位
+- **文件**：`funboost/core/active_cousumer_info_getter.py`
+- **问题**：`hmget` 返回列表先过滤 None 再 zip，导致有 None 值时键值对错位（如 q2 拿到 q3 的值）
+- **修复**：改为先 zip 再过滤 None：`{k: v for k, v in zip(keys, values) if v is not None}`
+
+### Bug 2: get_all_queue_names 缓存 key 冲突
+- 见下方详细条目
+
+---
+
+## 2026-05-10: 修复 get_all_queue_names 缓存 key 冲突 bug + 告警队列范围不一致
+
+### Bug: get_all_queue_names 按 project_name 缓存时使用单一变量，切换项目会返回旧项目数据
+- **文件**：`funboost/core/active_cousumer_info_getter.py`
+- **问题**：`_cache_all_queue_names` 不区分 `care_project_name`。用户切换项目后 30 秒内，仍返回旧项目的队列列表
+- **修复**：当 `care_project_name` 有值时，直接走 `self.project_name_queues`（内部已通过 `get_queue_names_by_project_name` 使用按 project_name 字典缓存），去掉有 bug 的单一变量缓存
+
+### Bug: 告警检查和前端下拉使用不同的队列数据源
+- **文件**：`funboost/funweb/flask_bps/queue_alerts.py`
+- **问题**：`_check_rules_once` 用 `get_all_queue_names()` 获取所有注册过的队列名（含其他项目和废弃队列），而前端下拉用 `get_queues_params_and_active_consumers().keys()` 只返回有消费者配置的队列
+- **修复**：统一改为 `getter.get_queues_params().keys()`
+
+---
+
+## 2026-05-10: 修复告警系统两个逻辑 bug
+
+### Bug 1: evaluate_fail_spike 失败率被系统性低估
+- **问题**：`all_consumers_last_x_s_execute_count` 是总执行次数（含成功+失败），但代码将其命名为 `total_succ` 并 `total = total_succ + total_fail` 重复计算了失败次数
+- **影响**：失败率被低估，例如实际 20% 会被算成 16.7%，可能漏报
+- **修复**：`total = total_exec`（直接用总执行次数作为分母），变量名改为 `total_exec`
+
+### Bug 2: evaluate_consumer_lost 超时检测永远不可达
+- **问题**：采集线程在 `active_consumer_count == 0` 时不存数据（`continue`），所以时序数据中的条目永远是 `active_consumer_count > 0`。当消费者停止后，旧数据仍在 Redis 中（保留 24h），导致 `all_lost` 始终为 False，超时检测分支永远不可达
+- **影响**：消费者停止 1 小时也不会触发 consumer_lost 告警
+- **修复**：先检查 `report_ts` 数据是否过期（>60s），再检查 `active_consumer_count`；移除了对 `_redis` 的直接依赖
+
+---
+
 ## 2026-05-10: 告警系统重构 — 提取 AlertRuleStore / AlertLogStore / TimeSeriesEvaluator 三大类
 
 ### 改动范围
