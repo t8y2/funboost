@@ -12,6 +12,7 @@ class SqlachemyConsumer(AbstractConsumer):
     """
     sqlachemy实现的操作5种数据库模拟消息队列，支持消费确认。
     """
+    _REQUEUE_IS_NATIVE_NACK = True
 
 
     def _dispatch_task(self):

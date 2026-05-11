@@ -18,6 +18,7 @@ class NsqConsumer(AbstractConsumer):
     """
     nsq作为中间件实现的。
     """
+    _REQUEUE_IS_NATIVE_NACK = True
 
 
     def _dispatch_task(self):

@@ -25,6 +25,7 @@ class RabbitmqConsumer(AbstractConsumer):
     使用pika包实现的。
     pika包 子线程去使用chanel执行ack，由于跨线程操作chanel报错，比较麻烦。
     """
+    _REQUEUE_IS_NATIVE_NACK = True
 
 
     # noinspection PyAttributeOutsideInit

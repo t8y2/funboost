@@ -52,6 +52,7 @@ class Rocketmq5Consumer(AbstractConsumer):
         - max_message_num: 每次拉取的最大消息数，默认 32
         - tag: 消息过滤 tag，默认 '*' 表示不过滤
     """
+    _REQUEUE_IS_NATIVE_NACK = True
 
     def custom_init(self):
         self._consumer = None

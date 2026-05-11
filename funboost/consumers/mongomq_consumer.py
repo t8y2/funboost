@@ -11,6 +11,7 @@ class MongoMqConsumer(AbstractConsumer, MongoMixin):
     """
     Mongo queue包实现的基于mongo的消息队列，支持消费确认。
     """
+    _REQUEUE_IS_NATIVE_NACK = True
 
 
     def _dispatch_task(self):
