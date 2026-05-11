@@ -1,26 +1,29 @@
 # AI 重大设计更新记录
 
-## 2026-05-09: NATS broker 升级为 nats-py 官方客户端 + 新增 NATS JetStream broker
+## 2026-05-09: NATS broker 全面重构 — 升级 nats-py + 移入 contrib + 枚举重命名
 
 ### 改动范围
-- 修改 `funboost/consumers/nats_consumer.py` — 使用 `nats-py` (asyncio) 替代废弃的 `pynats`
-- 修改 `funboost/publishers/nats_publisher.py` — 同上
-- 修改 `funboost/core/lazy_impoter.py` — NatsImporter 改为 import nats
+- 删除 `funboost/consumers/nats_consumer.py` 和 `funboost/publishers/nats_publisher.py`
+- 删除 `funboost/core/lazy_impoter.py` 中的 `NatsImporter` 类
+- 新增 `funboost/contrib/register_custom_broker_contrib/nats_core_broker.py` — NATS Core broker (合并 consumer+publisher)
 - 新增 `funboost/contrib/register_custom_broker_contrib/nats_jetstream_broker.py` — NATS JetStream 持久化 broker
+- 修改 `funboost/constant.py` — `BrokerEnum.NATS` 重命名为 `BrokerEnum.NATS_CORE`，新增 `BrokerEnum.NATS_JETSTREAM`
+- 修改 `funboost/factories/broker_kind__publsiher_consumer_type_map.py` — NATS 从模块级导入改为 `regist_to_funboost` 惰性导入
 
 ### 背景
-原有 NATS 实现使用的是 2019 年的 `pynats` 包（同步、无 JetStream 支持、已停止维护）。
-有用户在 GitHub issue 中反馈该包过旧。
+原有 NATS 实现使用 2019 年的 `pynats` 包（同步、无 JetStream 支持、已停止维护）。
+GitHub issue 反馈该包过旧。同时为了和 WATCHDOG/WEBSOCKET 等 contrib broker 保持一致架构。
 
 ### 设计
-1. **NATS Core**（`BrokerEnum.NATS`）：升级为 `nats-py` 官方 asyncio 客户端，保持原有行为（无持久化、无ACK）
-2. **NATS JetStream**（`BROKER_KIND_NATS_JETSTREAM`）：新增 contrib broker，支持：
-   - 消息持久化（Stream）
-   - 消费确认（ACK/NAK）
-   - 持久化消费者（durable，重启不丢失消费位置）
-   - 消费者组（多实例分摊消息）
-   - Pull 模式拉取
-   - 可配置 ack_wait、max_deliver
+1. **BrokerEnum.NATS_CORE**：使用 `nats-py` 官方 asyncio 客户端，无持久化、无ACK
+2. **BrokerEnum.NATS_JETSTREAM**：支持消息持久化(Stream)、ACK/NAK、durable consumer、消费者组、Pull模式、ConsumerConfig(ack_wait/max_deliver)
+3. **导入方式**：两者都通过 `regist_to_funboost` 惰性导入 contrib 模块，不使用 NATS 的用户不会触发 `import nats`
+4. **`import nats` 位置**：放在 broker 模块级（而非方法内），因为只有使用该 broker 时才会导入该模块
+
+### 修复的 bug
+- JetStream Publisher 的 `find_stream_name_by_subject` 参数用了 `self.queue_name` 而非 `self._subject`
+- JetStream Consumer 的 `_confirm_consume`/`_requeue` 在新 event loop 中执行 `msg.ack()`，而 msg 绑定在 dispatch loop 上 → 改为 `run_coroutine_threadsafe` 调度到正确的 loop
+- JetStream Consumer 的 `self.booster_params` 应为 `self.consumer_params`
 
 ### 依赖
 - `pip install nats-py`（替代 `pip install nats-python`/`pynats`）
