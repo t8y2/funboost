@@ -17,6 +17,7 @@ class RabbitmqAmqpConsumer(AbstractConsumer):
     使用 amqp 包实现，高性能 AMQP 客户端。
     amqp 是 Celery/Kombu 底层依赖，性能比 pika 更好。
     """
+    _REQUEUE_IS_NATIVE_NACK = True
 
     def _dispatch_task(self):
         def callback(message):

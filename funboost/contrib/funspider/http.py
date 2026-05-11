@@ -20,6 +20,7 @@ class SpiderResponse:
         self.status_code = resp.status_code
         self.url = str(resp.url)
         self._text = resp.text
+        self._content = resp.content
         self._selector: Optional[Selector] = None
         self._resp_dict: Optional[dict] = None
 
@@ -34,9 +35,18 @@ class SpiderResponse:
         return self._text
 
     @property
+    def content(self) -> bytes:
+        return self._content
+
+    @property
     def resp_dict(self) -> dict:
         if self._resp_dict is None:
-            self._resp_dict = json.loads(self._text)
+            try:
+                self._resp_dict = json.loads(self._text)
+            except json.JSONDecodeError:
+                raise ValueError(
+                    f"响应不是合法 JSON (URL: {self.url}), 前200字符: {self._text[:200]}"
+                )
         return self._resp_dict
 
     def xpath(self, query: str) -> list:

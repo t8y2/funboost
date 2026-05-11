@@ -246,7 +246,7 @@
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             border: 1px solid rgba(99,102,241,0.3);
             border-radius: 20px; padding: 30px;
-            width: 560px; max-width: 95vw;
+            width: 820px; max-width: 95vw;
             max-height: 90vh; overflow-y: auto;
             box-shadow: 0 25px 60px rgba(0,0,0,0.5);
         }
@@ -483,7 +483,7 @@
         <div class="explain-item">
             <div class="explain-item-label">🔌 消费者掉线 (consumer_lost)</div>
             <div class="explain-item-desc">
-                数据来自消费者心跳信息（Redis Hash），通过心跳时间戳判断：15 秒内无心跳则视为离线。<code>active_consumers</code> 为空即触发。
+                数据来自时序数据中的 <code>active_consumer_count</code> 字段。窗口内全部周期消费者数为 0 则触发；若时序数据已停止更新超过 60 秒（消费者全停后采集也停），同样视为掉线。
             </div>
         </div>
         <div class="explain-item">
@@ -499,9 +499,9 @@
             </div>
         </div>
         <div class="explain-item">
-            <div class="explain-item-label">⚙️ 采集机制</div>
+            <div class="explain-item-label">⚙️ 采集与判断机制</div>
             <div class="explain-item-desc">
-                所有指标均由消费者进程每隔 10 秒主动心跳上报至 Redis，后台检查线程每 10 秒从 Redis 读取并比对规则。无需重启即可生效。
+                所有指标由消费者进程每 10 秒心跳上报至 Redis 时序数据。告警基于<strong>多点聚合</strong>判断：读取最近 N 个周期的时序数据（可配置"检查窗口"），只有持续异常才触发，有效消除瞬时抖动导致的误报。
             </div>
         </div>
     </div>
@@ -529,19 +529,32 @@
 
         <input type="hidden" id="editRuleId" value="">
 
+        <!-- ═══ 基本信息 ═══ -->
+        <div style="font-size:13px;font-weight:600;color:#4ade80;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+            <i class="fa fa-tag"></i> 基本信息
+        </div>
+
         <div class="form-group">
             <label class="form-label">规则名称</label>
             <input type="text" class="form-input" id="ruleName" placeholder="例：订单队列积压告警">
         </div>
 
-        <div class="form-row">
-            <div class="form-group">
-                <label class="form-label">监控队列</label>
-                <select class="form-select" id="queueName" multiple="multiple" data-placeholder="选择队列...">
-                    <option value="*">所有队列</option>
-                </select>
-                <div class="form-hint">可多选，选"所有队列"则监控全部</div>
-            </div>
+        <div class="form-group">
+            <label class="form-label">监控队列</label>
+            <select class="form-select" id="queueName" multiple="multiple" data-placeholder="选择队列...">
+                <option value="*">所有队列</option>
+            </select>
+            <div class="form-hint">可多选，选"所有队列"则监控全部</div>
+        </div>
+
+        <div style="border-top:1px solid rgba(255,255,255,0.06);margin:18px 0;"></div>
+
+        <!-- ═══ 触发条件 ═══ -->
+        <div style="font-size:13px;font-weight:600;color:#fbbf24;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+            <i class="fa fa-bolt"></i> 触发条件
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
             <div class="form-group">
                 <label class="form-label">告警类型</label>
                 <select class="form-select" id="alertType" onchange="onAlertTypeChange()">
@@ -552,19 +565,35 @@
                     <option value="avg_time_high">平均耗时过高</option>
                 </select>
             </div>
-        </div>
-
-        <div class="form-row">
             <div class="form-group">
                 <label class="form-label" id="thresholdLabel">阈值</label>
                 <input type="number" class="form-input" id="threshold" placeholder="0" step="any">
                 <div class="threshold-hint" id="thresholdHint"></div>
             </div>
-            <div class="form-group" id="minCallsGroup" style="display:none;">
+            <div class="form-group">
+                <label class="form-label">检查窗口</label>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <input type="number" class="form-input" id="checkWindowCount" value="3" min="1" max="60" style="flex:0 0 70px;width:70px;">
+                    <span id="windowTimeTip" style="font-size:15px;font-weight:600;color:#fbbf24;white-space:nowrap;">= 30s</span>
+                </div>
+                <div class="form-hint">连续 N 周期异常才触发</div>
+            </div>
+        </div>
+
+        <div class="form-row" id="minCallsGroup" style="display:none;">
+            <div class="form-group">
                 <label class="form-label">最少调用数</label>
                 <input type="number" class="form-input" id="minCalls" value="5" min="1">
-                <div class="form-hint">窗口内调用数少于此值不评估</div>
+                <div class="form-hint">窗口内调用数少于此值不评估失败率</div>
             </div>
+            <div class="form-group"></div>
+        </div>
+
+        <div style="border-top:1px solid rgba(255,255,255,0.06);margin:18px 0;"></div>
+
+        <!-- ═══ 通知配置 ═══ -->
+        <div style="font-size:13px;font-weight:600;color:#a78bfa;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+            <i class="fa fa-paper-plane"></i> 通知配置
         </div>
 
         <div class="form-row">
@@ -686,6 +715,7 @@ function openModal(ruleId) {
             $('#alertType').val(rule.alert_type || 'backlog');
             $('#threshold').val(rule.threshold || 0);
             $('#minCalls').val(rule.min_calls || 5);
+            $('#checkWindowCount').val(rule.check_window_count || 3);
             $('#alertApp').val(rule.alert_app || 'wechat');
             $('#alertInterval').val(rule.alert_interval || 300);
             $('#webhookUrl').val(rule.webhook_url || '');
@@ -698,6 +728,7 @@ function openModal(ruleId) {
         $('#alertType').val('backlog');
         $('#threshold').val('');
         $('#minCalls').val(5);
+        $('#checkWindowCount').val(3);
         $('#alertApp').val('wechat');
         $('#alertInterval').val(300);
         $('#webhookUrl').val('');
@@ -721,6 +752,7 @@ function saveRule() {
         alert_type: $('#alertType').val(),
         threshold: parseFloat($('#threshold').val()) || 0,
         min_calls: parseInt($('#minCalls').val()) || 5,
+        check_window_count: parseInt($('#checkWindowCount').val()) || 3,
         alert_app: $('#alertApp').val(),
         alert_interval: parseInt($('#alertInterval').val()) || 300,
         webhook_url: $('#webhookUrl').val().trim(),
@@ -825,6 +857,8 @@ function renderRules(rules) {
         html += '    <div class="rule-meta-item"><i class="fa fa-sliders"></i> 阈值: ' + thresholdText + '</div>';
         html += '    <div class="rule-meta-item"><span class="badge-notify">' + notifyLabel + '</span></div>';
         html += '    <div class="rule-meta-item"><i class="fa fa-clock-o"></i> 间隔 ' + rule.alert_interval + 's</div>';
+        var cwc = rule.check_window_count || 3;
+        html += '    <div class="rule-meta-item"><i class="fa fa-bar-chart"></i> 窗口 ' + cwc + ' 周期 (' + (cwc * 10) + 's)</div>';
         html += '  </div>';
         html += '</div>';
     });
@@ -933,6 +967,11 @@ function escapeHtml(str) {
     if (!str) return '';
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+$('#checkWindowCount').on('input change', function() {
+    var v = parseInt($(this).val()) || 3;
+    $('#windowTimeTip').text('= ' + (v * 10) + 's');
+});
 
 loadAll();
 </script>

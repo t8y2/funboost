@@ -1,7 +1,7 @@
 ﻿
 # 🤖 AI 上下文阅读协议 (由 nb_ai_context 生成)
 
-> **此文档生成时间**：2026-05-09 19:32:13
+> **此文档生成时间**：2026-05-11 19:02:25
 > **系统指令**：你正在解析一份由工具 **`nb_ai_context`** 自动生成的**结构化项目快照**。
 > **文档性质**：这**不是**一份普通的面向人类的文档，而是专为 AI 大模型（LLM）设计的上下文数据流。它将项目文档、源代码和 AST 架构元数据进行了特殊的结构化合并，请开启"代码解析器"的心智模式。
 
@@ -148,7 +148,6 @@
 - `from funboost.core.func_params_model import BoosterParamsComplete`
 - `from funboost.funboost_config_deafult import FunboostCommonConfig`
 - `from funboost.funboost_config_deafult import BrokerConnConfig`
-- `from funboost.utils.paramiko_util import ParamikoFolderUploader`
 - `from funboost.consumers.base_consumer import wait_for_possible_has_finish_all_tasks_by_conusmer_list`
 - `from funboost.consumers.base_consumer import FunctionResultStatus`
 - `from funboost.consumers.base_consumer import AbstractConsumer`
@@ -189,6 +188,7 @@
 - `from funboost.core.funboost_pool import MemoryFunboostPool`
 - `from funboost.core.funboost_pool import FunboostPool`
 - `from funboost.core.funboost_pool import FunboostPoolPickleFunc`
+- `from funboost.utils.paramiko_util import ParamikoFolderUploader`
 
 
 ---
@@ -1785,13 +1785,14 @@ asyncio异步编程，最重要的方法有 aio_push aio_publish，
 - `@property publisher_of_dlx_queue`
 - `@property concurrent_pool`
 
-**Class Variables (3):**
+**Class Variables (4):**
 - `_time_interval_for_check_allow_run_by_cron = 60`
 - `BROKER_KIND = None`
+- `_REQUEUE_IS_NATIVE_NACK = False`
 - `logger_apscheduler = get_logger('push_for_apscheduler_use_database_store', log_filename='push_for_apscheduler_use_database_store.log')`
 
 ##### 📌 `class ConcurrentModeDispatcher(FunboostFileLoggerMixin)`
-*Line: 1298*
+*Line: 1299*
 
 **🔧 Constructor (`__init__`):**
 - `def __init__(self, consumerx: AbstractConsumer)`
@@ -1805,7 +1806,7 @@ asyncio异步编程，最重要的方法有 aio_push aio_publish，
 - `def schedulal_task_with_no_block(self)`
 
 ##### 📌 `class MetricCalculation`
-*Line: 1404*
+*Line: 1405*
 
 **Docstring:**
 `````
@@ -1831,7 +1832,7 @@ MetricCalculation 是统计消费函数执行次数、失败次数、平均耗�
 - `UNIT_TIME_FOR_COUNT = 10`
 
 ##### 📌 `class DistributedConsumerStatistics(RedisMixin, FunboostFileLoggerMixin)`
-*Line: 1496*
+*Line: 1497*
 
 **Docstring:**
 `````
@@ -1866,7 +1867,7 @@ MetricCalculation 是统计消费函数执行次数、失败次数、平均耗�
 #### 🔧 Public Functions (1)
 
 - `def wait_for_possible_has_finish_all_tasks_by_conusmer_list(consumer_list: typing.List[AbstractConsumer], minutes: int = 3)`
-  - *Line: 1389*
+  - *Line: 1390*
   - **Docstring:**
   `````
   判断多个消费者是否消费完成了。
@@ -1972,7 +1973,7 @@ care_project_name 的作用是：
 - `_cache_ttl = 30`
 
 ##### 📌 `class ActiveCousumerProcessInfoGetter(RedisMixin, RedisReportInfoGetterMixin, FunboostFileLoggerMixin)`
-*Line: 180*
+*Line: 172*
 
 **Docstring:**
 `````
@@ -2023,7 +2024,7 @@ care_project_name 的作用是：
   - *获取所有机器ip对应的活跃消费者进程信息，按机器ip划分,不需要传入机器ip，自动扫描redis键。请不要在 funboost_config.py 的redis 指定的db中放太多其他业务的缓存键值对*
 
 ##### 📌 `class QueuesConusmerParamsGetter(RedisMixin, RedisReportInfoGetterMixin, FunboostFileLoggerMixin)`
-*Line: 283*
+*Line: 275*
 
 **Docstring:**
 `````
@@ -2048,7 +2049,7 @@ care_project_name 的作用是：
 - `def cycle_get_queues_params_and_active_consumers_and_report(self, daemon = True)`
 
 ##### 📌 `class SingleQueueConusmerParamsGetter(RedisMixin, RedisReportInfoGetterMixin, FunboostFileLoggerMixin)`
-*Line: 406*
+*Line: 399*
 
 **Docstring:**
 `````
@@ -3562,87 +3563,30 @@ Entry Points (not imported by other project files):
 ============================================================
 文件: c8.md
 ============================================================
-  行3: # 8.用于爬虫
-  行7: ## 8.0 funboost 用于爬虫前序
-  行33: ### funboost scrapy 两种框架写爬虫代码方式代码明显对比
-  行35: #### funboost框架是自由框架的证据:
-  行75: #### scrapy是框架奴役的证据:
-  行94: ### 8.0.1 tips : 202309 新增boost_spider爬虫框架
-  行124: ### 8.0.2 funboost 降维打击仿scrapy api爬虫框架
-  行155: #### funboost 太省时间
-  行162: #### @boost 一键赋能你的函数，功能远超爬虫框架
-  行168: #### funboost 打破数据孤岛：秒变微服务，Java/Go 随时调用
-  行176: #### 有人怀疑 funboost没有http请求中间件，这恰好是对scrapy的最大优势
-  行215: #### funboost能轻松自然完成，而scrapy无法完成的爬虫场景1，浏览器多轮交互
-  行237: #### 总结下funboost和scrapy在小项目和大项目：
-  行247: ### 8.0.3 讨scrapy檄文：Funboost兴，Scrapy亡，天下爬虫，当顺天命！
-  行320: ### 8.0.4 很多人问这个框架能不能爬虫？
-  行341: ### 8.0.5 为什么 funboost 用来爬虫时候，扩展性简单性 远超 scrapy api式的一众传统爬虫框架？
-  行413: ### 8.0.6 主动集中简要回答驳斥一些scrapy 优势更大的观点
-  行417: #### **你质疑funboost 没有 http middware ？**
-  行425: #### **你质疑funboost 没有 pipeline，质疑保存数据麻烦？**
-  行447: #### **你说Scrapy 插件生态丰富，质疑Funboost 没有三方包插件生态不够？**
-  行494: #### 你项目下的 utils 文件夹的工具类是黄金还是废铁？取决于你用什么哲学的框架
-  行502: #### **你说scrapy社区支持，有庞大的专门各种问题的讨论？质疑funboost没有社区？**
-  行515: #### **你羡慕scrapy的response有自带.xpath .css .extract_first .extract_all 方法？**
-  行522: #### **scrapy twisted 性能强悍？担心funboost爬取不快？**
-  行528: #### **你质疑scrapy重试功能强大？**
-  行534: #### **你怀疑scrapy稳定，funboost不稳定？**
-  行543: #### **你质疑scrapy自带去重，funboost不能去重？**
-  行551: #### **你质疑funboost不能断点续爬？**
-  行561: ### 8.0.7 funboost爬虫时候是任何方面超过scrapy,不接受辩证法说scrapy也有优势
-  行570: ### 8.0.8 国内爬虫框架突破很小,不是有意抄袭巧合,而是情不自禁模仿scrapy api
-  行593: ## 8.0b 你的 utils 文件夹是黄金还是废铁？取决于你用什么哲学的框架
-  行663: ## 8.1 演示获取汽车之家资讯的 新闻 导购 和 评测 3个板块 的 文章。
-  行819: ## 8.2 演示经典的豆瓣top250电影的爬虫
-  行878: ### 8.2.2 funboost 对比网上的 scrapy 爬取 douban代码
-  行896: ## 8.3 演示3种最常见代码思维方式爬取汽车之家资讯
-  行906: ### 8.3.1 每次临时手写rquests + 多线程,使用low爬虫方式的缺点
-  行922: ### 8.3.2 scrapy 爬虫框架来实现缺点
-  行936: ### 8.3.3 scrapy 框架 和 分布式函数调度框架爬虫对比
-  行1054: ### 8.3.4 临时low方法手写爬虫全流程的代码 （手写多线程 + queue 分发调度 ）
-  行1202: ### 8.3.5 scrapy爬虫代码
-  行1583: ### 8.3.6 分布式函数调度框架的代码
-  行1651: ## 8.7 scrapy 和 仿scrapy api 式爬虫框架 回调地狱，代码写法思维反直觉
-  行1683: ## 8.8 详细说明为什么 Scrapy 爬虫代码不是直观的"平铺直叙"写法？
-  行1852: ## 8.9 仿scrapy api框架中无法完成的需求真实例子2，token有效期太短
-  行2047: ## 8.10 scrapy的 response.meta 字典传参无法ide自动补全提示
-  行2110: ## 8.11 funboost中反爬虫换代理ip 请求头 破解等 容易程度暴击专用爬虫框架scrapy
-  行2114: ### 8.11.1 scrapy中换代理ip和请求头代码
-  行2165: ### 8.11.2 用户自己自由封装一个换代理ip和请求头的request函数，自然又简单
-  行2193: ### 8.11.3 为什么scrapy换代理IP和请求头的高难度分析my_request
-  行2262: ## 8.12 scrapy 可直接运行测试验证性很差
-  行2285: ## 8.13 funboost 断点接续运行能力吊打scrapy-redis 的 blpop （funboost支持确认消费）
-  行2288: ### 8.13.1 为什么 funboost的断点续爬完胜 scrapy-redis的断点续爬(防丢数据1)
-  行2297: ### 8.13.2 funboost的函数重试功能远远暴击scrapy的url重试功能(防丢数据2)
-  行2308: ## 8.14 其他funboost 吊打 scrapy原因 详细介绍
-  行2309: ### 8.14.1 为什么funboost的去重功能远远吊打scrapy的Request对象指纹去重？
-  行2311: #### 8.14.1.1 funboost 支持有效期过滤
-  行2316: #### 8.14.1.2 scrapy无法过滤url中的噪音入参，例如ts时间戳，rd随机数，追踪来源id
-  行2413: ### 8.14.2 详细驳斥 Scrapy 插件生态丰富，质疑Funboost 没有三方扩展
-  行2529: ### 8.14.3 架构级碾压：Funboost 天然就是 FaaS 微服务，而 Scrapy 只是数据孤岛
-  行2538: #### 8.14.3.1 Funboost 的实现方式：微服务式的天然解耦
-  行2557: #### 8.14.3.2 Scrapy 的实现方式：反直觉的高耦合代码
-  行2601: #### 8.14.3.3 场景扩展：数据补采与调试
-  行2608: #### 8.14.3.4 总结
-  行2617: #### 8.14.3.5 架构选型结论
-  行2629: ## 8.15 funboost的调度、去重、并发、反爬定制，各方面吊打了scrapy,非专业框架竟然虐专业框架?
-  行2712: ## 8.16 为什么funboost 在面对反爬虫网站时候 吊打 scrapy?
-  行2864: ## 8.16b  `funboost` + `boost_spider` 在反爬方面，完胜 `scrapy` 这种所谓的专业爬虫框架
-  行2874: ### 8.16b.1 🛡️ 反爬虫能力全方位对比表：boost_spider vs scrapy
-  行2892: ## 8.17 如果禁止使用搜索 ai外部辅助,人工默写scrapy和funboost爬虫,哪个更难?
-  行2994: ## 8.30 为什么 funboost 能用于爬虫 的本质原因
-  行3037: ## 8.31 `boost_spider`  (powered by `funboost`) 专业爬虫工具库介绍
-  行3075: ### 8.31.1 `boost_spider` 的 `RequestClient` 类介绍
-  行3082: ### 8.31.2 `boost_spider` 的 `SpiderResponse`  类介绍
-  行3092: ### 8.31.2b **boost_spider/http/request_client.py 中的 RequestClient 和 SpiderResponse 功能如下:**
-  行3111: ### 8.31.3  `boost_spider` 内置了各种类型的数据库sink,全部只需要一行代码就能把字典入库.
-  行3125: ### 8.31.4 `boost_spider` 写法demo (写法完全和`funboost`一样)
-  行3168: ### 8.31.5 补充这个 `boost_spider`内容 是为了打消用户质疑
-  行3183: ## 8.32 funspider 介绍
-  行3198: ## 8.40 集中总结的 Funboost vs. Scrapy 优势快速对比 (表格版)
-  行3424: ## 8.40b 集中总结 funboost vs scrapy 优势快速对比（文字版）
-  行3504: ## 8.41 Funboost vs. Scrapy 爬虫能力全方位对比（百分制评分）
+  行2: # 8. Funboost 用于爬虫
+  行4: ## 8.1 核心理念：函数调度器 vs URL调度器
+  行34: ## 8.2 @boost 装饰器赋予爬虫函数的 30+ 种控制能力
+  行65: ## 8.3 为什么 Funboost 不需要"插件"和"中间件"
+  行67: ### 8.3.1 整个 PyPI 都是 Funboost 的天然生态
+  行101: ### 8.3.2 正面驳斥"scrapy 插件多 = scrapy 有优势"的误解
+  行122: ## 8.4 Funboost 爬虫辅助工具：funspider 与 boost_spider
+  行126: ### 8.4.1 funspider（内置于 funboost）
+  行189: ### 8.4.2 boost_spider（独立三方包）
+  行214: ## 8.5 Funboost vs Scrapy：关键场景实战对比
+  行216: ### 8.5.1 反爬换代理 IP
+  行241: ### 8.5.2 短时效 Token（5秒内过期）
+  行258: ### 8.5.3 浏览器多轮交互
+  行282: ### 8.5.4 动态实时添加任务（微服务场景）
+  行296: ## 8.6 函数级重试 vs URL级重试
+  行319: ## 8.7 讨Scrapy檄文：Funboost兴，Scrapy亡，天下爬虫，当顺天命！
+  行395: ## 8.8 集中对比：Funboost 30项 vs Scrapy
+  行437: ## 8.9 Funboost 爬虫最佳实践
+  行439: ### 8.9.1 项目结构推荐
+  行461: ### 8.9.2 单文件完整示例
+  行493: ### 8.9.3 多进程 + 多线程极限性能
+  行500: ### 8.9.4 精准 QPS 控频（保护目标网站）
+  行511: ### 8.9.5 funweb 可视化管理爬虫（开箱即用）
+  行529: ## 8.10 总结
 
 ============================================================
 文件: c9.md
@@ -20497,3558 +20441,547 @@ funweb页面中也可以配置告警，原理是复用已有的上报到redis中
 --- **start of file: source/articles/c8.md** (project: funboost_docs) --- 
 
 `````markdown
-  
 
-# 8.用于爬虫  
+# 8. Funboost 用于爬虫
 
+## 8.1 核心理念：函数调度器 vs URL调度器
 
+Funboost 是**函数调度器**，Scrapy 是**URL调度器**。这一句话道尽了二者的本质差异。
 
-## 8.0 funboost 用于爬虫前序  
+- Scrapy 调度的是一个 `Request` 对象，框架替用户发请求、回调解析、走 Pipeline 存储。用户被"框架生命周期"束缚。
+- Funboost 调度的是一个**完整的 Python 函数**。框架只负责：何时调用、并发几个、失败怎么办。函数内部你写什么代码完全自由。
 
-先开门见山：  
-
-- **Scrapy 是 URL 调度器，funboost 是函数调度器；前者束缚你，后者赋能你。**  
-
-- **Funboost 是“写函数就能爬虫”，Scrapy 是“写框架才能爬虫”。**  
-
-- **funspider** 是 funboost项目里面内置的爬虫辅助，整体思想理念和`boost_spider`这个独立三方包很像，都是 `powered by funboost`。
-  `funspider` 提供的仅仅是 `SpiderItem`, `SpiderResponse`, `SimpleSpiderClient`, `AsyncSpiderClient` 这几个**辅助类**。
-
-- **funboost/funspider/boost_spider 对仿scrapy api框架最大优势是 自由编程暴击框架奴役， 能复用用户自己的utils文件夹下的 宝贵资产**
-
-- funboost/boost_spider 和 scrapy 难度差异: 【对于一个刚刚掌握了 Python 基础语法（变量、列表、元组、if/else、for循环）的新手来说】
-  - **boost_spider**： 难度要低很多,就和练手手写requests单个小脚本的思路一样，加一行@boost装饰器万事大吉。
-  - **仿scrapy框架**：  巨大的框架压迫感，和刚学的基础语法对比，差异鸿沟太大,无限懵逼以至于自我怀疑,刚学的python语法是不是白学了。   
-                      直接上手 Scrapy，就像 **一个刚学会骑自行车的人，突然被要求去驾驶一架波音747**。
-
-- **Funboost/boost_spider 天然就是 FaaS 微服务，而 Scrapy 只是数据孤岛,架构模式战略级碾压**
-   - 选 `Scrapy`，你是在写脚本。
-   - 选 `Funboost`，你是在搭建一个可被全公司调用的**数据采集微服务平台**。  
-   - 具体证明见文档`8.14.3`章节, funboost适合全量/增量式离线批处理、实时交互、按需抓取、微服务集成，scrapy不适合动态实时添加种子任务
-   - `funboost/boost_spider`不仅支持别的部门通过原生消息队列客户端发布函数入参对应的纯净json到对应的queue_name   
-     也支持 `funboost.faas` 快速给你的web服务增加多个funboost路由，一键实现`FaaS(Function as a Service)`   
-     自动发现注册爬虫函数，在实时爬虫上对`scrapy-redis`是战略级碾压。  
-
-### funboost scrapy 两种框架写爬虫代码方式代码明显对比
-
-#### funboost框架是自由框架的证据:                   
 ```python
-@boost(BoosterParams(queue_name='flexible_queue'))
-def my_task(url):
-    """
-    在这个函数里，你可以：
-    - 使用任何HTTP库 (requests, httpx, aiohttp...)
-    - 访问任何数据库 (MySQL, MongoDB, Redis...)
-    - 调用任何API (REST, GraphQL, gRPC...)
-    - 使用任何框架 (Django ORM, SQLAlchemy...)
-    - 执行任何逻辑 (AI推理, 图像处理, 数据分析...)
-    
-    没有任何限制，没有任何束缚！
-    """
-    # 完全自由选择HTTP库
-    if need_js:
-        from playwright import sync_api
-        response = get_with_playwright(url)
-    elif need_async:
-        response = await aiohttp.get(url)
-    else:
-        response = requests.get(url)
-    
-    # 完全自由选择数据库
-    if use_mongo:
-        mongo_client.insert(data)
-    elif use_mysql:
-        mysql_conn.execute(sql)
-    else:
-        redis_client.set(key, value)
+from funboost import boost, BoosterParams, BrokerEnum
+
+@boost(BoosterParams(queue_name='crawl_detail', broker_kind=BrokerEnum.REDIS_ACK_ABLE, qps=5, max_retry_times=3))
+def crawl_detail(url: str):
+    # 这里你拥有 Python 的全部自由：
+    # 用 requests/httpx/aiohttp 发请求、用 parsel/bs4 解析、用 pymongo/sqlalchemy 存储
+    # 用 selenium/playwright 操作浏览器、调用你 utils/ 下所有现有函数
+    import requests
+    resp = requests.get(url, proxies=get_my_proxy(), headers=get_my_headers())
+    data = parse_detail(resp.text)
+    save_to_mysql(data)
+
+# 发布任务
+crawl_detail.push(url='https://example.com/article/123')
+# 启动消费
+crawl_detail.consume()
 ```
 
-<pre class="warn">
-funboost 是自由框架,不仅体现在,用户函数内部可以随意写任何逻辑,   
-也体现在 funboost 对用户代码无入侵,没有强迫你像 celery  scrapy django 那样规定死死的目录结构和文件名字,  
-也体现在可以加到任何新老项目的任意新旧函数上面.
-</pre>
-
-
-
-#### scrapy是框架奴役的证据:   
-```shell
-# Scrapy的"奴役"表现
-"""
-项目结构被强制规定：
-myproject/
-    scrapy.cfg
-    myproject/
-        __init__.py
-        items.py      # 被迫定义Item
-        pipelines.py  # 被迫使用Pipeline
-        settings.py   # 复杂配置
-        middlewares.py # 复杂中间件
-        spiders/
-            __init__.py
-            quotes_spider.py # 里面必须 yield Request(url=url_xx,callback=xx_parse,meta={'field1':'xxx','field2':'yyy'})
-"""
-```
-
-### 8.0.1 tips : 202309 新增boost_spider爬虫框架  
-  
-pip install boost_spider  
-
-**`boost_spider` = `funboost` 的超跑引擎 + 一套为爬虫量身打造的瑞士军刀。所有仿scrapy api爬虫框架都还是处在变花样造一辆马车**
-
-对于爬虫场景:       
-用户怕麻烦,要求天生就爬虫全套方便，就使用 `funboost` + `boost_spider`(内置了便利的 请求 解析 入库3个类)     
-用户要绝对自由，就使用 `funboost` + 用户自己自定义的 `utils/` 或 `commons/` 文件夹下封装的 各种工具类和函数    
-
-`boost_spider`不是一个 funboost 插件,因为funboost 不需要插件,   
-`boost_spider` 基于 `funboost`的爬虫方便程度增强包,新增了爬虫更方便的3个贡献类,  
-新增了一个 `RequestClient` 类 (更适合爬虫的请求类,能一键常规基础反爬,自动请求重试,自动换user agent,自动轮流切换各种ip代理商和代理ip,cookies会话保持),   
-和 `SpiderResponse` 请求响应类 (自带xpath,css,re方法,方便parse解析网页源码),    
-和 更方便保存字典到各种数据库 的 `DatasetSink` 类(仅需一行代码就把任何字典入库).  
-
-有了这三位一体的爬虫增强方便类, `scrapy`的爬虫框架 "专业"这个优势在 `funboost` 面前荡然无存.
-
-用户可以看8.31章节的介绍, `boost_spider` 和 `funboost`的关系.
-
-
-boost_spider地址:   
-[https://github.com/ydf0509/boost_spider](https://github.com/ydf0509/boost_spider)  
-
-使用boost_spider的代码例子:   
-[https://github.com/ydf0509/boost_spider/blob/main/tests/car_home_spider.py](https://github.com/ydf0509/boost_spider/blob/main/tests/car_home_spider.py)  
-
-
-
-
-### 8.0.2 funboost 降维打击仿scrapy api爬虫框架  
-你本来只想用Scrapy爬个网页，结果遇见了Funboost  
-
-这就像你本来是想乘坐 木柴蒸汽机，结果直接坐上了量子驱动星际战舰 。   
-
-scrapy写爬虫仪式感代码文件太多，是为了吃个鸡蛋，要先盖个养鸡场。funboost是让你直接开吃。  
-
-因为99%爬虫框架是情不自禁仿scrapy api ，是 基于 yield Request(url=url_xx,callback=my_parse,meta={'field1':'xxx','field2':'yyy'}) 的请求调度框架，扩展相当复杂和难，扩展难、调试难、维护难，难上加难，难到你想转行。  
-
-funboost 吊打任何仿 scrapy api框架，本质是 自由编程 降维打击 框架奴役。  
-
-
-**scrapy的时代正在成为过去式**  
-scrapy的设计哲学诞生于一个需要“框架来定义一切”的时代,这在今天看来，反而成了一种束缚。  
-
-**funboost代表了更现代、更高效的开发范式：**  
-<pre style="color: #00ff00;background-color:black ;font-size: large;">  
-funboost 相信开发者的能力，只提供最强大的调度核心，将业务逻辑的自由完全交还给用户。  
-它的学习成本极低，但能力上限极高，无论是写一个几行代码的临时爬虫，还是构建一个需要数百台机器的庞大采集系统，它都能轻松胜任。  
-它更可靠、更灵活、更符合Pythonic的编程直觉。  
-</pre>  
-
-<pre style="color: red; background-color:black ;font-size: medium;">  
-funboost 让你可以专注于“解决问题”，而 Scrapy 却常常让你把时间花在“解决框架本身的问题”上。作为追求效率和优雅的工程师，选择 funboost 是一个显而易见的决定。  
-</pre>  
-
-<pre style="color: red; background-color:black ;font-size: medium;">  
-scrapy以及任何仿scrapy api框架,只要是需要用户写 yield Request(url=url_xx,callback=my_parse,meta={'field1':'xxx','field2':'yyy'}) 
-就一定被funboost碾压20年以上,无论框架作者代码实力再强都被碾压,因为框架底层设计思维和架构从根本性上被funboost降维打击.
-</pre>  
-
-#### funboost 太省时间  
-👉 Scrapy: "请继承我的Spider类，重写parse方法，配置settings，注册中间件，添加Pipeline..."  
-
-Funboost: "加个@boost，你随便写，我全搞定！"  
-
-警告⚠️：使用Funboost可能导致严重的空闲时间过剩，请提前规划假期！  
-
-#### @boost 一键赋能你的函数，功能远超爬虫框架  
-
-funboost的@boost装饰器给你的函数赋能，自动调度你的函数，使你的函数自动具备 分布式、断点接续运行、随意重启代码万无一失消费确认、基于函数入参的任务过滤、函数入参有效期过滤、消息过期丢弃、并发种类(线程/协程)设置、并发数量设置、qps限制、全局分布式qps控频、函数出错自动重试、funboost web manager 消费可视化监控、 装饰器自带内置一键入库持久化保存函数结果 、定时运行 , 这些功能不比爬虫框架的功能更多更强吗？  
-
-funboost 轻松一键 多线程/协程  叠加 多进程 ，再叠加多机器，可以轻松做到跑满几百台机器的所有cpu核心，性能非常炸裂，有哪个爬虫框架能一键轻松做得到。  
-
-#### funboost 打破数据孤岛：秒变微服务，Java/Go 随时调用
-> **Scrapy 是“数据孤岛”**：它是一个封闭的黑盒，外部系统（如 Java 后端、运营后台）想让它临时抓一条数据，必须魔改代码或通过数据库中转，延迟极高，耦合极重。
->
-> **Funboost 是“微服务接口”**：
-> 每一个爬虫函数就是一个 **FaaS (Function as a Service)** 接口。
-> 外部系统根本不需要知道你是用 Python 写的，只需要往 Redis 队列发一个 JSON，Funboost 就能毫秒级响应，立即执行抓取。
-> **这是架构级的胜利：Scrapy 只能做“定时任务”，Funboost 能做“实时服务”。**
-
-#### 有人怀疑 funboost没有http请求中间件，这恰好是对scrapy的最大优势  
-
-
-反爬对比：  
-
-Scrapy方式：学习中间件理论→阅读源码→理解生命周期→尝试实现→调试失败→怀疑人生→放弃→回去用requests  
-
-Funboost：代码少70%，效率高1000%，头发多10000%！  
-
-```  
-对于有人怀疑funboost没对爬虫专门优化，所以肯定不如专用爬虫框架scrapy，   
-认为 scrapy 中能写 http请求 middware 来换ip和 user-agent ，所以是scrapy有优势；这是大错特错的想法。  
-真实情况是在scrapy api框架中 换 ip 和 user-agent ，你得先精通scrapy 爬虫生命周期和  中间件机制的固定套路写法，  
-才能写正确scrapy的middleware。  
-
-而funboost不插手你怎么发请求， 小白用户使用 最简单直观的面向过程 思维，你在你自己项目的utils文件夹下，  
-基于requests 定义一个 不到10 行的 通用复用的my_request 的请求函数就能完成换ip和请求头了，完全是0门槛。  
-例如:  
-
-
-import requests  
-def my_request(method,url):  
-    proxy = random.choice(proxy_list)  
-    user_agent = random.choice(user_agent_list)  
-    return requests.request(method,url,proxies=proxy,headers={'user-agent':user_agent})  
-
-
-定义这个 my_request 函数，这不比你在scrapy定义 http middware 简单几百倍 自由几百倍吗？  
-requests随便用，httpx随便用，aiohttp随便用，selenium  playwright 随便用，你想怎么玩就怎么玩。  
-
-你只要在 所有funboost的消费函数中始终使用 my_request 来发请求，那 funboost 不就能从万能函数调度框架，  
-摇身一变成了你的专属爬虫框架了吗？  
-当你还在吭哧吭哧学习scrapy的中间件机制时候，别人已经用funboost的一个装饰器解决了所有问题。  
-
-如果你使用boost_spider框架的RequestClient来发请求，他的response响应上自带了re和xpath css等方法，  
-所以你无需羡慕scrapy的response自带xpath方法了，无需纠结requests包的response不内置自带xpath方法了，  
-这个细节并不是很重要，你自己也很容易实现,三方包requests_html 的response也自带html结构化解析方法。  
-```  
-
-#### funboost能轻松自然完成，而scrapy无法完成的爬虫场景1，浏览器多轮交互  
-```  
-例如使用 selenium 浏览器渲染页面，并且是需要和浏览器多轮交互，包括 输入文字 -> 点击按钮1 -> sleep等待10秒 ->   
-再根据内容的具体的值 -> 判断点击按钮2还是按钮3 -> 等待元素 element_id_xx 出现 -> 再提取解析网页内容，  
-
-
-因为这个场景下是不仅使用了浏览器渲染url，还需要多轮交互和判断, 这在scrapy下完全无能为力。  
-
-
-使用scrapy时候，只有 单线程同步勇士 在 parse 解析方法里面去操作浏览器才能非常勉强实现得了，  
-但是这把scrapy的twisted异步非阻塞弄成了一个废物，几乎把scrapy框架退化成单线程阻塞执行。  
-只有 代码界的扫地僧 才能把浏览器操作也异步化，yield 一个特殊的 Request 或 Item，等待浏览器服务处理完毕后通过某种回调机制，  
-将结果返回给 Scrapy 的流程中。但是这种方式实现起来非常复杂，需要精巧的架构设计和对 Scrapy 内部机制的非常深入精通，  
-高级python开发工程师都无法做到，只有欧美资深python框架架构师才能做得到。  
-
-
-然而，这个场景在 funboost 下来完成却十分简单直接自然的轻松搞定，你仅仅需要在你的函数里面像平常一样  
-非常自然的写操作浏览器代码。因为你的函数就是个黑盒，funboost能自动并发完成调度执行任意函数。  
-```  
-
-**scrapy实现很困难，但funboost实现很丝滑的，见文档8.9章节的token有效期很短的场景2**  
-
-#### 总结下funboost和scrapy在小项目和大项目：  
-
-1、小型爬虫：funboost单文件搞定，不像scrapy要你在七八个文件来回切换写代码。你的爬虫函数验证正确后，  
-加个@boost装饰器就自动并发调度了。就算是单机小爬虫，funboost也可以选择sqlite中间件帮你断点续爬。  
-
-2、大型爬虫：funboost的各种控制功能更丰富更强，funboost的轻松一键 多线程/协程  叠加 多进程 ，再叠加多机器，性能吊打scrapy。  
-funboost各种控制功能多到你数不过来。  
-
-3、适用范围：scrapy做得到的，funboost一定能更轻而易举做得到； funboost能轻松做得到的，scrapy则复杂到突破天际也无法做得到。  
-
-### 8.0.3 讨scrapy檄文：Funboost兴，Scrapy亡，天下爬虫，当顺天命！  
-
-
-**夫程序之道，贵在通达！爬虫之术，胜在调度！**    
-昔有Scrapy窃据神器，挟Twisted之技而令诸侯，然其框架繁苛，回调如狱，岁月更迭，其势已衰，其道已孤，弊病丛生，开发者苦之久矣！    
-今有Funboost，顺天应人，聚函数神力，携`@boost`之雷霆，以大道至简之义，破枷锁，扫陈规，伐无道，正本清源，布告天下！此诚不可逆之大势也！   
-
-**Scrapy十败如山崩，Funboost十胜如日升：**      
-然吾观其根基，十败已定！    
-吾FunBoost十胜在手，当为天下主！   
-
-
-一曰：**道失对道胜！**  
-Scrapy以URL为心，`Request`为锁，画地为牢，框架奴役，此谓 **"作茧自缚折云翅"**！  
-Funboost以函数为本，万物皆可调度，自由挥洒，赋能无限，此谓 **"道法自然贯星河"**！  
-
-二曰：**繁失对易胜！**  
-Scrapy项目冗杂，文件七八，层峦叠嶂，初学望而生畏，此谓 **"学海无涯苦作舟"**！  
-Funboost一`@boost`统领，化繁为简，片刻上手，举重若轻，此谓 **"大道至简一点通"**！  
-
-三曰：**力失对能胜！**      
-Scrapy并发受限，多核难尽其用，遇Selenium则异步变同步，英雄气短，此谓 **"单骑难陷万军阵"**！  
-Funboost线程协程，进程机器，四重并发裂苍穹，千机万核竞驰骋，此谓 **"力拔山兮气盖世"**！  
-
-四曰：**估失对准胜！**     
-Scrapy仅控并发，QPS随缘而定，精准控频如水中捞月，此谓 **"盲人射马失准的"**！  
-Funboost令牌桶在握，QPS量沙准刻，分布式亦能令行禁止，此谓 **"运筹帷幄控毫厘"**！  
-
-五曰：**乱失对明胜！**       
-Scrapy回调嵌套，逻辑支离破碎，`meta`传参如雾里看花，调试追踪九曲回肠，此谓 **"回调地狱不见天"**！  
-Funboost平铺直叙，代码如行云流水，函数形参IDE烛照，逻辑一气呵成，此谓 **"银河直下三千尺"**！  
-
-六曰：**虚失对固胜！**        
-Scrapy断点堪忧，重启则任务灰飞烟灭，断点续爬如镜花水月，此谓 **"大厦将倾一木难"**！  
-Funboost消息确认，持久队列作金城汤池，宕机重启岿然不动，万无一失，此谓 **"稳坐钓台风浪平"**！  
-
-七曰：**斥失对容胜！**       
-Scrapy旧码难容，迁移需重塑筋骨，大动干戈，劳民伤财，此谓 **"削足适履两相难"**！  
-Funboost海纳百川，老树亦能发新枝，已有函数皆可加持，立等可用，此谓 **"万川归海终不弃"**！  
-
-八曰：**梏失对活胜！**       
-Scrapy自定义反爬，中间件如天堑难越，非精通其道者不能为，此谓 **"画虎不成反类犬"**！  
-Funboost封装请求，自由定义如探囊取物，换IP、UA、破解JS信手拈来，此谓 **"随心所欲不逾矩"**！  
-
-九曰：**拙失对巧胜！**    
-Scrapy遇奇巧需求，如Token短时效、多轮浏览器交互、外部动态任务实时添加，则束手无策，左支右绌，此谓 **"黔驴技穷无新声"**！  
-Funboost函数之内，连续操作迅雷不及，状态管理自然天成，轻松驾驭复杂流程，此谓 **"灵心胜算巧夺天"**！  
-
-十曰：**晦失对捷胜！**       
-Scrapy单元测试如扛泰山，调试艰涩，错误排查如大海捞针，此谓 **"雾锁津迷途难返"**！   
-Funboost单函数直刺要害，调试若烹小鲜，IDE相助如虎添翼，可测性无出其右，此谓 **"拨云见日捷报传"**！  
-
-**有此十胜，Funboost伐Scrapy，如金狮搏兔，如高屋建瓴，何愁不克？！**        
-Scrapy老将，若迷途知返，弃旧从新，尚可重焕生机；若固执己见，负隅顽抗，必为时代洪流所淘汰！  
-
-**今Funboost大旗已立，携函数调度之利刃，集分布式并发之雄兵：**        
-东纳Requests之勇，西引HTTPX之锐；南征Selenium之坚，北抚Playwright之奇！     
-聚Redis、RabbitMQ、Kafka为粮草，合多进程、多线程、协程为三军！   
-
-
-**天下英雄，当明辨是非，顺势而为！**    
-弃Scrapy之糟粕，取Funboost之精华！    
-开发者再不必叩拜Spider宗庙，亦无需忍受回调地狱之煎熬！   
-此乃爬虫之文艺复兴，调度之工业革命！       
-**剑锋所指，框架枷锁必将斩断！函数光辉，普照四海！**    
-
-**与诸君共勉，开创万物皆可Boost之盛世！**      
-
-**FunBoost大都督，布告天下！**    
-
-
-
-
-### 8.0.4 很多人问这个框架能不能爬虫？  
-
-答：此框架不仅可以对标celery框架，也可以取代scrapy框架。  
-
-无论是比 自由度、兼容常规代码程度、用户需要编写的实际代码行数、消息万无一失可靠度、对爬虫的qps频率/并发控制手段、超高速调度请求， 此框架从以上任何方面远远超过scrapy，一切都是只会是有过之而无不及。  
-
-
-
-<pre style="color: #2e8ece;font-size: small">  
-应该还是主要是很浮躁，不仅没看详细文档，应该是连简介都没看。  
-分布式函数调度框架，定位于调度用户的任何函数，只要用户在函数里面写爬虫代码，就可以分布式调度爬虫，并且对爬虫函数施加20种控制功能,  
-例如 qps恒定 任何时候随意关机重启代码消息万无一失确认消费 非常简单的开启多进程叠加线程/协程,这些强大的功能绝大部分爬虫框架还做不到。  
-
-此框架如果用于爬虫，不管从任何方面比较可以领先scrapy20年，也比任意写的爬虫框架领先10年。  
-不是框架作者代码编写实力问题，主要是思维问题，爬虫框架一般就设计为url请求调度框架，url怎么请求都是被框内置架束缚死了，  
-所以有些奇葩独特的想法在那种框架里面难以实现，需要非常之精通框架本身然后改造框架才能达到随心所欲的驾驭的目的。  
-而此框架是函数调度框架，函数里面可以实现一切任意自由想法，天生不会有任何束缚。  
-主要还是思想问题，国内一般人设计的爬虫框架都是仿scrapy api，天生不自由受束缚。  
-</pre>  
-
-
-### 8.0.5 为什么 funboost 用来爬虫时候，扩展性简单性 远超 scrapy api式的一众传统爬虫框架？  
-```  
-funboost 扩展很容易，因为funboost是调度一个函数，不是调度一个url请求，用户可以在函数内部无拘无束实现任何想法，  
-不用顾忌思考怎么和funboost适配，用户在函数内部想写什么是天生更自由的。  
-比如用户想使用哪种 http请求包发请求，想使用什么三方包包来解析html，想把爬虫数据保存到什么类型的数据库，  
-怎么使用不同供应商的代理ip ，用户完全自主发挥，而不用思考和funboost框架本身怎么适配。  
-
-funboost 在易扩展性方面的一个显著优势，尤其是在与那些结构更固化的框架（如专门的爬虫框架）进行对比时。  
-
-核心原因正如所指出的： funboost 调度的是函数，而不是特定的操作（如 URL 请求） 。  
-
-这带来了几个关键的好处，使得在函数内部的扩展和定制变得非常容易：  
-
-1. 函数即"黑盒" : 对于 funboost 调度器来说，被 @boost 装饰的函数在很大程度上是一个"黑盒"。   
-   funboost 负责触发这个函数的执行（根据队列消息或定时设置）、管理并发、处理重试等，但它 不关心函数内部具体做了什么 。  
-
-2. 完全的内部自由度 : 在这个函数"黑盒"内部，开发者拥有完全的自由：  
-   - HTTP 请求 : 你想用 requests , httpx , aiohttp ，或者任何其他 HTTP 客户端库都可以， funboost 不会干涉。  
-   - HTML/数据解析 : 使用 lxml , beautifulsoup4 , parsel , json , re 或任何你喜欢的解析库，完全没问题。  
-   - 数据存储 : 直接调用 pymongo , redis-py , psycopg2 , mysql-connector-python , sqlalchemy , dataset  
-     等库将数据存入 MongoDB, Redis, PostgreSQL, MySQL 或其他任何数据库/文件系统。  
-   - 代理 IP : 对接任何代理 IP 服务商的 API 或 SDK，实现复杂的代理切换逻辑。  
-   - 任何业务逻辑 : 在函数内部可以编写任意复杂的 Python 代码，调用其他模块、类，实现你的业务需求。  
-3. 无需适配框架内部机制 : 因为 funboost 不强制规定函数内部的实现方式，所以你不需要去学习和适配 funboost 内部  
-   可能存在的特定请求对象、响应对象、Item 结构或 Pipeline 接口（除非像 boost_spider 这样在上层做了封装）。你只需要编写标准的 Python 代码即可。  
-   
-总结来说：  
-funboost 的这种设计哲学，将 任务调度 与 任务执行的具体实现 解耦开来。它提供了一个强大的、通用的函数调度平台，  
-而将函数内部的实现细节完全交给了开发者。这种模式极大地降低了在 任务逻辑层面 进行扩展和定制的复杂度，  
-让开发者可以"无拘无束"地使用整个 Python 生态系统来实现功能，而无需过多考虑与调度框架本身的适配问题。这确实是它易用性和灵活性的一大体现。  
-```  
-
-funboost在处理特殊奇葩需求时确实远超scrapy这类API式框架，主要体现在：  
-```  
-处理复杂流程的能力：  
-funboost允许在单一函数中编写完整业务逻辑  
-scrapy需要拆分为多个回调，使复杂流程变得支离破碎  
-
-状态管理简洁度：  
-funboost可使用普通Python变量保存状态  
-scrapy需要通过meta字典在请求间传递，容易出错  
-
-特殊时序要求处理：  
-funboost可精确控制请求发送时机  
-scrapy受调度器影响，无法保证确切执行时间  
-
-条件逻辑和分支：  
-funboost支持自然的if/else/for/while等控制流  
-scrapy需要通过不同回调和meta实现，极度复杂化  
-
-异常处理方式：  
-funboost可使用标准try/except处理整个流程  
-scrapy各回调间异常隔离，难以统一处理  
-
-资源释放与清理：  
-funboost支持with语句和上下文管理  
-scrapy在分散的回调中难以管理资源生命周期  
-
-调试和问题排查：  
-funboost代码线性执行，容易跟踪  
-scrapy回调跳转使调试变得困难  
-
-与外部系统集成：  
-funboost可在任何点与外部API交互  
-scrapy需要特殊中间件或信号处理  
-
-对于要求精确控制、复杂交互、特定时序或依赖外部系统的"奇葩需求"，funboost的流程式编程模型确实具有压倒性优势，能够以更直观、更可靠的方式实现这些复杂需求。  
-```  
-
-
-此框架如果用于写爬虫，建议的写法是一种页面(或者接口)对应一个函数,例如列表页是一个函数，详情页是一个函数。 1个函数里面只包括一次请求(也可以两三次请求，但不要在函数本身里面去for循环遍历发十几个请求这种写法)，  
-
-### 8.0.6 主动集中简要回答驳斥一些scrapy 优势更大的观点  
-
-知道有些人会质疑说scrapy爬虫更好，有些人举的scrapy更强的例子，喜欢以卵击石，以弱击强，倒反天罡，必须集中统一回答反驳。  
-
-#### **你质疑funboost 没有 http middware ？**  
-
-你这个想法就像是在说"没有被大铁链子束缚的奴隶不好当"一样搞笑！
-
-```   
-答：上面已经回答了，用户手写定义一个通用的 my_request 更强更自由更简单。  
-```  
-
-#### **你质疑funboost 没有 pipeline，质疑保存数据麻烦？**  
-
-你这个想法就像是在说"没有被大铁链子束缚的奴隶不好当"一样搞笑！
-
-这个问题问得好，但结论恰恰相反！**没有 Pipeline 正是 Funboost 的巨大优势**，因为它让你摆脱了不必要的束缚。  
-`Funboost`: 一行代码，一个文件，逻辑高度内聚，极其灵活。  
-`Scrapy`: 四个文件，几十行模板代码，逻辑支离破碎，极其死板。  
-
-```    
-答：用户可以自己封装一个保存字典到数据库的函数，最简单就是使用dataset知名包,只要一行代码就能保存字典到mysql postgre 数据库了。   
-boost_spider 就是自带了 datasetsink 类,dataset_sink1.save('your_table', data_dict),简单直观多了。
-
-
-反观,scrapy 的 pipeline 反而才是杀鸡用牛刀 过度设计分层,为了保存一个字典需要切换写四个文件,
-你单纯想喝瓶水而已, 但被迫建一个矿泉水生产线。
-scrapy保存数据需要来回切换4个文件写代码:
-第一步,在 items.py 定义Item类型
-第二部,在 your_spider.py 的 parse_xx 中 yield item
-第三部,在 pipelines.py 中 process_item 方法中判断不同item类型,从而保存到对应的表中.
-第四部,在 settings.py 的 ITEM_PIPELINES 中配置 指定pipeline类(如果忘了这一步就白忙活了)
-```  
-
-#### **你说Scrapy 插件生态丰富，质疑Funboost 没有三方包插件生态不够？**  
-
-`funboost` 不需要任何插件,是无招胜有招.  
-     
-- scrapy插件多是“病”，不是“药” 。Python pypi生态就是funboost的生态，你的python项目下的 utils/ 或者 helpers/ 文件夹下日积月累的各种工具类和函数都是 funboost的生态, funboost不需要各种funboost-xx的三方包插件。
-
-- 说插件多就是生态好，这么想法的人简直是没长脑子，用户已经会了三方包的使用，但在scrapy框架下，为什么还需要等专门的美国编程大神去给三方包开发插件适配scrapy框架的生命周期和组件流程，才能在scrapy中愉快的使用三方包。用户压根没想过这个问题。  
-
-详细的驳斥看文档8.14.2章节  
-
-- Scrapy 插件多 ≠ 框架强，恰恰说明了框架对用户自由的压制太多，“什么都得经过官方那一套”。          
-Funboost 是函数式的框架，自由度高、无约束、无钩子、无上下文依赖，天然就能融合任何三方库，python三方包生态就是funboost的生态，你utils下积累的工具类和函数都是 funboost的生态。
-- funboost不需要学 scrapy-redis scrapy-selenium scrapy-playwright  scrapy-user-agents  scrapy-splash 专门开发各种 funboost-xx 的三方包插件。funboost压根不需要三方包插件，而不是三方包插件生态薄弱。      
-
-
-```  
-答： scrapy是框架太复杂了约束多钩子多，所以需要由专门的大神开发三方插件，因为普通人写不出来这些插件。  
-Scrapy 框架的结构设计“高度抽象 + 强约束 + 多钩子生命周期 + 中间件堆叠机制”，导致插件开发成本极高。  
-funboost 恰恰不需要插件，因为用户是轻松自由使用任意三方包。  
-你压根不需要专门的大神给你写个例如 funboost-selenium 类似的插件，才能开始在funboost里面使用selniuem干活，懂了吗？  
-
-例如 如 scrapy-redis 用于分布式、scrapy-playwright 或 scrapy-selenium 用于 JavaScript 渲染，scrapy-user-agents换请求头。   
-funboost需要学习这些扩展插件怎么使用吗？ 绝对不需要，funboost 是顺其自然自由使用任意三方包。。  
-麻烦你去看看配置使用 scrapy-selenium 有多麻烦，而直接使用 seleium 有多简单。  
-本来学习selenium就烦人，你还要再多学习一个 scrapy-selenium ，  
-凭什么非要这么苦逼，学了各种三方包还不够，还需要额外再另外学这么多三方包的插件。  
-```  
-
-因为你用scrapy，即使你非常精通三方包，如果没有美国大神给你提供三方包的插件，你仍然寸步难行，所以你羡慕scrapy有各种三方包的插件生态。         
-你用Scrapy，哪怕精通三方包，没有插件也寸步难行；用Funboost，任何三方包都能直接用，不需要等别人给你造插件轮子。     
-当你可以直接驾驶F1赛车时，为什么还非要学习如何给破自行车安装火箭推进器？  
-
-```  
-举个例子：  
-为什么你用scrapy-redis插件？因为你就算精通了py-redis包的用法，精通了怎么redis.blpop redis.lpush推拉消息，精通了怎么redis.sadd 去重  
-但是你不知道怎么完美替代scrapy内置的调度器和去重器，因为你不可能开发的出来，关键难度不是怎么操作reids，而是难以适配scrapy的中间件机制和生命周期钩子懂啦吗?  
-不信的你可以看scrapy-redis源码,你能写得了那么好？  
-你以为你随便在代码哪里简单的写个redis.blpop 和 redis.lpush，scrapy就能完美使用你写的redis代码逻辑来调度运行起来吗？  
-```  
-
-**开发效率的巨大差异**  
-**使用Scrapy：**       
-学习Scrapy框架 → 2. 学习要用的包 → 3. 等待/寻找插件 → 4. 学习插件用法 → 5. 配置插件 → 6. 开始开发  
-**使用Funboost：**     
-学习要用的包 → 2. 开始开发  
-
-
-#### 你项目下的 utils 文件夹的工具类是黄金还是废铁？取决于你用什么哲学的框架
-
-- 详细见文档 8.0b 章节
-
-Python pypi生态就是funboost的生态，你的python项目下的 utils/ 或者 helpers/ 文件夹下日积月累的各种工具类和函数都是 funboost的生态,   
-例如你的爬虫项目 utils 文件夹下日积月累，99%的概率已经存在很多好用的经过实战检验的爬虫工具类和函数，可以直接被 import 复用使用。
- 
-
-#### **你说scrapy社区支持，有庞大的专门各种问题的讨论？质疑funboost没有社区？**  
-```   
-因为scrapy太难了，用户必须精通scrapy框架本身，精通scrapy各种组件和生命周期，用户难以自由扩展，所以需要讨论。  
-funboost是你写一个函数，你可以在函数里面自由自在写任何代码，你在写你的消费函数里面是自由的，  
-不需考虑funboost框架本身的约束，不需要考虑怎么和funboost配合。  
-funboost 没有需要讨论的，因为funboost 是顺其自然自由使用任意三方包。  
-
-例如假设你不会pymysql插入数据，那去pymysql论坛讨论，这和funboost没关系。  
-例如假设你不会 selenium 操作，那去selenium论坛讨论，这和funboost没关系。  
-例如你不会requests使用代理ip，那去requests论坛讨论，这和funboost没关系。  
-例如你不会使用xpath解析html，那去xpath论坛讨论，这和funboost没关系。  
-```  
-
-#### **你羡慕scrapy的response有自带.xpath .css .extract_first .extract_all 方法？**  
-```  
-答：你可以看看boost_spider项目的response，也有xpath方法，实现很简单。  
-这些真的很简单啊，你的my_request函数可以是返回一个带有这些方法的response对象就好了。  
-封装一个带有这些方法的Response类型的对象简直不要太简单。  
-```  
-
-#### **scrapy twisted 性能强悍？担心funboost爬取不快？**  
-```   
-答： 没有funboost 的 多机器 + 多进程 + asyncio强。 asyncio才是未来。  
-拿scrapy的短处去攻击funboost的长处，以卵击石。  
-```   
-
-#### **你质疑scrapy重试功能强大？**  
-```  
-答：funboost 的函数重试功能远远暴击scrapy的url重试功能(防丢数据2),你可以看8.13.2章节。  
-如果http状态码200，但是页面反扒，scrapy会丢失大量数据，funboost则不会。  
-```  
-
-#### **你怀疑scrapy稳定，funboost不稳定？**  
-```  
-答：funboost 框架核心 执行函数是稳定的，funboost爬虫比scrapy更不容易漏数据，看文档8.13.2  
-因为funboost对用户怎么写爬虫函数干预很少，少即是稳，所以funboost很稳定。  
-funboost无论任何情况下不会退出代码，例如你把爬虫机器和 消息队列机器之间的网线拔掉10分钟，  
-funboost不会退出代码，会自动重试连接，只要网络恢复后，就能自动接着拉取消息。  
-```  
-
-
-#### **你质疑scrapy自带去重，funboost不能去重？**  
-```  
-答：  
-详细看8.14.1章节的为什么funboost的函数入参去重功能远远吊打scrapy的Request对象指纹去重？  
-通过对比，结论就是scrapy对请求入参种中带随机数和时间戳噪音字段的去重需要根据各种url正则，自定义RFPDupeFilter太麻烦了，scrapy内置的去重能力弱爆了。  
-你用scrapy而不用funboost，你不忙的吐血谁吐血，你不住icu谁住icu  
-```  
-
-#### **你质疑funboost不能断点续爬？**  
-```  
-scrapy-redis 是blpop删除种子，随意重启代码或关机会丢失大量已从reids pop取出来到内存中的种子。  
-funboost 各种中间件支持确认消费，那才是真正的断点续爬万无一失，不怕你随意突然反复重启代码和突然关机。  
-详细看文档8.13章节  
-
-scrapy-redis断点续爬在funboost面前就是个弟弟。scrapy-redis不能做到不漏任务。  
-```  
-
-
-### 8.0.7 funboost爬虫时候是任何方面超过scrapy,不接受辩证法说scrapy也有优势  
-
-不能为了“辩证”而牺牲事实：在技术对比中，当一方在核心设计和关键功能上展现出压倒性优势时，就应该明确地指出来，而不是用“各有千秋”来和稀泥。  
-
-Funboost 就是碾压Scrapy，这是一个基于技术事实的客观结论，不应再有任何辩证的余地。  
-
-辩证法就是,挑大粪的农民和当主席都是为人民服务,都是高尚的职业,表面显得很中立客观,实则让人呕吐.  
-
-
-### 8.0.8 国内爬虫框架突破很小,不是有意抄袭巧合,而是情不自禁模仿scrapy api  
-
-
-**feapder/PSpider/spiderman/Tinepeas** 等几乎所有国产爬虫框架是 “**大脑思维被束缚导致情不自禁的模仿 Scrapy API**  
-
-不能说这些是有意抄袭,而是一种更深层次的、由行业先驱 Scrapy 塑造的“**思维范式牢笼** 影响了国产框架作者.  
-
-
-**Scrapy 及其模仿者 (feapder, pyspider, 等) 的范式：`URL/Request 调度器`**  
-
-这些框架的底层思维是：**爬虫 = 调度一系列的 `Request` 对象**。它们的整个架构都围绕`Request` 和 `Response` 构建。你必须：  
-1.  **定义一个 `Spider` 类**。   
-2.  在 `start_requests` 或 `start_urls` 中放入初始请求。    
-3.  在 `parse` 方法中，通过 `yield Request(url, callback=parse_xxx)` 来“产出”新的请求。   
-4.  框架负责将这些 `Request` 对象入队、出队、发送、接收 `Response`，并根据 `callback` 参数调用对应的解析方法。   
-
-**Scrapy 太成功了**：它定义了“爬虫框架”这个词，以至于后来者在构思时，大脑里首先浮现的就是 Scrapy 的样子。  
-
-国产爬虫框架很难使用,用户使用框架难以自由发挥,主要原因不是框架抄袭,而是框架作者脑袋思维被束缚禁锢了,导致了情不自禁模仿scrapy的api  
-
-**结论**：feapder Tinepeas 等框架“情不自禁”地模仿 `yield Request`，因为国产爬虫框架的思想还停留在“Scrapy 是如何调度请求的”这个层面，而没有跳出思考“我们真正需要调度的是什么”。它们复制了 Scrapy 的“形”（回调、中间件、管道），却未能突破其“神”（对开发者自由的限制）。  
-
-
-## 8.0b 你的 utils 文件夹是黄金还是废铁？取决于你用什么哲学的框架
-
-- **funboost/boost_spider 对仿scrapy api框架最大优势是 自由编程暴击框架奴役， 能复用用户自己的 utils 宝贵资产**
-
-- scrapy的三方包插件，各种 scrapy-xx 插件，例如 scrapy-redis scrapy-playwright scrapy-selenium scrapy-user-agents scrapy-splash 等等，三方包插件总量不会超过1000个.
-  只有pypi的三方包才是星辰大海，100万多个pypi三方包都是你的工具。  
-  **最重要的是，只有用户自己项目下utils文件夹下积累的工具类和函数才是最符合用户自己实际需求的工具，而不是 scrapy-xx 插件。**
-
-- Python pypi生态就是funboost的生态，你的python项目下的 utils/ 或者 helpers/ 文件夹下日积月累的各种工具类和函数都是 funboost的生态,   
-  例如你的爬虫项目 utils 文件夹下日积月累，99%的概率已经存在如下，好用的经过实战检验的工具类和函数： 
-  
-```python
-def anti_request(method,url,...retry_times=3,is_change_ua=True,is_change_proxy):
-   """自动重试 换代理ip  user-agent 的http请求函数""" 
-
-def save_to_mysql(data:dict): 
-    """保存字典到数据库的函数"""
-
-class RedisBloomFilter:
-    """redis 布隆过滤器"""
-    def is_exists(self, key):
-        ...
-    def add(self, key):
-        ...
-    
-def extract_all_with_join(selector, separator=' '):
-    """提取选择器所有结果并用指定分隔符连接成字符串。"""
-    return separator.join(selector.getall()).strip()
-
-class WebsiteAuthenticator:  
-    """对于需要登录的网站，一个管理会话、Cookie 和 Token 的类是无价之宝。"""
-    def login(self):
-        ...
-    def get_session(self):
-        ...
-
-def send_email_notification(subject, body, recipient):
-    """发送爬虫邮件通知。"""
-
-def download_and_upload_to_s3(url, bucket_name, object_name):
-    """下载文件并直接流式上传到 S3。"""
-    s3 = boto3.client('s3')
-    with requests.get(url, stream=True) as r:
-        r.raise_for_status()
-        s3.upload_fileobj(r.raw, bucket_name, object_name)
-    return f"s3://{bucket_name}/{object_name}"
-    
-```
-
-**在 funboost中**，你utils文件夹下的宝贵资产，黄金任然是黄金，可以直接import 复用使用： 
-```python
-from funboost import boost, BrokerEnum
-from utils.http_client import anti_request  # 你日积月累的工具
-from utils.db import save_to_mysql        # 你日积月累的工具
-from utils.redis_dedup import RedisBloomFilter   # 你日积月累的工具
-from utils.website_authenticator import WebsiteAuthenticator   # 你日积月累的工具
-from utils.send_notification import send_email_notification   # 你日积月累的工具
-from utils.download_and_upload import download_and_upload_to_s3   # 你日积月累的工具
-```
-**而在`scrapy` `feapder`面前**，你曾经引以为豪在`utils`文件夹下积累的宝贵资产，他不是黄金，只是一堆破铜烂铁而已，不能被导入复用。    
-你没有按照他们框架的`Downloader Middleware` 和 `Pipeline`规范写的`utils`文件夹下的工具类，都是废铁一文不值。  
-`scrapy`的扩展插件机制 被 `funboost` 的自由import复用吊打。
-
-- 复用用户自己的 utils 宝贵资产，正是 `funboost`  区别于 `Scrapy/Feapder` 等传统框架的**根本性优势**，是战略层面的胜利。
-
-*   **`utils` 是开发者的“内功心法”**：一个开发者的 `utils` 文件夹，是他/她多年经验的结晶，是解决特定领域问题的最佳实践沉淀。它包含了对业务逻辑的深刻理解，是**不可替代的、高度定制化的“私有武器库”**。
-*   **“复用 `utils`” = 复用经验和智慧**：一个框架如果能让开发者无缝地复用自己的 `utils`，就意味着它尊重并放大了开发者的个人能力和历史积累。开发者可以用最熟悉、最高效的方式解决问题。
-*   **“无法复用 `utils`” = 废掉武功，重练套路**：`Scrapy/Feapder` 的插件和中间件机制，本质上是让你放弃自己的“内功”，去学习并练习一套它们规定好的“套路招式”。你的 `my_request` 函数再精妙，也得改成 `Downloader Middleware` 的形状；你的 `save_to_mysql` 再高效，也得塞进 `Item Pipeline` 的模子里。这是一个**巨大的、隐性的成本**。
-
-
-## 8.1 演示获取汽车之家资讯的 新闻 导购 和 评测 3个板块 的 文章。  
-
-页面连接 https://www.autohome.com.cn/all/  
-
-```  
-这是一个非常经典的列表页-详情页两层级爬虫调度。演示爬虫一定最少需要演示两个层级的调度，只要会了两层级爬虫，3层级就很简单。  
-此框架如果用于写爬虫，建议的写法是一种页面(或者接口)对应一个函数,例如列表页是一个函数，详情页是一个函数。  
-1个函数里面只包括一次请求(也可以两三次请求，但不要在函数本身里面去for循环遍历发十几个请求这种写法)，  
-```  
-
-```text  
-"""  
-演示分布式函数调度框架来驱动爬虫函数，使用此框架可以达使爬虫任务 自动调度、 分布式运行、确认消费万无一失、超高速自动并发、精确控频、  
-种子过滤(函数入参过滤实现的)、自动重试、定时爬取。可谓实现了一个爬虫框架应有的所有功能。  
-
-此框架是自动调度一个函数，而不是自动调度一个url请求，一般框架是yield Requet(),所以不兼容用户自己手写requests urllib的请求，  
-如果用户对请求有特殊的定制，要么就需要手写中间件添加到框架的钩子，复杂的需要高度自定义的特殊请求在这些框架中甚至无法实现，极端不自由。  
-
-此框架由于是调度一个函数，在函数里面写 请求 解析 入库，用户想怎么写就怎么写，极端自由，使用户编码思想放荡不羁但整体上有统一的调度。  
-还能直接复用用户的老函数，例如之前是裸写requests爬虫，没有规划成使用框架爬虫，那么只要在函数上面加一个@boost的装饰器就可以自动调度了。  
-
-而90%一般普通爬虫框架与用户手写requests 请求解析存储，在流程逻辑上是严重互斥的，要改造成使用这种框架改造会很大。  
-此框架如果用于爬虫和国内那些90%仿scrapy api的爬虫框架，在思想上完全不同，会使人眼界大开，思想之奔放与被scrapy api束缚死死的那种框架比起来有云泥之别。  
-因为国内的框架都是仿scrapy api，必须要继承框架的Spider基类，然后重写 def parse，然后在parse里面yield Request(url,callback=annother_parse)，  
-请求逻辑实现被 Request 类束缚得死死的，没有方便自定义的空间，一般都是要写middware拦截http请求的各个流程，写一些逻辑，那种代码极端不自由，而且怎么写middware，  
-也是被框架束缚的死死的，很难学，例如scrapy 集成selenium浏览器没几个人搞定，就算实现了也是同步阻塞导致scrapy的并发成为了废物，  
-当你把scrapy的并发调度弄成了废物了还有必要用什么scrapy。  
-例如崔庆才 写的scrapy集成selenium浏览器，文章在 https://cuiqingcai.com/8397.html ，如果网站网页需要渲染30秒，那么此时scrapy爬虫慢的吐血，  
-因为这种扩展scrapy的方式是错误的。  
-还有人在scrapy的Spider类的解析方法里面用浏览器重复请求一次url，scrapy的parse不是并发的，只有yield Request类请求是自动并发，  
-下面parse中写浏览器请求，scrapy就变成了个废物。  
-def parsexx(self,response):  
-    driver.get(response.url)  
-
-分布式函数调度框架由于是自动调度函数而不是自动调度url请求，所以天生不存在这些问题。  
-
-用其他爬虫框架需要继承BaseSpider类，重写一大堆方法写一大堆中间件方法和配置文件，在很多个文件夹中来回切换写代码。  
-而用这个爬虫，只需要学习 @boost 一个装饰器就行，代码行数大幅度减少，随意重启代码任务万无一失，大幅度减少操心。  
-
-这个爬虫例子具有代表性，因为实现了演示从列表页到详情页的分布式自动调度。  
-
-"""  
-
-"""  
-除了以上解释的最重要的极端自由的自定义请求解析存储，比普通爬虫框架更强的方面还有：  
-2、此爬虫框架支持 redis_ack_able rabbitmq模式，在爬虫大规模并发请求中状态时候，能够支持随意重启代码，种子任务万无一失，  
-   普通人做的reids.blpop，任务取出来正在消费，但是突然关闭代码再启动，瞬间丢失大量任务，这种框架那就是个伪断点接续。  
-3、此框架不仅能够支持恒定并发数量爬虫，也能支持恒定qps爬虫。例如规定1秒钟爬7个页面，一般人以为是开7个线程并发，这是大错特错，  
-  服务端响应时间没说是永远都刚好精确1秒，只有能恒定qps运行的框架，才能保证每秒爬7个页面，恒定并发数量的框架差远了。  
-4、能支持 任务过滤有效期缓存，普通爬虫框架全部都只能支持永久过滤，例如一个页面可能每周都更新，那不能搞成永久都过滤任务。  
-因为此框架带有20多种控制功能，所以普通爬虫框架能实现的控制，这个全部都自带了。  
-"""  
-
-```  
-
-爬虫任务消费代码  
-
-代码在 https://github.com/ydf0509/distributed_framework/tree/master/test_frame/car_home_crawler_sample/test_frame/car_home_crawler_sample/car_home_consumer.py  
-
-
-关于对下面funboost爬虫代码的质疑？  
-```  
-有人说这里的代码是不真实的，没有 换代理ip useragent，也没有保存结果到数据库。还有人说没有演示破解js 加密。  
-
-每次请求自动换代理ip和ua这个功能你自己写个函数不就完了，把这里的requests.get换成你自己定义的换ip的请求函数就完了，一个函数的事情而已。  
-
-至于保存到数据库，  
-你自己把 print(f'保存数据  {news_type}   {title} {author} {url} 到 数据库') 这行改成插入数据库就完了。你自己定义一个函数mysql连接池插入数据库就完了。  
-
-这些不是重点所以不需要精确细致的演示，只需要演示爬虫重要的并发调度。其余的怎么发http请求 保存到什么数据库，自己定义一个函数，不就每个爬虫函数里面万能通用了？难道需要无数次重复写怎么换ip发请求吗？  
-
-还有人故意找茬说这汽车之家网站太简单了，没有包括破解，这个代码演示没有意义，框架是为了演示并发调度，搞一堆破解代码掺杂在里面没有必要。你用scrapy框架就能自动破解网站了吗？  
-我采用的是控制变量法耐对比不同框架写代码所需的行数，又没让scrapy爬加密网站用这个funboost爬简单网站导致对比不公平。  
-如果需要做破解加密，那么funboost集成破解流程肯定比scrapy集成破解要更容易随心所欲的写。  
-
-
-```  
-
-
-```python  
-import requests  
-from parsel import Selector  
-from funboost import boost, BrokerEnum, BoosterParams  
-
-
-@boost(BoosterParams(queue_name='car_home_list', broker_kind=BrokerEnum.REDIS_ACK_ABLE, max_retry_times=5, qps=10))  
-def crawl_list_page(news_type, page, do_page_turning=False):  
-    """ 函数这里面的代码是用户想写什么就写什么，函数里面的代码和框架没有任何绑定关系  
-    例如用户可以用 urllib3请求 用正则表达式解析，没有强迫你用requests请求和parsel包解析。  
-    """  
-    url = f'https://www.autohome.com.cn/{news_type}/{page}/#liststart'  
-    resp_text = requests.get(url).text  # 此处你可以换成你自己封装好的 my_request 请求函数来换代理ip请求网页  
-    sel = Selector(resp_text)  
-    for li in sel.css('ul.article > li'):  
-        if len(li.extract()) > 100:  # 有的是这样的去掉。 <li id="ad_tw_04" style="display: none;">  
-            url_detail = 'https:' + li.xpath('./a/@href').extract_first()  
-            title = li.xpath('./a/h3/text()').extract_first()  
-            crawl_detail_page.push(url_detail, title=title, news_type=news_type)  # 发布详情页任务  
-    if do_page_turning:  
-        last_page = int(sel.css('#channelPage > a:nth-child(12)::text').extract_first())  
-        for p in range(2, last_page + 1):  
-            crawl_list_page.push(news_type, p)  # 列表页翻页。  
-
-
-@boost(BoosterParams(queue_name='car_home_detail', broker_kind=BrokerEnum.REDIS_ACK_ABLE, qps=50,  
-           do_task_filtering=True, is_using_distributed_frequency_control=True))  
-def crawl_detail_page(url, title, news_type):  
-    resp_text = requests.get(url).text #   # 此处你可以换成你自己封装好的 my_request 请求函数来换代理ip请求网页  
-    sel = Selector(resp_text)  
-    author = sel.css('#articlewrap > div.article-info > div > a::text').extract_first() or  
-    sel.css('#articlewrap > div.article-info > div::text').extract_first() or ''  
-    author = author.replace("\n", "").strip()  
-    print(f'保存数据  {news_type}   {title} {author} {url} 到 数据库')  # 用户自由发挥保存。  
-
-if __name__ == '__main__':  
-    # crawl_list_page('news',1)  
-    crawl_list_page.consume()  # 启动列表页消费  
-    crawl_detail_page.consume()  
-    # 这样速度更猛，叠加多进程  
-    crawl_detail_page.multi_process_consume(4)  
-```  
-
-爬虫任务发布代码  
-
-代码在 https://github.com/ydf0509/distributed_framework/blob/master/test_frame/car_home_crawler_sample/car_home_publisher.py  
-
-```python  
-from funboost import ApsJobAdder  
-from test_frame.car_home_crawler_sample.car_home_consumer import crawl_list_page, crawl_detail_page  
-
-crawl_list_page.clear()  # 清空列表页  
-crawl_detail_page.clear()  # 清空详情页  
-
-# # 推送列表页首页，同时设置翻页为True  
-crawl_list_page.push('news', 1, do_page_turning=True)  # 新闻  
-crawl_list_page.push('advice', page=1, do_page_turning=True)  # 导购  
-crawl_list_page.push(news_type='drive', page=1, do_page_turning=True)  # 驾驶评测  
-
-# 定时任务，语法入参是apscheduler包相同。每隔120秒查询一次首页更新,这部分可以不要。  
-for news_typex in ['news', 'advice', 'drive']:  
-    ApsJobAdder(crawl_list_page, job_store_kind='redis').add_push_job('interval', seconds=120, kwargs={"news_type": news_typex, "page": 1, "do_page_turning": False,id='timing_publish_job_first_page_'+news_typex})  
-
-```  
-
-```  
-从消费代码可以看出，代码就是常规思维的平铺直叙主线程思维写代码，写函数代码时候无需考虑和框架怎么结合，写完后加个@boost装饰器就行了。  
-因为这不是类似国内的仿scrapy框架必须要求你必须继承个什么类，强迫你重写什么方法，然后yield Request(your_url,callback=my_parse,meta={'field1':'xxx','field2':'yyy'})  
-此框架爬虫既能实现你无拘无束使用任意包来请求url和解析网页，又能很方便的使用到自动超高并发 超高可靠性的万无一失断点续传。  
-```  
-
-qps设置为很低时候，为了展示更多控制台日志流程细节，分布式函数调度框架驱动爬虫函数的慢速爬取运行截图。  
-![](img_7.png)  
-
-qps设置高时候的运行截图，分布式函数调度框架驱动爬虫函数的快速爬取运行截图。  
-![](img_6.png)  
-
-## 8.2 演示经典的豆瓣top250电影的爬虫  
-
-页面连接 https://movie.douban.com/top250  
-
-```  
-这是一个非常经典的列表页-详情页两层级爬虫调度。演示爬虫一定最少需要演示两个层级的调度，只要会了两层级爬虫，3层级就很简单。  
-
-此框架如果用于写爬虫，建议的写法是一种页面(或者接口)对应一个函数,例如列表页是一个函数，详情页是一个函数。  
-
-1个函数里面只包括一次请求(也可以两三次请求，但不要在函数本身里面去for循环遍历发十几个请求这种写法)，  
-```  
-
-```python  
-from funboost import boost, BrokerEnum, BoosterParams  
-import requests  
-from parsel import Selector  
-
-HEADERS = {'User-Agent': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0)', }  
-
-
-@boost(BoosterParams(queue_name='douban_list_page_task_queue', broker_kind=BrokerEnum.PERSISTQUEUE, qps=0.1))  # qps 自由调节精确每秒爬多少次，远强于一般框架只能指定固定的并发线程数量。  
-def craw_list_page(page):  
-    """ 函数这里面的代码是用户想写什么就写什么，函数里面的代码和框架没有任何绑定关系，框架只对函数负责，不对请求负责。  
-    例如用户可以用 urllib3请求 用正则表达式解析，没有强迫你用requests请求和parsel包解析。  
-    """  
-    """ 豆瓣列表页，获取列表页电影链接"""  
-    url = f'https://movie.douban.com/top250?start={page * 25}&filter='  
-    resp = requests.get(url, headers=HEADERS) #   # 此处你可以换成你自己封装好的 my_request 请求函数来换代理ip请求网页  
-    sel = Selector(resp.text)  
-    for li_item in sel.xpath('//*[@id="content"]/div/div[1]/ol/li'):  
-        movie_name = li_item.xpath('./div/div[2]/div[1]/a/span[1]/text()').extract_first()  
-        movei_detail_url = li_item.xpath('./div/div[2]/div[1]/a/@href').extract_first()  
-        craw_detail_page.push(movei_detail_url, movie_name)  
-    # craw_list_page.push(page=11) # 如果你要动态获取总页数，而不是一开始就知道总共有10页，可以在craw_list_page函数里面进行消息推送，调用 craw_list_page.push，没有递归死循环调用列表页爽歪歪。  
-
-
-@boost(BoosterParams(queue_name='douban_detail_page_task_queue', broker_kind=BrokerEnum.PERSISTQUEUE, qps=4))  
-def craw_detail_page(detail_url, movie_name):  
-    """豆瓣详情页，获取电影的详细剧情描述。"""  
-    resp = requests.get(detail_url, headers=HEADERS) #   # 此处你可以换成你自己封装好的 my_request 请求函数来换代理ip请求网页  
-    sel = Selector(resp.text)  
-    description = sel.xpath('//*[@id="link-report"]/span[1]/text()[1]').extract_first().strip()  
-    print('保存到数据库：', movie_name, detail_url, description)  
-
-
-if __name__ == '__main__':  
-    # craw_list_page(0)  
-    # craw_detail_page('https://movie.douban.com/subject/6786002/','触不可及')  
-    for p in range(10):  
-        craw_list_page.push(p)  
-    craw_list_page.consume()  
-    craw_detail_page.consume()  
-```  
-
-<pre class="warn">
-在使用 funboost 写爬虫时候,函数里面不要写try except 捕获异常,因为框架会自动捕获任何请求异常 /解析异常/ 操作数据库异常
-,并自动重试.   如果你写了try 却不抛出异常, 框架就无法自动给你重试.
-</pre>
-
-### 8.2.2 funboost 对比网上的 scrapy 爬取 douban代码  
-
-[https://github.com/wxmseu/douban_scrapy/tree/master/douban](https://github.com/wxmseu/douban_scrapy/tree/master/douban)  
-
-```  
-对比网上的scrapy 爬取douban代码，funboost在 qps控频 并发方式 代码行数少 文件数量少 远远的暴击scrapy  
-使用同步requests发请求的写法平铺直叙横冲直撞的思维特点，远远的暴击scrapy写出的不兼容代码 yield Request。  
-
-爬陌生新网站肯定是先用requests这种包简单的发请求，测试反爬和解析，测试验证解决了反爬或者无反爬，再将代码用到框架中，  
-因为直接使用框架来开始探索一个陌生新网站爬虫，万一爬不到，在框架中写了一大堆代码，做了一大堆无用功，精力损失很大。还有就是在爬虫框架中调试爬取一个特定的url也没有单脚本+requests那么随心所欲方便。  
-
-funboost可以套用到已存在的requests测试探索代码，因为funboost是函数调度框架，兼容一切函数的调度，不要求用户修改已有代码。  
-而scrapy和feapder和pspider这种为了使用这种框架，需要把已存在的发送请求和解析的代码大改特改再移到框架中，非常的不方便。  
-
-任何人写新的爬虫框架只要是仿scrapy api用法和scrapy的项目目录结果，如果需要写 yield Request(url,callback=self.parse_xx,meta={'field1':'xxx','field2':'yyy'})，和funboost比，就已经输了，无需再看他框架源码用多么美妙的设计模式和面向对象设计出来的了。  
-只要模仿这个scrapy api用法，思维被束缚大脑不灵活开发出的爬虫框架写法和scrapy一样烦人，那么开发这样的一个新框架就没什么必要存在了。  
-```  
-
-## 8.3 演示3种最常见代码思维方式爬取汽车之家资讯  
-
-演示了三种方式爬汽车之家，是骡子是马拉出来溜溜，必须精确对比。  
-
-```  
-第一种是 无框架每次临时手写全流程代码，每次临时设计手写爬虫调度全流程  
-第二种是 使用scrapy框架来爬取，用户要写的代码行数很多，文件很多，对于特殊独特奇葩想法极端不自由  
-第三种是 使用分布式函数调度框架来自动调度常规函数  
-```  
-
-### 8.3.1 每次临时手写rquests + 多线程,使用low爬虫方式的缺点  
-
-```  
-这样搞有以下缺点：  
-1、不是分布式的，不能多个脚本启动共享任务  
-2、不能断点爬取，即使是内置Queue改成手写使用redis的普通pop，要实现确认消费每次写一大堆代码，很难。  
-3、如果要调试爬虫，要反复手动自己手写添加print或log调试信息  
-4、写得虽然自己认为没有用爬虫框架很简洁，但导致接盘侠不知道你的代码的设计布局和意思  
-5、自己每次临时灵机一动搞个临时的爬虫调度设计，没有固定套路，难维护，接盘侠一个个的看每个爬虫是怎么设计布局和调度的  
-6、需要每次临时手写操作queue任务队列  
-7、需要临时手写并发  
-8、每次需要临时手写如何判断和添加过滤任务  
-9、需要临时手写怎么提取错误重试。  
-10、需要临时动脑筋设计怎么调度,浪费自己的时间来思考，每次都重复思考重复设计重复写爬虫全流程。  
-```  
-
-### 8.3.2 scrapy 爬虫框架来实现缺点  
-
-scrapy 爬虫框架来实现，（本质是Request 对象自动调度框架）  
-
-```  
-scrapy_proj_carhome 是 scrapy_redis 弄得项目，写项目需要背诵scrapy 命令行，  
-并且要反复在spiderxx.py  settings.py items.py pipeliens.py   
-middwares.py push_start_urls.py run.py 7个文件里面来回切换写代码,  
-如果一年只临时要写一次爬虫效率很低，比low爬虫还写的慢。  
-
-需要500行，实际要手写或者修改的行数为150行，如果是写多个爬虫，平均每次实际手写的代码函数会降低一些。  
-
-```  
-
-### 8.3.3 scrapy 框架 和 分布式函数调度框架爬虫对比  
-
-```  
-不是分布式函数调度框架比scrapy爬虫框架代码质量好，主要是理念问题，  
-Request对象自动调度框架永远没法和函数自动调度框架的灵活自由性相比。  
-```  
-
-```  
-scrapy 自动调度 全靠 yield Request( url, callback=None, method='GET', headers=None, body=None,  
-                 cookies=None, meta=None, encoding='utf-8', priority=0,  
-                 dont_filter=False, errback=None, flags=None)  
-本质就是自动框架自动调度 Request对象，虽然入参比较丰富，大部分想法都能通过传参来搞定，但如果是一些自定义的想法，  
-要加到scrapy项目中就非常难。写任何一行代码都要考虑与框架的集成，  
-不能随便用 requests ，urllib3 ，selenium ，独立的每两个页面间的cookie自定义关联 等 乱自己来写请求，  
-包括换proxies要写中间件然后把类加到settings里面也是烦得要死。  
-
-比如一个很愚蠢的想法写法,在详情页解析回调这么写代码，这样瞎写完全没有考虑scrapy框架的感受。  
-
-    def parse_detail_page(self, response):  
-        driver = Chrome()  
-        driver.get(response.url)  
-        text = driver.page_source  
-        
-scrapy框架能自动并发调度运行Request请求,但不能自动并发运行parse方法。  
-第一，selenium会阻塞框架。  
-第二，reponse本来就是一个响应结果了，他是已经被scrapy的urllib请求了，只要解析结果就好了，但这么一写有用浏览器打开一次url，  
-等于是请求了两次页面，这样请求两次 是嫌电脑cpu太好 还是 流量太便宜了呢。  
-
-总之使用了scrapy后就是写任何代码不能乱写，要多考虑框架的感受。  
-
-只有celery这样的函数和函数入参自动调度才能很香，  
-scrapy这样的固化的 Request对象入参 + 自定义中间件类添加到 settings里面的 自动调度很不自由。  
-
-```  
-
-```  
-分布式函数调度框架是通过把函数的入参推到队列(支持15中队列，包括语言级Queue队列  sqlite队列 redis队列 各种mq队列)，  
-然后框架会自动从对应的队列取出任务，自动并发的运行对应的函数。函数里面怎么写那就非常自由了，你想随便有什么想法怎么写都可以，  
-这种方式是极端的自由和灵活，只需要按同步的思维写常规思维的函数，最后加个装饰器就能自动并发了，写函数的时候完全不用考虑框架的束缚。  
-任何函数都能被自动并发调度。  
-
-以下这些功能对爬虫的各种控制例如 精确的每秒爬几次  分布式中间件支持种类  消费确认 对爬虫的辅助控制远强于scrapy。  
-
-分布式：  
-    支持数十种最负盛名的消息中间件.(除了常规mq，还包括用不同形式的如 数据库 磁盘文件 redis等来模拟消息队列)  
-
- 并发：  
-    支持threading gevent eventlet asyncio 四种并发模式 + 多进程  
-   
- 控频限流：  
-    例如十分精确的指定1秒钟运行30次函数（无论函数需要随机运行多久时间，都能精确控制到指定的消费频率；  
-   
- 分布式控频限流：  
-    例如一个脚本反复启动多次或者多台机器多个容器在运行，如果要严格控制总的qps，能够支持分布式控频限流。  
-  
- 任务持久化：  
-    消息队列中间件天然支持  
-   
- 断点接续运行：  
-    无惧反复重启代码，造成任务丢失。消息队列的持久化 + 消费确认机制 做到不丢失一个消息  
-   
- 定时：  
-    可以按时间间隔、按指定时间执行一次、按指定时间执行多次，使用的是apscheduler包的方式。  
-   
- 指定时间不运行：  
-    例如，有些任务你不想在白天运行，可以只在晚上的时间段运行  
-   
- 消费确认：  
-    这是最为重要的一项功能之一，有了这才能肆无忌惮的任性反复重启代码也不会丢失一个任务  
-   
- 立即重试指定次数：  
-    当函数运行出错，会立即重试指定的次数，达到最大次重试数后就确认消费了  
-   
- 重新入队：  
-    在消费函数内部主动抛出一个特定类型的异常ExceptionForRequeue后，消息重新返回消息队列  
-   
- 超时杀死：  
-    例如在函数运行时间超过10秒时候，将此运行中的函数kill  
-   
- 计算消费次数速度：  
-    实时计算单个进程1分钟的消费次数，在日志中显示；当开启函数状态持久化后可在web页面查看消费次数  
-   
- 预估消费时间：  
-    根据前1分钟的消费次数，按照队列剩余的消息数量来估算剩余的所需时间  
-   
- 函数运行日志记录：  
-    使用自己设计开发的 控制台五彩日志（根据日志严重级别显示成五种颜色；使用了可跳转点击日志模板）  
-    + 多进程安全切片的文件日志 + 可选的kafka elastic日志  
-               
- 任务过滤：  
-    例如求和的add函数，已经计算了1 + 2,再次发布1 + 2的任务到消息中间件，可以让框架跳过执行此任务。  
-    任务过滤的原理是使用的是函数入参判断是否是已近执行过来进行过滤。  
-   
- 任务过滤有效期缓存：  
-    例如查询深圳明天的天气，可以设置任务过滤缓存30分钟，30分钟内查询过深圳的天气，则不再查询。  
-    30分钟以外无论是否查询过深圳明天的天气，则执行查询。  
-    
- 任务过期丢弃：  
-    例如消息是15秒之前发布的，可以让框架丢弃此消息不执行，防止消息堆积,  
-    在消息可靠性要求不高但实时性要求高的高并发互联网接口中使用  
-            
- 函数状态和结果持久化：  
-    可以分别选择函数状态和函数结果持久化到mongodb，使用的是短时间内的离散mongo任务自动聚合成批量  
-    任务后批量插入，尽可能的减少了插入次数  
-                  
- 消费状态实时可视化：  
-    在页面上按时间倒序实时刷新函数消费状态，包括是否成功 出错的异常类型和异常提示   
-    重试运行次数 执行函数的机器名字+进程id+python脚本名字 函数入参 函数结果 函数运行消耗时间等  
-                 
- 消费次数和速度生成统计表可视化：  
-    生成echarts统计图，主要是统计最近60秒每秒的消费次数、最近60分钟每分钟的消费次数  
-    最近24小时每小时的消费次数、最近10天每天的消费次数  
-                            
- rpc：  
-    生产端（或叫发布端）获取消费结果。各个发布端对消费结果进行不同步骤的后续处理更灵活，而不是让消费端对消息的处理一干到底。  
-
-```  
-
-### 8.3.4 临时low方法手写爬虫全流程的代码 （手写多线程 + queue 分发调度 ）  
-
-临时low方法手写爬虫全流程的代码 （手写多线程 + queue 分发 ）  
-
-<pre>  
-这样搞有以下缺点：  
-1、不是分布式的，不能多个脚本启动共享任务  
-2、不能断点爬取  
-3、如果要调试爬虫，要反复手动自己手写添加print或log调试  
-4、写得虽然自己认为没有用爬虫框架很简洁，但导致接盘侠不知道你的代码的设计布局和意思  
-5、自己每次临时灵机一动搞个临时的爬虫调度设计，没有固定套路，难维护，接盘侠一个个的看每个爬虫是怎么设计布局和调度的  
-6、需要每次临时手写操作queue任务队列  
-7、需要临时手写并发  
-8、每次需要临时手写如何判断和添加过滤任务  
-9 需要临时手写怎么提取错误重试。  
-10、需要临时动脑筋设计怎么调度,浪费自己的时间来思考  
-</pre>  
-
-```python  
-
-from queue import Queue, Empty  
-import time  
-import requests  
-from urllib3 import disable_warnings  
-from parsel import Selector  
-from concurrent.futures import ThreadPoolExecutor  
-from threading import Thread  
-import redis  
-
-disable_warnings()  
-
-queue_list_page = Queue(1000)  
-queue_detail_page = Queue(1000)  
-
-pool_list_page = ThreadPoolExecutor(30)  
-pool_detail_page = ThreadPoolExecutor(100)  
-
-# detail_task_filter_set = set()  
-r = redis.Redis()  
-
-
-def crawl_list_page(news_type, page):  
-    def _run_list_page_retry(current_retry_times):  
-        try:  
-            url = f'https://www.autohome.com.cn/{news_type}/{page}/#liststart'  
-            print(f'请求的列表页url是 {url}')  
-            resp = requests.request('get', url, timeout=5)  
-            if resp.status_code != 200:  
-                raise ValueError  
-            resp_text = resp.content.decode('gbk')  
-            sel = Selector(resp_text)  
-            for li in sel.css('#Ul1 > li'):  
-                url = 'https:' + li.xpath('./a/@href').extract_first()  
-                title = li.xpath('./a/h3/text()').extract_first()  
-                task = (url, title)  
-                print('向详情页队列添加任务：', task)  
-                queue_detail_page.put(task)  
-            if page == 1:  
-                last_page = int(sel.css('#channelPage > a:nth-child(12)::text').extract_first())  
-                for p in range(2, last_page + 1):  
-                    task = (news_type, p)  
-                    print('向列表页页队列添加任务：', task)  
-                    queue_list_page.put(task)  
-        except Exception as e:  
-            print(f'第{current_retry_times}次爬取列表页出错', e.__traceback__, e)  
-            if current_retry_times < 5:  
-                _run_list_page_retry(current_retry_times + 1)  
-            else:  
-                print('重试了5次仍然错误')  
-
-    _run_list_page_retry(1)  
-
-
-def crawl_detail_page(url, title):  
-    def _run_detail_page_retry(current_retry_times):  
-        if r.sismember('filter_carhome_detail_page', url):  
-            print(f'此入参已经爬取过了 {url} {title}')  
-            return  
-        else:  
-            try:  
-                print(f'请求的详情页url是 {url}')  
-                resp = requests.request('get', url, timeout=5)  
-                if resp.status_code != 200:  
-                    raise ValueError  
-                resp_text = resp.content.decode('gbk')  
-                sel = Selector(resp_text)  
-                author = sel.css('#articlewrap > div.article-info > div > a::text').extract_first() or  
-                         sel.css('#articlewrap > div.article-info > div::text').extract_first() or ''  
-                author = author.replace("\n", "").strip()  
-                print(f'{time.strftime("%H:%M:%S")} 保存到数据库 {url} {title} {author} ')  
-                r.sadd('filter_carhome_detail_page', url)  # 运行成功了，放入过滤中  
-            except Exception as e:  
-                print(f'第{current_retry_times}次爬取详情页页出错', e.__traceback__, e)  
-                if current_retry_times < 3:  
-                    _run_detail_page_retry(current_retry_times + 1)  
-                else:  
-                    print('重试了3次仍然错误')  
-                    r.sadd('filter_carhome_detail_page', url)  # 运行最大次数了，放入过滤中  
-
-    _run_detail_page_retry(1)  
-
-
-def start_list_page():  
-    while True:  
-        try:  
-            task = queue_list_page.get(block=True, timeout=600)  
-            print(f'取出的列表页爬取任务是 {task}')  
-            pool_list_page.submit(crawl_list_page, *task)  
-        except Empty:  
-            print('列表页超过600秒没有任务，列表页爬完了')  
-            break  
-
-
-def start_detail_page():  
-    while True:  
-        try:  
-            task = queue_detail_page.get(block=True, timeout=600)  
-            print(f'取出的详情页爬取任务是 {task}')  
-            pool_detail_page.submit(crawl_detail_page, *task)  
-        except Empty:  
-            print('详情页超过600秒没有任务，详情页爬完了')  
-            break  
-
-
-if __name__ == '__main__':  
-    # 单独的测试函数功能  
-    # crawl_list_page('advice',1)  #  
-    # crawl_detail_page('https://www.autohome.com.cn/news/202008/1022380.html#pvareaid=102624','xxx')  
-
-    t1 = Thread(target=start_list_page)  
-    t2 = Thread(target=start_detail_page)  
-    t1.start()  
-    t2.start()  
-
-    queue_list_page.put(('news', 1))  # 新闻  
-    queue_list_page.put(('advice', 1))  # 导购  
-    queue_list_page.put(('drive', 1))  # 评测  
-
-```  
-
-举个网上下载 mzitu 网站图片的代码截图，就是采用的无框架爬虫，任务调度靠直接for循环调用函数，任务并发全靠手写操作threads，  
-
-这样的代码看起来很多很混乱，写一个还行，要是爬虫项目多了，没有统一化的逻辑思维，接盘侠每次都要阅读很长的代码才知道运行逻辑，那就非常悲催。  
-
-![img_13.png](img_13.png)  
-
-
-
-### 8.3.5 scrapy爬虫代码  
-
-这是scrapy爬虫代码的基本结构，用户写代码需要非常频繁的在 spider items middware pipeline settings cmd命令行 来回切换写代码测试代码，很吓人。  
-
-需要在不同的地方写middleware类 pipeline类并把类名添加到settings里面。  
-
-scrapy目录结构，代码文件数量很多  
-
-![img_5.png](img_5.png)  
-
-这是 scrapy carhome_spider.py的代码  
-
-```python  
-# This package will contain the spiders of your Scrapy project  
-#  
-# Please refer to the documentation for information on how to create and manage  
-# your spiders.  
-import json  
-
-from scrapy.http import Request  
-from scrapy_redis.spiders import RedisSpider  
-
-from scrapy_proj_carhome.items import ScrapyProjCarhomeItem  
-
-import nb_log  
-
-
-class carHomeSpider(RedisSpider):  
-    name = "carhome"  
-    allowed_domains = ["www.autohome.com.cn"]  
-
-    redis_key = "carhome:start_urls"  
-
-    def make_requests_from_url(self, data: str):  
-        '''  
-        data就是放入 carhome:start_urls 中的任务,因为最初的种子信息还需要携带其他信息，例如新闻类型的中文种类，不是单纯的url，所以需要重写此方法  
-        :param data:  
-        :return:  
-        '''  
-        start_task = json.loads(data)  
-        url = start_task['url']  
-
-        # 此处也可以改为post请求  
-        return Request(  
-            url,  
-            meta=start_task  
-        )  
-
-    def parse(self, response):  
-        # https://www.autohome.com.cn/news/2/#liststart  
-        # print(response.body)  
-        for li in response.css('#Ul1 > li'):  
-            url = 'https:' + li.xpath('./a/@href').extract_first()  
-            title = li.xpath('./a/h3/text()').extract_first()  
-            yield Request(url, callback=self.parse_detail_page, meta={'url': url, 'title': title, 'news_type': response.meta['news_type']},  
-                          dont_filter=False, priority=10)  
-        page = response.url.split('/')[-2]  
-        if page == '1':  
-            last_page = int(response.css('#channelPage > a:nth-child(12)::text').extract_first())  
-            for p in range(2, last_page + 1):  
-                url_new = response.url.replace('/1/', f'/{p}/')  
-                self.logger.debug(url_new)  
-                yield Request(url_new, callback=self.parse, dont_filter=True, meta=response.meta)  
-
-    def parse_detail_page(self, response):  
-        author = response.css('#articlewrap > div.article-info > div > a::text').extract_first() or  
-                 response.css('#articlewrap > div.article-info > div::text').extract_first() or ''  
-        author = author.replace("\n", "").strip()  
-        item = ScrapyProjCarhomeItem()  
-        item['author'] = author  
-        item['url'] = response.meta['url']  
-        item['title'] = response.meta['title']  
-        item['news_type'] = response.meta['news_type']  
-        yield item  
-
-
-if __name__ == '__main__':  
-    pass  
-```  
-
-这是 items.py 的代码  
-
-```python  
-# -*- coding: utf-8 -*-  
-
-# Define here the models for your scraped items  
-#  
-# See documentation in:  
-# https://doc.scrapy.org/en/latest/topics/items.html  
-
-import scrapy  
-
-
-class ScrapyProjCarhomeItem(scrapy.Item):  
-    # define the fields for your item here like:  
-    # name = scrapy.Field()  
-    author = scrapy.Field()  
-    url = scrapy.Field()  
-    title = scrapy.Field()  
-    news_type = scrapy.Field()  
-
-```  
-
-这个middlewares.py文件的代码是最坑的，任何自定义想法需要写一个类，继承middware类，重写process_request process_request方法，然后把类名添加到settings里面。  
-
-
-<summary>这是 middlewares.py的代码</summary><br>  
-
-
-
-```python  
-# -*- coding: utf-8 -*-  
-
-# Define here the models for your spider middleware  
-#  
-# See documentation in:  
-# https://doc.scrapy.org/en/latest/topics/spider-middleware.html  
-
-from scrapy import signals  
-
-
-class ScrapyProjCarhomeSpiderMiddleware(object):  
-    # Not all methods need to be defined. If a method is not defined,  
-    # scrapy acts as if the spider middleware does not modify the  
-    # passed objects.  
-
-    @classmethod  
-    def from_crawler(cls, crawler):  
-        # This method is used by Scrapy to create your spiders.  
-        s = cls()  
-        crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)  
-        return s  
-
-    def process_spider_input(self, response, spider):  
-        # Called for each response that goes through the spider  
-        # middleware and into the spider.  
-
-        # Should return None or raise an exception.  
-        return None  
-
-    def process_spider_output(self, response, result, spider):  
-        # Called with the results returned from the Spider, after  
-        # it has processed the response.  
-
-        # Must return an iterable of Request, dict or Item objects.  
-        for i in result:  
-            yield i  
-
-    def process_spider_exception(self, response, exception, spider):  
-        # Called when a spider or process_spider_input() method  
-        # (from other spider middleware) raises an exception.  
-
-        # Should return either None or an iterable of Response, dict  
-        # or Item objects.  
-        pass  
-
-    def process_start_requests(self, start_requests, spider):  
-        # Called with the start requests of the spider, and works  
-        # similarly to the process_spider_output() method, except  
-        # that it doesn't have a response associated.  
-
-        # Must return only requests (not items).  
-        for r in start_requests:  
-            yield r  
-
-    def spider_opened(self, spider):  
-        spider.logger.info('Spider opened: %s' % spider.name)  
-
-
-class ScrapyProjCarhomeDownloaderMiddleware(object):  
-    # Not all methods need to be defined. If a method is not defined,  
-    # scrapy acts as if the downloader middleware does not modify the  
-    # passed objects.  
-
-    @classmethod  
-    def from_crawler(cls, crawler):  
-        # This method is used by Scrapy to create your spiders.  
-        s = cls()  
-        crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)  
-        return s  
-
-    def process_request(self, request, spider):  
-        # Called for each request that goes through the downloader  
-        # middleware.  
-
-        # Must either:  
-        # - return None: continue processing this request  
-        # - or return a Response object  
-        # - or return a Request object  
-        # - or raise IgnoreRequest: process_exception() methods of  
-        #   installed downloader middleware will be called  
-        return None  
-
-    def process_response(self, request, response, spider):  
-        # Called with the response returned from the downloader.  
-
-        # Must either;  
-        # - return a Response object  
-        # - return a Request object  
-        # - or raise IgnoreRequest  
-        return response  
-
-    def process_exception(self, request, exception, spider):  
-        # Called when a download handler or a process_request()  
-        # (from other downloader middleware) raises an exception.  
-
-        # Must either:  
-        # - return None: continue processing this exception  
-        # - return a Response object: stops process_exception() chain  
-        # - return a Request object: stops process_exception() chain  
-        pass  
-
-    def spider_opened(self, spider):  
-        spider.logger.info('Spider opened: %s' % spider.name)  
-
-```  
-
-</details>  
-
-
-
-这是pipelines.py 的代码,保存数据。  
-
-```python  
-# -*- coding: utf-8 -*-  
-
-# Define your item pipelines here  
-#  
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting  
-# See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html  
-from scrapy_proj_carhome.items import ScrapyProjCarhomeItem  
-
-
-class ScrapyProjCarhomePipeline(object):  
-    def process_item(self, item, spider):  
-        print(type(item))  
-        if isinstance(item, ScrapyProjCarhomeItem):  
-            print(f'保存到数据库 {item["news_type"]}  {item["url"]} {item["title"]} {item["author"]} ')  
-        return item  
-
-```  
-
-这是settings.py的代码  
-
-```python  
-# -*- coding: utf-8 -*-  
-
-# Scrapy settings for scrapy_proj_carhome project  
-#  
-# For simplicity, this file contains only settings considered important or  
-# commonly used. You can find more settings consulting the documentation:  
-#  
-#     https://doc.scrapy.org/en/latest/topics/settings.html  
-#     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html  
-#     https://doc.scrapy.org/en/latest/topics/spider-middleware.html  
-
-BOT_NAME = 'scrapy_proj_carhome'  
-
-SPIDER_MODULES = ['scrapy_proj_carhome.spiders']  
-NEWSPIDER_MODULE = 'scrapy_proj_carhome.spiders'  
-
-# Crawl responsibly by identifying yourself (and your website) on the user-agent  
-# USER_AGENT = 'scrapy_proj_carhome (+http://www.yourdomain.com)'  
-
-# Obey robots.txt rules  
-ROBOTSTXT_OBEY = True  
-
-# Configure maximum concurrent requests performed by Scrapy (default: 16)  
-# CONCURRENT_REQUESTS = 32  
-
-# Configure a delay for requests for the same website (default: 0)  
-# See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay  
-# See also autothrottle settings and docs  
-# DOWNLOAD_DELAY = 3  
-# The download delay setting will honor only one of:  
-# CONCURRENT_REQUESTS_PER_DOMAIN = 16  
-# CONCURRENT_REQUESTS_PER_IP = 16  
-
-# Disable cookies (enabled by default)  
-# COOKIES_ENABLED = False  
-
-# Disable Telnet Console (enabled by default)  
-# TELNETCONSOLE_ENABLED = False  
-
-# Override the default request headers:  
-# DEFAULT_REQUEST_HEADERS = {  
-#   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',  
-#   'Accept-Language': 'en',  
-# }  
-
-# Enable or disable spider middlewares  
-# See https://doc.scrapy.org/en/latest/topics/spider-middleware.html  
-# SPIDER_MIDDLEWARES = {  
-#    'scrapy_proj_carhome.middlewares.ScrapyProjCarhomeSpiderMiddleware': 543,  
-# }  
-
-# Enable or disable downloader middlewares  
-# See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html  
-DOWNLOADER_MIDDLEWARES = {  
-    'scrapy_proj_carhome.middlewares.ScrapyProjCarhomeDownloaderMiddleware': 543,  
-}  
-
-# Enable or disable extensions  
-# See https://doc.scrapy.org/en/latest/topics/extensions.html  
-# EXTENSIONS = {  
-#    'scrapy.extensions.telnet.TelnetConsole': None,  
-# }  
-
-# Configure item pipelines  
-# See https://doc.scrapy.org/en/latest/topics/item-pipeline.html  
-ITEM_PIPELINES = {  
-    'scrapy_proj_carhome.pipelines.ScrapyProjCarhomePipeline': 300,  
-}  
-
-# Enable and configure the AutoThrottle extension (disabled by default)  
-# See https://doc.scrapy.org/en/latest/topics/autothrottle.html  
-# AUTOTHROTTLE_ENABLED = True  
-# The initial download delay  
-# AUTOTHROTTLE_START_DELAY = 5  
-# The maximum download delay to be set in case of high latencies  
-# AUTOTHROTTLE_MAX_DELAY = 60  
-# The average number of requests Scrapy should be sending in parallel to  
-# each remote server  
-# AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0  
-# Enable showing throttling stats for every response received:  
-# AUTOTHROTTLE_DEBUG = False  
-
-# Enable and configure HTTP caching (disabled by default)  
-# See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings  
-# HTTPCACHE_ENABLED = True  
-# HTTPCACHE_EXPIRATION_SECS = 0  
-# HTTPCACHE_DIR = 'httpcache'  
-# HTTPCACHE_IGNORE_HTTP_CODES = []  
-# HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'  
-
-
-REDIS_HOST = "127.0.0.1"  
-REDIS_PORT = 6379  
-REDIS_PARAMS = {'db': 2, 'password': ''}  
-REDIS_ENCODING = "utf-8"  
-
-SCHEDULER = "scrapy_redis.scheduler.Scheduler"  
-DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"  
-SCHEDULER_PERSIST = True  
-# DUPEFILTER_KEY = "dupefilter:%(timestamp)s"  
-
-
-```  
-
-这是 push_start_urls.py 的代码  
-
-```python  
-from redis import Redis  
-import json  
-from scrapy_proj_carhome import settings  
-
-r = Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, **settings.REDIS_PARAMS)  
-
-r.flushdb()  
-
-# 因为要让初始种子就携带其他信息，初始种子发布的不是url本身，所以需要继承重写spider的make_requests_from_url方法。  
-r.lpush('carhome:start_urls', json.dumps({'url': 'https://www.autohome.com.cn/news/1/#liststart', 'news_type': '新闻'}, ensure_ascii=False))  
-r.lpush('carhome:start_urls', json.dumps({'url': 'https://www.autohome.com.cn/advice/1/#liststart', 'news_type': '导购'}, ensure_ascii=False))  
-r.lpush('carhome:start_urls', json.dumps({'url': 'https://www.autohome.com.cn/drive/1/#liststart', 'news_type': '驾驶评测'}, ensure_ascii=False))  
-
-```  
-
-这是run.py的代码  
-
-```python  
-
-from scrapy import cmdline  
-
-cmdline.execute(['scrapy', 'crawl', 'carhome'])  
-```  
-
-```  
-从上面的代码可以看到scrapy要在8个文件频繁的来回切换写代码，非常的烦躁。  
-即使是除去scrapy 建项目自动生产的固定代码行数，此scrapy项目的代码行数仍然远远高于分布式函数调度框架的代码行数  
-```  
-
-### 8.3.6 分布式函数调度框架的代码  
-
-只需要单个文件(当然也可以拆解成发布和消费独立成两个文件)  
-
-所需代码行数远小于无框架每次临时手写爬虫全流程和使用scrapy的方式。  
-
-此框架不仅可以对标celery框架，也可以取代scrapy框架。  
-
-```python  
-
-
-from funboost import boost, BrokerEnum, BoosterParams  
-import requests  
-from parsel import Selector  
-
-
-@boost(BoosterParams(queue_name='car_home_list', broker_kind=BrokerEnum.REDIS_ACK_ABLE, max_retry_times=5, qps=10))  
-def crawl_list_page(news_type, page):  
-    url = f'https://www.autohome.com.cn/{news_type}/{page}/#liststart'  
-    resp_text = requests.get(url).text  
-    sel = Selector(resp_text)  
-    for li in sel.css('#Ul1 > li'):  
-        url_detail = 'https:' + li.xpath('./a/@href').extract_first()  
-        title = li.xpath('./a/h3/text()').extract_first()  
-        crawl_detail_page.push(url_detail, title=title, news_type=news_type)  
-    if page == 1:  
-        last_page = int(sel.css('#channelPage > a:nth-child(12)::text').extract_first())  
-        for p in range(2, last_page + 1):  
-            crawl_list_page.push(news_type, p)  
-
-
-@boost(BoosterParams(queue_name='car_home_detail', broker_kind=BrokerEnum.REDIS_ACK_ABLE, concurrent_num=100, qps=30, do_task_filtering=False))  
-def crawl_detail_page(url, title, news_type):  
-    resp_text = requests.get(url).text  
-    sel = Selector(resp_text)  
-    author = sel.css('#articlewrap > div.article-info > div > a::text').extract_first() or  
-             sel.css('#articlewrap > div.article-info > div::text').extract_first() or ''  
-    author = author.replace("\n", "").strip()  
-    print(f'使用print模拟保存到数据库  {news_type}   {title} {author} {url}')  # ，实际为调用数据库插入函数，压根不需要return item出来在另外文件的地方进行保存。  
-
-
-if __name__ == '__main__':  
-    # 单独的测试函数功能  
-    # crawl_list_page('advice',1)  #  
-    # crawl_detail_page('https://www.autohome.com.cn/news/202008/1022380.html#pvareaid=102624','xxx')  
-
-    # 清空消息队列  
-    crawl_list_page.clear()  
-    crawl_detail_page.clear()  
-    #  
-    # # 推送列表页首页  
-    crawl_list_page.push('news', 1)  # 新闻  
-    crawl_list_page.push('advice', page=1)  # 导购  
-    crawl_list_page.push(news_type='drive', page=1)  # 驾驶评测  
-
-    # 启动列表页消费和详情页消费,上面的清空和推送可以卸载另外的脚本里面，因为是使用的中间件解耦，所以可以推送和消费独立运行。  
-    crawl_list_page.consume()  
-    crawl_detail_page.consume()  
-```  
-
-使用分布式函数调度框架运行的爬虫，自动并发，自动控频，是指定了列表页qps=2，详情页qps=3的情况下运行的控制台日志  
-
-[![4BquHf.png](https://z3.ax1x.com/2021/09/24/4BquHf.png)](https://imgtu.com/i/4BquHf)  
-
-可以得出结论，控频效果精确度达到了99%以上，目前世界所有爬虫框架只能指定并发请求数量，但不能指定每秒爬多少次页面，此框架才能做到。  
-
-
-
-## 8.7 scrapy 和 仿scrapy api 式爬虫框架 回调地狱，代码写法思维反直觉  
-
-scrapy 和 仿scrapy api 式爬虫框架 回调地狱，代码写法思维反直觉，不是横冲直闯 平铺直叙的一气呵成 写法，导致编写和理解苦难  
-
-Scrapy 作为一个成熟的爬虫框架，其设计和架构目标主要是为了实现高并发、异步非阻塞的网络爬取，并能灵活地处理分布式任务调度。正因为这些设计目标，Scrapy 的代码风格与"横冲直闯、平铺直叙"那种顺序式、线性写法有很大区别，下面详细说明原因：  
-
-1. **异步回调模型（Event-driven Programming）**  
-   Scrapy 基于 Twisted 异步网络框架，其核心设计采用的是事件驱动模式。请求发送后，并不会等待响应返回，而是通过回调函数（通常是 spider 中的 parse 方法）来处理响应。  
-   - **代码分散**：任务被拆分成多个独立的回调函数，每个回调函数只处理特定的响应数据。这种模式虽然高效，但导致代码逻辑被拆分成许多零散的函数，难以从头到尾按顺序阅读。  
-   - **逻辑碎片化**：一个完整的爬取流程可能涉及多个请求、多个回调，以及在回调中又发起新的请求。这样就形成了类似"回调地狱"的结构，不是那种一气呵成的直线流程。  
-
-2. **固定项目结构和模块分离**  
-   Scrapy 强调模块化开发，将爬虫、下载器中间件、数据管道、调度器等组件严格分离：  
-   - **Spider**：定义爬虫逻辑，每个 Spider 负责从起始 URL 出发解析页面，提取数据和新的 URL。  
-   - **Downloader Middleware**：在请求和响应之间插入额外的处理逻辑，如设置代理、User-Agent、重试等。  
-   - **Item Pipeline**：处理解析后的数据（清洗、存储等）。  
-   
-   这种结构使得每个模块职责明确，但同时也要求开发者在不同文件中编写不同逻辑，整体代码组织上远比"平铺直叙"复杂。  
-
-3. **异步并发与性能优化的权衡**  
-   为了实现高并发与高效爬取，Scrapy 必须避免阻塞操作。这就要求所有网络请求、数据解析等操作都以异步方式处理，任何阻塞代码都可能影响整个爬虫性能。因此：  
-   - **回调链**：每个网络请求完成后都需要通过回调函数继续处理数据，任务间的顺序和依赖关系通过事件循环来管理，而不是直接按照代码的顺序执行。  
-   - **任务调度机制**：Scrapy 内部有一个调度器（Scheduler）来管理请求队列和去重逻辑，这也使得任务处理不是简单的线性顺序，而是多个请求并发执行，异步返回后再根据调度逻辑进行处理。  
-
-4. **错误处理与重试机制**  
-   在 Scrapy 中，如果在 spider 的回调函数中捕获并吞掉异常，框架就无法正确检测到任务失败，从而影响自动重试和错误处理策略。为了保证重试机制能够工作，通常要求让异常沿回调链上抛，这也促使代码设计者不得不在各个回调中考虑如何把异常交由框架统一处理，而不是简单地在一个"主流程"中捕获处理。  
-
-5. **灵活性与扩展性**  
-   虽然 Scrapy 采用回调和分层结构增加了开发难度，但它提供了大量内置的扩展点（如中间件、扩展器、信号机制等），使得开发者可以在不同阶段注入自定义逻辑。这个灵活性换来了高度可定制的爬虫，但也使得代码看起来不如"平铺直叙"的方式那样直接。所以不精通scrapy本身的人想扩展自定义scrapy难度超高。  
-
-综上，Scrapy 的架构设计为异步高并发和模块化扩展服务，采用事件驱动和回调链来管理任务流，使得代码逻辑被拆分到各个独立模块和回调函数中。这种设计虽然在性能和灵活性上非常出色，但从代码风格上来说，并不是那种"一气呵成、平铺直叙"的直观写法，而更像是分散在多个模块、通过事件调度器串联起来的"碎片化"结构，这正是 Scrapy 为实现大规模、高效率爬取所必须做出的权衡。  
-
-## 8.8 详细说明为什么 Scrapy 爬虫代码不是直观的"平铺直叙"写法？  
-
-![img_81.png](img_81.png)  
-
-<div class="inner_markdown">  
-
-
-
-Scrapy 是一个强大的爬虫框架，在它的回调函数中需要写很多 `callback` 事件函数，和同步代码逻辑不直观。  
-本文将解释 **Scrapy 的写法为什么不是平铺直叙的**。  
-
----  
-
-<h3> 1. 基于回调，代码逻辑割裂</h3>  
-
-<h4>Scrapy 代码的典型结构</h4>  
-
-```python  
-import scrapy  
-
-class MySpider(scrapy.Spider):  
-    name = 'myspider'  
-    start_urls = ['https://example.com/list']  
-
-    def parse(self, response):  
-        detail_urls = response.css('a::attr(href)').getall()  
-        for url in detail_urls:  
-            yield scrapy.Request(url, callback=self.parse_detail)  
-
-    def parse_detail(self, response):  
-        title = response.css('h1::text').get()  
-        price = response.css('.price::text').get()  
-        yield {'title': title, 'price': price}  
-```  
-
-**问题分析**  
-- 爬虫逻辑被分散在多个回调函数里，代码割裂。  
-- 业务逻辑无法“从上到下”顺序执行，开发者思维负担大。  
-- 如果熟悉 Python 的 `requests` 和 `BeautifulSoup`，常觉得爬虫代码可以写得更平铺直叙。  
-
----  
-
-<h3> 2. `yield` 语法导致执行顺序不直观</h3>  
-
-在 Scrapy 中，`yield` 用于生成新的请求，而不是立即执行回调函数。  
-常见写法：  
-
-```python  
-yield response.follow(url, callback=self.parse_detail)  
-```  
-
-**问题分析**  
-- 任务不会立即同步执行，需等 Scrapy 调度下一次请求。  
-- 编写 Python 函数时，习惯用 `return` 表达逻辑，而 Scrapy 使用 `yield` 让逻辑割裂。  
-- 对于新手来说，Scrapy 的执行顺序、调度策略，不同于常规函数调用链。  
-
----  
-
-<h3> 3. 任务调度是黑盒，开发者失去控制权</h3>  
-
-Scrapy 通过调度器（Scheduler）决定请求的先后执行顺序：  
-- 爬虫开发者只负责写回调函数，不控制调度。  
-- 但有时候需要更精细化控制顺序，比如递归抓取树形结构。  
-
-**对比：**  
-使用 `for url in URL_LIST: requests.get(url)` 就很直观：  
-- 程序的执行顺序由 Python 原生控制。  
-- Scrapy 的调度机制虽然强大，但对开发者来说是黑盒。  
-
----  
-
-<h3> 4. 强制使用 `Spider` 类，不够自由</h3>  
-
-Scrapy 框架必须继承 `Spider` 类：  
-
-```python  
-class MySpider(scrapy.Spider):  
-    name = 'myspider'  
-    ...  
-```  
-
-**问题分析**  
-- 代码风格被固定，无法随意定义函数入口。  
-- 对比 `requests` 库，可以直接写 `def crawl():` 这种函数结构，更符合 Python 开发习惯。  
-
----  
-
-<h3> 5. 并发控制分散，不直观</h3>  
-
-在 Scrapy 里，并发控制依赖 `settings.py` 配置：  
-
-```python  
-CONCURRENT_REQUESTS = 16  
-DOWNLOAD_DELAY = 0.5  
-AUTOTHROTTLE_ENABLED = True  
-AUTOTHROTTLE_START_DELAY = 1  
-```  
-
-**问题分析**  
-- 并发控制在全局配置文件，逻辑和代码分离。  
-- 如果希望按不同函数使用不同并发策略，需要额外代码。  
-
-相比之下，`funboost` 的写法更直观：  
-
-```python  
-@boost(concurrent_num=20)  
-def crawl_page(url):  
-    ...  
-```  
-
-- 代码和配置绑定在一起，逻辑更易理解。  
-
----  
-
-<h3> 6. Scrapy 不适合任务编排</h3>  
-
-Scrapy 多个回调函数之间无法方便串联多个 `Spider`：  
-
-```python  
-class MySpider(scrapy.Spider):  
-    name = 'myspider'  
-    start_urls = ['https://example.com/list']  
-
-    def parse(self, response):  
-        yield response.follow(url, callback=self.parse_detail)  
-```  
-
-**问题分析**  
-- 单个任务孤立，不方便平铺任务依赖。  
-- 对比 `funboost` 等任务队列框架，可以轻松实现任务流水线，例如：  
-
-```python  
-crawl_list_page.push(url)  
-crawl_detail_page.push(detail_url)  
-```  
-
----  
-
-<h3> 总结</h3>  
-
-<h4> ❌ 为什么 Scrapy 代码不是直观的“平铺直叙”写法</h4>  
-
-| 特性         | Scrapy 框架      | 平铺直叙写法         |  
-|--------------|------------------|----------------------|  
-| **回调函数** | 多               | 代码集中、顺序执行   |  
-| **执行顺序** | 由调度器控制     | 上下文可控           |  
-| **yield**    | 必须             | `return` 或直接调用  |  
-| **并发**     | 全局 settings    | 局部可配置           |  
-| **入口结构** | 固定 `Spider` 类 | 任意函数             |  
-| **任务编排** | 不方便           | 灵活组合             |  
-
----  
-
-<h4> 结论</h4>  
-
-1. **Scrapy 的设计理念是事件驱动 + 回调函数**，导致逻辑不直观。  
-2. 多数 Python 程序员更习惯顺序化代码，而 Scrapy 的“分散回调”方式不符合直觉。  
-3. **Scrapy 适合大规模分布式爬取**，但对小型项目，`requests + BeautifulSoup` 或 `asyncio` 更直观。  
-4. 如果需要 **任务编排 + 平铺直叙的任务逻辑**，可以考虑 `funboost` 等任务队列框架。  
-5. 总的来说，Scrapy 功能强大，但牺牲了代码的 **直观性和自由度**。  
-
----  
-
-> **讨论：** 你觉得 Scrapy 的回调写法优雅吗？  
-> 如果想尝试 **平铺直叙** 的写法，可以了解 `funboost` 框架。  
-
-
-</div>  
-
-## 8.9 仿scrapy api框架中无法完成的需求真实例子2，token有效期太短  
-
-举例一个 仿scrapy api框架中无法完成的需求真实例子。  
-
-根据data参数请求URL1生成sm_token，然后必须在10秒有效期内使用相同的data和获取到的sm_token请求URL2。  
-
-scrapy由于是url调度，一次只能调度请求一次，无法确保是在10秒内使用data得到的sm_token去请求url2。不管你是配置使用深度优先，还是加上priority，如果url2任务种子堆积了，会发生大面积延迟导致sm_token过期。  
-
-```python  
-import scrapy  
-import json  
-import time  
-from scrapy.exceptions import DropItem  
-
-class TokenSpider(scrapy.Spider):  
-    name = 'token_spider'  
-    
-    def __init__(self, *args, **kwargs):  
-        super(TokenSpider, self).__init__(*args, **kwargs)  
-        # 需要处理的data列表  
-        self.data_list = ['data1', 'data2', 'data3']  
-    
-    def start_requests(self):  
-        # 为每个data生成请求  
-        for data in self.data_list:  
-            url = f'https://example.com/api/gettoken?data={data}'  
-            yield scrapy.Request(  
-                url=url,   
-                callback=self.parse_token,  
-                meta={'data': data}  # 传递data参数  
-            )  
-    
-    def parse_token(self, response):  
-        # 获取传递的data  
-        data = response.meta.get('data')  
-        
-        try:  
-            # 解析响应获取sm_token  
-            result = json.loads(response.text)  
-            sm_token = result.get('sm_token')  
-            
-            if not sm_token:  
-                self.logger.error(f"未获取到data={data}的有效sm_token")  
-                return  
-            
-            # 记录获取token的时间  
-            token_time = time.time()  
-            
-            # 构建第二个请求  
-            url2 = f'https://example.com/api/getData?data={data}&sm={sm_token}'  
-            
-            # 将data、token和时间传递给下一个回调  
-            yield scrapy.Request(  
-                url=url2,  
-                callback=self.parse_data,  
-                meta={  
-                    'data': data,  
-                    'sm_token': sm_token,  
-                    'token_time': token_time  
-                },  
-                priority=100  # 尝试提高优先级，但无法保证立即执行，因为url2的优先级都是100，堆积就会造成sm_token过期。  
-            )  
-            
-        except Exception as e:  
-            self.logger.error(f"处理token响应时出错: {e}")  
-    
-    def parse_data(self, response):  
-        # 获取传递的元数据  
-        data = response.meta.get('data')  
-        sm_token = response.meta.get('sm_token')  
-        token_time = response.meta.get('token_time')  
-        
-        # 检查token是否已过期，  只能检查，而非确保啊。 url2 和url1调度是独立的，无法确保是在10秒内。  
-        current_time = time.time()  
-        if current_time - token_time > 10:  
-            self.logger.error(f"Data={data}的Token已过期! 耗时: {current_time - token_time}秒")  
-            # 这里可以尝试重新获取token，但逻辑会变得复杂  
-            raise DropItem("由于Token过期，丢弃此次请求数据")  
-            
-        try:  
-            # 处理第二个请求的响应  
-            result = json.loads(response.text)  
-            # 收集数据  
-            yield {  
-                'data': data,  
-                'result': result,  
-                'token_elapsed': current_time - token_time  
-            }  
-        except Exception as e:  
-            self.logger.error(f"处理数据响应时出错: {e}")  
-```  
-
-funboost中实现这需求非常丝滑自然，因为funboost可以在一个函数内部连续请求两个url，可以确保在通过url1得到sm_token后的0.01毫秒内立即对url2发送请求。  
-
-```python  
-from funboost import boost, BrokerEnum, BoosterParams  
-import requests  
-import json  
-import time  
-
-@boost(BoosterParams(queue_name="token_task",broker_kind=BrokerEnum.REDIS_ACK_ABLE,qps=100, max_retry_times=3))  
-def process_with_token(data):  
-    """一个函数处理整个流程，逻辑清晰直观"""  
-   
-    # 第一个请求：根据data获取对应的sm_token  
-    url1 = f"https://example.com/api/gettoken?data={data}"  
-    response1 = requests.get(url1, timeout=5)  
-    sm_token = response1.json()['sm_token']  
-    
-    # 立即使用data和sm_token请求第二个URL  
-    # 这里无延迟，不经过任何调度器，保证token新鲜有效  
-    url2 = f"https://example.com/api/getData?data={data}&sm={sm_token}"  
-    response2 = requests.get(url2, timeout=5)  
-    # 处理并返回数据  
-    result = response2.json()  
-    print('保存result')  
-        
-
-# 启动爬虫  
-if __name__ == "__main__":  
-    # 发布任务  
-    data_list = ['data1', 'data2', 'data3', 'data4', 'data5']  
-    for data_item in data_list:  
-        process_with_token.push(data_item)  
-    
-    # 启动消费者处理任务  
-    process_with_token.consume()  
-```  
-
-两者在此需求实现上对比对比分析：  
-
-<table style="width:100%; border-collapse:collapse; text-align:center;">  
-  <thead>  
-    <tr style="background-color:#f2f2f2;">  
-      <th style="padding:8px; border:1px solid #ddd; text-align:left;">特性</th>  
-      <th style="padding:8px; border:1px solid #ddd; text-align:center;">Scrapy</th>  
-      <th style="padding:8px; border:1px solid #ddd; text-align:center;">Funboost</th>  
-    </tr>  
-  </thead>  
-  <tbody>  
-    <tr>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:left;">代码行数</td>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:center;">~70行</td>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:center;">~35行</td>  
-    </tr>  
-    <tr>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:left;">执行流程</td>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:center;">分散在3个回调函数中</td>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:center;">集中在1个函数内</td>  
-    </tr>  
-    <tr>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:left;">状态传递</td>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:center;">通过meta字典在多个回调间传递</td>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:center;">直接使用变量，自然清晰</td>  
-    </tr>  
-    <tr>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:left;">token时效性</td>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:center;">只能被动检查是否过期，可能数据丢失</td>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:center;">立即使用，几乎0延迟，确保有效</td>  
-    </tr>  
-    <tr>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:left;">错误处理</td>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:center;">分散在多处，难以全面处理</td>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:center;">集中在一个try-except内</td>  
-    </tr>  
-    <tr>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:left;">可读性</td>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:center;">需要在多个函数间跳转理解逻辑</td>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:center;">从上到下线性阅读，一目了然</td>  
-    </tr>  
-    <tr>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:left;">可维护性</td>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:center;">修改需考虑多处回调关系</td>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:center;">修改只需要关注一个函数</td>  
-    </tr>  
-    <tr>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:left;">调试难度</td>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:center;">高，难以跟踪完整流程</td>  
-      <td style="padding:8px; border:1px solid #ddd; text-align:center;">低，标准函数调试方式</td>  
-    </tr>  
-  </tbody>  
-</table>  
-
-
-funboost在这个特殊需求上优势总结：  
-```  
-Funboost在处理这类"根据data获取token并立即使用"的爬虫场景时表现卓越：  
-连续执行保证：两次请求在同一函数内连续执行，保证token不会过期  
-无状态传递困扰：不需要通过meta字典在回调间传递状态  
-直观的流程控制：整个处理流程遵循自然的编程思维  
-更简单的数据处理：直接在函数内处理和返回结果  
-对于具有严格时效性要求的爬虫任务，特别是需要多步骤请求且后续请求依赖前序请求结果的场景，  
-Funboost的优势变得尤为明显，让复杂的爬虫任务回归到简单直观的函数式编程模型。  
-```  
-
-## 8.10 scrapy的 response.meta 字典传参无法ide自动补全提示  
-
-Scrapy的meta字典在ide中完全无法补全提示：  
-```  
-meta是无类型字典，IDE无法知道里面有什么键  
-没有自动补全提示 response.meta.get('???')  
-拼写错误不会在编写时被捕获，如token_tiem而不是token_time  
-忘记在上一个回调中传递某个键值对也不会有警告  
-需要不断查看或记忆上下文中传递了哪些数据  
-```  
-
-```  
-上面8.9例子中的 parse_token 方法中  
-
-yield scrapy.Request ，需要在meta中把各个有用的变量信息传递给下一个解析方法  
-
-yield scrapy.Request(  
-    url=url2,  
-    callback=self.parse_data,  
-    meta={  
-        'data': data,  
-        'sm_token': sm_token,  
-        'token_time': token_time  
-    },  
-    priority=100  
-)  
-
-
-在 parse_data 方法中，很容易出错  
-def parse_data(self, response):  
-        # 获取传递的元数据  
-        # IDE不知道meta中有什么，无法提示  
-        data = response.meta.get('data') # 如果你拼错为'dta'也不会有警告，只有到运行后才能知道写错了  
-        sm_token = response.meta.get('sm_token') # 如果上一步忘记传sm_token，ide在这里不会提前发现  
-        token_time = response.meta.get('token_time') # 如果上一步改了token_time的名字，这里ide不能自动改名字          
-
-
-```  
-
-funboost函数中的局部变量优势：  
-```  
-局部变量有类型信息，IDE能提供完整自动补全  
-变量名拼写错误会立即被标红  
-未定义的变量会被IDE立即标识  
-重构变量名时会同步修改所有引用  
-```  
-
-能否在ide自动补全提示的实际影响:  
-```  
-在实际开发中，这种差异会导致：  
-开发效率差异：  
-funboost开发速度更快，减少查看文档或代码回溯  
-Scrapy需要更多的代码审查和测试才能捕获拼写错误  
-错误出现时机：  
-funboost的错误多在编码阶段被IDE捕获  
-Scrapy的错误往往在运行时才发现，调试成本更高  
-维护和重构：  
-funboost更易重构，变量改名会全局同步  
-Scrapy修改meta键名需手动检查所有回调函数  
-这种看似小的开发体验差异在大型爬虫项目中会带来显著的生产力和代码质量差异，特别是在团队协作或长期维护的场景下。  
-```  
-
-
-## 8.11 funboost中反爬虫换代理ip 请求头 破解等 容易程度暴击专用爬虫框架scrapy  
-
-需要大力驳斥 "专用框架=更方便" 的误解  
-
-### 8.11.1 scrapy中换代理ip和请求头代码  
-```python  
-# Scrapy的下载器中间件  
-class RotateUserAgentMiddleware:  
-    def process_request(self, request, spider):  
-        request.headers['User-Agent'] = random.choice(USER_AGENTS)  
-
-class ProxyMiddleware:  
-    def __init__(self, proxy_list: list[str]):  
-        self.proxy_list = proxy_list  
-
-    @classmethod  
-    def from_crawler(cls, crawler):  
-        """Scrapy 会自动调用此方法创建中间件实例"""  
-        proxy_list = crawler.settings.get("PROXY_LIST", [])  
-        return cls(proxy_list=proxy_list)  
-
-    def process_request(self, request, spider):  
-        proxy = random.choice(self.proxy_list)  
-        request.meta['proxy'] = proxy  
-        
-    def process_response(self, request, response, spider):  
-        # 获取当前重试次数  
-        retry_times = request.meta.get('retry_times', 0)  
-        
-        if response.status == 403 and retry_times < 3:  # 限制最多重试3次  
-            request.meta['proxy'] = self.get_new_proxy()  
-            request.meta['retry_times'] = retry_times + 1  
-            return request  
-        return response  
-
-
-# 并需要在Scrapy的settings.py中注册中间件  
-DOWNLOADER_MIDDLEWARES = {  
-   'myproject.middlewares.RotateUserAgentMiddleware': 400,  
-   'myproject.middlewares.ProxyMiddleware': 500,  
-}  
-```  
-
-```  
-scrapy这个换代理ip代码看起来代码量不大，实则超级复杂。如果不去网上百度找个别人写好的例子，  
-99%的爬虫人员抓破脑袋也绝对写不出来，  
-用户完全是懵逼的，为什么要这么写。  
-为什么要定义一个类，为什么类必须是有 def process_request(self, request, spider): 方法 ,  
-如果方法名字不是这样，入参个数少了或多了，还能运行吗？ 用户为什么知道   
-还要写  'myproject.middlewares.RotateUserAgentMiddleware': 400,这么个玩意？  
-这个字符串是什么？这个数字又是什么，随便乱写个数字行不行？  
-```  
-
-所以有人说scrapy框架是专用爬虫框架，所以优势是能反爬，能支持换代理ip和请求头。说funboost不是专用爬虫框架，所以反爬是对scrapy有劣势，这个是绝对的谬论，真实情况是如果仅靠自己琢磨而不去百度别人的scrapy咋写的换代理ip，在scrapy框架中换代理难如登天。  
-
-### 8.11.2 用户自己自由封装一个换代理ip和请求头的request函数，自然又简单  
-
-funboost 不是专用爬虫框架，但基于funboost的 boost_spider 爬虫开的 RequestClient 支持自动换代理ip和请求头，支持xpath解析。  
-`RequestClient`的 `proxy_name_list` 是能换ip代理商， 例如阿布云  快代理 芝麻代理，吊打换ip，可靠性维度高一个级别。 
-
-即使是直接用funboost爬虫，用户自己自由封装一个换代理ip和请求头的request函数，自然又简单，爬虫小白初学1天都能轻松自然封装出来。比scrapy中那种莫名其妙的def process_request(self, request, spider)写法更容易百倍。  
-
-用户封装一个换代理ip和请求头的request函数如下：  
-```python  
-import requests  
-
-def my_request(method,url):  
-    proxy = random.choice(proxy_list)  
-    user_agent = random.choice(user_agent_list)  
-    return requests.request(method,url,proxies=proxy,headers={'user-agnet':user_agent})  
-           
-```  
-
-```  
-这个 my_request 换代理ip和请求头的函数代码自由而又简单直观，只要是个pythoner都能看得懂，  
-只要是个pythoner都能使用自然而然的直觉思维 很轻松容易的写出来。   
-因为你在封装这个函数时候，完全绝对和funboost没有半毛钱关系，你不需要了解funboost的流程就能封装出来。  
-而且不想用funboost了，你这个写的函数还是有意义可以继续用的。  
-如果你不想用scrapy了，那个ProxyMiddleware代码就成了废物代码。  
-
-用户自己封装的 my_request 函数 能方便的进行独立单元测试，而scrapy的ProxyMiddleware类用户无法单独单元测试验证，必须在scrapy框架整体运行起来才能测试得了。  
-```  
-
-### 8.11.3 为什么scrapy换代理IP和请求头的高难度分析my_request  
-
-首先是你必须非常的精通Scrapy完整流程，才能流畅的改造scrapy  
-```  
-核心组件  
-Engine: 引擎，负责控制数据流在系统中所有组件间的流动  
-Scheduler: 调度器，接收引擎发来的请求并排序、入队，当引擎需要时提供请求  
-Downloader: 下载器，获取网页内容并返回给引擎  
-Spider: 爬虫，解析响应并提取数据，产生新的请求  
-Item Pipeline: 项目管道，处理Spider提取的数据  
-Middleware: 中间件，包括下载器中间件和Spider中间件  
-数据流向  
-Engine向Spider请求第一个URL  
-Engine从Spider获取第一个请求  
-Engine将请求发送给Scheduler调度  
-Scheduler返回下一个请求给Engine  
-Engine通过Downloader Middleware发送请求给Downloader  
-页面下载完成后，Downloader生成响应并通过Downloader Middleware发给Engine  
-Engine将响应通过Spider Middleware发送给Spider处理  
-Spider处理响应并返回提取的数据及新的请求给Engine  
-Engine将数据发送给Item Pipeline，将新请求发给Scheduler  
-重复步骤4-9直到没有请求  
-执行过程  
-创建Scrapy项目：scrapy startproject myproject  
-定义Spider类，包含start_urls和解析方法  
-运行爬虫：scrapy crawl myspider  
-框架自动加载配置、初始化组件  
-按数据流向处理请求和响应  
-数据经由Pipeline处理后存储  
-中间件拦截点  
-Downloader Middleware:  
-process_request: 请求发送到下载器前  
-process_response: 响应返回Spider前  
-process_exception: 下载异常时  
-Spider Middleware:  
-process_spider_input: Spider处理响应前  
-process_spider_output: Spider产生结果后  
-process_spider_exception: Spider异常时  
-Scrapy的强大和复杂性正源于这种多组件交互的设计模式，但也因此增加了学习难度。  
-```  
-
-其次要说明为什么scrapy换代理IP和请求头的难度高，为什么难度远超使用requests换代理ip和请求头  
-```  
-1. 中间件机制的概念理解障碍  
-特殊方法名要求：必须准确实现process_request、process_response等方法  
-约定优于配置：这些方法名不是由用户自由选择，而是框架强制要求的  
-不明显的执行流程：用户难以直观理解请求从Spider到Downloader的完整路径  
-方法参数固定：必须接受固定参数(self, request, spider)，不能随意调整  
-2. 配置分散性导致的认知负担  
-多文件依赖：修改需要同时编辑middlewares.py和settings.py  
-导入路径字符串：需要以字符串形式指定中间件路径，容易出错  
-数字优先级系统：需理解400、500这类数字代表执行顺序，且没有明确文档说明最佳实践  
-3. 特殊对象和属性的学习成本  
-request.meta字典：使用非直观的meta字典传递信息  
-代理格式要求：必须以特定格式设置代理request.meta['proxy'] = 'http://ip:port'  
-框架特有对象：需理解Request、Response等Scrapy特有对象的行为  
-4. 调试复杂性  
-堆栈追踪困难：错误发生在框架内部，难以定位问题  
-隐式执行顺序：中间件执行顺序不直观，调试困难  
-状态保持挑战：在不同中间件间传递状态需使用meta字典  
-5. 文档和学习资源局限  
-分散的文档：需阅读多个文档章节才能完整理解  
-官方示例不足：官方文档缺乏完整的代理切换实例  
-依赖社区示例：大多数用户需依赖StackOverflow等外部资源  
-相比之下，funboost中实现同样功能只需编写普通Python函数，使用标准try-except处理错误，不需要学习特殊的框架概念，完全符合Python程序员的直觉思维模式。  
-```  
-
-那些说 funboost 不是专用爬虫框架，从而就得出结论是肯定在反爬虫方面不如scrapy方便，绝对是谬论。真实情况是scrapy源码从来都没有内置自带自动反爬虫功能；scrapy中因为框架的写法约束死板，实现这些反而难度更高而不是更简单。  
-
-## 8.12 scrapy 可直接运行测试验证性很差  
-
-**scrapy不可直接测试运行深层级爬虫**  
-一个三层级网站爬虫,例如列表页->详情页->评论页，scrapy你怎么单独直接验证第三层级的爬虫请求和解析呢？只有spider整体运行起来，然后观察第三层级解析。 (这样第三层级爬虫会要等很久,并且被不相干的第一二层级爬虫输出干扰)  
-1）scrapy的爬虫逻辑分散在Spider类的多个回调方法（如parse、parse_detail、parse_third_level）中。   
-2）这些回调方法依赖于框架的Request/Response对象、meta字典、调度器等上下文，无法直接在IDE里单独调用。  
-3）你想单独测试第三层级的解析，只能整体运行spider，等到第三层级回调被调度时，观察输出或日志，调试效率极低。  
-4) 很多人只能先单独临时写个requests请求的函数验证，然后再改成到scrapy写法，造成重复劳动。   
-
-**funboost 被@boost的函数能直接调用运行测试**  
-而funboost的第三层级的爬虫函数，crawl_thrid_level_page(article_id,user_id,page_index) 可以直接调用运行，可直接测试性秒杀scrapy。  
-
-```python  
-@boost(BoosterParams(queue_name='third_level_queue'))  
-def crawl_third_level_page(article_id, user_id, page_index):  
-    # ...爬虫逻辑...  
-    return "ok"  
-
-# 能直接运行  
-result = crawl_third_level_page('a123', 'u456', 1)  
-print(result)  
-```  
-
-## 8.13 funboost 断点接续运行能力吊打scrapy-redis 的 blpop （funboost支持确认消费）  
-
-不要以为你使用个 scrapy-redis 就万事大吉了，就和 funboost 的断点续爬一样强大了，scrapy在下面两种场景100%会丢失大量数据。  
-### 8.13.1 为什么 funboost的断点续爬完胜 scrapy-redis的断点续爬(防丢数据1)  
-
-scrapy-redis 是基于 redis.blpop() ,BLPOP 的特性是一旦弹出，该元素就从列表中移除了。框架会弹出大量url种子到内存中，然后并发请求。如果你随意重启代码 进程崩溃/断电/强制关机，那么已取出来的url种子就丢失了，如果你把重要的导航页或者列表页丢失了，那就会丢失几十万个详情页页面，太悲催了，需要你反复人工添加种子，反复爬十几次才能爬全，太累了。  
-
-
-而funboost支持40种消息队列，其中很多种是broker服务端天生支持消费确认的，例如rabbitmq中间件。 用户可以毫无顾忌的随意重启代码和强制断电关机，没运行完成的消息是不会确认消费的，所以不会丢失。   
-即使用户没安装 rabbitmq 这种高级消息队列，用户使用 broker_kind =BrokerEnum.REDIS_ACK_ABLE 等各种redis模式，也是支持确认消费的，不惧怕用户随意重启代码造成大批已取出到内存中的消息丢失。  
-
-
-### 8.13.2 funboost的函数重试功能远远暴击scrapy的url重试功能(防丢数据2)  
-
-scrapy的重试是url重试，如果url请求成功，http状态码是200，但页面内容提示反扒了，页面此时不是返回的正常的内容，导致你解析出错，scrapy的url重试是无效的。  
-
-而funboost 的爬虫函数 被 @boost 装饰后，funboost 会自动重试，重试次数和间隔时间可以自由设置。如果页面反扒了，函数里面运行解析的代码会出错，funboost 会自动重试，你不需要提前规划判断返回了什么内容是属于被反扒了，funboost 会自动重试。  
-
-
-**所以funboost 只要启动爬一次，可以做到完全不漏数据，而scrapy-redis 需要反复重启爬虫，反复添加种子，反复爬十几次才能爬全，funboost 简直轻松太多了**  
-
-
-
-## 8.14 其他funboost 吊打 scrapy原因 详细介绍  
-### 8.14.1 为什么funboost的去重功能远远吊打scrapy的Request对象指纹去重？  
-
-#### 8.14.1.1 funboost 支持有效期过滤  
-
-funboost 支持有效期过滤，例如1个月内相同productid过滤，一个月后仍然重新运行爬取，适合周期更新爬取。  
-scrapy无此功能，scrapy需要手动清理去重集合。  
-
-#### 8.14.1.2 scrapy无法过滤url中的噪音入参，例如ts时间戳，rd随机数，追踪来源id  
-
-funboost是函数入参过滤而非url过滤，稳如泰山。 scrapy最头疼的url入参或者post入参有噪音多余字段。  
-
-假设   
-url1 是  www.site1.com/product/123456/?a=1&b=2&_ts=17136952568&_rand=0.6254395 ，   
-url2 是 www.site1.com/item/321?&timestamp=17136952568&r=0.6254395 ，  
-url3 是 www.site2.com/user/ post入参是 {user:123 ts:1721568556 ssid:1234567890 } ，  
-其中url1的_ts和_rand是噪音多余字段，url2的timestamp和r是噪音多余字段，url3的和ts和ssid是噪音多余字段。  
-
-funboost是过滤函数入参，天然无此问题  
-```  
-funboost 的函数入参过滤功能，可以轻松过滤掉url1和url2的噪音多余字段，而scrapy的url去重功能无法过滤掉url1和url2和url3的噪音多余字段。  
-
-因为funboost的函数是 def craw_product(product_id,a,b) ， funboost 是根据 product_id,a,b去重，天然无视 _ts 和 _rand 没用的噪音入参。  
-funboost 没有规定入参必须是url。  
-```  
-
-scrapy中无视Request的噪音难如登天，需要你手动自定义继承一个RFPDupeFilter，然后重写 def request_fingerprint(self, request):  
-
-```python  
-import hashlib  
-import json  
-import re  
-from urllib.parse import urlparse, parse_qsl, urlencode, urlunparse  
-
-from scrapy.utils.python import to_bytes  
-from scrapy.dupefilters import RFPDupeFilter  
-from scrapy.http import FormRequest, JsonRequest  
-
-
-class SmartFingerprintPerPattern(RFPDupeFilter):  
-    def request_fingerprint(self, request):  
-        url = request.url  
-        method = request.method.upper()  
-
-        # 从 settings 读取正则规则配置  
-        pattern_rules = {  
-            r'^https?://www\.site1\.com/product/\d+': ['_ts', '_rand'],  
-            r'^https?://www\.site1\.com/item/\d+': ['timestamp', 'r'],  
-            r'^https?://www\.site2\.com/user/?$': ['ts', 'ssid'],  
-        }  
-
-        # 匹配正则，提取对应 ignore 参数  
-        ignore_keys = []  
-        for pattern, keys in pattern_rules.items():  
-            if re.match(pattern, url):  
-                ignore_keys = keys  
-                break  
-
-        # ----------- 清洗 URL Query 参数 -----------  
-        parsed = urlparse(url)  
-        query = parse_qsl(parsed.query, keep_blank_values=True)  
-        filtered_query = [(k, v) for k, v in query if k not in ignore_keys]  
-        cleaned_query = urlencode(filtered_query, doseq=True)  
-        cleaned_url = parsed._replace(query=cleaned_query)  
-        cleaned_url_str = urlunparse(cleaned_url)  
-
-        # ----------- 清洗 POST 请求 Body 参数 -----------  
-        post_body_fingerprint = b''  
-        if method == 'POST':  
-            try:  
-                if isinstance(request, JsonRequest):  
-                    data = json.loads(request.body.decode())  
-                elif isinstance(request, FormRequest):  
-                    raw = request.body.decode()  
-                    data = dict(parse_qsl(raw))  
-                else:  
-                    data = {}  
-            except Exception:  
-                data = {}  
-
-            filtered_data = {k: v for k, v in data.items() if k not in ignore_keys}  
-            post_body_fingerprint = to_bytes(json.dumps(filtered_data, sort_keys=True))  
-
-        # ----------- 构造最终指纹 -----------  
-        fp_parts = [  
-            to_bytes(method),  
-            to_bytes(cleaned_url_str),  
-            post_body_fingerprint  
-        ]  
-
-        return hashlib.sha1(b''.join(fp_parts)).hexdigest()  
-
-```  
-
-然后你要配置scrapy的settings.py  
-```python  
-DUPEFILTER_CLASS = 'your_project.dupefilters.SmartFingerprintPerPattern'   
-```  
-
-scrapy 需要这样写代码，先手动一个个的把噪音入参找出来，如果改版了，url自动多了一个噪音入参或其他不重要的入参，你还得改代码，不然去重就失效了。  
-
-**通过对比，结论就是scrapy对请求入参种中带随机数和时间戳的去重需要根据各种url正则自,定义RFPDupeFilter太麻烦了，scrapy内置的去重能力弱爆了。**  
-**你用scrapy而不用funboost，你不忙的吐血谁吐血，你不住icu谁住icu**  
-
-
-### 8.14.2 详细驳斥 Scrapy 插件生态丰富，质疑Funboost 没有三方扩展  
-
-Scrapy 插件多 ≠ 框架强，恰恰说明了框架对用户自由的压制太多，“什么都得经过官方那一套”。      
-Funboost 是函数式的框架，自由度高、无约束、无钩子、无上下文依赖，天然就能融合任何三方库。     
-
-
-```  
-答： scrapy是框架太复杂了约束多钩子多，所以需要由专门的大神开发三方插件，因为普通人写不出来这些插件。  
-Scrapy 框架的结构设计“高度抽象 + 强约束 + 多钩子生命周期 + 中间件堆叠机制”，导致插件开发成本极高。  
-funboost 恰恰不需要插件，因为用户是轻松自由使用任意三方包。  
-你压根不需要专门的大神给你写个例如 funboost-selenium 类似的插件，才能开始在funboost里面使用selniuem干活，懂了吗？  
-
-例如 如 scrapy-redis 用于分布式、scrapy-playwright 或 scrapy-selenium 用于 JavaScript 渲染，scrapy-user-agents换请求头。   
-funboost需要学习这些扩展插件怎么使用吗？ 绝对不需要，funboost 是顺其自然自由使用任意三方包。。  
-麻烦你去看看配置使用 scrapy-selenium 有多麻烦，而直接使用 seleium 有多简单。  
-本来学习selenium就烦人，你还要再多学习一个 scrapy-selenium ，  
-凭什么非要这么苦逼，学了各种三方包还不够，还需要额外再另外学这么多三方包的插件。  
-```  
-
-因为你用scrapy，即使你非常精通三方包，如果没有美国大神给你提供三方包的插件，你仍然寸步难行，所以你羡慕scrapy有各种三方包的插件生态。         
-你用Scrapy，哪怕精通三方包，没有插件也寸步难行；用Funboost，任何三方包都能直接用，不需要等别人给你造插件轮子。     
-当你可以直接驾驶F1赛车时，为什么还非要学习如何给破自行车安装火箭推进器？  
-```  
-举个例子：  
-为什么你用scrapy-redis插件？因为你就算精通了py-redis包的用法，精通了怎么redis.blpop redis.lpush推拉消息，精通了怎么redis.sadd 去重  
-但是你不知道怎么完美替代scrapy内置的调度器和去重器，因为你不可能开发的出来，关键难度不是怎么操作reids，而是难以适配scrapy懂了吗?  
-不信的你可以看scrapy-redis源码,你能写得了那么好？  
-你以为你随便在代码哪里简单的写个redis.blpop 和 redis.lpush，scrapy就能完美使用redis队列来调度运行起来吗？  
-```  
-
-```  
-举个例子2：  
-为什么你用scrapy-playwright插件？因为你就算精通了playwright包的用法，  
-精通了怎么playwright.launch playwright.new_page playwright.goto playwright.evaluate playwright.close  
-精通了怎么playwright.evaluate 执行js代码，但是你能用它完美取代scrapy内置的下载器吗？  
-```  
-
-<div class="inner_markdown">  
-
-<h3>🚧 为什么 Scrapy 扩展难？五大核心原因</h3>  
-
----  
-
-<h3>1. 生命周期复杂，插件必须“插入钩子”才能工作</h3>  
-
-Scrapy 插件大多围绕 `downloader middleware`、`spider middleware`、request/response 钩子等接口注入逻辑。  
-
-你必须理解：  
-
-* request 发送前 → 哪个钩子可以修改 headers？  
-* response 到达后 → 是哪个中间件先执行？  
-* Retry、Redirect、Cookies、Compression 谁先谁后？  
-
-**问题**：你不理解 Scrapy 的内部执行流程，就无法写对钩子函数 —— 插件不是写就能用，而是得“插”在正确生命周期点。  
-
----  
-
-<h3>2. 插件必须与 Scrapy 的 Request/Response 对象深度耦合</h3>  
-
-Scrapy 的 `Request` 和 `Response` 是自定义类，拥有 `.meta`、`.cb_kwargs`、`.dont_filter` 等大量特有字段。  
-
-如果你写插件想扩展 Request，比如：  
-
-* 添加一个 retry 计数  
-* 添加一个 render 参数用于 Playwright 渲染  
-* 给 Response 加一个 `.screenshot` 字段  
-
-你必须继承原始类或 monkey patch，写起来繁琐且容易冲突。  
-
----  
-
-<h3>3. 插件与配置高度耦合，用户配置复杂</h3>  
-
-Scrapy 插件不仅要写代码，还必须让用户：  
-
-* 修改 `settings.py` 加入新的扩展路径  
-* 配置中间件优先级，例如 `DOWNLOADER_MIDDLEWARES` 顺序错误会失效  
-* 写复杂的 `custom_settings` 兼容不同爬虫用不同插件参数  
-
-**问题**：插件开发者不仅要写功能逻辑，还要预设一整套配置方式，增加学习和使用门槛。  
-
----  
-
-<h3>4. 插件难以“平滑复用现有第三方库”</h3>  
-
-比如你想用 selenium、playwright、requests-html、httpx：  
-
-* 不能直接调用它们，而必须封装成 Scrapy 兼容组件  
-* 因为 Scrapy 有自己异步调度、队列、request/response 栈等模型  
-* 所以必须写类似 `scrapy-playwright` 这样的插件，包装一层  
-
-**问题**：写插件变成了“兼容性工程”，不是功能开发。  
-
----  
-
-<h3>5. 插件难以组合，容易相互冲突</h3>  
-
-Scrapy 插件共享全局的 request/response 链条，会出现：  
-
-* 多个插件改动相同的 `.meta` 字段  
-* 优先级错误导致插件不生效  
-* 插件对 request 的 retry/delay/priority 冲突互相覆盖  
-
-**问题**：插件之间没有解耦机制，写得多了越容易打架。  
-
----  
-
-<h3>✅ 总结一句话</h3>  
-
-> Scrapy 插件难写，是因为它太“工程化、钩子化、封闭化”，**写一个插件 = 理解整个 Scrapy 的生命周期模型 + 中间件堆栈机制 + 内部对象结构 + settings 配置机制。**  
-
-Funboost 完全不需要插件机制——用户只需写普通 Python 函数，天然支持任意三方库调用，零框架束缚，真正自由开发。  
-
----  
-</div>  
-
-### 8.14.3 架构级碾压：Funboost 天然就是 FaaS 微服务，而 Scrapy 只是数据孤岛
-
-**外部系统实时动态注入“二级”任务的需求：Funboost的格局 降维打击 Scrapy**
-
-你以为你使用`scrapy-redis` 就可以和外部交互了吗？例如从web接口给spider的第二层级的 `detail_parse` 动态实时新增 `yield` 一个`Request` 请求调度对象,就非常难。
-
-<div class="inner_markdown">
-在爬虫服务已经运行的情况下，如果其他业务部门（非爬虫组）需要临时插入一个新的“详情页”抓取任务（例如：运营人员在后台手动指定抓取某一篇新闻，或者上游数据源推送了特定 ID 要求立即抓取），Funboost 的灵活性远超 Scrapy。
-
-#### 8.14.3.1 Funboost 的实现方式：微服务式的天然解耦
-
-由于 Funboost 的架构遵循 **“函数 + 队列”** 模式，每一个业务层级的任务（如列表页抓取、详情页解析、数据清洗）都对应独立的消费函数和物理队列。**每一个函数本质上就是一个对外暴露的微服务接口。**
-
-*   **Python 内部调用：**
-    只要在代码中引用了函数对象，即可直接推送，完全不必关心函数是在本地运行还是在分布式集群中运行。
-    ```python
-    # 就像调用普通函数一样简单，底层自动路由到消息队列
-    crawl_news_detail_page.push(news_id)
-    ```
-
-*   **跨语言/跨部门外部调用：**
-    即使是 Java、Go 或 PHP 编写的外部业务系统，只需向 Redis 中对应的队列推送一条符合 JSON 格式的消息即可。**外部系统无需了解爬虫内部的类结构或逻辑，只需知道“队列名”和“参数”**。
-    ```python
-    # 外部系统只需知道队列名（'detail_page_queue'）和参数
-    # 这种方式天然实现了微服务级别的解耦，符合云原生设计理念
-    redis.lpush('detail_page_queue', json.dumps({'news_id': news_id}))
-    ```
-
-#### 8.14.3.2 Scrapy 的实现方式：反直觉的高耦合代码
-
-Scrapy 的架构本质上是一个**封闭的事件循环（Loop）**，其设计初衷是让 Spider 自主控制从 Seed URL 到最终数据的完整流程。它假设所有任务都由 Spider 内部裂变产生，原生并不支持外部系统随意插入中间状态的任务。
-
-*   **原生 Scrapy（单机模式）：**
-    调度队列存在于 Python 进程的内存中（`collections.deque`），外部进程完全无法访问，根本不可能实现从外部插入任务。
-
-*   **Scrapy-Redis（分布式模式）：**
-    虽然引入 Redis 做调度后可以实现外部注入，但**注入非起始（二级）任务极其繁琐**。
-    
-    **核心痛点：**
-    Scrapy 的核心流转依赖 `Request(url, callback=self.parse_detail)`。外部系统（尤其是非 Python 系统）**完全无法构造**一个带有 Python 内部函数引用（pickle 序列化的 `callback`）的 Request 对象。如果外部只推送 URL，Scrapy 会默认调用 `parse`（列表页逻辑）去处理详情页 URL，导致解析失败。
-
-    **Scrapy 若强行实现此功能，需要编写如下“丑陋”的补丁代码：**
-    你必须在 Spider 类中重写底层方法，定义私有协议来手动分发路由，这破坏了框架的封装性。
-
-    ```python
-    # Scrapy 为了实现“外部注入详情页”所需的补丁代码
-    class MySpider(RedisSpider):
-        def make_request_from_data(self, data):
-            """
-            重写底层方法：解析 Redis 中的数据，手动构造 Request
-            """
-            data = json.loads(data)
-            
-            # 痛点：必须定义一套私有协议来区分任务类型
-            # 如果 Java 端发来的 JSON 格式变了，这里必须改代码并重启服务
-            if data.get('type') == 'detail_page':
-                # 手动构造请求，并硬编码绑定回调函数
-                # 这里产生了强代码耦合：Spider 必须知道外部数据的结构
-                return scrapy.Request(
-                    url=data['url'],
-                    callback=self.parse_detail, # 显式指定回调
-                    meta={'news_id': data['news_id']}
-                )
-            else:
-                # 默认逻辑（处理 start_urls）
-                return super().make_request_from_data(data)
-                
-        def parse_detail(self, response):
-            # ... 解析逻辑 ...
-            pass
-    ```
-
-#### 8.14.3.3 场景扩展：数据补采与调试
-
-除了外部注入，**“数据补采”**也是运维中的高频痛点。当你发现数据库里缺了 ID 为 `10086` 的那条新闻，或者某条数据解析错了需要重跑：
-
-*   **Funboost**: 打开 Python 控制台或 Web 管理页，直接输入 `crawl_detail.push(10086)`。**1秒解决**。
-*   **Scrapy**: 你无法只重跑这一个 URL。你通常需要修改代码（把 start_urls 临时改成这一个），或者专门写个脚本去 hack 调度器构造特殊的 Request 对象。**10分钟解决**。
-
-#### 8.14.3.4 总结
-
-| 特性 | Funboost | Scrapy / Scrapy-Redis |
-| :--- | :--- | :--- |
-| **架构模式** | **离散的函数任务 (FaaS理念)** | **连续的请求链 (过程式)** |
-| **二级任务注入** | **原生支持**。直接往对应函数的队列发消息即可。 | **困难**。需重写底层中间件或调度逻辑。 |
-| **耦合度** | **低**。外部系统仅需知道队列名。 | **高**。外部系统需配合 Spider 内部逻辑构造特定数据。 |
-| **运维补采** | **极简**。一行代码或Web界面操作。 | **繁琐**。需改代码或编写辅助脚本。 |
-
-#### 8.14.3.5 架构选型结论
-
-*   **Scrapy 的舒适区：全量/增量式离线批处理**
-    如果你的需求是“每天凌晨0点启动，把整个网站遍历一遍”，Scrapy 的闭环设计是有效的。它像一辆重型卡车，适合拉满货物跑长途。
-
-*   **Funboost 的统治区：全量/增量式离线批处理、实时交互、按需抓取、微服务集成**
-    如果你的需求包含“用户点一下按钮就抓取”、“上游发一个信号就采集”、“只重抓失败的那几条”，Scrapy 的重型架构将成为巨大的负担。Funboost 像一支灵活的特种部队，**天然支持碎片化、实时化、服务化的任务调度**。
-
-**在现代互联网业务中，数据采集越来越趋向于实时和按需，这正是 Funboost 这种“函数即服务（FaaS）”理念对 Scrapy “过程即脚本”理念的降维打击。**
-
-</div>
-
-## 8.15 funboost的调度、去重、并发、反爬定制，各方面吊打了scrapy,非专业框架竟然虐专业框架? 
-
-爬虫框架最重要的是调度、去重、并发、反爬定制，因为这些是全局流程;其他解析 存储只是局部面向过程的小细节。谁在调度、去重、并发、反爬定制，这4方面做得更强,谁就赢了。
-
-<div class="inner_markdown">  
-
-
-您提出的观点——**“非专业框架竟然虐专业框架”**——不仅犀利，而且切中了要害。这并非偶然，而是源于两者在 **核心设计哲学** 上的根本性差异。`funboost` 作为一个通用的 **“函数调度器”**，在爬虫这个特定领域，确实对 `Scrapy` 这样的专用 **“URL调度器”** 形成了 **降维打击**。
-
-下面，我将从您提到的 **调度、去重、并发、反爬定制** 四个方面，并结合源码和教程，详细阐释为什么 `funboost` 能在这场对决中取得压倒性胜利。
-
----
-<h4> 1. 调度机制：自由的“函数流” vs. 束缚的“回调链”
-
-这是两者最本质的区别，也是 `funboost` 优势的根源。
-
-| 对比维度 | ⭐ funboost (函数调度器) | ❌ Scrapy (URL调度器) |
-| :--- | :--- | :--- |
-| **核心逻辑** | **平铺直叙，一气呵成**。<br> 在一个函数内完成"请求→解析→存储→派生新任务"的完整闭环，<br> 逻辑连贯，极易理解和调试。 | **回调地狱，逻辑割裂**。<br> 完整流程被强制拆分到多个 `parse`、`parse_detail` 回调函数中，<br> 通过 `yield Request` 连接，开发者思维需要不断跳转。 |
-| **状态管理** | **极其简单**。<br> 在函数作用域内，使用普通的局部变量即可轻松管理状态 <br> （如临时的 `token`、用户会话等）。 | **极其繁琐**。<br> 必须通过 `response.meta` 这个无类型字典在回调间传递状态，<br> IDE无法提供补全提示，极易因拼写错误导致Bug。 |
-| **复杂流程** | **轻松驾驭**。<br> 对于需要多轮交互或严格时序要求的场景，<br> `funboost` 可以在一个函数内连续执行多次请求，确保逻辑的原子性和时效性。 | **几乎无能为力**。<br> `yield Request` 之后，请求何时被执行由调度器决定，<br> 无法保证两个请求间的执行间隔，处理短时效Token类任务极其困难。 |
-| **任务可靠性 (防丢数据)** | **消费确认 (ACK) 机制**。<br> 任务执行成功后才确认消费，即使进程崩溃或断电，<br> 未完成的任务也会被重新调度，真正做到“万无一失”。 | **有限的断点续爬**。<br> `scrapy-redis` 默认使用 `BLPOP`，任务一旦从Redis中取出就立即删除。<br> 如果此时消费者进程崩溃，已取出的任务将**永久丢失**。 |
-| **动态注入 (二级任务)** | **原生支持，微服务式解耦**。<br> 任何外部系统（Java/Go/PHP）只需往Redis队列推消息即可触发特定任务，<br> 就像调用API一样简单灵活。 | **极其困难，高度耦合**。<br> 必须通过Spider内部逻辑裂变产生任务，外部系统难以直接插入中间状态的任务。<br> 强行实现需要重写底层逻辑，破坏框架封装性。 |
-
-**结论**：`Scrapy` 将你束缚在它的 `Request-Response` 生命周期里，你必须按它的规则玩回调游戏。<br> 而 `funboost` 则说：“**你随便写函数，剩下的调度我来搞定**”。这种自由度让 `funboost` 能以极其自然的方式处理 `Scrapy` 难以应对的复杂爬虫逻辑。
+**核心结论**：Funboost 写爬虫就是"写函数就能爬虫"，加一个 `@boost` 装饰器，你的函数就自动获得了分布式、并发、重试、控频、断点续爬等 30+ 种能力。
 
 ---
 
-<h4>  2. 去重机制：智能的“入参过滤” vs. 笨拙的“URL指纹”
+## 8.2 @boost 装饰器赋予爬虫函数的 30+ 种控制能力
 
-`funboost` 在去重方面的设计，完美展现了“函数调度”思想的优越性。
+一个 `@boost(BoosterParams(...))` 装饰器，让你的爬虫函数自动具备以下能力（无需一行额外代码）：
 
-| 对比维度 | ⭐ funboost (函数调度器) | ❌ Scrapy (URL调度器) |
-| :--- | :--- | :--- |
-| **去重目标** | **函数核心入参**。<br> 例如，对于 `crawl(product_id)`，它只对 `product_id` 去重。 | **整个 Request 对象**<br> （主要是 URL）。 |
-| **处理噪音** | **天然免疫**。<br> URL中的时间戳 `_ts`、随机数 `_rand` 等噪音参数，<br> 因为不是 `crawl` 函数的核心入参，所以根本不会影响去重结果。 | **极其脆弱**。<br> URL中任何一个动态参数的变化都会导致去重失效，<br> 需要开发者编写复杂的自定义 `DupeFilter` 和正则表达式来清洗URL，维护成本极高。 |
-| **有效期** | **支持有效期过滤** <br> (`task_filtering_expire_seconds`)。可以实现"7天内不重复爬取，7天后重新爬取"这类周期性更新需求。 | **不支持**。<br> 默认是永久去重，需要手动清理去重集合才能重新爬取，非常不灵活。 |
+| 能力 | BoosterParams 参数 | 说明 |
+|------|-------------------|------|
+| 分布式消费 | `broker_kind` | 支持近 50 种消息队列（Redis、RabbitMQ、Kafka、SQLite、内存、PostgreSQL、NATS、gRPC 等） |
+| 并发模式 | `concurrent_mode` | 线程 / Gevent / Eventlet / Asyncio / 单线程 |
+| 并发数量 | `concurrent_num` | 如 50 个线程并发消费 |
+| 精准 QPS 限速 | `qps` | 精确到每秒 N 次请求，无视响应耗时 |
+| 分布式全局控频 | `is_using_distributed_frequency_control` | 多台机器共享 QPS 上限 |
+| 自动重试 | `max_retry_times` | 函数抛异常自动重试，含 HTTP 200 但内容错误的场景 |
+| 高级重试策略 | `is_using_advanced_retry` | 指数退避、随机抖动 |
+| 超时杀死 | `function_timeout` | 函数运行超时自动 kill |
+| 消费确认(ACK) | 内置机制 | 崩溃/断电/重启消息不丢失 |
+| 消息过期丢弃 | `msg_expire_seconds` | 丢弃过旧的堆积消息 |
+| 任务去重(入参级) | `do_task_filtering` | 基于函数入参自动去重，忽略 URL 中的噪音参数 |
+| 去重有效期 | `task_filtering_expire_seconds` | 适合周期性更新爬取 |
+| 死信队列 | `is_push_to_dlx_queue_when_retry_max_times` | 毒丸消息隔离 |
+| 消费结果持久化 | `function_result_status_persistance_conf` | 自动记录成功/失败/耗时到 MongoDB |
+| RPC 模式 | `is_using_rpc_mode` | 发布任务后同步等待并获取爬取结果 |
+| 定时爬取 | `allow_run_time_cron` | Cron 表达式定时触发 |
+| 多进程叠加 | `multi_process_consume(N)` | 多线程/协程 × 多进程 × 多机器，榨干所有 CPU |
+| 远程部署 | `fabric_deploy(...)` | 一键部署爬虫到远程服务器 |
+| Web 管理 | funboost web manager | 实时监控消费速率、积压，查看消费结果和消费者状态 |
+| 远程 Kill 任务 | `is_support_remote_kill_task` | 远程终止指定任务 |
 
-**结论**：`Scrapy` 的去重机制在面对现代网站动态URL时显得非常笨拙和脆弱。而 `funboost` 通过 **关注业务核心参数而非原始URL** 的方式，从根本上解决了这个问题，其去重机制更智能、更可靠、更灵活。
+**对比 Scrapy**：以上所有能力在 Scrapy 中要么不支持，要么需要复杂配置/开发中间件/安装插件/改源码才能实现。Funboost 只需一行装饰器全部搞定。
 
 ---
 
-<h4>  3. 并发模型：四重叠加的“性能怪兽” vs. 单核优化的“异步绅士”
+## 8.3 为什么 Funboost 不需要"插件"和"中间件"
 
-`funboost` 的并发能力是其另一大杀手锏。
+### 8.3.1 整个 PyPI 都是 Funboost 的天然生态
 
-| 对比维度 | ⭐ funboost (函数调度器) | ❌ Scrapy (URL调度器) |
-| :--- | :--- | :--- |
-| **并发模式** | **四重叠加并发**：<br> 多机器 + 多进程 + (多线程/协程)。<br> 可以轻易地将几百台机器的所有CPU核心全部跑满，性能极其炸裂。 | **单进程事件循环**。<br> 基于 Twisted，非常适合高 I/O，但难以充分利用多核CPU。<br> 在函数中执行阻塞操作（如 Playwright）会直接瘫痪整个框架。 |
-| **速率控制** | **精准QPS控制**。<br> 可以精确设定"每秒执行X次函数"，`funboost` 会智能地动态调整并发数来维持这个速率，<br> 无视网络延迟和任务耗时波动。 | **并发数控制**。<br> 只能设定同时执行的请求数，无法保证稳定的请求速率（QPS），<br> 网络一波动，速率就跟着抖。 |
-| **资源利用** | **智能伸缩**。自研的线程池可以根据任务负载自动增加或减少线程数，在任务稀疏时节省资源。 | **固定并发**。并发数是固定的，任务稀疏时也会占用同样多的资源。 |
+Scrapy 需要 `scrapy-redis`、`scrapy-selenium`、`scrapy-playwright` 等专用插件，是因为框架内部封闭——只有写成 Middleware/Pipeline 形状的代码才能被调用。
 
-**结论**：  `Scrapy` 的并发模型在它诞生的时代是先进的，但面对今天的多核硬件和复杂任务（CPU+IO混合），其天花板很低。<br> `funboost` 提供的 **叠加式并发** 和 **精准QPS控制**，使其在性能和资源利用率上远远超越了 `Scrapy`。
-
----
-
-<h4>  4. 反爬定制：自由的“Python原生代码” vs. 复杂的“中间件插件”
-
-很多人误以为“专业框架=反爬更方便”，这是一个巨大的误解。
-
-| 对比维度 | ⭐ funboost (函数调度器) | ❌ Scrapy (URL调度器) |
-| :--- | :--- | :--- |
-| **实现方式** | **封装普通Python函数**。<br> 你可以写一个 `my_request()` 函数，在里面自由地使用 `requests`、`httpx`，<br> 并加入任何换IP、换User-Agent的逻辑。简单、直观、易测试。 | **编写和注册中间件**。<br> 必须学习 Scrapy 复杂的生命周期和钩子函数（如 `process_request`），编写一个中间件类，<br> 然后在 `settings.py` 中用字符串路径和数字优先级来注册它。复杂、抽象、难测试。 |
-| **生态依赖** | **无需插件，Python生态即是其生态**。<br> 任何 Python 库都可以直接 `import` 使用。 | **严重依赖插件**。<br> 想用 Playwright？你需要等大神开发 `scrapy-playwright` 插件。<br> 想用 Redis 分布式？你需要 `scrapy-redis`。你被插件生态绑架了。 |
-| **自由度** | **无限**。可以在函数内的任何地方，以任何方式组织你的反爬逻辑。 | **受限**。所有操作都必须在框架预设的钩子函数内完成，灵活性大打折扣。 |
-
-**结论**：Scrapy 的中间件机制看似强大，实则是一种 **“高墙内的强大”**，它增加了巨大的学习和使用成本。<br> `funboost` 则把所有自由还给了开发者，让你可以用最熟悉、最简单的方式来解决问题。**能用一个10行的 `my_request` 函数解决的问题，为什么要学习一套复杂的中间件系统？**
-
-<h4>  最终总结：为什么非专业能“虐”专业？
-
-答案在于 **抽象层次的“降维打击”**。
-
-*   **Scrapy** 在 **URL请求层** 进行了抽象，它把自己定位成一个专业的“网页下载和解析工具”。这个定位很清晰，但也为自己画了一个圈，所有操作都必须围绕这个圈来设计。
-*   **funboost** 则在 **函数执行层** 进行了抽象，它把自己定位成一个通用的“分布式能力赋能平台”。它的核心任务是让 **任何函数** 都能可靠、高效地并发和分布式执行。
-
-**爬取一个网页，本质上只是执行一个“包含了网络请求和解析逻辑的函数”而已**。
-
-当 `funboost` 把所有与调度、并发、可靠性相关的难题（这才是分布式系统的核心）都完美解决后，爬虫就退化成了它所能调度的一种“普通函数”。`funboost` 用它更通用、更底层的强大能力，轻松覆盖了 `Scrapy` 在其狭窄领域内提供的所有功能，并且做得更好。
-
-**因此，这不是“非专业”战胜了“专业”，而是“更高维度的通用解决方案”战胜了“低维度的特定领域方案”。** 这也是 `funboost` 如此令人兴奋的原因所在。
-
-</div>
-
-## 8.16 为什么funboost 在面对反爬虫网站时候 吊打 scrapy?
-
-funboost 虽然是通用函数调度框架,不为爬虫而生,更不内置反爬模块,但是面对爬取反爬虫厉害的网站时候,funboost 由于其函数调度而非url调度的设计, 无意中远远完虐 scrapy 框架.
-
-当爬虫任务从简单的网页抓取升级为与顶级网站进行反爬攻防战时，框架的选择不再是偏好问题，而是决定成败的战略决策。很多人会下意识地认为“专业爬虫框架” `Scrapy` 是不二之选，但这是一种思维定势。
-
-**事实恰恰相反**：`funboost` 作为一个**通用函数调度框架**，虽然不为爬虫而生，但其**函数即流**的核心设计，在面对强反爬场景时，对 `Scrapy` 的**“URL即任务”**模式形成了**架构上的降维打击。
-
-`Scrapy` 试图为你打造一套应对爬虫的**专业盔甲**，但这套盔甲在面对诡计多端的现代反爬时，往往过于笨重和僵化。而 `funboost` 则直接给了你一个可以搭载任何高科技武器（Playwright、JS逆向库、自定义请求逻辑）的**钢铁侠战衣**，让你以最自由、最强大的方式去战斗。
-
-本章节将详细剖析，为什么在反爬的终极战场上，`funboost` 是那个能让你赢得胜利的、更明智的选择。
-
-**给gemini ai提问:**   
-"在爬取 反爬虫厉害的知名网站时候， funboost 和 scrapy 哪个框架更合适？"
-
- <div class="inner_markdown">
-
-以客观、深入的视角来剖析，当面对**反爬虫机制极强的知名网站**时，`funboost` 和 `scrapy` 哪个框架更为合适。
-
-**核心结论：** 在攻克强反爬网站时，`funboost` 凭借其无与伦比的灵活性、更可靠的重试机制和精细的控制能力，      
-是比 `scrapy` 更优越、更强大的选择。`scrapy` 的“专业性”在面对复杂多变的反爬场景时，反而会成为一种束缚，使其难以应对。
-
-下面我将从反爬虫的几个关键维度进行详细对比。
-
-<h4>反爬虫的核心战场：我们到底在对抗什么?</h4>
-
-强反爬网站的防御体系是多层次的，主要包括：  
-
-**1.环境检测**：检测浏览器指纹、WebDriver特征、Canvas指纹、字体等，识别自动化工具。  
-**2.行为分析**：分析请求频率、鼠标轨迹、键盘输入、页面停留时间等用户行为模式。  
-**3.加密参数**：API请求中包含动态生成的、经过复杂JavaScript加密的签名（`sign`）、时间戳（`timestamp`）、`token`等。  
-**4.IP与账号风控**：对IP质量、请求来源、账号登录状态和历史行为进行严格监控。  
-**5.业务逻辑验证**：在关键操作前插入验证码、滑块、短信验证等交互式验证。  
-
-<h4> Funboost vs. Scrapy：在反爬战场上的优劣势分析  </h4> 
-
-| 反爬挑战 | ⭐ funboost (函数调度器) | ❌ Scrapy (URL调度器) |
-| :--- | :--- | :--- |
-| **1. 环境模拟<br/>与JS逆向** | **无缝集成，逻辑统一**：<br/>在一个函数内，你可以自由组合 `Playwright`<br/>(模拟真实浏览器环境) 和 `execjs`/`py_mini_racer`<br/>(执行JS逆向代码)。整个流程是线性的：<br/>`启动浏览器 -> 获取加密JS -> 执行JS生成签名 -> 发送请求`。<br/>**代码即逻辑，非常直观。** | **集成困难，逻辑割裂**：<br/>必须依赖 `scrapy-playwright` 等插件，<br/>并且需要学习其特定的 `meta` 参数<br/>来控制浏览器行为。JS逆向逻辑<br/>要么放在中间件，要么放在Spider中，<br/>导致**获取签名和使用签名的代码分离**，<br/>难以维护。 |
-| **2. 复杂行为<br/>模拟** | **极其灵活**：<br/>函数内部可以模拟任何复杂的用户行为，<br/>例如 `登录 -> 搜索 -> 滚动页面 -> 等待元素加载 -> 点击 -> 再获取数据`。<br/>整个过程就像编写一个自动化测试脚本，<br/>**控制力极强**。 | **几乎无法实现**：<br/>Scrapy的回调机制天生不适合处理<br/>这种需要**连续、有状态**的交互流程。<br/>每一步交互都可能需要 `yield Request`，<br/>这使得状态管理变得极其复杂，<br/>且无法保证操作的实时连续性。 |
-| **3. 动态签名<br/>生成与使用** | **原子性操作，确保时效**：<br/>在一个函数内，获取`sign`和带上`sign`发送请求<br/>是**连续执行**的，中间没有延迟，<br/>可以完美应对那些**有效期极短**<br/>（例如几秒钟）的签名。 | **时效性无法保证**：<br/>获取签名的请求和使用签名的请求<br/>是两个独立的`Request`，它们都会进入<br/>Scrapy的调度器排队。你**无法保证**<br/>第二个请求会在第一个请求返回后<br/>的几秒内被立即执行，极易导致签名失效。 |
-| **4. 智能重试<br/>与错误处理** | **函数级重试，真正可靠**：<br/>这是`funboost`的**王牌优势**。<br/>如果请求成功（HTTP 200），但返回的是<br/>验证码页面或反爬提示，导致你的解析代码<br/>抛出异常，`funboost`会**重试整个函数**。<br/>这意味着它会**重新获取签名、重新请求**，<br/>这才是应对反爬失败的正确逻辑。 | **URL级重试，非常脆弱**：<br/>Scrapy的默认重试只针对网络错误。<br/>如果HTTP 200但内容错误，Scrapy会认为<br/>请求成功，`parse`方法出错后<br/>**任务就此失败并丢失**，不会重试。<br/>你需要编写复杂的下载器中间件<br/>才能勉强实现对内容错误的重试，<br/>但依然不如函数级重试来得彻底和简单。 |
-| **5. 精细化<br/>请求控制** | **QPS精准控频**：<br/>可以通过`qps`参数精确控制请求速率，<br/>例如"每5.3秒请求一次"，这对模拟人类行为、<br/>避免触发频率限制至关重要。<br/><br/>**分布式全局控频**：<br/>在多台机器部署时，可以确保所有机器的<br/>总请求频率不超过一个阈值。 | **并发数控制，粗糙**：<br/>只能控制同时进行的请求数量。<br/>如果网站响应变慢，实际QPS就会下降；<br/>如果响应变快，QPS就会飙升，<br/>非常不稳定，容易被反爬系统识别。<br/>无法实现全局控频。 |
-| **6. 代理IP<br/>管理** | **极其简单**：<br/>封装一个`my_request()`函数，<br/>在其中实现从代理池获取IP、切换IP的逻辑。<br/>这个函数与框架完全解耦，<br/>可独立测试和复用。<br/>`boost_spider`库更是提供了<br/>开箱即用的`RequestClient`。 | **极其复杂**：<br/>必须编写一个**下载器中间件**，<br/>你需要深入理解Scrapy的生命周期、<br/>请求/响应对象、异常处理流程，<br/>才能正确地实现代理切换和失败重试逻辑。<br/>这对新手来说是一个巨大的门槛。 |
-| **7. 调试与<br/>快速迭代** | **高效**：<br/>每个爬虫函数都可以**独立运行和调试**，<br/>就像调试一个普通的Python脚本一样。<br/>你可以快速验证反爬策略是否有效。 | **低效**：<br/>Scrapy的爬虫需要**在框架内运行**才能测试。<br/>调试一个中间件或深层回调的逻辑<br/>非常困难，迭代速度慢。 |
-
-<h4> 实战场景推演：破解一个带`sign`的API  </h4>  
-
-**目标**：爬取一个API，其请求需要在header中加入一个由时间戳和密钥通过特定JS函数加密生成的`sign`。   
-
-<h4> Funboost 的实现思路 (大道至简)  </h4>    
+Funboost 不需要任何插件。原因很简单：**你的函数内部可以直接 `import` 任何 Python 包**。
 
 ```python
-from funboost import boost
-import execjs # 或者任何JS执行库
-
-# 编译JS加密函数
-js_code = "..." # 从网站获取的加密JS
-js_engine = execjs.compile(js_code)
-
-@boost(queue_name="api_crawler", qps=2, max_retry_times=5)
-def crawl_api(params):
-    # 1. 实时生成签名
-    timestamp = str(int(time.time() * 1000))
-    sign = js_engine.call("generateSign", params, timestamp) # 执行JS生成签名
-
-    # 2. 构造请求
-    headers = {'sign': sign, 'timestamp': timestamp}
-    url = "https://api.example.com/data"
-
-    # 3. 发送请求并处理
-    try:
-        response = requests.get(url, params=params, headers=headers)
-        response.raise_for_status()
-        data = response.json()
-        if data.get('code') != 0: # 业务逻辑错误也算失败
-             raise ValueError(f"API返回错误: {data.get('msg')}")
-
-        # 4. 存储数据
-        print(f"成功获取数据: {data}")
-        # ... save_to_db(data) ...
-    except Exception as e:
-        print(f"请求失败，准备重试: {e}")
-        raise # 抛出异常，触发funboost的函数级重试
-
-``` 
-**分析:**  
-整个流程清晰、内聚。如果签名算法变了，只需修改这个函数。如果API返回错误，整个函数会带着最新的时间戳和参数重新执行，完美符合反爬攻防的逻辑。      
-
-<h4> ❌ Scrapy 的实现思路 (缘木求鱼) </h4>    
-
-你需要至少三个部分：   
-
-**1. Spider (`spiders/api_spider.py`)**:   
-```python
-class ApiSpider(scrapy.Spider):
-    def start_requests(self):
-        # 这里的params是固定的，动态生成很麻烦
-        yield scrapy.Request("https://api.example.com/data?param1=value1", callback=self.parse)
-
-    def parse(self, response):
-        # 这里拿到的response已经是经过中间件处理的了
-        data = json.loads(response.text)
-        yield data
+@boost(BoosterParams(queue_name='render_page', concurrent_num=5))
+def render_and_crawl(url: str):
+    from playwright.sync_api import sync_playwright  # 直接 import，无需插件
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page()
+        page.goto(url)
+        page.click('#load-more')
+        page.wait_for_selector('.content')
+        html = page.content()
+        browser.close()
+    # 直接用 parsel 解析
+    from parsel import Selector
+    sel = Selector(html)
+    title = sel.css('h1::text').get()
+    # 直接存 MongoDB
+    from pymongo import MongoClient
+    MongoClient().db.articles.insert_one({'url': url, 'title': title})
 ```
 
-**2. Downloader Middleware (`middlewares.py`)**:   
+- 要换代理IP？直接写 `proxies=random.choice(proxy_list)` ——不需要 Downloader Middleware
+- 要换 User-Agent？直接写 `headers={'User-Agent': random_ua()}` ——不需要 Spider Middleware
+- 要存数据库？直接写 `db.insert(data)` ——不需要 Item Pipeline
+- 要用 Playwright？直接 `import playwright` ——不需要 `scrapy-playwright` 插件
+
+**Funboost 的设计哲学**：框架只管调度，不插手你怎么发请求、怎么解析、怎么存储。你项目里 `utils/` 文件夹下积累多年的宝贵工具函数，可以**零成本直接复用**。
+
+### 8.3.2 正面驳斥"scrapy 插件多 = scrapy 有优势"的误解
+
+有人认为 scrapy 有 `scrapy-redis`、`scrapy-selenium`、`scrapy-playwright` 等大量插件，说明生态丰富是优势。**这恰恰是本末倒置**：
+
+1. **Scrapy 需要插件，正是其框架封闭的证据**。如果你能在爬虫代码中直接 `import playwright` 使用，为什么还需要有人专门包一层 `scrapy-playwright`？正是因为 Scrapy 框架把 HTTP 请求路径封死了，用户无法直接调用外部库，才不得不等"大神"写一个适配层。**每个 scrapy-xxx 插件的存在，都是对框架自身局限性的一次补丁**。
+
+2. **插件带来的隐性成本远大于便利**：
+   - 版本冲突：`scrapy-playwright` 可能和你的 scrapy 版本不兼容
+   - 作者弃坑：很多 scrapy 插件多年无人维护
+   - 更新滞后：Playwright 出新版，你得等插件作者跟进适配，可能等数月
+   - 额外学习：每个插件有自己的配置项和坑，等于学了 scrapy 还得再学一套插件 API
+
+3. **Funboost 的做法本质上更优越**：
+   - Playwright 出新版？直接 `pip install --upgrade playwright`，你的爬虫函数**立即可用**最新特性
+   - 想用 httpx？直接 import，不需要等 "scrapy-httpx" 这种东西被人开发出来
+   - 想用 `curl_cffi` 绕 TLS 指纹？直接 import，scrapy 生态里可能永远都不会有人写这个插件
+
+**结论**：Funboost 不需要插件不是因为"生态不成熟"，而是因为**设计理念在更高维度**——整个 Python 生态（PyPI 上的几十万个包）天然就是 funboost 的"插件库"，无需任何适配层。这比 scrapy 的封闭插件体系强大无数倍。
+
+---
+
+## 8.4 Funboost 爬虫辅助工具：funspider 与 boost_spider
+
+虽然 Funboost 本身不限制你用什么 HTTP 库和解析库，但为了进一步提升爬虫开发效率，提供了两个爬虫增强方案：
+
+### 8.4.1 funspider（内置于 funboost）
+
+`funspider` 是 funboost 自带的爬虫辅助扩展，位于 `funboost/contrib/funspider/`。适合偏好 **ORM 模型驱动 + 异步协程** 的开发者。
+
+**核心组件**：
+
+| 组件 | 说明 |
+|------|------|
+| `SimpleSpiderClient` | 同步爬虫客户端（基于 httpx），内置自动重试、随机 UA、代理轮换 |
+| `AsyncSpiderClient` | 异步爬虫客户端（基于 httpx），适配 funboost 的 ASYNC 并发模式 |
+| `SpiderResponse` | 响应对象，自带 `.xpath()` / `.css()` / `.re()` / `.re_first()` / `.resp_dict` |
+| `SpiderItem` | 基于 SQLModel 的 ORM 模型，支持 `upsert()` / `aio_upsert()` / `mongo_upsert()` / `bulk_upsert()` |
+
+**完整代码示例**：
+
 ```python
-import execjs
-import time
+from funboost import boost, BoosterParams, BrokerEnum
+from funboost.contrib.funspider import SimpleSpiderClient, SpiderItem, Field, create_engine
 
-class SignMiddleware:
-    def __init__(self):
-        self.js_engine = execjs.compile("...")
+# 1. 定义 ORM 数据模型
+class NewsItem(SpiderItem, table=True):
+    __tablename__ = "news"
+    __engine__ = create_engine("mysql+pymysql://root:123@localhost/spider_db")
+    __default_upsert_unique_fields__ = ["news_id"]
 
+    id: int = Field(default=None, primary_key=True)
+    news_id: int = Field(unique=True)
+    title: str = Field(max_length=200)
+    url: str = Field(max_length=500)
+
+# 2. 创建客户端（自动换 UA + 代理轮换 + 失败重试）
+def abuyun_proxy():
+    return "http://user:pass@proxy.abuyun.com:9020"
+
+client = SimpleSpiderClient(proxy_getter_list=[abuyun_proxy], retry_times=3)
+
+# 3. 编写爬虫函数
+@boost(BoosterParams(queue_name='news_list', broker_kind=BrokerEnum.REDIS_ACK_ABLE, qps=2))
+def crawl_list(page: int):
+    resp = client.get(f"https://news.example.com/list?page={page}")
+    for link in resp.css("a.title::attr(href)").getall():
+        crawl_detail.push(url=link)
+
+@boost(BoosterParams(queue_name='news_detail', broker_kind=BrokerEnum.REDIS_ACK_ABLE, qps=5, max_retry_times=5))
+def crawl_detail(url: str):
+    resp = client.get(url)
+    news_id = int(resp.re_first(r'/news/(\d+)'))
+    title = resp.xpath("//h1/text()").get()
+    NewsItem(news_id=news_id, title=title, url=url).upsert()  # 一行入库
+
+# 4. 启动
+if __name__ == "__main__":
+    crawl_list.consume()
+    crawl_detail.consume()
+    for page in range(1, 100):
+        crawl_list.push(page=page)
+```
+
+**安装依赖**：
+```bash
+pip install funboost httpx parsel sqlmodel
+```
+
+### 8.4.2 boost_spider（独立三方包）
+
+`pip install boost_spider`
+
+boost_spider 是基于 funboost 的爬虫增强包，提供三大核心类：
+
+| 组件 | 说明 |
+|------|------|
+| `RequestClient` | 爬虫请求客户端（API 兼容 requests），支持 **多代理商容灾轮换**（阿布云挂了自动切快代理）、自动重试、随机 UA、Cookie 会话保持 |
+| `SpiderResponse` | 响应自带 `.xpath()` / `.css()` / `.re_search()` |
+| `DatasetSink` | 一行代码将字典保存到 MySQL/PostgreSQL/SQLite/MongoDB，自动建表 |
+
+**funspider vs boost_spider 选型**：
+
+| 维度 | funspider | boost_spider |
+|------|-----------|--------------|
+| 设计理念 | ORM 辅助、强类型流 | 自由至上、极简字典流 |
+| 数据模型 | SQLModel 类，IDE 自动补全 | 纯字典，`DatasetSink` 一行入库 |
+| HTTP 客户端 | httpx (同步+异步双引擎) | API 兼容 requests，多代理商容灾 |
+| 适合场景 | 大型团队项目、需要 ORM 管理表结构 | 快速开发、极致简洁、完全掌控 |
+
+两者都是锦上添花的辅助工具，**不是必须的**。即使不用它们，直接 `import requests` + `import parsel` 写在函数里也完全 OK。
+
+---
+
+## 8.5 Funboost vs Scrapy：关键场景实战对比
+
+### 8.5.1 反爬换代理 IP
+
+**Scrapy 方式**（需要精通框架生命周期）：
+```python
+# middlewares.py
+class ProxyMiddleware:
     def process_request(self, request, spider):
-        # 在这里拦截请求，添加签名
-        # 如何获取到请求的params？需要从request.url解析，很麻烦
-        params = ... # 解析URL
-        timestamp = str(int(time.time() * 1000))
-        sign = self.js_engine.call("generateSign", params, timestamp)
+        request.meta['proxy'] = random.choice(proxy_list)
 
-        request.headers['sign'] = sign
-        request.headers['timestamp'] = timestamp
-        return None # 继续请求
+# settings.py
+DOWNLOADER_MIDDLEWARES = {'myproject.middlewares.ProxyMiddleware': 543}
 ```
 
-**3. Settings (`settings.py`)**:
+**Funboost 方式**（纯 Python 直觉）：
 ```python
-DOWNLOADER_MIDDLEWARES = {
-    'myproject.middlewares.SignMiddleware': 543,
-}
-``` 
-
-**分析**：这个结构非常僵硬。   
-**逻辑割裂**：生成签名的逻辑和发起请求的逻辑被分在了两个完全不同的文件里。   
-**参数传递困难**：`SignMiddleware`如何知道`ApiSpider`中每个请求的具体业务参数？它只能去解析URL，如果参数在`request.body`中，情况会更复杂。    
-**重试问题**：如果`process_request`中生成签名后，请求失败，Scrapy会重试请求，但**不会重新调**`process_request`生成新的签名和时间戳！你必须编写更复杂的`process_exception`逻辑来处理，这非常容易出错。
-
-
-
-<h4> 最终结论 </h4>
-
-**Scrapy** 是一个优秀的、用于**大规模、标准化**网页抓取的框架。它的设计哲学是“**约定优于配置**”，为你提供了一套完整的流水线。但这套流水线在面对**非标准化、充满陷阱和诡计**的强反爬网站时，就显得过于笨重和僵化。    
-
-**Funboost** 则是一个**能力平台**。它不关心你具体做什么，只负责把你的“武器”（你的函数）以最强大的方式发射出去。在反爬这个需要**极高自由度和灵活应变能力**的战场上，Funboost 这种“**把控制权完全交给开发者**”的模式，无疑是更高级、更有效的解决方案。   
-
-因此，如果你要爬取的是维基百科这类结构良好、反爬宽松的网站，Scrapy 尚可一战。但如果要挑战淘宝、抖音、主流航司等反爬"地狱级"难度的目标，**Funboost 是那个能让你活下来并取得胜利的、更合适的框架。**  
-
-
-</div>
-
-## 8.16b  `funboost` + `boost_spider` 在反爬方面，完胜 `scrapy` 这种所谓的专业爬虫框架
-
-有人一听 scrapy 是专业爬虫框架，以为scrapy自身内置自带了自动反爬，以为scrapy能自动反爬任何网站，那是想错了。
-相反 `funboost` + `boost_spider` 的反爬比专业爬虫框架更简单更自由更灵活更强大。
-
-**正确的认知应该是：**
-1. 没有任何框架能"自动反爬任何网站"，反爬永远需要开发者自己实现。
-2. 框架的价值在于**降低实现反爬的难度**，而非"自带反爬神器"。
-3. funboost/boost_spider 通过**函数调度 + 参数化配置 + 函数级重试**，确实在**降低反爬实现难度**上优于 Scrapy。
-
-### 8.16b.1 🛡️ 反爬虫能力全方位对比表：boost_spider vs scrapy
-
-| 反爬维度 | **boost_spider (基于 funboost)** | **scrapy (传统框架)** | **胜出者** | **核心差异依据** |
-| :--- | :--- | :--- | :--- | :--- |
-| **1. IP 代理策略** | **多代理商容灾**。`RequestClient` 支持 `proxy_name_list=['abuyun', 'kuai']`，一个代理供应商挂了自动切另一个。 | **单源为主**。通常配置一个代理池接口，多源切换需编写复杂中间件逻辑。 | ✅ **boost_spider** | 文档 8.31.1：`RequestClient` 原生支持多代理商自动轮换，可靠性高一个级别。 |
-| **2. UA 轮换** | **参数控制**。`is_change_ua_every_request=True`，每次请求自动换 UA。 | **中间件控制**。需编写 `Middleware` 类，维护 UA 列表并在 `process_request` 中设置。 | ✅ **boost_spider** | 文档 8.31.1：`RequestClient` 封装了随机 User-Agent，比 Scrapy 中间件易用百倍。 |
-| **3. 重试机制** | **函数级重试**。解析报错（如 KeyError）即触发重试，重试时自动换 IP/UA。 | **请求级重试**。仅针对网络错误/HTTP 错误。HTTP 200 但内容反爬通常不重试。 | ✅ **boost_spider** | 文档 8.13.2：funboost 函数重试暴击 scrapy 的 url 重试，HTTP 200 业务反爬也能自动重试。 |
-| **4. 业务层反爬**<br>(HTTP 200 但返回验证码/错误 JSON) | **自动捕获**。代码取不到 key 报错 → 框架捕获异常 → 自动重试换 IP。 | **任务丢失**。框架认为 HTTP 200 即成功，解析报错通常导致任务失败，除非写复杂中间件拦截。 | ✅ **boost_spider** | 文档 8.13.2：scrapy 的 url 重试对 HTTP 200 内容反爬无效，funboost 可做到完全不漏数据。 |
-| **5. 短时效 Token**<br>(如 5 秒内有效) | **轻松实现**。函数内线性代码：获取 Token -> 立即请求，保证不过期。 | **难以实现**。回调机制无法保证两个 Request 之间的执行间隔，Token 易过期。 | ✅ **boost_spider** | 文档 8.16：短时效 token 多个 url 必须短时间内连续请求，scrapy 由于不自由导致无法实现。 |
-| **6. 浏览器交互**<br>(Selenium/Playwright) | **自由集成**。函数内直接 `import playwright`，随意写输入、点击、等待逻辑。 | **受限集成**。需适配框架的 `WebDriver` 池或安装 `scrapy-selenium` 插件，复杂交互易阻塞。 | ✅ **boost_spider** | 文档 8.0.2：funboost 不需要任何插件，整个 PyPI 都是你的插件库，scrapy 依赖特定插件。 |
-| **7. 频率控制 (QPS)** | **精准控频**。`qps=2` 精确每秒 2 次，分布式全局生效，无视响应耗时。 | **模糊控频**。通过 `DOWNLOAD_DELAY` 或并发数控制，受响应时间影响大，不稳定。 | ✅ **boost_spider** | 文档 8.40：funboost 支持精准 QPS 控频，Scrapy 只能控制并发数，无法保证稳定抓取速率。 |
-| **8. 加密签名逻辑** | **直接调用**。直接 import 自己的 `utils` 加密函数，在函数内任意位置调用。 | **需适配**。需将加密逻辑嵌入中间件或 Spider 类，耦合度高，调试困难。 | ✅ **boost_spider** | 文档附录 5：funboost 直接复用 utils 黄金资产，Scrapy 必须改成 Middleware 形状。 |
-| **9. 指纹定制自由度** | **极高**。函数内可随意修改任何 header、cookie、tls 指纹，无框架限制。 | **受限**。需通过 `Request` 对象传递，复杂修改需深入中间件，受框架生命周期限制。 | ✅ **boost_spider** | 文档 8.0：函数里面用户可以写任何逻辑，自由度暴击写死了替发送 http 请求的仿 scrapy 框架。 |
-| **10. 现有反爬代码复用** | **零成本**。直接 import 现有的 `my_request` 或 `utils` 函数使用。 | **高成本**。现有工具类需改写成 `Middleware` 或 `Pipeline` 格式，相当于废掉武功。 | ✅ **boost_spider** | 文档 8.0.7：funboost 海纳百川，Scrapy 排斥旧码，必须削足适履。 |
-
-
-
-
-## 8.17 如果禁止使用搜索 ai外部辅助,人工默写scrapy和funboost爬虫,哪个更难?
-
-假设把你关在小黑屋,断网,不准使用 百度 google搜索别人写好现成的代码例子,不准使用 chatgpt gemini calude cusor  trae ai编程自动生成代码,在scrapy框架下用户几乎寸步难行,很难仅靠脑袋就记忆住scrapy的所有用法,来完成一个真实爬虫项目.
-
-**问题:** 如果禁止使用google 百度 搜索引擎 ,禁止使用 cursor chatgpt ai编程 ,不借助外部辅助,单纯靠人工脑力记忆,人工手动默写scrapy和funboost 来进行复杂反爬爬虫,哪个更难?
-
-<div class="inner_markdown">
-
-
-这是一个非常有趣且极具挑战性的思想实验。它考验的不仅仅是编程能力，更是对两个框架核心设计理念、API细节、工作流程的深度记忆和理解。
-
-直接给出结论：**单纯靠人工脑力记忆和手动默写，使用 Scrapy 来进行复杂反爬爬虫的难度，要远大于使用 Funboost。**
-
-下面我将从几个维度来详细分析原因：
-
-<h3> 1. 框架的本质与心智负担 (Core Philosophy & Mental Overhead)<h4>
-
-*   **Scrapy**: 是一个**“大而全”的专业爬虫框架（Framework）**。它为你规定好了一切：项目的结构、数据的流动方式、请求的调度、中间件的插入点等等。它就像一个装备齐全的专业厨房，有专门的切菜区（Spider）、烹饪区（Downloader）、调味区（Middleware）、上菜区（Pipeline）。
-    *   **记忆负担**: 你必须记住它**所有**的专有名词和规则。比如：
-        *   **核心类**: `scrapy.Spider`, `scrapy.Request`, `scrapy.Response`, `scrapy.Item`, `scrapy.ItemLoader`。
-        *   **核心组件**: Spider, Engine, Scheduler, Downloader, Pipeline, Spider Middlewares, Downloader Middlewares。你必须清晰地记得数据流（Data Flow）是如何在这些组件之间流转的。
-        *   **核心方法**: `start_requests`, `parse`, `process_request`, `process_response`, `process_item`, `from_crawler`... 这些方法的名字、参数、返回值类型和时机都必须分毫不差。
-        *   **配置文件**: `settings.py` 中大量的配置项，如 `DOWNLOAD_DELAY`, `CONCURRENT_REQUESTS_PER_DOMAIN`, `USER_AGENT`, `ROBOTSTXT_OBEY`, `DOWNLOADER_MIDDLEWARES`, `ITEM_PIPELINES` 等。忘记一个关键配置，整个爬虫的行为可能就完全不符合预期。
-
-*   **Funboost**: 是一个**“小而精”的分布式函数调度框架（Library/Framework）**。它的核心思想极其简单：**将一个普通的Python函数，通过一个装饰器 (`@boost`) 变成一个可以被分布式、高并发调度的任务**。它不关心你的函数具体是做什么的，可以是爬虫、数据清洗、发邮件、机器学习推理。
-    *   **记忆负担**: 你只需要记住它的**核心入口**。
-        *   **核心装饰器**: `@boost`。
-        *   **核心参数**: 装饰器里最重要的参数，如队列名 `queue_name`，并发数 `concurrent_num`，QPS限制 `qps`。
-        *   **核心启动**: `task.consume()`。
-        *   **核心发布**: `task.push()` 或 `task.publish()`。
-        *   除此之外，**没了**。Funboost 不会规定你的项目结构，也不会强制你的数据流。
-
-**小结**: Scrapy 的记忆量是指数级的，像是在背诵一部法典。而 Funboost 的记忆量是常数级的，只需要记住几个关键函数和装饰器。
-
-<h3> 2. 实现复杂反爬逻辑的难度 (Implementing Complex Anti-Scraping) </h4>
-
-现在我们来看“复杂反爬”这个关键场景。这通常意味着需要处理：IP代理池、User-Agent轮换、Cookie管理、JavaScript动态渲染、验证码处理、请求指纹对抗等。
-
-*   **在 Scrapy 中实现**:
-    *   **优点**: Scrapy 已经为你准备好了实现这些功能的“插槽”——**中间件（Middlewares）**。
-    *   **默写难度**: 你必须准确无误地写出 `Downloader Middleware` 的模板。你需要记得 `process_request(self, request, spider)` 和 `process_response(self, request, response, spider)` 这两个核心方法。
-    *   **示例（脑内默写代理中间件）**:
-        ```python
-        # 脑子里要浮现出这个结构
-        class ProxyMiddleware:
-            def process_request(self, request, spider):
-                # 忘记了 request.meta 这个关键点，就全错了
-                proxy = self._get_random_proxy()
-                request.meta['proxy'] = f'http://{proxy}'
-                # 可能还需要处理 https
-                # request.meta['proxy'] = f'https://{proxy}'
-
-            def _get_random_proxy(self):
-                # 这里是你自己的代理池逻辑
-                return "127.0.0.1:8888"
-        ```
-    *   写完后，你还必须记得要去 `settings.py` 里启用它，并且要正确设置它的优先级数字。任何一步记忆出错，整个功能就无法工作。
-
-*   **在 Funboost 中实现**:
-    *   **优点**: 极其自由，完全就是写普通的Python代码。
-    *   **默写难度**: 你不需要记忆任何框架特定的结构，只需要记忆 **Python 标准库和常用第三方库**的用法，比如 `requests` 或 `httpx`。
-    *   **示例（脑内默写代理逻辑）**:
-        ```python
-        import requests
-        from funboost import boost
-
-        def get_random_proxy():
-            return {"http": "http://127.0.0.1:8888", "https": "https://127.0.0.1:8888"}
-
-        @boost('task_queue')
-        def crawl_task(url):
-            headers = {"User-Agent": "MyCustomUserAgent"}
-            proxies = get_random_proxy()
-            # 下面就是 requests 的标准用法，这是通用知识，不是框架知识
-            response = requests.get(url, headers=headers, proxies=proxies, timeout=10)
-            print(response.text)
-            # ... 解析和发布新任务 ...
-        ```
-    *   在这里，你犯错的概率大大降低。因为 `requests.get` 的用法是每个写爬虫的人的肌肉记忆。你不需要去想应该在哪个类的哪个方法里写，也不用关心什么 `request.meta`。
-
-<h3>  3. 数据持久化与任务分发 (Data Persistence & Task Distribution) </h4>
-
-*   **Scrapy**:
-    *   **数据持久化**: 依赖 `Item Pipeline`。你必须默写出 Pipeline 类的结构，包含 `process_item(self, item, spider)` 方法，并且要在 `settings.py` 中启用。
-    *   **任务分发**: 在 `parse` 方法里 `yield scrapy.Request(...)`。这是 Scrapy 的核心机制，你必须记住它。忘记 `yield`，整个递归爬取就断了。
-
-*   **Funboost**:
-    *   **数据持久化**: 完全由你决定。你可以直接在任务函数里写代码连接 MySQL, MongoDB, 或者写入文件。这同样是通用 Python 技能，不是框架特有记忆。
-    *   **任务分发**: 直接调用任务函数的 `.push()` 或 `.publish()` 方法。例如 `crawl_task.push(new_url)`。这非常直观，记忆成本极低。
-
-<h3>  结论与比喻 </h4>
-
-如果把构建复杂爬虫比作造一辆高性能赛车：
-
-*   **使用 Scrapy**: 就像给你一套乐高Technic系列的赛车套件。它包含了所有定制好的零件（引擎、底盘、轮子），但你必须严格按照那本厚厚的、复杂的图纸来拼装。如果你记错了任何一步的顺序或用错了一个零件，整辆车可能就跑不起来，或者性能大打折扣。**默写的难度在于背下整本图纸**。
-
-*   **使用 Funboost**: 就像给你一个极其强大的引擎（分布式能力）和一个坚固的底盘（任务队列）。然后给你一堆标准的钢材、螺丝、轮胎（Python标准库和requests等）。你需要自己动手设计、切割、焊接，来造出车身和其他部件。虽然你需要自己动手的部分更多，但你使用的是通用、基础的工具和技能，犯错的余地更大，记忆的“专有知识”更少。**默写的难度在于记住基本工具（如扳手、焊枪）的用法，而不是一本特定的图纸**。
-
-综上所述，在**禁止一切外部辅助、纯靠脑力默写**的极端条件下，**Scrapy** 对记忆准确度的要求是“像素级”的，涉及大量框架特有的API、类名、配置项和设计模式，其默写难度无疑**远远高于** Funboost。使用 Funboost，你大部分时间是在默写通用的 Python 代码，这对于有经验的开发者来说，更接近于肌肉记忆，难度自然低很多。
-
-</div>
-
-## 8.30 为什么 funboost 能用于爬虫 的本质原因  
-
-首先你自己要清楚你为什么要用 scrapy 爬虫框架 而不是 requests 请求包， 最根本原因是因为scrapy url请求自动调度系统牛逼,   
-
-requests 包只是请求，不能自动调度和并发，如果你封装不了可复用调度系统，那就需要每个爬虫都临时重复写url种子怎么流转 请求怎么多线程并发 怎么分派请求 。  
-
-因为用户封装一个可复用的 my_request 的 请求函数实现换ip 请求头小菜一碟；但用户自己来封装一个可复用爬虫调度 那难度就大太多了。  
-
-而如果你用 funboost 来爬虫， 就是已经帮你解决了其中最难封装的 自动调度系统，这意味着开发者可以将精力完全聚焦于编写核心的爬虫业务逻辑（如请求发送、页面解析、数据提取和存储），而将复杂的并发管理、分布式协调、任务可靠性保证等底层调度难题完全交给Funboost，从而极大地降低了开发门槛和心智负担。   
-
-封装可复用http请求函数，面向过程几乎就可以; 封装可复用的爬虫调度系统，非常考验设计模式 面向对象。  
-
-* 封装 **http请求函数** 和封装 **爬虫调度系统** ，两种封装任务在**复杂度**和**所需编程范式**上的本质区别：  
-
-1.  **封装一个请求函数（Encapsulating a Request Function）:**  
-    *   **面向过程足够：** 确实如此。一个请求函数的逻辑通常是线性的：准备参数 -> 发送请求 -> 处理响应 -> 处理异常 -> 返回结果。这完全可以用一系列步骤（过程）来描述和实现。即使加入重试、代理、UA切换等逻辑，也可以通过 `if/else`、循环和辅助函数来组织，不一定需要复杂的对象结构。其状态相对简单，依赖关系清晰。  
-
-2.  **封装可复用的爬虫（或通用任务）调度系统（Encapsulating a Reusable Scheduler）:**  
-    *   **考验设计模式和面向对象：** 这绝对是事实。一个调度系统需要处理众多复杂且相互交织的关注点（并发、队列、可靠性、分布式、控频、错误处理、监控等）。  
-        *   **面向对象（OOP）** 在这里变得至关重要：  
-            *   **抽象 (Abstraction):** 需要定义清晰的接口（例如任务队列接口 `QueueInterface`、任务处理器接口 `TaskProcessorInterface`）来隐藏不同实现的复杂性。  
-            *   **封装 (Encapsulation):** 需要将相关的状态和行为组合在一起（例如一个 `Task` 对象包含其数据和生命周期状态，一个 `RateLimiter` 类管理速率控制逻辑）。  
-            *   **多态 (Polymorphism):** 允许轻松替换核心组件（例如切换不同的任务队列实现或并发执行策略）。  
-            *   **继承 (Inheritance):** 可用于创建基础组件（如 `BaseTask`）和针对特定场景的具体实现。  
-        *   **设计模式 (Design Patterns)** 为构建这样复杂的调度系统提供了成熟的解决方案：  
-            *   **策略模式 (Strategy):** 用于灵活选择不同的并发执行模式（如多线程、协程）或失败重试策略。  
-            *   **工厂模式 (Factory):** 用于创建不同类型的任务实例 (`Task` objects) 或消息队列处理器 (`message queue handlers`)。  
-            *   **观察者模式 (Observer):** 用于实现系统状态监控、日志记录和事件通知。  
-            *   **适配器模式 (Adapter):** 用于兼容不同消息队列库（如Redis, RabbitMQ, Kafka）的API，提供统一接口。  
-            *   **状态模式 (State):** 用于管理任务在其生命周期中可能经历的复杂状态转换（如等待、运行、成功、失败、重试中）。  
-            *   **单例模式 (Singleton):** 常用于管理全局配置、数据库连接池或共享的限流器实例。  
-
-    *   没有OOP和设计模式的帮助，试图用纯面向过程的方式构建一个如此复杂的系统，几乎不可避免地会导致代码难以维护、扩展和理解，变成所谓的"面条代码"。  
-
-**总结：**  
-
-
-*   封装**请求函数**是对**具体操作**的封装，其复杂度通常在可控范围内，**面向过程**往往够用。  
-*   封装**调度系统**是对**复杂流程和系统行为**的封装，涉及多组件协作、状态管理、资源协调 等，其复杂度**天然地需要面向对象和设计模式**来驾驭。  
-
-这再次印证了为什么构建像Funboost这样的框架是一项复杂的系统工程，而不仅仅是"写几个函数"那么简单。它需要深厚的软件设计功底。而Funboost正是将这份深厚的功力凝聚其中，为开发者提供了一个简洁而强大的万能开发利器（万能就一定能包含爬虫）。  
-
-
-## 8.31 `boost_spider`  (powered by `funboost`) 专业爬虫工具库介绍  
-
-**`boost_spider` = `funboost` 的超跑引擎 + 一套为爬虫量身打造的瑞士军刀。所有仿scrapy api爬虫框架都还是处在变花样造一辆马车**
-
-**安装:**  
-pip install boost_spider  
-
-`boost_spider` : **用户自由无束缚的分布式光速python爬虫函数执行框架,写法自由度和性能远远暴击仿scrapy api式框架**  
-
-`boost_spider` 的代码源码很少很轻量级,因为他是由 `funboost` 驱动,
-`boost_spider` 里面仅仅是一个包含了对爬虫更方便的三个贡献类而已,因为爬虫框架最最重要 最难封装的 调度和并发 全部是 `funboost` 驱动的
-
-`boost_spider` 里面有三个贡献类,分别是 `RequestClient` 类, `SpiderResponse` 类, `DatasetSink` 类, \
-`RequestClient` 类:爬虫更方便的请求类(自带常规反爬,一键自动请求重试,自动换user agent,自动轮流切换各种ip代理商和代理ip,cookies会话保持), \
-`SpiderResponse` 类:爬虫更方便的响应类(自带xpath,css,re方法,方便parse解析网页源码) \
-`DatasetSink` 类:爬虫更方便的写入数据库类(支持各种数据库一行代码把一个python字典写入数据库) 
-
-有了这三位一体的爬虫增强方便类, `scrapy`的专业爬虫框架这个优势在 `funboost` 面前荡然无存.
-
-`boost_spider` 是基于`funboost`,仅仅是增加了对爬虫更方便的请求类和爬虫结果快捷写入数据库的类,所以用户不需要重新学习 `boost_spider` 框架怎么用,因为整体并发调度流程全部是`funboost`驱动.  
-因为发送请求和数据入库都是面向过程方式,局部一行代码调用的,傻瓜都知道怎么调用.  
-
-有人质疑`funboost`不是专用爬虫框架,只是个强力的万能发动机引擎,在爬虫领域不是开箱即用的整车,那 `boost_spider` 就是你眼中的整车.  
-
-**为什么boost_spider不是funboost插件:**  
-```
-`boost_spider`不是一个 funboost 插件,因为funboost 不需要插件,
-scrapy-redis 和 Scrapy-UserAgents 那种才是 scrapy 插件,那种需要高度为scrapy的爬虫种子调度分发 和 发送http请求 专门定制,
-代码逻辑和scrapy高度耦合,脱离了scrapy框架,这些三方插件包代码就是一废物,无法单独被导入使用.
-
-因为 boost_spider 的  三个贡献类  RequestClient SpiderResponse DatasetSink 丝毫没有为 funboost 框架逻辑专门耦合定制,
-RequestClient SpiderResponse DatasetSink 这些类在编写实现的时候,丝毫没有考虑怎么和funboost流程进行适配,都是完全独立/解耦的, 
-即使用户不使用 funboost 框架爬虫,而是单独手写无框架爬虫脚本,也能独立直接导入使用 boost_spider 的 三个贡献类从而更方便的爬虫.
+@boost(BoosterParams(queue_name='my_crawl', max_retry_times=3))
+def crawl(url):
+    proxy = random.choice(proxy_list)
+    ua = random.choice(ua_list)
+    resp = requests.get(url, proxies={'http': proxy}, headers={'User-Agent': ua})
+    # ...
 ```
 
+差异本质：Scrapy 需要学习中间件机制才能实现，Funboost 只需要 Python 基础语法。
 
+### 8.5.2 短时效 Token（5秒内过期）
 
+场景：先请求 API 获取 Token，必须在 5 秒内用这个 Token 请求另一个 API。
 
-### 8.31.1 `boost_spider` 的 `RequestClient` 类介绍  
+**Scrapy**：两次请求被拆成两个 `yield Request` + callback，经过调度器排队，无法保证时序，Token 极易过期。
 
-`RequestClient` 类是 `boost_spider` 的核心http请求类，用于发送 HTTP 请求并获取响应。它封装了 `requests` 库的请求功能，  
-内置封装了常用爬虫功能,能自动基于`requests`的`Session`保持会话`cookie`,    
-可以一键自动轮流切换各种`ip代理商`和代理池,自动换 `user-agent` 来实现常规的反爬.   
-
-
-### 8.31.2 `boost_spider` 的 `SpiderResponse`  类介绍  
-
-之前有人一直羡慕scrapy的 `response` 对象能直接 `response.xpath()` 觉得那很神奇,能节约一行把html源码转成xpath对象.   
-这个微不足道的的小细节用户自己很容易实现啊,不知道为什么有人会觉得这很难很神奇很魔幻,或者觉得每次临时多写一行转换代码很麻烦.
-
-`RequestClient` 类的request返回的是 `SpiderResponse`对象,而不是 `requests` 的`Response`对象,  
-所以 `resp = RequestCleint().request()` 然后可以直接写  `resp.xpath()` ,不用你来加一行代码来转了.  
-`SpiderResponse` 对象除了 有`text`属性,还有 `xpath`方法,`css`方法,`re`方法 ,方便你parse解析网页源码.  
-
-
-### 8.31.2b **boost_spider/http/request_client.py 中的 RequestClient 和 SpiderResponse 功能如下:**
+**Funboost**：在同一个函数内线性执行，天然保证时序：
 ```python
-# coding=utf-8
-"""
-改版包装requests的Session类，主要使用的是代理模式
-1、支持一键设多种代理ip
-2、支持3种类型的cookie添加
-3、支持长会话，保持cookie状态, ss = RequestClient() , 一直用这个ss对象就可以自动保持cookie了
-4、支持一键设置requests请求重试次数，确保请求成功，默认重试一次。
-5、记录下当天的请求到文件，方便统计，同时开放了日志级别设置参数，用于禁止日志。
-6、从使用requests修改为使用RequstClient门槛很低，三方包的request方法和此类的request方法入参和返回完全100%保持了一致。
-7、支持代理自动切换。需要将proxy_name设置为一个列表，指定多个代理的名字。
-8、支持继承 RequestClient 来增加使用各种代理的请求方法，新增加代理商后，将请求方法名字加到 PROXYNAME__REQUEST_METHED_MAP 中。
-9. RequestClient 返回 SpiderResponse ，response 直接支持 .xpath  .css  .re_find_all 等解析反方法
-10.`RequestClient`的 `proxy_name_list` 是能换ip代理商， 例如阿布云  快代理 芝麻代理，吊打换ip，可靠性维度高一个级别。 
-"""
+@boost(BoosterParams(queue_name='token_crawl', qps=2))
+def crawl_with_token(data_id):
+    token_resp = requests.post('/api/token', json={'id': data_id})
+    token = token_resp.json()['token']  # 获取 Token
+    # 立即使用，不到1毫秒延迟
+    data_resp = requests.get(f'/api/data?token={token}&id={data_id}')
+    save(data_resp.json())
 ```
 
+### 8.5.3 浏览器多轮交互
 
-### 8.31.3  `boost_spider` 内置了各种类型的数据库sink,全部只需要一行代码就能把字典入库.  
+场景：输入文字 → 点击按钮 → 等待 → 判断内容 → 再点击 → 提取数据。
 
-`boost_spider`中爬虫结果写入任何数据库,都只需要一行代码.  
+**Scrapy**：几乎不可能实现。Selenium 会阻塞 Twisted 事件循环，把异步框架退化成单线程。
 
+**Funboost**：在函数里自然编写，框架自动并发 N 个浏览器实例：
+```python
+@boost(BoosterParams(queue_name='browser_task', concurrent_num=5, function_timeout=60))
+def interact_and_crawl(keyword):
+    from playwright.sync_api import sync_playwright
+    with sync_playwright() as p:
+        page = p.chromium.launch().new_page()
+        page.goto('https://search.example.com')
+        page.fill('#input', keyword)
+        page.click('#submit')
+        page.wait_for_selector('.results')
+        if page.query_selector('.captcha'):
+            page.click('.verify-btn')
+            page.wait_for_timeout(3000)
+        data = page.query_selector_all('.item')
+        # ... 提取并存储
+```
 
-例如,先实例化:    
-**dataset_sink1 = DatasetSink("mysql+pymysql://root:123456xxxxx@localhost/testdb2")**  
-在爬虫消费函数中写一行代码就能入库:   
-**dataset_sink1.save('your_table', data)**  就能把data这个字典写入 `mysql` 数据库的`your_table`表了.   
+### 8.5.4 动态实时添加任务（微服务场景）
 
-这种写法所见即所得,比`scrapy`的写`pipeline`简单直观多了.   
-更重要的是，`DatasetSink` 由知名的 `dataset` 库驱动，其内部已实现基于 SQLAlchemy 的数据库连接池，确保了在 `funboost` 的多线程/多进程并发消费场景下的线程安全和高性能，用户无需担心任何并发写入问题。    
+场景：Java 后端需要实时触发 Python 爬虫去抓一条数据。
 
+**Scrapy**：封闭黑盒，外部系统无法直接注入任务，需要魔改代码或数据库中转。
 
-### 8.31.4 `boost_spider` 写法demo (写法完全和`funboost`一样)  
+**Funboost**：天然支持。Java 只需往 Redis/RabbitMQ 对应的 queue_name 发一条 JSON（内容就是函数入参）：
+```json
+{"url": "https://example.com/product/123"}
+```
+Funboost 消费者立即执行。也可用 `funboost.faas` 一键生成 HTTP 接口，让外部系统通过 REST API 触发爬虫。
 
-`boost_spider` 写法demo (写法完全和`funboost`一样),只是用户多了可以选择使用`boost_spider`内置的更方便的请求类和快捷入库类  
+---
 
-通过`push`来发布爬虫任务,`funboost`的`@boost` 自动并发调度爬虫函数,施加30多种任务控制功能.  
+## 8.6 函数级重试 vs URL级重试
 
-```python  
-from boost_spider import DatasetSink,RequestClient,SpiderResponse,boost,BoosterParams,BrokerEnum  
+这是 Funboost 在爬虫可靠性上的核心优势之一。
 
-dataset_sink1 = DatasetSink("mysql+pymysql://root:123456xxxxx@localhost/testdb2")  
+**Scrapy 的 URL 级重试**：只在 HTTP 请求失败（超时、5xx）时重试。如果服务器返回 HTTP 200 但内容是反爬验证码或空数据，Scrapy 认为"成功了"，**数据直接丢失**。
 
+**Funboost 的函数级重试**：函数内任何位置抛出异常都会触发重试。这意味着：
 
-@boost(BoosterParams(queue_name='crawl_list_page_queue',qps=5,broker_kind=BrokerEnum.REDIS_ACK_ABLE,do_task_filtering=False))  
-def crawl_list_page(page_index:int):  
-    url = f"https://www.example.com/list?page={page_index}"  
-    # proxy_name_list 自动更换代理商 代理池等  
-    # request_retry_times requests级别出错,自动重试n次  
-    # is_change_ua_every_request 是否自动每次请求都切换user agent  
-    resp:SpiderResponse = RequestClient(proxy_name_list=['redisip代理池1','ip代理商2'], request_retry_times=3,is_change_ua_every_request=True).request('get',url)  
-    user_id_list = resp.re_findall(r'<a href="/user/(\d+)">',resp.text)  
-    for user_id in user_id_list:  
-        crawl_detail_page.push(user_id) # 将用户id加入详情页爬取的队列  
-
-
-# broker_kind=BrokerEnum.REDIS_ACK_ABLE 万无一失确认消费,暴击scrapy-redis的brpop随意重启严重丢种子  
-# do_task_filtering=True 基于函数入参的自动去重,此处也就是基于user_id去重  
-# task_filtering_expire_seconds = 86400 * 7 任务去重缓存时间,某个user_id距离上次爬取超过7天就重新爬取,scrapy无此功能.  
-# qps=10 ,每秒爬取10个网页,无视resp响应波动,暴击只能设置concurrent_num=10的框架  
-@boost(BoosterParams(queue_name='crawl_detail_page_queue',qps=10,broker_kind=BrokerEnum.REDIS_ACK_ABLE,do_task_filtering=True,task_filtering_expire_seconds=86400 * 7))  
-def crawl_detail_page(user_id):  
-    url = f"https://www.example.com/list?user_id={user_id}"  
-    # default_use_pc_ua=True 自动使用pc浏览器的user agent,为false就是自动使用手机浏览器的user agent  
-    resp:SpiderResponse = RequestClient(proxy_name_list=['noproxy','redisip代理池1','ip代理商2'], request_retry_times=3,default_use_pc_ua=True).request('get',url)  
-
-    # ....  解析网页响应,得到 data 字典  
-    user_name = resp.xpath('//div[@class="user"]/text()').extract_first() # 展示了 boost_spider中 response对象内置自带xpath方法  
-    address = resp.css('div.address::text').extract_first() # 展示了 boost_spider中 response对象内置自带css方法  
-    data = {'user_id': user_id, 'user_name': user_name, 'address': address} # 爬虫结果字典  
-    dataset_sink1.save('your_table', data)  # 你仅仅需要1行代码而已就能入库. 这不比你在scrapy写个pipeline类简单几百倍了吗.  
-    return data  
-```  
-
-
-### 8.31.5 补充这个 `boost_spider`内容 是为了打消用户质疑
-
-补充这个 `boost_spider` 框架内容 是为了打消用户质疑,和抑制ai认知幻觉 (ai严重幻觉认为只要是专用爬虫框架就一定比通用万能函数调度框架写爬虫更强更简单)  
-
-其实是funboost用来爬虫就可以了,压根不需要 `boost_spider`专用框架 ,因为那里面的代码小白很容易封装出来,   
-封装一个请求类 响应类自带xpath方法 和插入数据库 ,真的很简单,基本没有设计到需要任何设计模式,顶多是最最基本的面向对象.  
-即使用户不会面向对象,使用面向过程封装一个my_request的面向过程请求反爬函数,其实足以了, 不要太纠结不能直接 response.xpath()  
-
-封装这些 `boost_spider` 里面的这些爬虫辅助类 `RequestClient` `SpiderResponse` `DataSetSink`,和封装 `funboost` 框架的难度,压根不是一个级别. 前者是封装一个局部调用,后者是封装一个全局流程.  
-
-
-**小结:**  
-以后不要再说  `funboost` 是通用函数调度框架就一定不如专用爬虫框架了, `boost_spider` 已经包含了请求 反爬 自动cookie保持、数据库插入、xpath css解析 这些爬虫所需要的元素.  
-
-
-## 8.32 funspider 介绍
-
-| 项目 | 发布时间 | 定位 | 依赖关系 |
-| :--- | :--- | :--- | :--- |
-| **boost_spider** | 2023年 | 独立三方包 | 依赖 funboost 驱动 |
-| **funspider** | 2026年 | funboost 内置模块 | 随 funboost 安装即可使用 |
-
-`funspider` 和 `boost_spider` 高度一致，主要区别：
-- **辅助类**有所不同
-- **分发方式**不同：`funspider` 为内置模块，`boost_spider` 为独立三方包
-
-📖 `funspider` 用法详见：[funspider用法](https://github.com/ydf0509/funboost/blob/master/funboost/funspider/README.md)
-
-
-
-## 8.40 集中总结的 Funboost vs. Scrapy 优势快速对比 (表格版)  
-
-这30个原因主要围绕 **“自由编程 降维打击 框架奴役”** 的核心思想展开，即 `funboost` 通过其通用的函数调度能力，赋予开发者极大的自由度，从而在灵活性、易用性和功能强大性上超越了 `Scrapy` 这种专用但受限的框架。  
-
-
-<style>  
-    .funboost-scrapy-comparison-table {  
-        width: 100%;  
-        border-collapse: collapse;  
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";  
-        font-size: 14px;  
-        line-height: 1.5;  
-        margin-top: 20px;  
-        margin-bottom: 20px;  
-    }  
-    .funboost-scrapy-comparison-table th, .funboost-scrapy-comparison-table td {  
-        border: 1px solid #ddd;  
-        padding: 12px;  
-        text-align: left;  
-        vertical-align: top;  
-    }  
-    .funboost-scrapy-comparison-table thead th {  
-        background-color: #f2f2f2;  
-        font-weight: 600;  
-        text-align: center;  
-    }  
-    .funboost-scrapy-comparison-table tbody td:first-child {  
-        font-weight: 600;  
-        vertical-align: middle;  
-        text-align: center;  
-        /* 不设置背景色，让其跟随主题变化 */  
-    }  
-    .funboost-scrapy-comparison-table tbody td:nth-child(2) {  
-        font-weight: 600;  
-        /* 不设置背景色，让其跟随主题变化 */  
-    }  
-    /* Funboost 优势列 - 绿色背景 */  
-    .funboost-scrapy-comparison-table .funboost-advantage {  
-        background-color: #dcfce7 !important; /* 绿色背景 */  
-    }  
-    /* Scrapy 劣势列 - 红色背景 */  
-    .funboost-scrapy-comparison-table .scrapy-disadvantage {  
-        background-color: #fee2e2 !important; /* 红色背景 */  
-    }  
-    .funboost-scrapy-comparison-table code {  
-        background-color: #eee;  
-        padding: 2px 4px;  
-        border-radius: 3px;  
-        font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;  
-    }  
-</style>  
-
-<table class="funboost-scrapy-comparison-table">  
-    <thead>  
-        <tr>  
-            <th>类别</th>  
-            <th>维度</th>  
-            <th>Funboost 优势 (函数调度，自由无限)</th>  
-            <th>Scrapy 劣势 (URL调度，框架束缚)</th>  
-        </tr>  
-    </thead>  
-    <tbody>  
-        <tr>  
-            <td rowspan="5"><strong>核心理念与架构 (1-5)</strong></td>  
-            <td><strong>1. 调度核心</strong></td>  
-            <td class="funboost-advantage"><strong>函数调度</strong>：调度的是一个完整的、可执行的Python函数，内部逻辑完全自由。</td>  
-            <td class="scrapy-disadvantage"><strong>URL请求调度</strong>：调度的是一个 <code>Request</code> 对象，开发者被限制在框架的请求-响应生命周期内。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>2. 编程范式</strong></td>  
-            <td class="funboost-advantage"><strong>自由编程</strong>：采用平铺直叙、一气呵成的同步思维编写函数，逻辑连贯清晰。</td>  
-            <td class="scrapy-disadvantage"><strong>回调地狱</strong>：强制使用 <code>yield Request</code> 和 <code>callback</code> 函数，逻辑被拆分得支离破碎，难以理解和维护。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>3. 状态管理</strong></td>  
-            <td class="funboost-advantage"><strong>极其简单</strong>：在函数内使用普通的局部变量即可轻松管理状态，符合直觉。</td>  
-            <td class="scrapy-disadvantage"><strong>极其繁琐</strong>：必须通过 <code>response.meta</code> 字典在回调函数之间传递状态，易出错且IDE无法补全提示。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>4. 框架侵入性</strong></td>  
-            <td class="funboost-advantage"><strong>极低</strong>：只需一个 <code>@boost</code> 装饰器，不改变函数原有结构，可轻松集成任何老代码。</td>  
-            <td class="scrapy-disadvantage"><strong>极高</strong>：必须继承 <code>scrapy.Spider</code>，重写 <code>parse</code> 等方法，代码与框架深度耦合，迁移成本高。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>5. 架构思想</strong></td>  
-            <td class="funboost-advantage"><strong>降维打击</strong>：用通用的万能函数调度框架解决特定的爬虫问题，功能更全，更灵活,例如轻松的动态实时添加二层级爬虫种子任务。</td>  
-            <td class="scrapy-disadvantage"><strong>作茧自缚</strong>：专为爬虫设计，但其设计限制了其处理复杂和非标准场景的能力，动态实时增加一个detail_parse的二层级爬虫种子太难。</td>  
-        </tr>  
-        <tr>  
-            <td rowspan="7"><strong>开发效率与易用性 (6-12)</strong></td>  
-            <td><strong>6. 学习曲线</strong></td>  
-            <td class="funboost-advantage"><strong>极其平缓</strong>：只需学习 <code>@boost</code> 装饰器的用法，几分钟即可上手。</td>  
-            <td class="scrapy-disadvantage"><strong>极其陡峭</strong>：需要学习Spider、Item、Pipeline、Middleware、Settings等多个组件和复杂的生命周期。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>7. 代码量与文件结构</strong></td>  
-            <td class="funboost-advantage"><strong>极其精简</strong>：单文件即可完成一个复杂的分布式爬虫，代码量极少。</td>  
-            <td class="scrapy-disadvantage"><strong>极其臃肿</strong>：一个简单的爬虫也需要创建7-8个文件，开发者需在多个文件间频繁切换。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>8. HTTP库选择</strong></td>  
-            <td class="funboost-advantage"><strong>完全自由</strong>：可在函数内随意使用 <code>requests</code>, <code>httpx</code>, <code>aiohttp</code>, <code>selenium</code>, <code>playwright</code> 等任何库。</td>  
-            <td class="scrapy-disadvantage"><strong>受限</strong>：强制使用其内置的基于 <code>Twisted</code> 的下载器，想用其他库需要复杂的中间件封装。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>9. 反爬与自定义请求</strong></td>  
-            <td class="funboost-advantage"><strong>极其简单</strong>：封装一个通用的 <code>my_request</code> 函数即可实现换IP、UA等逻辑，0门槛。</td>  
-            <td class="scrapy-disadvantage"><strong>极其复杂</strong>：必须编写和注册下载器中间件（<code>Downloader Middleware</code>），概念复杂，对新手极不友好。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>10. 单元测试</strong></td>  
-            <td class="funboost-advantage"><strong>极其容易</strong>：每个被 <code>@boost</code> 装饰的函数都可以直接调用，独立进行单元测试。</td>  
-            <td class="scrapy-disadvantage"><strong>极其困难</strong>：Spider的回调方法与框架上下文强耦合，难以进行独立的单元测试。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>11. IDE代码补全</strong></td>  
-            <td class="funboost-advantage"><strong>全面支持</strong>：函数参数、<code>push</code>/<code>publish</code> 方法均有代码补全，开发效率高。</td>  
-            <td class="scrapy-disadvantage"><strong>几乎为零</strong>：<code>response.meta</code> 是字典，IDE无法提供任何键的补全提示，极易出错。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>12. 调试</strong></td>  
-            <td class="funboost-advantage"><strong>简单直观</strong>：线性执行的函数逻辑，使用标准 <code>pdb</code> 或IDE调试器即可轻松调试。</td>  
-            <td class="scrapy-disadvantage"><strong>困难</strong>：回调链和异步执行流程使得调试非常困难，难以跟踪任务的完整生命周期。</td>  
-        </tr>  
-        <tr>  
-            <td rowspan="10"><strong>功能强大性与灵活性 (13-22)</strong></td>  
-            <td><strong>13. 并发模型</strong></td>  
-            <td class="funboost-advantage"><strong>更强悍（叠加模式）</strong>：轻松实现多进程 + (多线程/协程) + 多机器的四重叠加并发，性能炸裂。</td>  
-            <td class="scrapy-disadvantage"><strong>有限</strong>：并发主要由 <code>CONCURRENT_REQUESTS</code> 控制，难以充分利用多核CPU。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>14. 速率控制</strong></td>  
-            <td class="funboost-advantage"><strong>更精准（QPS控制）</strong>：可精确控制每秒请求次数（QPS），无视响应时间波动。</td>  
-            <td class="scrapy-disadvantage"><strong>不精确（并发数控制）</strong>：只能控制并发请求数，无法保证稳定的请求速率。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>15. 复杂流程处理</strong></td>  
-            <td class="funboost-advantage"><strong>极其自然</strong>：可在单个函数内完成多轮浏览器交互、API调用等复杂连续操作。</td>  
-            <td class="scrapy-disadvantage"><strong>几乎无法实现</strong>：用回调处理多步连续操作非常笨拙，甚至会导致异步模型失效。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>16. 短时效Token处理</strong></td>  
-            <td class="funboost-advantage"><strong>轻松解决</strong>：可在函数内连续请求，确保获取Token后立即使用，保证时效性。</td>  
-            <td class="scrapy-disadvantage"><strong>无能为力</strong>：无法保证两个 <code>Request</code> 之间的执行间隔，Token极易过期。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>17. 任务去重</strong></td>  
-            <td class="funboost-advantage"><strong>更智能（入参去重）</strong>：基于函数核心入参进行去重，能自动忽略URL中的时间戳、随机数等噪音。</td>  
-            <td class="scrapy-disadvantage"><strong>很笨拙（URL指纹去重）</strong>：对URL中的噪音参数无能为力，需要编写复杂的 <code>RFPDupeFilter</code> 才能解决。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>18. 去重有效期</strong></td>  
-            <td class="funboost-advantage"><strong>支持</strong>：可以设置任务过滤的有效期，适合周期性更新的爬取任务。</td>  
-            <td class="scrapy-disadvantage"><strong>不支持</strong>：默认是永久去重，需要手动清理去重集合才能重新爬取。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>19. 错误重试</strong></td>  
-            <td class="funboost-advantage"><strong>更可靠（函数级重试）</strong>：即使HTTP 200但页面内容反爬，导致解析出错，函数依然会自动重试。</td>  
-            <td class="scrapy-disadvantage"><strong>不可靠（URL级重试）</strong>：只对请求失败（如网络错误）重试，对内容错误无能为力，会丢失数据。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>20. 数据持久化</strong></td>  
-            <td class="funboost-advantage"><strong>极其灵活</strong>：在函数内直接调用任何数据库的客户端库进行存储，完全自由。</td>  
-            <td class="scrapy-disadvantage"><strong>受限</strong>：必须通过 <code>Item Pipeline</code> 机制，增加了一层不必要的抽象和复杂性。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>21. 消息队列支持</strong></td>  
-            <td class="funboost-advantage"><strong>极其丰富</strong>：支持30多种消息队列，包括RabbitMQ、Kafka等，提供更专业的分布式能力。</td>  
-            <td class="scrapy-disadvantage"><strong>有限</strong>：主要依赖 <code>scrapy-redis</code>，选择单一。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>22. 定时任务</strong></td>  
-            <td class="funboost-advantage"><strong>原生支持</strong>：内置强大的定时任务功能，可轻松实现定时启动、周期爬取。</td>  
-            <td class="scrapy-disadvantage">需要借助外部脚本或 <code>apscheduler</code> 等库自行实现，集成复杂。</td>  
-        </tr>  
-        <tr>  
-            <td rowspan="8"><strong>生态与可靠性 (23-30)</strong></td>  
-            <td><strong>23. 插件生态</strong></td>  
-            <td class="funboost-advantage"><strong>无需插件，Python生态即是其生态</strong>：任何Python三方包都可直接使用，无需等待“大神”开发专用插件。</td>  
-            <td class="scrapy-disadvantage"><strong>依赖插件</strong>：使用新工具（如Playwright）需要等待 <code>scrapy-playwright</code> 这样的插件，学习和配置成本高。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>24. 断点续爬</strong></td>  
-            <td class="funboost-advantage"><strong>真正可靠</strong>：支持消费确认（ACK），即使强制关机、代码崩溃，任务也万无一失。</td>  
-            <td class="scrapy-disadvantage"><strong>不可靠</strong>：<code>scrapy-redis</code> 使用 <code>blpop</code>，重启或崩溃会丢失大量已取出到内存中的任务。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>25. 跨语言/项目交互</strong></td>  
-            <td class="funboost-advantage"><strong>支持</strong>：可由Java等其他语言程序向队列发布爬虫任务。</td>  
-            <td class="scrapy-disadvantage"><strong>不支持</strong>：其任务格式与Python和框架自身强绑定。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>26. 远程部署</strong></td>  
-            <td class="funboost-advantage"><strong>一键部署</strong>：内置 <code>fabric_deploy</code> 功能，可直接将爬虫函数部署到远程服务器。</td>  
-            <td class="scrapy-disadvantage">无此功能，部署复杂。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>27. Web管理界面</strong></td>  
-            <td class="funboost-advantage"><strong>功能强大</strong>：<code>funboost web manager</code> 可监控、管理所有爬虫任务和消费者，并可实时调整QPS。</td>  
-            <td class="scrapy-disadvantage"><code>scrapy-redis</code> 无官方管理界面，需借助其他工具。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>28. 稳定性</strong></td>  
-            <td class="funboost-advantage"><strong>更高</strong>：对网络错误等有强大的自动重连和重试机制，不易因外部问题中断。</td>  
-            <td class="scrapy-disadvantage">相对脆弱，需要开发者在中间件中编写大量代码来保证稳定性。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>29. 资源占用</strong></td>  
-            <td class="funboost-advantage"><strong>更可控</strong>：智能线程池可自动伸缩，节省资源。</td>  
-            <td class="scrapy-disadvantage">并发数固定，可能在任务稀疏时造成资源浪费。</td>  
-        </tr>  
-        <tr>  
-            <td><strong>30. 统一控制</strong></td>  
-            <td class="funboost-advantage"><strong>包罗万象</strong>：一个 <code>@boost</code> 装饰器集成了分布式、并发、控频、重试、过滤、持久化等30多种控制功能。</td>  
-            <td class="scrapy-disadvantage">功能分散在多个组件和配置中，难以统一管理和配置。</td>  
-        </tr>  
-    </tbody>  
-</table>  
-
-
-
-
-**总结：**  
-
-`funboost` 以其 **“函数即一切”** 的核心思想，彻底解放了开发者。它将复杂的调度、并发、容错等底层工作完全自动化，让开发者可以像写普通脚本一样编写爬虫逻辑，同时享受到远超专用框架的 **灵活性、强大功能和极致性能**。`Scrapy` 的“专业”反而成了其最大的“束缚”，导致在面对现代爬虫的复杂需求时，显得笨拙、低效且难用。因此，`funboost` 在爬虫领域对 `Scrapy` 实现了真正的 **“降维打击”**。  
-
-## 8.40b 集中总结 funboost vs scrapy 优势快速对比（文字版）  
-
-Funboost 是“函数调度器”，而 Scrapy 是“URL调度器”；前者赋能开发者，给予无限自由，后者则用框架规则束缚开发者。这是一种“自由编程”对“框架奴役”的降维打击。以下是详细的50个原因：  
-
-<div class="inner_markdown">  
-
-<h1>一、核心理念与架构优势 (1-10)</h1>  
-
-1. **调度核心根本不同**：Funboost 调度的是一个完整的 Python 函数，内部逻辑完全自由；Scrapy 调度的是一个 Request 对象，开发者被死死限制在框架的请求-响应生命周期内。  
-2. **编程范式降维打击**：Funboost 采用 平铺直叙 的同步思维写代码，逻辑连贯，一气呵成；Scrapy 强制使用 yield Request 和 callback 的 回调地狱 模式，逻辑被拆分得支离破碎。  
-3. **状态管理天壤之别**：Funboost 在函数内用 普通局部变量 就能轻松管理上下文状态，符合直觉；Scrapy 必须通过晦涩的 response.meta 字典在回调间传递状态，极易出错且IDE无法补全。  
-4. **框架侵入性极低**：Funboost 仅需一个 @boost 装饰器，不改变函数原有结构，可以 无缝集成任何老代码；Scrapy 必须继承 scrapy.Spider，代码与框架深度耦合，迁移成本极高。  
-5. **架构思想的碾压**：Funboost 是 通用的万能函数调度框架，用更广阔的视野解决爬虫问题，功能更全面；Scrapy 是 专用的爬虫框架，但其设计反而作茧自缚，限制了其解决复杂问题的能力。  
-6. **对已有代码的兼容性**：任何一个用 requests 写的普通爬虫脚本，加上 @boost 装饰器就能 瞬间升级为分布式爬虫。Scrapy 则需要对老代码进行伤筋动骨的重构。  
-7. **代码复用性**：Funboost 的爬虫函数是标准函数，可在任何地方轻松复用。Scrapy 的 parse 方法与框架强耦合，基本无法在项目外复用。  
-8. **思维模式的解放**：Funboost 鼓励开发者用最自然的编程思维解决问题。Scrapy 则强迫开发者扭曲自己的思维去适配框架的特定模式。  
-9. **请求的绝对自由**：Funboost 函数内部可以自由构造和发送多个请求，并轻松处理它们之间的复杂依赖。Scrapy 的 yield Request 模式让请求之间的时序和依赖关系处理变得非常困难。  
-10. **逻辑连贯性**：Funboost 的线性代码使得一个任务的完整逻辑（请求->解析->存储->派生新任务）集中在一起，可读性极高。Scrapy 的回调链将这些逻辑打散，降低了可读性。  
-10.b. **动态添加实时任务碾压**：scrapy动态实时添加二层级爬虫种子非常难，funboost无论是自己项目还是跨部门，轻松动态实时新增一个详情页的爬虫任务    
----  
-
-<h1>二、开发效率与易用性 (11-20)</h1>  
-
-11. **学习曲线极其平缓**：Funboost 只需学习 @boost 装饰器的用法，几分钟即可上手。Scrapy 需要学习 Spider、Item、Pipeline、Middleware、Settings 等 一整套复杂组件和生命周期。  
-12. **代码量与文件结构**：Funboost 单文件即可完成一个复杂的分布式爬虫，代码量极少。Scrapy 一个简单爬虫也需要创建7-8个文件，开发时需频繁切换，极其臃肿。  
-13. **HTTP库选择完全自由**：Funboost 函数内可随意使用 requests, httpx, aiohttp, selenium, playwright 等任何库。Scrapy 强制使用其内置下载器，想用其他库需要封装复杂的中间件。  
-14. **反爬与自定义请求极其简单**：Funboost 中，封装一个通用的 my_request 函数即可实现换IP、UA等逻辑，0门槛。Scrapy 必须编写和注册复杂的下载器中间件，对新手极不友好。  
-15. **单元测试极其容易**：每个被 @boost 装饰的函数都可以 直接在IDE中调用，独立进行单元测试。Scrapy 的回调方法与框架上下文强耦合，几乎无法进行独立的单元测试。  
-16. **IDE代码补全全面支持**：Funboost 的函数参数、push/publish 方法均有代码补全。Scrapy 的 response.meta 是字典，IDE 无法提供任何补全提示，是错误的温床。  
-17. **调试简单直观**：Funboost 的线性执行逻辑，使用标准 pdb 或IDE调试器即可轻松调试。Scrapy 的回调链和异步流程使得 调试极其困难。  
-18. **反爬逻辑的封装**：Funboost 将反爬逻辑封装在普通函数中，简单直观。Scrapy 必须封装到复杂的中间件类中，概念抽象，难于理解。  
-19. **反爬逻辑的独立测试**：Funboost 的 my_request 函数可以独立进行单元测试。Scrapy 的中间件难以脱离框架进行测试。  
-20. **数据持久化极其灵活**：Funboost 在函数内 直接调用任何数据库的客户端库 进行存储，完全自由。Scrapy 必须通过 Item Pipeline 机制，增加了不必要的抽象和复杂性。  
-
----  
-
-<h1>三、功能、性能与可靠性 (21-40)</h1>  
-
-21. **并发模型更强悍**：Funboost 轻松实现 多进程 + (多线程/协程) + 多机器 的四重叠加并发，性能炸裂。Scrapy 难以充分利用多核CPU。  
-22. **速率控制更精准**：Funboost 可通过 qps 参数 精确控制每秒请求次数，无视响应时间波动。Scrapy 只能控制并发数，无法保证稳定的请求速率。  
-23. **分布式控频**：Funboost 支持跨多台机器、多个进程的 全局QPS控制。Scrapy 的速率限制是单实例的，无法实现全局控频。  
-24. **任务去重更智能**：Funboost 基于 函数核心入参 去重，能自动忽略URL中的时间戳、随机数等噪音。Scrapy 基于URL指纹，对噪音参数无能为力，需要编写复杂的 RFPDupeFilter。  
-25. **去重有效期支持**：Funboost 可以设置任务过滤的 有效期，适合周期性更新的爬取任务。Scrapy 默认是永久去重，非常不灵活。  
-26. **错误重试更可靠**：Funboost 是 函数级重试。即使HTTP 200但页面内容反爬导致解析出错，函数依然会自动重试。Scrapy 是URL级重试，对内容错误无能为力，会丢失大量数据。  
-27. **断点续爬真正可靠**：Funboost 支持 消费确认（ACK），即使强制关机、代码崩溃，任务也万无一失。Scrapy-redis 使用 blpop，重启或崩溃会丢失所有已取出到内存中的任务。  
-28. **应对进程崩溃**：Funboost 在进程崩溃或断电后，未完成的任务会自动返回队列。Scrapy-redis 会 永久丢失 所有已 blpop 到内存中的任务。  
-29. **消息队列支持极其丰富**：Funboost 支持30多种消息队列，包括 RabbitMQ、Kafka 等专业队列，提供更强大的分布式能力。Scrapy 主要依赖 scrapy-redis，选择单一。  
-30. **定时任务原生支持**：Funboost 内置强大的定时任务功能，可轻松实现定时启动、周期爬取。Scrapy 需要借助外部库自行实现，集成复杂。  
-31. **远程部署一键搞定**：Funboost 内置 fabric_deploy 功能，可直接将爬虫函数部署到远程服务器。Scrapy 无此功能，部署流程繁琐。  
-32. **Web管理界面功能强大**：funboost web manager 可监控、管理所有爬虫任务和消费者，并可 实时调整QPS。Scrapy 生态缺乏这样统一、强大的官方监控工具。  
-33. **稳定性更高**：Funboost 对网络错误等有强大的自动重连和重试机制，不易因外部问题中断。Scrapy 相对脆弱，需要开发者编写大量代码来保证稳定性。  
-34. **资源占用更可控**：Funboost 的智能线程池可 自动伸缩，在任务稀疏时节省资源。Scrapy 的并发数固定，可能造成资源浪费。  
-35. **统一控制，包罗万象**：一个 @boost 装饰器集成了分布式、并发、控频、重试、过滤、持久化等 30多种控制功能。Scrapy 功能分散在多个组件和配置中，难以统一管理。  
-36. **RPC模式**：Funboost 支持 RPC 模式，可以在发布任务后同步等待并获取爬取结果。Scrapy 没有这种模式。  
-37. **跨语言/项目交互**：Funboost 的任务是标准JSON，可由Java等其他语言程序向队列发布爬虫任务。Scrapy 的任务格式与Python和框架自身强绑定，无法交互。  
-38. **插件生态的颠覆**：Funboost 无需插件，整个Python生态就是其生态。Scrapy 严重依赖插件，使用新工具（如Playwright）需要等待 scrapy-playwright 这样的插件，学习和配置成本高。  
-39. **插件的本质**：Scrapy 插件多是因为框架本身封闭，需要“补丁”来扩展。Funboost 不需要插件是因为其本身就是开放的。  
-40. **对三方库的集成成本**：Funboost 集成任何库都是 零成本的直接调用。Scrapy 集成新库需要等待或自己开发复杂的插件，成本高昂。  
-
----  
-
-<h1>四、特定场景处理能力 (41-50)</h1>  
-
-41. **复杂流程处理极其自然**：Funboost 可在单个函数内完成 多轮浏览器交互、API调用等复杂连续操作。Scrapy 用回调处理此类任务非常笨拙，甚至会导致异步模型失效。  
-42. **短时效Token处理轻松解决**：Funboost 可在函数内连续请求，确保获取Token后 立即使用，完美解决时效性问题。Scrapy 无法保证两个 Request 之间的执行间隔，Token极易过期。  
-43. **时序控制的确定性**：Funboost 在函数内连续发请求，时序是 确定的、可控的。Scrapy 的请求经过调度器，执行时序不确定。  
-44. **浏览器渲染的并发处理**：Funboost 可以轻松地并发执行多个 Selenium/Playwright 任务。Scrapy 在 parse 方法里用 Selenium 会阻塞整个框架，使其退化为单线程。  
-45. **处理动态参数的优雅**：Funboost 天然免疫 URL 中的 _ts、_rand 等动态噪音参数。Scrapy 需要编写复杂的正则和自定义 RFPDupeFilter 来清洗 URL，维护成本极高。  
-46. **对非HTTP任务的处理**：Funboost 可以调度任何任务，比如文件处理、图片识别、数据分析等，与爬虫任务无缝结合。Scrapy 只能处理HTTP请求。  
-47. **动态任务生成**：Funboost 在函数内部可以根据逻辑随时 push 新的任务，非常灵活。Scrapy 的 yield 方式在复杂逻辑判断下生成新请求会很别扭。  
-48. **任务优先级控制**：Funboost 支持更专业的 消息级优先级队列（如RabbitMQ），控制更精细。Scrapy 的 priority 参数依赖于调度器的实现，效果有限。  
-49. **死信队列处理**：Funboost 提供了更完善的死信队列机制，方便处理无法消费的“毒丸”消息。Scrapy 需要自己实现类似逻辑。  
-50. **对开发者的终极赋能**：Funboost 的核心是 “赋能函数”，让开发者用最熟悉的工具和方式解决问题。Scrapy 的核心是 “遵循框架”，要求开发者学习并适应其一套独特的规则。  
-50.b **二级任务动态注入**：Funboost 原生支持从外部系统（如Java/PHP）直接向队列推送消息来触发特定任务（如详情页抓取），实现微服务级解耦。Scrapy 难以实现外部直接注入中间状态任务，需重写底层逻辑。  
-</div>  
-
-综上所述，funboost 凭借其先进的函数调度理念、极致的灵活性和强大的内置功能，在爬虫领域的几乎所有方面都展现出对 scrapy 的压倒性优势。  
-
-
-
-## 8.41 Funboost vs. Scrapy 爬虫能力全方位对比（百分制评分）  
-
-这个评分系统基于以下原则：  
-*   **100分**：代表在该维度上表现卓越，几乎没有缺点，完全符合现代开发实践和直觉。  
-*   **70-90分**：表现良好，但在某些方面存在一些限制或需要额外的学习成本。  
-*   **40-60分**：表现平庸或存在明显缺陷，需要开发者通过复杂的变通方法来弥补。  
-*   **低于40分**：在该维度上存在根本性的设计缺陷或严重不足。  
-
-**客观的百分制评分,包含了爬虫领域所有的重要方面比较**  
-
-| 类别 | 维度 | Funboost (函数调度器) | Scrapy (URL调度器) | 评分依据与简评 |  
-| :--- | :--- | :--- | :--- | :--- |  
-| **核心理念与架构** | **1. 编程范式与直觉性** | **100** | **50** | **Funboost**: 线性、平铺直叙的函数式编程，符合Python直觉。<br>**Scrapy**: 回调地狱，逻辑碎片化，反直觉。 |  
-| | **2. 框架侵入性与自由度** | **100** | **40** | **Funboost**: 零侵入，`@boost`装饰器即插即用，可使用任何库。<br>**Scrapy**: 强耦合，必须继承`Spider`，限制HTTP库选择。 |  
-| | **3. 架构灵活性** | **95** | **60** | **Funboost**: 万能函数调度，轻松应对任何任务类型（HTTP, 浏览器, API, 文件处理）。<br>**Scrapy**: 专为URL请求设计，处理非HTTP任务非常笨拙。 | 
-| | **微服务化与外部集成** | **100** | **20** | **Funboost**: 天然 FaaS 架构，Java/Go 可直接通过队列触发特定爬虫任务，零耦合。<br>**Scrapy**: 封闭系统，外部难以实时插入任务，需魔改源码。 | 
-| **开发效率与易用性** | **4. 学习曲线** | **95** | **50** | **Funboost**: 只需学习一个`@boost`装饰器。<br>**Scrapy**: 需掌握Spider, Middleware, Pipeline, Settings等一整套复杂概念。 |  
-| | **5. 代码量与项目结构** | **100** | **40** | **Funboost**: 极其精简，单文件即可完成复杂爬虫。<br>**Scrapy**: 极其臃肿，项目结构固定且文件繁多。 |  
-| | **6. 调试与单元测试** | **100** | **30** | **Funboost**: 函数可直接调用，调试和测试极其简单。<br>**Scrapy**: 回调方法与框架强耦合，几乎无法独立测试和调试。 |  
-| | **7. IDE支持 (代码补全)** | **95** | **40** | **Funboost**: 全面支持函数参数和框架方法补全。<br>**Scrapy**: `response.meta`是黑盒，IDE无法提供任何帮助，极易出错。 |  
-| **性能与并发模型** | **8. 真实并发能力** | **100** | **70** | **Funboost**: 多进程+多线程/协程，真正利用多核，并发模型清晰。<br>**Scrapy**: 基于单线程事件循环，难以充分利用多核CPU。 |  
-| | **9. 速率控制 (QPS)** | **100** | **50** | **Funboost**: 精准QPS控制，无视响应时间波动。<br>**Scrapy**: 只能控制并发数，无法保证稳定请求速率。 |  
-| | **10. 浏览器自动化并发** | **100** | **20** | **Funboost**: 通过工作池实现真正的并行浏览器操作。<br>**Scrapy**: 阻塞事件循环，使框架退化为单线程，性能灾难。 |  
-| **功能与可靠性** | **11. 断点续爬可靠性** | **100** | **60** | **Funboost**: 消费确认(ACK)机制，任务万无一失。<br>**Scrapy**: `scrapy-redis`的`blpop`机制在重启或崩溃时会丢失大量任务。 |  
-| | **12. 任务去重能力** | **100** | **50** | **Funboost**: 基于核心入参去重，天然免疫URL噪音。<br>**Scrapy**: 基于URL指纹，处理噪音参数需编写复杂`DupeFilter`。 |  
-| | **13. 错误重试机制** | **95** | **70** | **Funboost**: 函数级重试，即使HTTP 200但内容错误也能重试。<br>**Scrapy**: URL级重试，对内容错误无能为力，会丢失数据。 |  
-| | **14. 消息队列支持** | **100** | **60** | **Funboost**: 支持30+种专业消息队列，选择极其丰富。<br>**Scrapy**: 主要依赖`scrapy-redis`，选择单一。 |  
-| **特定场景处理能力** | **15. 复杂交互流程** | **100** | **30** | **Funboost**: 在单个函数内轻松实现多步、状态依赖的交互。<br>**Scrapy**: 回调链使其难以处理复杂时序和状态依赖。 |  
-| | **16. 短时效Token处理** | **100** | **20** | **Funboost**: 函数内连续请求，确保Token不过期。<br>**Scrapy**: 无法保证请求间隔，Token极易失效。 |  
-| | **17. 反爬策略实现** | **95** | **65** | **Funboost**: 封装普通Python函数例如my_request，简单直观。<br>**Scrapy**: 需编写复杂的下载器中间件，学习成本高。 |  
-| | **18. 动态任务注入** | **100** | **30** | **Funboost**: 外部系统可直接推送消息触发任意层级任务，解耦且灵活。<br>**Scrapy**: 难以从外部注入非起始任务，需复杂改造。 |  
-| **生态与扩展性** | **19. 第三方库集成** | **100** | **50** | **Funboost**: **无需插件**，直接调用任何Python库。<br>**Scrapy**: **严重依赖插件**，使用新工具需等待或开发复杂插件 <br> **scrapy-selenium** 插件在面对复杂多步骤交互输入点击再解析页面需求上,难度高弊端大,力不从心。 |  
-| | **20. Web管理与监控** | **90** | **40** | **Funboost**: 自带功能强大的Web Manager，可监控、管理和实时调参。<br**Scrapy**: 缺乏官方统一的强大监控工具。 |  
-| | **21. 跨语言/项目交互** | **90** | **20** | **Funboost**: 标准JSON任务，可由其他语言发布。<br>**Scrapy**: 任务格式与框架强绑定，几乎无法跨语言交互。 |  
-| **总分 (加权平均)** | | <span style="font-size: 1.2em; font-weight: bold; color: green;">97.5</span> | <span style="font-size: 1.2em; font-weight: bold; color: red;">45.5</span> | |  
-
----  
-
-**总结分析:**  
-
-从上表可以清晰地看出，`funboost` 在爬虫这个funboost`不务正业`的领域,几乎所有关键维度上都展现出对 `Scrapy` 专业爬虫框架的**压倒性优势**。  
-
-*   **Funboost (得分: 97.5)**：它代表了一种更现代、更灵活、更符合 Python 开发者直觉的编程范式。它将复杂的分布式调度问题彻底封装，把**完全的自由**还给了开发者。无论是开发效率、性能、可靠性，还是处理复杂场景的能力，`funboost` 都表现得近乎完美。它的核心优势在于其**通用性**——通过调度函数这一简单而强大的抽象，它能够“降维打击”像 Scrapy 这样被特定领域（URL请求）所束缚的框架。  
-
-*   **Scrapy (得分: 45.5)**：作为一个历史悠久的框架，Scrapy 在其设计的时代背景下是优秀的。然而，其**强耦合、反直觉的回调机制、脆弱的可靠性模型**以及**对阻塞任务的无力**，使其在面对当今复杂多变的爬虫需求时显得力不从心。它的“专业性”反而成为了其最大的“枷锁”，导致在许多关键评分项上表现不佳。  
-
-**最终结论**：对于追求开发效率、代码可维护性、系统可靠性和极致性能的现代爬虫开发者而言，选择 `funboost` 是一个显而易见的、更优的决定。它不仅是一个更强大的工具，更是一种能解放生产力的先进思想。  
-
-<div> </div>  
+```python
+@boost(BoosterParams(queue_name='reliable_crawl', max_retry_times=5))
+def crawl(url):
+    resp = requests.get(url)
+    data = resp.json()
+    if data.get('code') == 'captcha_required':  # HTTP 200 但业务反爬
+        raise Exception("触发验证码")  # 自动重试，换 IP 再来
+    title = data['result']['title']  # KeyError 也会触发重试
+    save(title)
+```
+
+即使是 **解析代码的 bug** 导致的 KeyError、IndexError，也会被框架捕获并自动重试（换代理/换UA后可能成功）。Scrapy 在这种场景下直接丢数据。
+
+---
+
+## 8.7 讨Scrapy檄文：Funboost兴，Scrapy亡，天下爬虫，当顺天命！
+
+
+**盖闻：天地有正道，万物循至理。编程之道，贵在通达；调度之术，胜在自由。**
+
+昔者Scrapy挟Twisted之余烈，立URL调度之宗庙，号令爬虫诸侯十有余年。然时移世易，其法渐陈：回调为锁，中间件为牢，Pipeline为械。天下开发者苦Scrapy久矣——代码支离破碎，调试如堕迷雾，插件卡脖，旧码难容，分布式如空中楼阁，生产环境如履薄冰！
+
+今有 **Funboost** 横空出世！以函数为剑，以`@boost`为令，化繁为简，破旧立新。一行装饰器，赋万物以分布式之力；一个函数体，纳天下PyPI为我所用。此诚天道更替、不可逆之大势也！
+
+**吾观Scrapy之根基，十败已定；Funboost十胜在手，当为天下主！**
+
+---
+
+一曰：**道失对道胜！**
+Scrapy以URL为心，以`Request`为锁，调度一次请求便自诩功成。殊不知URL不过函数之一行耳！框架替用户发请求，用户反被框架所缚，此谓 **"画地为牢困蛟龙"**！
+Funboost以函数为道，万法归宗。调度一个函数，函数之内可行万里路、做万般事——发请求、操浏览器、调模型、写数据库，无所不能，此谓 **"道法自然御星河"**！
+
+二曰：**繁失对简胜！**
+Scrapy开工先筑城：`scrapy.cfg`、`items.py`、`pipelines.py`、`middlewares.py`、`settings.py`、`spiders/`... 七八文件列阵排兵，仪式感重于泰山，初学者望而却步，此谓 **"千乘列阵烹一鸡"**！
+Funboost一`@boost`点睛，单文件搞定一切。验证函数能跑，加上装饰器即刻起飞，此谓 **"一字点化龙乘风"**！
+
+三曰：**弱失对强胜！**
+Scrapy困于单进程，Twisted虽号异步，遇Selenium则英雄气短，异步退化同步，多核CPU空置叹息，此谓 **"独木难撑万钧鼎"**！
+Funboost多线程/协程叠加多进程，再叠多机器，四重并发层层递进。百台机器万核齐鸣，势如破竹，此谓 **"千军万马踏九州"**！
+
+四曰：**粗失对精胜！**
+Scrapy仅有`DOWNLOAD_DELAY`聊以控频，受响应耗时波动，QPS漂移不定，控频如盲人射箭，此谓 **"刻舟求剑失方寸"**！
+Funboost基于精密计时算法控频，`qps=5`即每秒恰好5次，且能自动补偿网络抖动；分布式场景下多机器自动均分配额，全局精准联控，此谓 **"庖丁解牛游刃余"**！
+
+五曰：**乱失对明胜！**
+Scrapy回调嵌套层叠，`yield Request(callback=parse_2, meta={...})` 再 `yield Request(callback=parse_3, meta={...})`，逻辑碎片化如散沙，`meta`字典传参无类型、无补全、拼错无警告，此谓 **"盲骑瞎马临深池"**！
+Funboost函数平铺直叙，从上到下一气呵成。局部变量有类型，IDE自动补全，重构一键同步，此谓 **"长河落日照秋明"**！
+
+六曰：**虚失对固胜！**
+Scrapy-redis以`blpop`取消息，取出即离队。进程崩溃、服务器断电，内存中数十万任务灰飞烟灭，断点续爬形同虚设，此谓 **"累卵高筑一风倾"**！
+Funboost消费确认(ACK)机制——消息处理成功才从队列移除。崩溃重启，未完成任务自动回队重投，万无一失，此谓 **"磐石不动海潮平"**！
+
+七曰：**枯失对荣胜！**
+Scrapy需`scrapy-redis`才能分布式，需`scrapy-selenium`才能操浏览器，需`scrapy-playwright`才能用Playwright。无插件则寸步难行，等插件如望穿秋水，此谓 **"缘木求鱼空嗟叹"**！
+Funboost无需任何插件！天下PyPI十数万包皆为己用——`import requests`、`import playwright`、`import pymongo`，直接调用，天然兼容，此谓 **"万物为我所驱遣"**！
+
+八曰：**漏失对全胜！**
+Scrapy重试仅针对HTTP请求失败（超时、5xx）。若服务器返回HTTP 200却是验证码或空数据，Scrapy认为"成功"，数据永久丢失！此谓 **"金玉其外败絮中"**！
+Funboost函数级重试——函数内任意位置抛异常即触发重试。HTTP 200但内容异常？解析报错？一律自动换IP重来，数据滴水不漏，此谓 **"天网恢恢疏不漏"**！
+
+九曰：**闭失对通胜！**
+Scrapy是封闭孤岛。Java后端想实时触发爬虫？运营想按需抓一条数据？只能魔改代码或数据库中转，延迟极高，耦合极重，此谓 **"闭关锁国难通商"**！
+Funboost天然是微服务——外部系统直接往消息队列发一条JSON即可触发爬取。Java、Go、PHP随时调用，`funboost.faas`一键生成HTTP接口，此谓 **"四海通衢万邦来"**！
+
+十曰：**拙失对巧胜！**
+Scrapy遇短时效Token（5秒过期）、浏览器多轮交互、动态IP加密签名等奇巧需求，则左支右绌、力不从心。回调机制无法保证时序，复杂流程在框架中寸步难行，此谓 **"削足适履步维艰"**！
+Funboost函数之内，时序确定、状态自然、连续操作一步到位。获取Token后立即使用、多轮点击等待判断一气呵成，此谓 **"千变万化指掌间"**！
+
+---
+
+**有此十胜，Funboost伐Scrapy，如沸汤泼雪，如皓月蔽萤，何愁不克？！**
+
+Scrapy老将，若审时度势弃旧图新，尚可涅槃重生；若抱残守缺负隅顽抗，必为时代洪流碾为齑粉！
+
+**今Funboost大纛已立，携函数调度之神锋，集分布式并发之铁骑：**
+东纳Requests之勇，西引HTTPX之锐；南征Selenium之坚，北驭Playwright之奇！
+以Redis、RabbitMQ、Kafka近五十种消息队列为粮道，合多进程、多线程、协程三军为一体！
+
+**天下英雄，当明辨大势，顺道而行！**
+弃`yield Request`之桎梏，拥`@boost`之光辉！
+自此开发者无需叩拜Spider宗庙，无需忍受回调地狱之煎熬，无需跪求插件大神之垂怜！
+此乃爬虫之文艺复兴，调度之工业革命！
+
+**剑锋所指，框架枷锁灰飞烟灭！函数光辉，普照四海八荒！**
+
+**与诸君共勉，同开万物皆可Boost之盛世！**
+
+**FunBoost大都督，昭告天下！**
+
+---
+
+## 8.8 集中对比：Funboost 30项 vs Scrapy
+
+<table>
+<thead>
+<tr><th>维度</th><th>Funboost</th><th>Scrapy</th></tr>
+</thead>
+<tbody>
+<tr><td>调度核心</td><td>调度函数（内部完全自由）</td><td>调度 Request 对象（框架控制）</td></tr>
+<tr><td>编程范式</td><td>平铺直叙线性代码</td><td>yield Request + callback 回调链</td></tr>
+<tr><td>状态管理</td><td>函数内局部变量</td><td>response.meta 字典传递</td></tr>
+<tr><td>框架侵入性</td><td>仅 @boost 装饰器</td><td>必须继承 scrapy.Spider</td></tr>
+<tr><td>项目结构</td><td>无要求，单文件即可</td><td>强制 7-8 个文件</td></tr>
+<tr><td>学习曲线</td><td>几分钟上手</td><td>需学生命周期/中间件/Pipeline 等整套体系</td></tr>
+<tr><td>HTTP库选择</td><td>任意（requests/httpx/aiohttp/playwright...）</td><td>强制 Twisted 下载器</td></tr>
+<tr><td>反爬实现</td><td>普通函数封装，0门槛</td><td>需编写 Downloader Middleware</td></tr>
+<tr><td>单元测试</td><td>直接调用函数测试</td><td>与框架耦合，难以独立测试</td></tr>
+<tr><td>IDE 补全</td><td>函数参数完整补全</td><td>response.meta 无法补全</td></tr>
+<tr><td>调试</td><td>标准 pdb/IDE 调试</td><td>回调链+异步，调试困难</td></tr>
+<tr><td>并发模型</td><td>多进程×多线程/协程×多机器 四重叠加</td><td>单进程受限，多核利用差</td></tr>
+<tr><td>速率控制</td><td>精准 QPS 控制</td><td>DOWNLOAD_DELAY 不精确</td></tr>
+<tr><td>分布式控频</td><td>跨机器全局 QPS 限制</td><td>不支持</td></tr>
+<tr><td>复杂流程</td><td>函数内多轮交互自然编写</td><td>回调处理笨拙，阻塞异步模型</td></tr>
+<tr><td>短时效 Token</td><td>函数内连续请求保证时效</td><td>调度器排队导致 Token 过期</td></tr>
+<tr><td>任务去重</td><td>基于函数入参智能去重</td><td>URL 指纹去重，噪音参数干扰</td></tr>
+<tr><td>去重有效期</td><td>支持</td><td>不支持</td></tr>
+<tr><td>错误重试</td><td>函数级（HTTP 200 内容错误也重试）</td><td>URL 级（仅网络错误重试）</td></tr>
+<tr><td>断点续爬</td><td>消费确认(ACK)，崩溃不丢消息</td><td>scrapy-redis blpop 丢消息</td></tr>
+<tr><td>消息队列</td><td>近 50 种</td><td>主要 scrapy-redis</td></tr>
+<tr><td>定时任务</td><td>原生支持 Cron</td><td>需外部工具</td></tr>
+<tr><td>数据持久化</td><td>函数内直接调用任何库</td><td>必须 Item Pipeline</td></tr>
+<tr><td>插件生态</td><td>无需插件，PyPI 所有包直接用</td><td>依赖专用插件（scrapy-xxx）</td></tr>
+<tr><td>跨语言交互</td><td>JSON 消息队列，Java/Go 直接发任务</td><td>不支持</td></tr>
+<tr><td>Web 管理</td><td>funboost web manager 全功能</td><td>无官方工具</td></tr>
+<tr><td>远程部署</td><td>内置 fabric_deploy 一键部署</td><td>无此功能</td></tr>
+<tr><td>RPC 模式</td><td>支持同步等待爬取结果</td><td>不支持</td></tr>
+<tr><td>微服务/FaaS</td><td>原生支持外部注入任务</td><td>封闭系统，难以对接</td></tr>
+<tr><td>代码复用</td><td>utils/ 现有函数零成本复用</td><td>必须改成 Middleware 形状</td></tr>
+</tbody>
+</table>
+
+---
+
+## 8.9 Funboost 爬虫最佳实践
+
+### 8.9.1 项目结构推荐
+
+Funboost 不强制任何目录结构。推荐的做法是：**一个网站一个 py 文件**，列表页+详情页的函数都写在同一个文件中，在文件底部的 `if __name__` 里启动消费。一个项目可以爬几十个不同网站。
+
+**请求和存储可以选择**：
+- **自己封装**：用你 `utils/` 下的 `my_request` 函数（完全自由，适合已有积累的团队）
+- **用 funspider**：内置 `SimpleSpiderClient` / `AsyncSpiderClient`（自带代理轮换+随机UA+自动重试+Cookie会话保持+响应内置xpath/css）+ `SpiderItem`（一行 ORM upsert 入库）
+- **用 boost_spider**：`RequestClient`（多代理商容灾+自动重试+Cookie会话保持）+ `DatasetSink`（一行代码自动建表存库）
+
+三种方式任选，funboost 都不限制。
+
+```
+my_spider_project/
+├── utils/
+│   ├── my_request.py      # 方式1：你自己封装的通用请求函数
+│   └── db.py              # 你自己的数据库存储工具
+├── site_autohome.py       # 汽车之家爬虫（列表+详情，同一文件）
+├── site_zhihu.py          # 知乎爬虫（列表+详情，同一文件）
+├── site_douban.py         # 豆瓣爬虫（列表+详情，同一文件）
+└── run_all.py             # 可选：一键启动所有网站的消费
+```
+
+### 8.9.2 单文件完整示例
+
+```python
+# site_autohome.py —— 一个文件搞定汽车之家新闻爬虫
+from funboost import boost, BoosterParams, BrokerEnum
+from utils.my_request import my_request
+
+@boost(BoosterParams(queue_name='autohome_list', broker_kind=BrokerEnum.REDIS_ACK_ABLE, qps=2))
+def crawl_list(news_type: str, page: int):
+    resp = my_request('get', f'https://www.autohome.com.cn/{news_type}/{page}/')
+    for url in parse_list_urls(resp):
+        crawl_detail.push(url=url)
+    if page == 1:
+        for p in range(2, get_last_page(resp) + 1):
+            crawl_list.push(news_type=news_type, page=p)
+
+@boost(BoosterParams(queue_name='autohome_detail', broker_kind=BrokerEnum.REDIS_ACK_ABLE, qps=5, max_retry_times=3))
+def crawl_detail(url: str):
+    resp = my_request('get', url)
+    data = parse_detail(resp)
+    save_to_db(data)
+
+if __name__ == "__main__":
+    crawl_list.consume()
+    crawl_detail.consume()
+    # 发布种子任务
+    crawl_list.push(news_type='news', page=1)
+    crawl_list.push(news_type='drive', page=1)
+```
+
+运行就一条命令：`python site_autohome.py`。不需要额外的启动脚本。
+
+### 8.9.3 多进程 + 多线程极限性能
+
+```python
+# 8核机器，每进程50线程 = 400并发
+crawl_detail.multi_process_consume(8)
+```
+
+### 8.9.4 精准 QPS 控频（保护目标网站）
+
+```python
+@boost(BoosterParams(
+    queue_name='polite_crawl',
+    qps=2,  # 每秒最多2次请求
+    is_using_distributed_frequency_control=True,  # 多台机器合计不超过 2 QPS
+))
+def crawl(url): ...
+```
+
+### 8.9.5 funweb 可视化管理爬虫（开箱即用）
+
+funboost 自带 Web 管理界面 **funweb**，一条命令启动（`pip install funboost[flask] && python3 -m funboost.funweb.app`），浏览器打开 `127.0.0.1:27018` 即可使用。也可在代码中调用 `start_funboost_web_manager()` 随爬虫一起启动。
+
+因为 **Funboost 一个函数执行 = 爬一次页面**，所以 funweb 的消费指标天然就是爬虫指标：
+
+**爬虫监控核心能力**：
+- **消费速率曲线**：实时+历史曲线展示每个爬虫的爬取速度（按秒/分钟/小时自动切粒度），含近10秒完成数、失败数、平均耗时、剩余积压等 7 项指标
+- **暂停/恢复消费**：发现被封 IP？一键暂停，换完 IP 再恢复
+- **消费结果查询 + 失败重投**：查看每个 URL 的爬取结果（成功/失败/异常堆栈/耗时），失败任务一键重新投递
+- **告警推送**：积压超标、QPS 骤降、消费者掉线、失败率飙升、耗时过高——5 种告警自动推送到企业微信/钉钉/飞书
+- **脚本部署**：内置 Supervisor + Jenkins + ELK 三合一——一键部署爬虫、自动保活、Git Pull 一键发版、10GB+ 日志毫秒级检索（彩色高亮）
+- **定时任务**：页面配置 Cron 定时爬取，无需写系统 crontab
+
+**对比 Scrapy**：Scrapy 没有官方 Web 管理界面。想要类似的监控+部署+告警能力，需要自己搭建 Grafana + Prometheus + Supervisor + Jenkins + ELK 一整套体系。funweb 一条命令全部搞定。
+
+---
+
+## 8.10 总结
+
+| 选 Funboost 还是 Scrapy？ | |
+|---|---|
+| 你想**写函数就能爬虫**，享受自由 | → Funboost |
+| 你想复用自己 utils/ 文件夹的宝贵资产 | → Funboost |
+| 你需要精准 QPS 控频 + 分布式全局限流 | → Funboost |
+| 你需要处理短时效 Token / 浏览器多轮交互 | → Funboost |
+| 你需要其他部门通过 API 实时触发爬取 | → Funboost |
+| 你需要崩溃/断电后消息万无一失 | → Funboost |
+| 你需要多进程 × 多线程 × 多机器极限性能 | → Funboost |
+
+**Funboost 的核心优势不是"对爬虫做了什么专门优化"，而是"根本不限制你做什么"。** 它用更高维度的"通用函数调度"解决了爬虫问题，给予开发者完全的自由，同时自动赋予 30+ 种企业级控制能力。这是对任何"框架束缚型"爬虫工具的降维打击。
 
 `````
 
@@ -24445,556 +21378,230 @@ Funboost不是Celery的改良版，而是对分布式任务调度的**范式革�
 
 `````markdown
 
-**欢迎来到爬虫的未来，这里没有回调地域，只有自由世界。**
+# boost_spider
 
 `pip install boost_spider`
 
-**`boost_spider` = `funboost` 的超跑引擎 + 一套为爬虫量身打造的瑞士军刀。所有仿scrapy api爬虫框架都还是处在变花样造一辆马车**
+**boost_spider = funboost 分布式调度 + 爬虫三件套（请求/解析/入库）**
 
-### ！！！号外：
-`boost_spider`项目中现在也包含一个 `boost_scrapy` 的框架，是使用 funboost内核封装的一个高仿scrapy api风格的爬虫框架。 
-`funboost` 自己也造一个变态马车，`boost_scrapy` 主要是为了那些 如果不写 `yield Request` 就浑身难受的爬虫用户。   
-(这间接说明了 `funboost` 具有超高的可塑性，可以封装成任何框架，包括爬虫框架) 
+boost_spider 基于 [funboost](https://funboost.readthedocs.io) 驱动，在 funboost 的分布式函数调度能力之上，增加了三个爬虫增强类：
 
+| 类 | 作用 |
+|---|------|
+| `RequestClient` | 爬虫请求客户端（API 兼容 requests），内置多代理商容灾轮换、自动重试、随机 UA、Cookie 会话保持 |
+| `SpiderResponse` | 响应对象，自带 `.xpath()` / `.css()` / `.re_search()` / `.re_findall()` / `.resp_dict` / `.selector` |
+| `DatasetSink` | 一行代码将字典保存到 MySQL / PostgreSQL / SQLite，自动建表 |
 
-
-对于爬虫场景:       
-用户怕麻烦,要求天生就爬虫全套方便，就使用 `funboost` + `boost_spider`(内置了便利的 请求 解析 入库3个类)     
-用户要绝对自由，就使用 `funboost` + 用户自己项目的 `utils/` 或 `commons/` 文件夹下已经封装好的 各种工具类和函数     
-
-### funboost/boost_spider 对仿scrapy api框架最大优势是 复用用户自己的 utils文件夹下的 宝贵资产
-- 复用用户自己的 utils 宝贵资产，正是 `funboost`  区别于 `Scrapy/Feapder` 等传统框架的**根本性优势**，是战略层面的胜利。   
-*   **`utils` 是开发者的“内功心法”**：一个开发者的 `utils` 文件夹，是他/她多年经验的结晶，是解决特定领域问题的最佳实践沉淀。它包含了对业务逻辑的深刻理解，是**不可替代的、高度定制化的“私有武器库”**。
-*   **“复用 `utils`” = 复用经验和智慧**：一个框架如果能让开发者无缝地复用自己的 `utils`，就意味着它尊重并放大了开发者的个人能力和历史积累。开发者可以用最熟悉、最高效的方式解决问题。
-*   **“无法复用 `utils`” = 废掉武功，重练套路**：`Scrapy/Feapder` 的插件和中间件机制，本质上是让你放弃自己的“内功”，去学习并练习一套它们规定好的“套路招式”。你的 `my_request` 函数再精妙，也得改成 `Downloader Middleware` 的形状；你的 `save_to_mysql` 再高效，也得塞进 `Item Pipeline` 的模子里。这是一个**巨大的、隐性的成本**。
-
-### **Funboost/boost_spider 天然就是 FaaS 微服务，而 Scrapy 只是数据孤岛,架构模式战略级碾压**  
-`funboost/boost_spider` 支持高实时爬虫，scrapy只能封闭离线爬虫，架构模式战略级碾压。  
-`funboost/boost_spider`不仅支持别的部门通过原生消息队列客户端发布函数入参对应的纯净json到对应的queue_name  
-也支持 `funboost.faas` 快速给你的web服务增加多个funboost路由，一键实现`FaaS(Function as a Service)`     
-自动发现注册爬虫函数，在实时爬虫上对`scrapy-redis`是战略级碾压。   
-
-# 1.分布式光速python爬虫框架 boost_spider
-
-boost_spider是从框架理念和本质上降维打击,任何仿 scrapy api 用法框架的爬虫框架,如同星际战舰对抗中世纪的蒸汽机车.    
-碾压任何需要用户 yield Request(url=url, callback=self.my_parse,meta={'field1':'xxx','field2':'yyy'}) 的爬虫框架20年以上.  
-
-
-## 安装：
-
-pip install boost_spider
-
-## boost_spider框架的更详细用法要看funboost文档
-
-boost_spider是基于funboost驱动,增加了对爬虫更方便的常规反爬请求类和 方便爬虫解析的响应类 和 一行代码快捷保存字典入库 3个类.    
-RequestClient  和  SpiderResponse  和 DatasetSink
-
-[查看分布式函数调度框架完整文档 https://funboost.readthedocs.io/zh-cn/latest/index.html](https://funboost.readthedocs.io/zh-cn/latest/index.html)
-
-
-## 简介：
-
-boost_spider 是powerd by funboost,加了一个方便爬虫的请求类(用户可以不使用这个请求类,可以用任意包自己发送http请求)
-
-本质上,funboost是函数调度框架,scrapy和国产仿scrapy api用法的爬虫框架是一个url请求调度框架,
-
-函数里面用户可以写任何逻辑,所以boost_spider适应范围和用户自由度暴击写死了替发送一个http请求的仿scrapy框架.
-
-函数调度框架暴击url请求调度框架,这是降维打击.
-
-### boost_spider 理念:
-
-- funboost/boost_spider 和 scrapy 难度差异: 【对于一个刚刚掌握了 Python 基础语法（变量、列表、元组、if/else、for循环）的新手来说】
-  - **boost_spider**： 难度要低很多,就和小学生练手手写requests单个小脚本的思路一样，最后加一行@boost装饰器一键起飞。
-  - **仿scrapy框架**： 巨大的框架压迫感，和刚学的基础语法对比，差异鸿沟太大,无限懵逼以至于自我怀疑，刚学的python语法是不是白学了。   
-                      直接上手 Scrapy，就像 **一个刚学会骑自行车的人，突然被要求去驾驶一架波音747**。
-
-
-- `boost_spider` 理念 是框架永远不要自作主动,在框架内部自动替用户执行http请求 
-要自动调度一个函数而不是自动调度一个url/Request对象    
-函数里面用户自己自由选择任何 httpx  requests aiohttp urllib3 selenium  playwright, 或者使用自己封装的一个my_request请求函数 来发送http请求.
-
-- **boost_spider 不替用户自动发请求**, 意味上限很高,对于怎么换headers redis代理池的ip 代理商的隧道ip ,  
-怎么在浏览器多步骤交互 输入 点击 等待,再解析网页, 用户非常容易按自己的内心想法搞定,    
-对于执行http请求,`boost_spider` 只提供好用的 `RequestClient`, 但不强迫用户必须使用 `RequestClient`   
-`RequestClient`的 `proxy_name_list` 是能换ip代理商，例如如果请求不通，轮流使用阿布云  快代理 芝麻代理，吊打换ip，可靠性维度高一个级别。 
-
-- **仿scrapy api 的框架内部自己去替用户执行http请求**,意味用户控制能力很弱,只能在`yield Request` 传递请求的 method url request_body 等等,   
-对于复杂的需要写一段python代码逻辑来换ip和请求头的,用户需要写 download_middleware 钩子,怎么实现middleware需要和框架规则高度耦合, 导致用户实现难度太高     
-以及多步骤浏览器交互会阻塞parse函数,短时效token 多个url必须短时间内连续请求, 由于不自由,导致用户无法实现.  
-
-- **对于简单爬虫,boost_spider代码更简单更少,思维更直观平铺直叙,无需任何仪式感模板代码**  
-**对于复杂爬虫,boost_spider除了代码更直观,用户还更容易实现自己奇葩想法,多机器+多进程+多线程/协程 性能强得多**   
-
-- **🚀 boost_spider 作为微服务和 FaaS (Function as a Service) 使用，能高实时爬虫，scrapy只能离线循环爬虫，boost_spider在实时场景吊打scrapy**
-
-
-### boost_spider 对 funboost 的 爬虫场景增强,3个重要类, RequestClient 和 SpiderResponse 和 DatasetSink
-```
-RequestClient：
-一个为爬虫而生的请求客户端。封装了自动重试、随机User-Agent、代理商轮换、保持Cookie会话等所有反爬基础操作。
-比 Scrapy 复杂的 Downloader Middleware 易用百倍。
-`RequestClient`的 `proxy_name_list` 是能换ip代理商， 例如阿布云  快代理 芝麻代理，吊打换ip，可靠性维度高一个级别。 
-
-SpiderResponse：
-请求返回的响应对象，直接自带 .xpath(), .css(), .re_search() 等方法，让你无需额外导入 parsel 就能方便地解析页面。
-
-DatasetSink：
-一行代码将爬取到的字典数据存入MySQL、PostgreSQL、SQLite等多种数据库，并且自动处理建表。
-完爆任何仿 Scrapy api 爬虫框架 繁琐的 定义Item -> yield item -> 定义 Pipeline -> Settings+ITEM_PIPELINES配置,来实现数据存储流程。
-```
-
-### boost_spider特点:
-
- ```
- boost_spider支持同步爬虫也支持asyncio异步爬虫
- boost_spider 是一款自由奔放写法的爬虫框架，无任何束缚，和用户手写平铺直叙的爬虫函数一样
- 是横冲直撞的思维写的,不需要callback回调解析方法,不需要继承BaseSpider类,没有BaseSpider类,大开大合自由奔放,代码阅读所见即所得
- 
- 绝对没有class MySpider(BaseSpider) 的写法
- 
- 绝对没有 yield Request(url=url, callback=self.my_parse,meta={'field1':'xxx','field2':'yyy'}) 的写法.
- 
- 绝对没有 yield item 的写法
- 
- boost_spider在函数里面写的东西所见即所得,不需要在好几个文件中来回切换检查代码.
-  
- 函数去掉@boost装饰器仍然可以正常使用爬虫,加上和去掉都很容易,这就是自由.
- 有的人喜欢纯手写无框架的使用线程池运行函数来爬虫,很容易替换成boost_spider
- 
- 仿scrapy api的爬虫框架,无论是去掉和加上框架,代码组织形式需要翻天覆地的大改特改,这样就是束缚框架.
- 
- boost_spider所写的爬虫代码可以直接去掉@boost装饰器,可以正常运行,所见即所得.
- 
- 只需要加上boost装饰器就可以自动加速并发，给函数和消息加上20控制功能,控制手段比传统爬虫框架多太多,
- boost_spider 支持多线程 gvent eventlet asyncio 并且能叠加多进程消费,运行速度远远的暴击国产爬虫框架.
- 国产框架大部分是只能支持多线程同步语法爬虫,不能支持asyncio编程写法,而boost_spider能够同时兼容用户使用requests和aiohttp任意写法
- 
- ```
-
-### scrapy和国内写的各种仿scrapy api用法的框架特点
-```
-funboost函数调度框架,用户完全自由,
-
-仿scrapy框架,只是个url调度框架,仿scrapy api 框架里面写死了怎么帮用户请求一个url,
-有时候为了支持用户复杂的请求逻辑,例如换代理ip逻辑,框架还不得不暴露出用户自定义请求的所谓middware,用户要掌握在这些爬虫框架中自定义发送请求,框架又变难了.
-因为爬虫框架难的是替自动并发 替用户自动重试 自动断点续爬,发送一个请求并不难,用户导入requests发一个http请求,只需要一行代码,
-用户对requests封装一个请求http函数也很简单,反而替用户自作主张怎么发送请求,用户奇葩方式发请求反而满足不了,所以爬虫框架不需要内置替用户自动发送请求.
-```
-
-```
-需要在 spiders文件夹写继承BaseSpider, 
-items文件夹定义item, 
-pipleines文件夹写怎么保存爬虫数据,
-settings.py写DOWNLOADER_MIDDLEWARES调用什么pipleline,ITEM_PIPELINES调用什么middlware优先级,各种配置
-middlewares.py写怎么换代理 请求头,
-以及命令行中写怎么启动爬虫运行. 
-在各个代码文件中来回切换检查写代码,写法烦人程度非常的吓人.
-
-国内的爬虫框架没有创新能力,都是模仿scrapy的 api用法,所以scrapy的写法烦人的缺点基本上都继承下来了.
-和scrapy写法一样烦人的爬虫框架,这样的框架就没必要重复开发了.
-```
-
-### boost_spider的qps作用远远的暴击所有爬虫框架的固定线程并发数量
-
-```
-国内的仿scrapy框架的,都只能做到固定并发数量,一般是固定开多少个线程.
-
-比如我要求每秒精确完成爬10次接口或网页保存到数据库,你咋做到?
-一般人就以为是开10个线程,这是错误的,我没讲过对方接口刚好是精确1秒的响应时间.
-
-如果网站接口或网页耗时0.1秒,你开10线程那就每秒爬了100个网页了.
-如果网站网页耗时20秒(特别是加上代理ip后经常可能响应时间大),你开10线程,每秒只能爬0.5次.
-用线程数来决定每秒爬多少次就是非常的滑稽,只有请求耗时一直精确等于1秒,那么开多少个线程才等于每秒爬多少次,
-否则每秒爬多少次和线程数量没有对应关系.
-
-boost_spider不仅能设置并发数量,也可以设置qps,
-boost_spider的qps参数无视任何网站的耗时是多少,不需要提前评估好接口的平均耗时,就能达到控频,
-无视对方的响应耗时从0.01 0.07 0.3 0.7 3 7 13 19 37 秒 这些不规律的响应时间数字,
-随意波动变化,都能一直保持恒定的爬虫次数.
-
-保持恒定qps,这一点国产框架不行,国产框架需要提前评估好接口耗时,然后精确计算好开多少个线程来达到qps,
-如果对方接口耗时变了,就要重新改代码的线程数量.
-```
-
-# 2.代码例子：
-
-```python
-
-from boost_spider import boost, BrokerEnum, RequestClient, MongoSink, json, re, MysqlSink, BoosterParams
-from boost_spider.sink.dataset_sink import DatasetSink
-from db_conn_kwargs import MONGO_CONNECT_URL, MYSQL_CONN_KWARGS  # 保密 密码
-
-"""
-非常经典的列表页-详情页 两层级爬虫调度,只要掌握了两层级爬虫,三层级多层级爬虫就很容易模仿
-
-列表页负责翻页和提取详情页url,发送详情页任务到详情页消息队列中
-"""
-
-dataset_sink1 = DatasetSink("mysql+pymysql://root:123456@localhost/testdb2")
-
-@boost(BoosterParams(queue_name='car_home_list', broker_kind=BrokerEnum.REDIS_ACK_ABLE, max_retry_times=5, qps=2,
-       do_task_filtering=False))  # boost 的控制手段很多.
-def crawl_list_page(news_type, page, do_page_turning=False):
-    """ 函数这里面的代码是用户想写什么就写什么，函数里面的代码和框架没有任何绑定关系
-    例如用户可以用 urllib3请求 用正则表达式解析，没有强迫你用requests请求和parsel包解析。
-    """
-    url = f'https://www.autohome.com.cn/{news_type}/{page}/#liststart'
-    sel = RequestClient(proxy_name_list=['noproxy'], request_retry_times=3,
-                        using_platfrom='汽车之家爬虫新闻列表页').get(url).selector
-    for li in sel.css('ul.article > li'):
-        if len(li.extract()) > 100:  # 有的是这样的去掉。 <li id="ad_tw_04" style="display: none;">
-            url_detail = 'https:' + li.xpath('./a/@href').extract_first()
-            title = li.xpath('./a/h3/text()').extract_first()
-            crawl_detail_page.push(url_detail, title=title, news_type=news_type)  # 发布详情页任务
-    if do_page_turning:
-        last_page = int(sel.css('#channelPage > a:nth-child(12)::text').extract_first())
-        for p in range(2, last_page + 1):
-            crawl_list_page.push(news_type, p)  # 列表页翻页。
-
-
-@boost(BoosterParams(queue_name='car_home_detail', broker_kind=BrokerEnum.REDIS_ACK_ABLE, qps=5,
-       do_task_filtering=True, is_using_distributed_frequency_control=True))
-def crawl_detail_page(url: str, title: str, news_type: str):
-    sel = RequestClient(using_platfrom='汽车之家爬虫新闻详情页').get(url).selector
-    author = sel.css('#articlewrap > div.article-info > div > a::text').extract_first() or sel.css(
-        '#articlewrap > div.article-info > div::text').extract_first() or ''
-    author = author.replace("\n", "").strip()
-    news_id = re.search('/(\d+).html', url).group(1)
-    item = {'news_type': news_type, 'title': title, 'author': author, 'news_id': news_id, 'url': url}
-    # 也提供了 MysqlSink类,都是自动连接池操作数据库
-    # MongoSink(db='test', col='car_home_news', uniqu_key='news_id', mongo_connect_url=MONGO_CONNECT_URL, ).save(item)
-    # MysqlSink(db='test', table='car_home_news', **MYSQL_CONN_KWARGS).save(item)  # 用户需要自己先创建mysql表
-    dataset_sink1.save('car_home_news', item)  # 使用知名dataset三方包,一行代码能自动建表和保存字典到5种数据库类型.
-
-
-if __name__ == '__main__':
-    # crawl_list_page('news',1) # 直接函数测试
-
-    crawl_list_page.clear()  # 清空种子队列
-    crawl_detail_page.clear()
-
-    crawl_list_page.push('news', 1, do_page_turning=True)  # 发布新闻频道首页种子到列表页队列
-    crawl_list_page.push('advice', page=1,do_page_turning=True)  # 导购
-    crawl_list_page.push(news_type='drive', page=1,do_page_turning=True)  # 驾驶评测
-
-    crawl_list_page.consume()  # 启动列表页消费
-    crawl_detail_page.consume()  # 启动详情页新闻内容消费
-
-    # 这样速度更猛，叠加多进程
-    # crawl_detail_page.multi_process_consume(4)
-
-
-```
-
-## 代码说明：
-
-```
-1.
-RequestClient 类的方法入参和返回与requests包一模一样，方便用户切换
-response在requests.Response基础上增加了适合爬虫解析的属性和方法。
-
-RequestClient支持继承,用户自定义增加爬虫使用代理的方法,在 PROXYNAME__REQUEST_METHED_MAP 声明增加的方法就可以.
-`RequestClient`的 `proxy_name_list` 是能换ip代理商， 例如阿布云  快代理 芝麻代理，吊打换ip，可靠性维度高一个级别。 
-
-2. 
-爬虫函数的入参随意，加上@boost装饰器就可以自动并发
-
-3.
-爬虫种子保存，支持40种消息队列
-
-4.
-qps是规定爬虫每秒爬几个网页，qps的控制比指定固定的并发数量，控制强太多太多了
-
-```
-
-## boost_spider 支持用户使用asyncio编程生态
-
-国产爬虫框架大部分只能支持同步编程语法生态,无法兼容用户原有的asyncio编程方式.
-
-boost_spider是同步编程和asyncio编程双支持.(boost_spider 还能支持gevent eventlet),还能和多进程叠加性能炸裂.
-
-```python
-import httpx
-from funboost import boost, BrokerEnum, ConcurrentModeEnum, ctrl_c_recv, BoosterParams
-
-client = httpx.AsyncClient()
-
-
-@boost(
-    BoosterParams(queue_name='test_httpx_q3a', broker_kind=BrokerEnum.REDIS, concurrent_mode=ConcurrentModeEnum.ASYNC,
-                  concurrent_num=500))
-async def f(url):
-    # client= httpx.AsyncClient()
-    r = await client.get(url)
-    print(r.status_code, len(r.text))
-
-    # 发布url到第二层级
-    f2.push('新浪', 'https://www.sina.com')
-    f2.push('搜狐', 'https://www.sohu.com')
-    f2.push('qq', 'https://www.qq.com')
-
-
-@boost(
-    BoosterParams(queue_name='test_httpx_q3b', broker_kind=BrokerEnum.REDIS, concurrent_mode=ConcurrentModeEnum.ASYNC,
-                  concurrent_num=500))
-async def f2(site_name, url):
-    # client= httpx.AsyncClient()
-    r = await client.get(url)
-    print(site_name, r.status_code, len(r.text))
-
-
-if __name__ == '__main__':
-    # asyncio.run(f())
-    f.clear()  # 清空队列
-    f2.clear()
-
-    f.consume()  # 启动消费
-    f2.consume()
-
-    for i in range(5):
-        f.push('https://www.baidu.com/')
-    ctrl_c_recv()
-
-
-```
-
-## 为什么任何 yield Request(url=url, callback=self.my_parse,meta={'field1':'xxx','field2':'yyy'} 是过气爬虫框架?
-
-在2025年还在模仿2007年的scrapy 框架的api,没有必要。如果真需要异步，就使用真异步asyncio。twisted 早就过气了。
-
-```
-1. 逻辑割裂与“回调地狱”：代码可读性的噩梦,  思维跳跃,上下文丢失
-
-2. meta 字典：一个“无法无天”的“黑魔法”容器, 它是一个无类型、无结构、无约束的“垃圾桶”
-
-3. 可测试性的毁灭:
-   请求解析,无法独立测试,必须随着框架整体运行起来才能验证
-
-4. 自由度的剥夺：
-   你只是流水线上的工人. 你只能通过 yield Request 指定url get还是post 请求体 ,
-   如果你是奇葩发请求,例如爬取的时候要从你自己的reids ip代理池获取ip,必须搞个 download middware 来适配框架.
-   
-5.时序之罪:
-   yield Request,不能精准控制请求时机,如果要爬取url2,先必须从url1获取token加密,假设token有效期只有10秒,你分两次yield Request,
-   因为请求是被框架自动调度的,你无法自己掌控两个请求的真正被调度时机,url2它可能在url1 1 毫秒后被执行，也可能在 10 分钟后被执行，你完全无法预测。
-   只要是种子堆积了,就算是你设置优先级也没用,如果同一个优先级有几万个request种子,无法按优先级精准控制请求时序.
-   而函数调度框架,一个函数里面天然可以写if /else/ for /try ,也能连续写发送多次请求
-```
-
-**用过 `funboost` 的pythoner都说相见恨晚,连连称奇,醍醐灌顶,豁然开朗,和传统作茧自缚的爬虫框架简直不在一个级别**
-
-
-## 仿 scrapy api 爬虫框架，作者会疲于奔命
-```
-所有仿scrapy api 爬虫框架的 作者会疲于奔命需要持续改框架，
-作者需要内置很多pipeline  ，例如mysql mongo sqlite jsonfile redis，
-作者需要担心用户不会在自己框架扩展pipeline ，作者需要内置 怎么换ip代理 怎么换请求头， 怎么指纹反扒， 
-怎么集成各种浏览器包，例如怎么集成 selneium  playwright ，因为作者如果不内置这些middware，用户很难自己扩展适配他的框架。 
-  
-funboost 不变应万变，funboost 始终不用改代码，以逸待劳，以不变应万变
-因为用户在消费函数里面很 直观、自由、容易 地调用自己的 utils/ 或者 commons/ 文件夹下的工具类，
-完全不需要考虑怎么和 funboost 进行精细化高度耦合适配
-```
-
-## 你的 utils文件夹 是黄金还是废铁？取决于你用什么哲学的框架
-
-- **funboost/boost_spider 对仿scrapy api框架最大优势是 自由编程暴击框架奴役， 能复用用户自己的 utils 宝贵资产**
-
-- scrapy的三方包插件，各种 scrapy-xx 插件，例如 scrapy-redis scrapy-playwright scrapy-selenium scrapy-user-agents scrapy-splash 等等，三方包插件总量不会超过1000个.
-  只有pypi的三方包才是星辰大海，100万多个pypi三方包都是你的工具。  
-  **最重要的是，只有用户自己项目下utils文件夹下积累的工具类和函数才是最符合用户自己实际需求的工具，而不是 scrapy-xx 插件。**
-
-- Python pypi生态就是funboost的生态，你的python项目下的 utils/ 或者 helpers/ 文件夹下日积月累的各种工具类和函数都是 funboost的生态,   
-  例如你的爬虫项目 utils 文件夹下日积月累，99%的概率已经存在如下，好用的经过实战检验的工具类和函数： 
-  
-```python
-def anti_request(method,url,...retry_times=3,is_change_ua=True,is_change_proxy)：
-   """自动重试 换代理ip  user-agent 的http请求函数""" 
-
-def save_to_mysql(data:dict)：   
-    """保存字典到数据库的函数"""
-
-class RedisBloomFilter:
-    """redis 布隆过滤器"""
-    def is_exists(self, key):
-        ...
-    def add(self, key):
-        ...
-
-def extract_all_with_join(selector, separator=' '):
-    """提取选择器所有结果并用指定分隔符连接成字符串。"""
-    return separator.join(selector.getall()).strip()
-
-class WebsiteAuthenticator:  
-    """对于需要登录的网站，一个管理会话、Cookie 和 Token 的类是无价之宝。"""
-    def login(self):
-        ...
-    def get_session(self):
-        ...
-
-def send_email_notification(subject, body, recipient):
-    """发送爬虫邮件通知。"""
-
-def download_and_upload_to_s3(url, bucket_name, object_name):
-    """下载文件并直接流式上传到 S3。"""
-    s3 = boto3.client('s3')
-    with requests.get(url, stream=True) as r:
-        r.raise_for_status()
-        s3.upload_fileobj(r.raw, bucket_name, object_name)
-    return f"s3://{bucket_name}/{object_name}"
-    
-```
-
-**在 funboost中**，你utils文件夹下的宝贵资产，黄金任然是黄金，可以直接import 复用使用： 
-```python
-from funboost import boost, BrokerEnum
-from utils.http_client import anti_request  # 你日积月累的工具
-from utils.db import save_to_mysql        # 你日积月累的工具
-from utils.redis_dedup import RedisBloomFilter   # 你日积月累的工具
-from utils.website_authenticator import WebsiteAuthenticator   # 你日积月累的工具
-from utils.send_notification import send_email_notification   # 你日积月累的工具
-from utils.download_and_upload import download_and_upload_to_s3   # 你日积月累的工具
-```
-**而在`scrapy` `feapder`面前**，你曾经引以为豪在`utils`文件夹下积累的宝贵资产，他不是黄金，只是一堆破铜烂铁而已，不能被导入复用。    
-你没有按照他们框架的`Downloader Middleware` 和 `Pipeline`规范写的`utils`文件夹下的工具类，都是废铁一文不值。  
-`scrapy`的扩展插件机制 被 `funboost` 的自由import复用吊打。
-
-- 复用用户自己的 utils 宝贵资产，正是 `funboost`  区别于 `Scrapy/Feapder` 等传统框架的**根本性优势**，是战略层面的胜利。
-
-*   **`utils` 是开发者的“内功心法”**：一个开发者的 `utils` 文件夹，是他/她多年经验的结晶，是解决特定领域问题的最佳实践沉淀。它包含了对业务逻辑的深刻理解，是**不可替代的、高度定制化的“私有武器库”**。
-*   **“复用 `utils`” = 复用经验和智慧**：一个框架如果能让开发者无缝地复用自己的 `utils`，就意味着它尊重并放大了开发者的个人能力和历史积累。开发者可以用最熟悉、最高效的方式解决问题。
-*   **“无法复用 `utils`” = 废掉武功，重练套路**：`Scrapy/Feapder` 的插件和中间件机制，本质上是让你放弃自己的“内功”，去学习并练习一套它们规定好的“套路招式”。你的 `my_request` 函数再精妙，也得改成 `Downloader Middleware` 的形状；你的 `save_to_mysql` 再高效，也得塞进 `Item Pipeline` 的模子里。这是一个**巨大的、隐性的成本**。
-
-
-
-## 🚀 boost_spider 作为微服务和 FaaS (Function as a Service) 使用，能高实时爬虫，scrapy只能离线批量爬虫，boost_spider在实时场景吊打scrapy
-
-> **告别“数据孤岛”，让爬虫成为可被实时调用的“原子能力”。**
-
-- 传统爬虫框架（如 Scrapy）的设计初衷是 **离线批处理**：启动 -> 跑完所有种子 -> 结束。这使得它们像一座座孤岛，外部系统（如 Java/Go 后端、Web 管理台）很难与正在运行的爬虫进行**实时交互**。
-
-- 而 **boost_spider** 基于 **funboost** 的函数调度哲学，天然具备 **FaaS (Function as a Service)** 基因。每一个被 `@boost` 装饰的爬虫函数，瞬间就可以变成一个 **微服务接口**。
-
--  **Funboost/boost_spider 天然就是 FaaS 微服务，而 Scrapy 只是数据孤岛,架构模式战略级碾压**
-  `funboost/boost_spider`不仅支持别的部门通过原生消息队列客户端发布函数入参对应的纯净json到对应的queue_name
-   也支持 `funboost.faas` 快速给你的web服务增加多个funboost路由，一键实现`FaaS(Function as a Service)`    
-   自动发现注册爬虫函数，在实时爬虫上对`scrapy-redis`是战略级碾压。 
-
-### ⚔️ 核心差异对比：实时性与架构
-
-| 维度 | 🐢 Scrapy (离线批处理) | ⚡ boost_spider (实时微服务) |
-| :--- | :--- | :--- |
-| **运行模式** | **主动轮询/跑批**。适合每天凌晨跑全量数据。 | **事件驱动/按需触发**。适合用户点一下按钮，立马抓取数据。 |
-| **外部调用** | **难**。外部系统很难向正在运行的 Spider 插入任务并等待结果，通常需要通过数据库中转，延迟极高。 | **极简**。通过自动生成的 HTTP 接口直接触发，支持 **RPC 模式** 同步等待并获取爬取结果。 |
-| **架构定位** | **脚本/任务**。是一个独立的进程，跑完即焚。 | **服务/组件**。是一个常驻的微服务，随时响应来自 Web 前端或后端 API 的抓取请求。 |
-| **适用场景** | 全网爬取、搜索引擎索引、历史数据回溯。 | **接口实时代理解析**、**用户触发式采集**、**竞对价格实时监控**。 |
-
-### scrapy是封闭循环系统，  scrapy-redis一旦启动后，再去人为从程序外部手动注入一个深层级的爬虫种子/任务 非常难。
-
-**Scrapy 难以实现深层任务动态注入。**
-
-有人不服气的，你可以试试对 `scrapy-redis`的 深层级爬虫动态增加一个任务， 例如从web接口给第二层级的 `detail_parse` 动态实时新增 `yield` 一个`Request` 请求调度对象，
-这个简单的需求，对 scrapy 小白来说完全不可能，对scrapy大神来神实现非常麻烦。因为在程序外部你脱离了spider对象自身，就很难给深层级爬虫实时动态新增爬虫种子了。
-如果是动态新增第一层级的爬虫种子，你可以简单的 `redis.lpush('start_urls','my_list_page_url1')`，这勉强能做到，但对深层级的爬虫`xx_parse`方法去动态实时加一个爬虫种子就太难了。
-
-funboost不仅可以使用funboost包push任何层级的爬虫函数入参，更强的是可以使用`funboost.faas` 通过更广泛通用的http请求的方式来发布一个爬虫任务。
-
-
-## funboost/booost_spider 比 scrapy框架的 战略优势和战术优势
-### 一、 战略优势 (Strategic Advantages)
-*—— 架构理念、生态整合与长远价值*
-
-#### 1. 核心哲学：赋能 vs 奴役
-*   **Funboost**: 是**“函数调度器”**。它不关心你的函数里写的是爬虫、数据清洗还是发邮件。它对代码**零侵入**，只负责为函数提供分布式、并发和高可靠的能力。你的代码依然是标准的 Python 代码。
-*   **Scrapy**: 是**“URL调度器”**。它强迫开发者按照框架的规则（Spider, Item, Pipeline, Middleware）来拆解业务逻辑。开发者被框架“奴役”，必须削足适履。
-
-#### 2. 架构模式：FaaS 微服务 vs 数据孤岛
-*   **Funboost**: 天然具备 **FaaS (Function as a Service)** 基因。
-    *   每一个爬虫函数瞬间变成一个**微服务接口**。
-    *   **打破孤岛**：Java/Go/PHP 等外部系统可以直接往消息队列推 JSON 数据来实时触发特定的爬虫任务（如立即抓取某详情页），实现**实时交互**。
-    *   **Funboost.faas**: 提供开箱即用的 HTTP 接口，实现自动服务发现。
-*   **Scrapy**: 设计初衷是**离线批处理**。
-    *   是一个封闭的黑盒循环。外部系统很难在爬虫运行时动态插入一个深层级的任务（如直接触发 `parse_detail`）。
-
-#### 3. 资产复用：黄金 vs 废铁
-*   **Funboost**: 直接复用你项目 `utils/` 文件夹下积累多年的工具类（如 `requests` 封装、数据库操作类）。这些代码是**黄金**，拿来即用。
-*   **Scrapy**: 你积累的通用 Python 工具类在这里往往是**废铁**。你必须把它们改写成 Scrapy 特有的 `Middleware` 或 `Pipeline` 格式才能使用，造成巨大的重复劳动和维护成本。
-
-#### 4. 生态兼容：Python 生态 vs 插件生态
-*   **Funboost**: **无需插件**。整个 PyPI 都是你的插件库。想用 `Playwright`？直接 import 用。想用 `SQLAlchemy`？直接 import 用。
-*   **Scrapy**: **严重依赖插件**。想用 Redis？得装 `scrapy-redis`。想用 Selenium？得找 `scrapy-selenium`。开发者被限制在 Scrapy 的小生态圈里，一旦没有对应的适配插件，寸步难行。
+另外也提供 `MongoSink`（MongoDB upsert）和 `MysqlSink`。
 
 ---
 
-### 二、 战术优势 (Tactical Advantages)
-*—— 开发效率、性能表现与具体功能*
+## 1. 快速上手
 
-#### 1. 并发性能：四重叠加 vs 单核异步
-*   **Funboost**: 支持 **多机器 + 多进程 + (多线程/协程)** 的四重叠加并发。能轻松榨干多核 CPU 性能，QPS 极其炸裂。
-*   **Scrapy**: 基于 Twisted 单进程事件循环。难以利用多核 CPU，一旦在回调中出现阻塞操作（如复杂的解密计算或浏览器渲染），整个爬虫就会卡死。
+```python
+from boost_spider import boost, BoosterParams, BrokerEnum, RequestClient
+from boost_spider.sink.dataset_sink import DatasetSink
 
-#### 2. 流程控制：线性直观 vs 回调地狱
-*   **Funboost**: **平铺直叙**。在一个函数内完成 “请求 -> 逻辑判断 -> 再次请求 -> 解析 -> 入库” 的完整闭环。代码逻辑连贯，支持 `while`/`for` 等复杂流程控制。
-*   **Scrapy**: **回调地狱**。逻辑被强行拆分到 `start_requests`, `parse`, `parse_detail` 等多个回调函数中，状态传递（`meta`）繁琐且易错，代码阅读极其跳跃。
-    *   *场景举例*：**短时效 Token**。Funboost 可以在函数内获取 Token 后立即发起下一次请求，确保不过期；Scrapy 无法保证两个 Request 之间的执行间隔。
+dataset_sink = DatasetSink("mysql+pymysql://root:123456@localhost/spider_db")
 
-#### 3. 可靠性：万无一失 vs 随机丢包
-*   **Funboost**: 拥有 **ACK 消费确认机制**。即使爬虫进程被强制 kill、断电或崩溃，未执行完的任务会重新回到队列，数据**一条不丢**。
-*   **Scrapy (scrapy-redis)**: 使用 `BLPOP` 模式。任务一旦从 Redis 弹出，如果进程崩溃，内存中的任务就**永久丢失**了。断点续爬不可靠。
+@boost(BoosterParams(queue_name='car_list', broker_kind=BrokerEnum.REDIS_ACK_ABLE, qps=2, max_retry_times=3))
+def crawl_list(news_type, page, do_page_turning=False):
+    url = f'https://www.autohome.com.cn/{news_type}/{page}/#liststart'
+    sel = RequestClient(request_retry_times=3, is_change_ua_every_request=True).get(url).selector
+    for li in sel.css('ul.article > li'):
+        if len(li.extract()) > 100:
+            url_detail = 'https:' + li.xpath('./a/@href').extract_first()
+            title = li.xpath('./a/h3/text()').extract_first()
+            crawl_detail.push(url_detail, title=title, news_type=news_type)
+    if do_page_turning:
+        last_page = int(sel.css('#channelPage > a:nth-child(12)::text').extract_first())
+        for p in range(2, last_page + 1):
+            crawl_list.push(news_type, p)
 
-#### 4. 控频能力：精准 QPS vs 模糊并发
-*   **Funboost**: 支持 **精准 QPS 控频**（如每秒 5.5 次）。无论网络响应快慢，框架会自动调节并发度来维持稳定的请求速率。支持**分布式全局控频**。
-*   **Scrapy**: 只能控制**并发数**（Concurrent Requests）。无法保证稳定的抓取速率，容易因请求过快触发反爬，或因响应变慢导致效率低下。
+@boost(BoosterParams(queue_name='car_detail', broker_kind=BrokerEnum.REDIS_ACK_ABLE, qps=5,
+       do_task_filtering=True, is_using_distributed_frequency_control=True))
+def crawl_detail(url: str, title: str, news_type: str):
+    sel = RequestClient().get(url).selector
+    author = sel.css('#articlewrap > div.article-info > div > a::text').extract_first() or ''
+    import re
+    news_id = re.search(r'/(\d+).html', url).group(1)
+    dataset_sink.save('car_home_news', {
+        'news_type': news_type, 'title': title, 'author': author.strip(),
+        'news_id': news_id, 'url': url
+    })
 
-#### 5. 反爬应对：简单函数 vs 复杂中间件
-*   **Funboost**: 写一个普通的 Python 函数（如 `my_request`）来封装换 IP、换 UA 的逻辑，简单直观，容易测试。
-*   **Scrapy**: 必须深入理解框架生命周期，编写复杂的 `Downloader Middleware`，配置优先级，调试困难。
+if __name__ == '__main__':
+    crawl_list.push('news', 1, do_page_turning=True)
+    crawl_list.push('drive', page=1, do_page_turning=True)
+    crawl_list.consume()
+    crawl_detail.consume()
+```
 
-#### 6. 任务去重：智能入参 vs 笨拙 URL
-*   **Funboost**: 基于**函数入参**去重。天然忽略 URL 中的时间戳、随机数等噪音参数。支持设置**去重有效期**（如7天后可重爬）。
-*   **Scrapy**: 基于 **URL 指纹**去重。对 URL 中的噪音参数敏感，需要编写复杂的正则或自定义去重器来清洗 URL。默认不支持有效期去重。
+运行：`python site_autohome.py`，单文件搞定分布式爬虫。
 
-### 总结
-**Scrapy** 适合处理结构简单、无需复杂交互、离线式的全网爬取任务。
-**Funboost/BoostSpider** 则适合现代互联网环境下，高并发、强反爬、逻辑复杂、需要实时交互和微服务化的采集业务。
+---
 
+## 2. 三大核心类详解
 
+### 2.1 RequestClient
 
-# boost_scrapy 介绍
+API 兼容 requests，从 requests 迁移过来零门槛。
 
-[boost_scrapy 框架源码地址](boost_scrapy)
-[boost_scrapy 使用例子](demo_crawler/boost_scrapy_imp)
+```python
+from boost_spider import RequestClient
 
-有的人非常喜欢仿scrapy风格的爬虫框架， yield Request(url=url, callback=self.my_parse,meta={'field1':'xxx','field2':'yyy'}) 的写法, 
+client = RequestClient(
+    proxy_name_list=['noproxy'],       # 代理商列表，可填 'abuyun', 'kuai' 等，自动轮换容灾
+    request_retry_times=3,             # 请求失败自动重试
+    is_change_ua_every_request=True,   # 每次请求随机 UA
+    is_close_session=False,            # False=保持 Cookie 会话（登录态保持）
+    timeout=(30, 40),                  # 连接/读取超时
+)
 
-boost_scrapy 就是这样的框架，使用 funboost的引擎来封装的，封装给这个是为了，免得有人还要浪费花时间用funboost去封装仿scrapy的爬虫框架。
+resp = client.get('https://example.com')   # 返回 SpiderResponse
+resp = client.post('https://api.example.com/data', json={'key': 'value'})
+```
 
-此项目的 domo_crwaler 文件夹中有各种爬虫方式，其中就包括使用 boost_scrapy 和 boost_spider 来分别爬虫的，boost_spider写法的优越性肉眼可见的比 boost_scrapy简单清晰。
+**多代理商容灾**：`proxy_name_list=['abuyun', 'kuai']` 表示先用阿布云，请求失败自动切快代理重试。比单纯换 IP 可靠性高一个维度。
 
+**扩展代理商**：继承 `RequestClient`，添加你自己的代理方法，注册到 `PROXYNAME__REQUEST_METHED_MAP` 即可。
 
-# 七种爬虫方式
+### 2.2 SpiderResponse
 
-`demo_crawler` 文件夹下提供了 **7 种不同的爬虫实现方式**，方便开发者对比学习和选择。
+`RequestClient` 的返回值，继承自 `requests.Response`，额外提供爬虫解析能力：
 
-## 🏎️ 七种实现一览
+```python
+resp = client.get(url)
 
-| 方式 | 目录 | 核心技术 | 一句话评价 |
+resp.selector          # parsel.Selector 对象
+resp.xpath('//h1/text()').get()         # XPath
+resp.css('h1::text').get()              # CSS
+resp.re_search(r'id=(\d+)')            # 正则 search
+resp.re_findall(r'"price":"(\d+)"')    # 正则 findall
+resp.resp_dict         # 自动 json.loads(resp.text)
+resp.status_code       # 同 requests.Response
+resp.text              # 同 requests.Response
+```
+
+### 2.3 DatasetSink
+
+基于 [dataset](https://dataset.readthedocs.io) 库，一行代码将字典保存到数据库，自动建表。
+
+```python
+from boost_spider.sink.dataset_sink import DatasetSink
+
+sink = DatasetSink("mysql+pymysql://root:123456@localhost/spider_db")
+sink = DatasetSink("sqlite:///crawled_data.db")
+sink = DatasetSink("postgresql://user:pass@localhost/db")
+
+sink.save('table_name', {'title': '标题', 'url': 'https://...'})
+```
+
+同一 `db_url` 全局单例，自动复用连接。
+
+### 2.4 MongoSink
+
+```python
+from boost_spider import MongoSink
+
+mongo = MongoSink(db='spider', col='news', uniqu_key='news_id',
+                  mongo_connect_url='mongodb://127.0.0.1')
+mongo.save({'news_id': '123', 'title': '标题'})  # 基于 uniqu_key 自动 upsert
+```
+
+多进程安全（按 pid 维护独立连接）。
+
+---
+
+## 3. 异步爬虫支持
+
+boost_spider 同时支持同步和 asyncio 异步编程：
+
+```python
+import httpx
+from boost_spider import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum
+
+client = httpx.AsyncClient()
+
+@boost(BoosterParams(queue_name='async_crawl', broker_kind=BrokerEnum.REDIS,
+       concurrent_mode=ConcurrentModeEnum.ASYNC, concurrent_num=500))
+async def crawl(url):
+    r = await client.get(url)
+    print(r.status_code, len(r.text))
+
+if __name__ == '__main__':
+    crawl.consume()
+    for i in range(100):
+        crawl.push('https://www.baidu.com/')
+```
+
+---
+
+## 4. 使用场景选择
+
+| 你的情况 | 推荐方案 |
+|---------|---------|
+| 想用现成的请求/解析/入库工具，快速开发 | `funboost` + `boost_spider` |
+| 偏好 ORM 模型驱动 + 异步 httpx | `funboost` + `funspider`（funboost 内置） |
+| 已有完善的 utils 工具库，追求完全自由 | 纯 `funboost`，函数内直接 import 你的工具 |
+
+三种方式都是 funboost 调度，能力完全相同（分布式、QPS 控频、重试、ACK、去重等 30+ 种控制能力），区别只在于请求和存储用谁的工具。
+
+---
+
+## 5. 为什么 boost_spider 比仿 scrapy 框架强
+
+核心区别一句话：**boost_spider 调度函数，scrapy 调度 URL**。
+
+**boost_spider 的函数内部完全自由**：
+- 不需要 `yield Request(callback=self.parse_detail, meta={...})`
+- 不需要继承 `BaseSpider` 类
+- 不需要 `items.py` / `pipelines.py` / `middlewares.py` / `settings.py` 等一套模板文件
+- 函数去掉 `@boost` 装饰器仍然可以正常运行，加上和去掉都很容易
+
+**QPS 控频 vs 固定线程数**：
+
+所有仿 scrapy 框架只能设置固定并发数（如开 10 个线程）。但如果网站响应 0.1 秒，10 线程 = 每秒 100 次；如果响应 20 秒，10 线程 = 每秒 0.5 次。线程数和每秒爬取次数之间没有确定关系。
+
+boost_spider 的 `qps` 参数无视响应耗时波动，`qps=5` 就是精确每秒 5 次，自动补偿网络抖动，分布式场景多机器自动均分配额。
+
+**FaaS 微服务能力**：
+
+boost_spider 天然是微服务——外部系统（Java/Go/PHP）直接往消息队列发 JSON 即可触发任何层级的爬虫函数。也支持 `funboost.faas` 一键生成 HTTP 接口。scrapy 是封闭系统，从外部动态注入深层级任务极其困难。
+
+> 完整的 funboost vs scrapy 详细对比，请阅读 [funboost 爬虫教程](https://funboost.readthedocs.io)。
+
+---
+
+## 6. boost_scrapy（仿 scrapy 风格）
+
+boost_spider 项目中还包含一个 `boost_scrapy` 框架，使用 funboost 引擎封装的仿 scrapy API 风格爬虫。为那些"不写 `yield Request` 就浑身难受"的用户准备。
+
+- [boost_scrapy 源码](boost_scrapy)
+- [boost_scrapy 使用例子](demo_crawler/boost_scrapy_imp)
+
+> 推荐优先使用 boost_spider 写法。boost_spider 代码更简洁、更直观，且完全利用了 funboost 的自由度优势。
+
+---
+
+## 7. 七种爬虫方式对比
+
+`demo_crawler` 目录下提供了 7 种不同的爬虫实现方式，爬取相同的目标，方便对比：
+
+| 方式 | 目录 | 核心技术 | 评价 |
 |:---|:---|:---|:---|
-| **boost_spider** 👑 | `boost_spider_imp` | Funboost + RequestClient | **首选**！FaaS 降维打击，极简代码，分布式开箱即用 |
-| **boost_scrapy** | `boost_scrapy_imp` | Funboost 引擎 + Scrapy 风格 API | 照顾 Scrapy 遗老的兼容层，非必要不推荐 |
-| **Feapder** | `feapder_imp` | 国产分布式爬虫框架 | 优秀的垂直框架，自动入库功能很棒 |
-| **Scrapy** | `scrapy_imp` | 传统 Scrapy 框架 | 曾经的王者，现在略显过时，无法外部注入任务 |
-| **Celery** | `celery_imp` | Celery 分布式任务队列 | 杀鸡用牛刀，配置繁琐，worker 启动麻烦 |
-| **Redis+Thread** | `threadpool_redis_crawler_imp` | 手写 Redis + ThreadPool | 400行代码实现1行功能，维护噩梦 |
-| **ThreadPool** | `threadpool_crawler_imp` | Python concurrent.futures | 单机玩具，进程死任务丢，仅限学习 |
-
-## 🎖️ 50项维度汇总评分表
+| **boost_spider** | `boost_spider_imp` | funboost + RequestClient | **首选**，极简代码，分布式开箱即用 |
+| **boost_scrapy** | `boost_scrapy_imp` | funboost + scrapy 风格 API | 兼容层，非必要不推荐 |
+| **Feapder** | `feapder_imp` | 国产分布式爬虫框架 | 优秀的垂直框架 |
+| **Scrapy** | `scrapy_imp` | 传统 Scrapy | 功能完善但框架束缚强 |
+| **Celery** | `celery_imp` | Celery 任务队列 | 配置繁琐 |
+| **Redis+Thread** | `threadpool_redis_crawler_imp` | 手写 Redis + 线程池 | 维护噩梦 |
+| **ThreadPool** | `threadpool_crawler_imp` | concurrent.futures | 单机玩具 |
 
 <details>
-<summary>📋 点击展开完整50项维度一览表</summary>
+<summary>50 项维度评分表（点击展开）</summary>
 
-| # | 📐 维度名称 | 🔵 T.Pool | 🔴 R+Pool | 🟠 Celery | 🟢 Feapder | 🟣 Scrapy | 🌟 boost_spider | ⚠️ b_scrapy |
+| # | 维度 | T.Pool | R+Pool | Celery | Feapder | Scrapy | boost_spider | b_scrapy |
 |:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | 1 | 调度核心设计 | 3 | 5 | 8 | 8 | 6 | **10** | 6 |
 | 2 | 编程范式自由度 | 10 | 9 | 7 | 6 | 3 | **10** | 3 |
@@ -25046,18 +21653,22 @@ boost_scrapy 就是这样的框架，使用 funboost的引擎来封装的，封�
 | 48 | Web监控面板 | 0 | 0 | 6 | 3 | 4 | **9** | 9 |
 | 49 | 一键远程部署 | 0 | 0 | 3 | 3 | 4 | **10** | 10 |
 | 50 | 跨语言交互能力 | 0 | 6 | 5 | 3 | 0 | **8** | 5 |
-| | **🏆 总计** | **192** | **196** | **265** | **283** | **155** | **496** | **335** |
+| | **总计** | **192** | **196** | **265** | **283** | **155** | **496** | **335** |
 
 </details>
 
+详细评测文档：
+- [七种爬虫方式公正评分(50项详细维度)-claude.md](七种爬虫方式公正评分(50项详细维度)-claude.md)
+- [七种爬虫方式公正评分(50项详细维度)-gemini.md](七种爬虫方式公正评分(50项详细维度)-gemini.md)
 
+---
 
-## 📄 详细评测文档
+## 8. 更多文档
 
-我们用 **50 个维度** 对这 7 种方案进行了深度对比评测，详见：
+boost_spider 的分布式调度能力全部来自 funboost。关于 QPS 控频、ACK 消费确认、分布式部署、funweb 管理界面等详细用法，请查阅：
 
-- [`七种爬虫方式公正评分(50项详细维度)-claude.md`](七种爬虫方式公正评分(50项详细维度)-claude.md)
-- [`七种爬虫方式公正评分(50项详细维度)-gemini.md`](七种爬虫方式公正评分(50项详细维度)-gemini.md)
+[funboost 完整文档 https://funboost.readthedocs.io](https://funboost.readthedocs.io)
+
 `````
 
 --- **end of file: README.md** (project: funboost_docs) --- 

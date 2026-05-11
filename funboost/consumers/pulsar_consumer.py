@@ -31,6 +31,7 @@ class PulsarConsumer(AbstractConsumer, ):
     """
     pulsar作为中间件实现的。
     """
+    _REQUEUE_IS_NATIVE_NACK = True
 
 
 

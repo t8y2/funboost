@@ -13,6 +13,7 @@ from funboost.utils.notify_util import Notifier
 from funboost.core.active_cousumer_info_getter import QueuesConusmerParamsGetter
 from funboost.funweb.flask_bps.web_helper import LOCAL_IP
 from funboost.core.loggers import logger_notify
+from funboost.constant import RedisKeys
 
 logger = logger_notify
 
@@ -25,39 +26,74 @@ _ALERT_LOG_KEY = 'funboost:funweb:alert:log'
 _ALERT_LOG_MAX = 500
 _ALERT_LOG_TTL = 30 * 24 * 3600
 
-
-def _gen_rule_id():
-    return str(uuid.uuid4())[:8]
+_DEFAULT_CHECK_WINDOW_COUNT = 3
 
 
-def _load_rules():
-    raw = _redis.hgetall(_RULES_KEY)
-    rules = []
-    for k, v in raw.items():
+class AlertRuleStore:
+    """告警规则存储管理器，封装规则的 CRUD 操作"""
+
+    def __init__(self, redis_client=None):
+        self._redis = redis_client or _redis
+
+    @staticmethod
+    def gen_id():
+        return str(uuid.uuid4())[:8]
+
+    def load_all(self):
+        raw = self._redis.hgetall(_RULES_KEY)
+        rules = []
+        for k, v in raw.items():
+            try:
+                rule = json.loads(v.decode() if isinstance(v, bytes) else v)
+                rule['_id'] = k.decode() if isinstance(k, bytes) else k
+                rules.append(rule)
+            except (json.JSONDecodeError, TypeError):
+                pass
+        return rules
+
+    def get(self, rule_id):
+        raw = self._redis.hget(_RULES_KEY, rule_id)
+        if not raw:
+            return None
         try:
-            rule = json.loads(v.decode() if isinstance(v, bytes) else v)
-            rule['_id'] = k.decode() if isinstance(k, bytes) else k
-            rules.append(rule)
+            return json.loads(raw.decode() if isinstance(raw, bytes) else raw)
         except (json.JSONDecodeError, TypeError):
-            pass
-    return rules
+            return None
+
+    def save(self, rule_id, rule_dict):
+        self._redis.hset(_RULES_KEY, rule_id, json.dumps(rule_dict, ensure_ascii=False))
+
+    def delete(self, rule_id):
+        self._redis.hdel(_RULES_KEY, rule_id)
 
 
-def _save_rule(rule_id, rule_dict):
-    _redis.hset(_RULES_KEY, rule_id, json.dumps(rule_dict, ensure_ascii=False))
+class AlertLogStore:
+    """告警日志存储管理器"""
+
+    def __init__(self, redis_client=None):
+        self._redis = redis_client or _redis
+
+    def append(self, entry):
+        ts = time.time()
+        entry['ts'] = ts
+        member = json.dumps(entry, ensure_ascii=False)
+        self._redis.zadd(_ALERT_LOG_KEY, {member: ts})
+        self._redis.zremrangebyrank(_ALERT_LOG_KEY, 0, -(_ALERT_LOG_MAX + 50))
+        self._redis.expire(_ALERT_LOG_KEY, _ALERT_LOG_TTL)
+
+    def query(self, start_ts, end_ts, limit=200):
+        raw_list = self._redis.zrevrangebyscore(_ALERT_LOG_KEY, end_ts, start_ts)
+        logs = []
+        for raw in raw_list[:limit]:
+            try:
+                logs.append(json.loads(raw.decode() if isinstance(raw, bytes) else raw))
+            except (json.JSONDecodeError, TypeError):
+                pass
+        return logs
 
 
-def _delete_rule(rule_id):
-    _redis.hdel(_RULES_KEY, rule_id)
-
-
-def _append_alert_log(entry):
-    ts = time.time()
-    entry['ts'] = ts
-    member = json.dumps(entry, ensure_ascii=False)
-    _redis.zadd(_ALERT_LOG_KEY, {member: ts})
-    _redis.zremrangebyrank(_ALERT_LOG_KEY, 0, -(_ALERT_LOG_MAX + 50))
-    _redis.expire(_ALERT_LOG_KEY, _ALERT_LOG_TTL)
+_rule_store = AlertRuleStore()
+_log_store = AlertLogStore()
 
 
 def _send_notification(alert_app, webhook_url, message):
@@ -85,8 +121,115 @@ def _send_notification(alert_app, webhook_url, message):
         logger.error(f'FunboostAlert send notification failed: {e}')
 
 
+class TimeSeriesEvaluator:
+    """
+    通用时序数据评估器，不依赖告警规则。
+    实例化时传入 queue_name 和 count，自动从 Redis 时序数据中读取。
+    所有 evaluate_* 方法返回 (triggered: bool, detail: str)。
+    可被告警系统、Dashboard 健康检查、API 等复用。
+
+    用法：
+        evaluator = TimeSeriesEvaluator('my_queue', count=3)
+        triggered, detail = evaluator.evaluate_backlog(threshold=100)
+    """
+
+    def __init__(self, queue_name, count=3):
+        self.queue_name = queue_name
+        self.count = count
+        self.series = self._fetch_series(queue_name, count)
+
+    @staticmethod
+    def _fetch_series(queue_name, count):
+        key = RedisKeys.gen_funboost_queue_time_series_data_key_by_queue_name(queue_name)
+        raw_list = _redis.zrevrange(key, 0, count - 1)
+        series = []
+        for raw in raw_list:
+            try:
+                data = json.loads(raw.decode() if isinstance(raw, bytes) else raw)
+                series.append(data)
+            except (json.JSONDecodeError, TypeError):
+                pass
+        return series
+
+    def evaluate_backlog(self, threshold=0):
+        """积压告警：窗口内全部超阈值才触发"""
+        if not self.series:
+            return False, ''
+        for s in self.series:
+            backlog = s.get('msg_num_in_broker', 0) or 0
+            if backlog < threshold:
+                return False, ''
+        latest = self.series[0].get('msg_num_in_broker', 0) or 0
+        n = len(self.series)
+        return True, f'积压 {latest} >= {threshold}（连续 {n} 个周期/{n * 10}s）'
+
+    def evaluate_qps_drop(self, threshold=0):
+        """QPS 骤降：平均 QPS <= 阈值且有消费者在线"""
+        if not self.series:
+            return False, ''
+        has_consumer = any(s.get('active_consumer_count', 0) > 0 for s in self.series)
+        if not has_consumer:
+            return False, ''
+        counts = [s.get('all_consumers_last_x_s_execute_count', 0) or 0 for s in self.series]
+        avg_qps = sum(c / 10.0 for c in counts) / len(counts)
+        if avg_qps <= threshold:
+            n = len(self.series)
+            return True, f'平均QPS={avg_qps:.1f} <= {threshold}（近 {n} 个周期/{n * 10}s）'
+        return False, ''
+
+    def evaluate_consumer_lost(self, now=0):
+        """
+        消费者掉线：
+        1. 先检查最新时序数据是否已过期（采集线程在 active_consumer_count==0 时不存数据，
+           所以消费者全停后时序数据会停止更新，需通过 report_ts 检测）
+        2. 再检查窗口内 active_consumer_count 是否全部为 0（兼容旧数据或采集逻辑变更后）
+        """
+        if now <= 0:
+            return False, ''
+        if self.series:
+            latest_ts = self.series[0].get('report_ts', 0)
+            if latest_ts and now - latest_ts > 60:
+                return True, f'无活跃消费者（时序数据已停止更新 {int(now - latest_ts)}s）'
+            all_lost = all(s.get('active_consumer_count', 0) == 0 for s in self.series)
+            if all_lost:
+                n = len(self.series)
+                return True, f'无活跃消费者（连续 {n} 个周期/{n * 10}s）'
+            return False, ''
+        return False, ''
+
+    def evaluate_fail_spike(self, threshold=0, min_calls=5):
+        """失败率飙升：汇总近 N 个周期的总成功/失败数计算失败率"""
+        if not self.series:
+            return False, ''
+        total_exec = sum(s.get('all_consumers_last_x_s_execute_count', 0) or 0 for s in self.series)
+        total_fail = sum(s.get('all_consumers_last_x_s_execute_count_fail', 0) or 0 for s in self.series)
+        total = total_exec
+        if total < min_calls or total == 0:
+            return False, ''
+        fail_rate = total_fail / total
+        fail_threshold = threshold / 100.0
+        if fail_rate >= fail_threshold:
+            n = len(self.series)
+            return True, f'失败率 {fail_rate:.0%} >= {fail_threshold:.0%}（近 {n} 个周期/{n * 10}s 共 {total} 次调用）'
+        return False, ''
+
+    def evaluate_avg_time_high(self, threshold=0):
+        """耗时过高：近 N 个周期的平均耗时 >= 阈值"""
+        if not self.series:
+            return False, ''
+        times = [s.get('all_consumers_last_x_s_avarage_function_spend_time') for s in self.series]
+        valid = [t for t in times if t is not None]
+        if not valid:
+            return False, ''
+        avg_time = sum(valid) / len(valid)
+        if avg_time >= threshold:
+            n = len(self.series)
+            return True, f'平均耗时 {avg_time:.1f}s >= {threshold}s（近 {n} 个周期/{n * 10}s）'
+        return False, ''
+
+
 def _check_rules_once():
-    rules = _load_rules()
+    rules = _rule_store.load_all()
     if not rules:
         return
 
@@ -94,15 +237,17 @@ def _check_rules_once():
     if not enabled_rules:
         return
 
-    try:
-        getter = QueuesConusmerParamsGetter()
-        queues_info = getter.get_queues_params_and_active_consumers()
-    except Exception as e:
-        logger.error(f'FunboostAlert get queues info failed: {e}')
-        return
-
     now = time.time()
     now_str = time.strftime('%Y-%m-%d %H:%M:%S')
+
+    try:
+        getter = QueuesConusmerParamsGetter()
+        all_queue_names = sorted(getter.get_queues_params().keys())
+    except Exception as e:
+        logger.error(f'FunboostAlert get queue names failed: {e}')
+        return
+
+    evaluator_cache = {}
 
     for rule in enabled_rules:
         rule_id = rule['_id']
@@ -113,57 +258,34 @@ def _check_rules_once():
         alert_interval = rule.get('alert_interval', 300)
         alert_app = rule.get('alert_app', 'wechat')
         webhook_url = rule.get('webhook_url', '')
+        check_window = rule.get('check_window_count', _DEFAULT_CHECK_WINDOW_COUNT)
+        min_calls = rule.get('min_calls', 5)
 
-        for q_name, info in queues_info.items():
-            if '*' not in rule_queue_names and q_name not in rule_queue_names:
-                continue
+        target_queues = all_queue_names if '*' in rule_queue_names else [q for q in rule_queue_names if q in all_queue_names]
+
+        for q_name in target_queues:
+            cache_key = (q_name, check_window)
+            if cache_key not in evaluator_cache:
+                evaluator_cache[cache_key] = TimeSeriesEvaluator(q_name, count=check_window)
+            ev = evaluator_cache[cache_key]
 
             triggered = False
             detail = ''
 
             if alert_type == 'backlog':
-                backlog = info.get('msg_num_in_broker', 0) or 0
-                if backlog >= threshold:
-                    triggered = True
-                    detail = f'队列 {q_name} 积压 {backlog} >= {threshold}'
-
+                triggered, detail = ev.evaluate_backlog(threshold=threshold)
             elif alert_type == 'qps_drop':
-                last_x_s_count = info.get('all_consumers_last_x_s_execute_count', 0) or 0
-                consumers = info.get('active_consumers', [])
-                if len(consumers) > 0 and last_x_s_count > 0:
-                    qps = last_x_s_count / 10.0
-                    if qps <= threshold:
-                        triggered = True
-                        detail = f'队列 {q_name} QPS={qps:.1f} <= {threshold} (近10秒执行{last_x_s_count}次, {len(consumers)}个消费者)'
-                elif len(consumers) > 0 and last_x_s_count == 0 and threshold >= 0:
-                    triggered = True
-                    detail = f'队列 {q_name} QPS=0 <= {threshold} (近10秒无执行, {len(consumers)}个消费者)'
-
+                triggered, detail = ev.evaluate_qps_drop(threshold=threshold)
             elif alert_type == 'consumer_lost':
-                consumers = info.get('active_consumers', [])
-                if len(consumers) == 0:
-                    triggered = True
-                    detail = f'队列 {q_name} 无活跃消费者!'
-
+                triggered, detail = ev.evaluate_consumer_lost(now=now)
             elif alert_type == 'fail_spike':
-                qps = info.get('all_consumers_last_x_s_execute_count', 0) or 0
-                qps_fail = info.get('all_consumers_last_x_s_execute_count_fail', 0) or 0
-                total = qps + qps_fail
-                min_calls = rule.get('min_calls', 5)
-                if total >= min_calls and total > 0:
-                    fail_rate = qps_fail / total
-                    fail_threshold = threshold / 100.0
-                    if fail_rate >= fail_threshold:
-                        triggered = True
-                        detail = f'队列 {q_name} 失败率 {fail_rate:.0%} >= {fail_threshold:.0%} (近{total}次调用)'
-
+                triggered, detail = ev.evaluate_fail_spike(threshold=threshold, min_calls=min_calls)
             elif alert_type == 'avg_time_high':
-                avg_time = info.get('all_consumers_last_x_s_avarage_function_spend_time') or 0
-                if avg_time >= threshold:
-                    triggered = True
-                    detail = f'队列 {q_name} 平均耗时 {avg_time:.1f}s >= {threshold}s'
+                triggered, detail = ev.evaluate_avg_time_high(threshold=threshold)
 
             if triggered:
+                detail = f'队列 {q_name} {detail}'
+
                 last_alert_ts_key = f'funboost:funweb:alert:last:{rule_id}:{q_name}'
                 last_ts = _redis.get(last_alert_ts_key)
                 if last_ts and now - float(last_ts) < alert_interval:
@@ -180,7 +302,7 @@ def _check_rules_once():
                 ])
                 _send_notification(alert_app, webhook_url, message)
 
-                _append_alert_log({
+                _log_store.append({
                     'rule_id': rule_id,
                     'rule_name': rule.get('rule_name', ''),
                     'queue_name': q_name,
@@ -208,7 +330,7 @@ _checker_thread.start()
 @alert_bp.route('/alert/rules', methods=['GET'])
 @login_required
 def get_rules():
-    rules = _load_rules()
+    rules = _rule_store.load_all()
     return jsonify({'succ': True, 'data': rules})
 
 
@@ -216,19 +338,20 @@ def get_rules():
 @login_required
 def add_rule():
     data = request.get_json(force=True)
-    rule_id = _gen_rule_id()
+    rule_id = _rule_store.gen_id()
     rule = {
         'rule_name': data.get('rule_name', ''),
         'queue_name': data.get('queue_name', '*'),
         'alert_type': data.get('alert_type', 'backlog'),
         'threshold': data.get('threshold', 0),
         'min_calls': data.get('min_calls', 5),
+        'check_window_count': data.get('check_window_count', _DEFAULT_CHECK_WINDOW_COUNT),
         'alert_app': data.get('alert_app', 'wechat'),
         'webhook_url': data.get('webhook_url', ''),
         'alert_interval': data.get('alert_interval', 300),
         'enabled': data.get('enabled', True),
     }
-    _save_rule(rule_id, rule)
+    _rule_store.save(rule_id, rule)
     return jsonify({'succ': True, 'data': {'_id': rule_id, **rule}})
 
 
@@ -236,34 +359,32 @@ def add_rule():
 @login_required
 def update_rule(rule_id):
     data = request.get_json(force=True)
-    raw = _redis.hget(_RULES_KEY, rule_id)
-    if not raw:
+    rule = _rule_store.get(rule_id)
+    if not rule:
         return jsonify({'succ': False, 'error': '规则不存在'}), 404
-    rule = json.loads(raw.decode() if isinstance(raw, bytes) else raw)
     for k in ('rule_name', 'queue_name', 'alert_type', 'threshold', 'min_calls',
-              'alert_app', 'webhook_url', 'alert_interval', 'enabled'):
+              'check_window_count', 'alert_app', 'webhook_url', 'alert_interval', 'enabled'):
         if k in data:
             rule[k] = data[k]
-    _save_rule(rule_id, rule)
+    _rule_store.save(rule_id, rule)
     return jsonify({'succ': True, 'data': {'_id': rule_id, **rule}})
 
 
 @alert_bp.route('/alert/rules/<rule_id>', methods=['DELETE'])
 @login_required
 def delete_rule(rule_id):
-    _delete_rule(rule_id)
+    _rule_store.delete(rule_id)
     return jsonify({'succ': True})
 
 
 @alert_bp.route('/alert/rules/<rule_id>/toggle', methods=['POST'])
 @login_required
 def toggle_rule(rule_id):
-    raw = _redis.hget(_RULES_KEY, rule_id)
-    if not raw:
+    rule = _rule_store.get(rule_id)
+    if not rule:
         return jsonify({'succ': False, 'error': '规则不存在'}), 404
-    rule = json.loads(raw.decode() if isinstance(raw, bytes) else raw)
     rule['enabled'] = not rule.get('enabled', True)
-    _save_rule(rule_id, rule)
+    _rule_store.save(rule_id, rule)
     return jsonify({'succ': True, 'data': {'_id': rule_id, **rule}})
 
 
@@ -273,13 +394,7 @@ def get_alert_log():
     now = time.time()
     start_ts = float(request.args.get('start_ts', now - 7 * 24 * 3600))
     end_ts = float(request.args.get('end_ts', now))
-    raw_list = _redis.zrevrangebyscore(_ALERT_LOG_KEY, end_ts, start_ts)
-    logs = []
-    for raw in raw_list[:200]:
-        try:
-            logs.append(json.loads(raw.decode() if isinstance(raw, bytes) else raw))
-        except (json.JSONDecodeError, TypeError):
-            pass
+    logs = _log_store.query(start_ts, end_ts)
     return jsonify({'succ': True, 'data': logs})
 
 
@@ -288,8 +403,7 @@ def get_alert_log():
 def get_queue_names():
     try:
         getter = QueuesConusmerParamsGetter()
-        queues_info = getter.get_queues_params_and_active_consumers()
-        queue_names = sorted(queues_info.keys())
+        queue_names = sorted(getter.get_queues_params().keys())
         return jsonify({'succ': True, 'data': queue_names})
     except Exception as e:
         return jsonify({'succ': False, 'error': str(e)})
