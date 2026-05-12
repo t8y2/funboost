@@ -4,6 +4,7 @@ NATS JetStream Broker - 基于 NATS JetStream 的持久化消息队列
 
 设计理念：
     - 使用 NATS JetStream 实现消息持久化、消费确认、分组消费
+    - 每个 funboost 队列对应一个独立的 NATS Stream（stream_name = queue_name）
     - 比 NATS Core 更可靠，支持 ACK、消息回放、持久化订阅
     - 适用于需要可靠消息传递但不想部署 RabbitMQ/Kafka 重型中间件的场景
 
@@ -15,7 +16,6 @@ NATS JetStream Broker - 基于 NATS JetStream 的持久化消息队列
         broker_kind=BROKER_KIND_NATS_JETSTREAM,
         broker_exclusive_config={
             'nats_url': 'nats://localhost:4222',  # 可选，默认从 BrokerConnConfig.NATS_URL 读
-            'stream_name': 'funboost',            # 可选，默认 'funboost'
             'consumer_group': 'default',          # 可选，消费者组名
             'ack_wait': 60,                       # 可选，ACK 超时秒数
             'max_deliver': 3,                     # 可选，最大重投次数
@@ -23,6 +23,12 @@ NATS JetStream Broker - 基于 NATS JetStream 的持久化消息队列
     ))
     def process_message(x, y):
         return x + y
+
+概念对应（类比 Kafka）：
+    - Stream = Kafka Topic（每个队列一个独立的 Stream）
+    - Subject = queue_name（消息发布的路由键）
+    - Durable Consumer = Kafka Consumer Group（持久化消费位移）
+    - retention="workqueue" = 消费后即删（类似 RabbitMQ 行为）
 
 依赖：
     pip install nats-py
@@ -43,21 +49,19 @@ BROKER_KIND_NATS_JETSTREAM = BrokerEnum.NATS_JETSTREAM
 
 register_broker_exclusive_config_default(BROKER_KIND_NATS_JETSTREAM, {
     'nats_url': '',
-    'stream_name': 'funboost',
-    'consumer_group': 'default',
+    'consumer_group': 'funboost_group',
     'ack_wait': 60,
     'max_deliver': 3,
 })
 
 
 class NatsJetStreamPublisher(AbstractPublisher):
-    """NATS JetStream 发布者，消息持久化到 Stream"""
+    """NATS JetStream 发布者，每个队列对应一个独立的 Stream"""
 
     def custom_init(self):
         super().custom_init()
         config = self.publisher_params.broker_exclusive_config
         self._nats_url = config['nats_url'] or BrokerConnConfig.NATS_URL
-        self._stream_name = config['stream_name']
 
         self._loop = asyncio.new_event_loop()
         self._loop_thread = threading.Thread(target=self._loop.run_forever, daemon=True)
@@ -71,26 +75,22 @@ class NatsJetStreamPublisher(AbstractPublisher):
             )
             self._js = self._nc.jetstream()
             try:
-                await self._js.find_stream_name_by_subject(self._subject)
+                await self._js.find_stream_name_by_subject(self.queue_name)
             except Exception:
                 await self._js.add_stream(
-                    name=self._stream_name,
-                    subjects=[f"{self._stream_name}.*"],
+                    name=self.queue_name,
+                    subjects=[self.queue_name],
                     retention="workqueue",
                 )
 
         future = asyncio.run_coroutine_threadsafe(_init(), self._loop)
         future.result(timeout=15)
-        self.logger.info(f'NATS JetStream Publisher 初始化完成, stream={self._stream_name}')
-
-    @property
-    def _subject(self):
-        return f"{self._stream_name}.{self.queue_name}"
+        self.logger.info(f'NATS JetStream Publisher 初始化完成, stream={self.queue_name}')
 
     def _publish_impl(self, msg):
         async def _pub():
             data = msg.encode() if isinstance(msg, str) else msg
-            await self._js.publish(self._subject, data)
+            await self._js.publish(self.queue_name, data)
 
         future = asyncio.run_coroutine_threadsafe(_pub(), self._loop)
         future.result(timeout=10)
@@ -98,7 +98,7 @@ class NatsJetStreamPublisher(AbstractPublisher):
     def clear(self):
         async def _purge():
             try:
-                await self._js.purge_stream(self._stream_name, subject=self._subject)
+                await self._js.purge_stream(self.queue_name)
             except Exception as e:
                 self.logger.warning(f'清空 JetStream 消息失败: {e}')
 
@@ -106,7 +106,15 @@ class NatsJetStreamPublisher(AbstractPublisher):
         future.result(timeout=10)
 
     def get_message_count(self):
-        return -1
+        async def _count():
+            try:
+                info = await self._js.stream_info(self.queue_name)
+                return info.state.messages
+            except Exception:
+                return -1
+
+        future = asyncio.run_coroutine_threadsafe(_count(), self._loop)
+        return future.result(timeout=10)
 
     def close(self):
         if hasattr(self, '_nc'):
@@ -126,6 +134,7 @@ class NatsJetStreamConsumer(AbstractConsumer):
     NATS JetStream 消费者
 
     特点：
+    - 每个队列对应一个独立的 Stream（stream_name = queue_name）
     - 持久化消费（durable consumer），重启不丢失消费位置
     - 支持消费确认（ACK），未确认的消息会重投
     - 支持消费者组（多个消费者分摊消息）
@@ -137,14 +146,9 @@ class NatsJetStreamConsumer(AbstractConsumer):
         super().custom_init()
         config = self.consumer_params.broker_exclusive_config
         self._nats_url = config['nats_url'] or BrokerConnConfig.NATS_URL
-        self._stream_name = config['stream_name']
         self._consumer_group = config['consumer_group']
         self._ack_wait = config['ack_wait']
         self._max_deliver = config['max_deliver']
-
-    @property
-    def _subject(self):
-        return f"{self._stream_name}.{self.queue_name}"
 
     @property
     def _durable_name(self):
@@ -162,16 +166,16 @@ class NatsJetStreamConsumer(AbstractConsumer):
             js = nc.jetstream()
 
             try:
-                await js.find_stream_name_by_subject(self._subject)
+                await js.find_stream_name_by_subject(self.queue_name)
             except Exception:
                 await js.add_stream(
-                    name=self._stream_name,
-                    subjects=[f"{self._stream_name}.*"],
+                    name=self.queue_name,
+                    subjects=[self.queue_name],
                     retention="workqueue",
                 )
 
             sub = await js.pull_subscribe(
-                self._subject,
+                self.queue_name,
                 durable=self._durable_name,
                 config=ConsumerConfig(
                     ack_wait=self._ack_wait,
@@ -179,21 +183,18 @@ class NatsJetStreamConsumer(AbstractConsumer):
                 ),
             )
             self.logger.info(
-                f'NATS JetStream 消费者启动, subject={self._subject}, '
+                f'NATS JetStream 消费者启动, stream={self.queue_name}, '
                 f'durable={self._durable_name}'
             )
 
             while True:
                 try:
-                    msgs = await sub.fetch(batch=1, timeout=5)
-                    for msg in msgs:
-                        kw = {'body': msg.data, '_nats_msg': msg}
-                        self._submit_task(kw)
+                    msgs = await sub.fetch(batch=10, timeout=5)
                 except nats.errors.TimeoutError:
-                    pass
-                except Exception as e:
-                    self.logger.error(f'JetStream 拉取消息异常: {e}')
-                    await asyncio.sleep(1)
+                    continue
+                for msg in msgs:
+                    kw = {'body': msg.data, '_nats_msg': msg}
+                    self._submit_task(kw)
 
         asyncio.set_event_loop(self._loop)
         self._loop.run_until_complete(_run())

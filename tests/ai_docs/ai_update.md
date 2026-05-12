@@ -1,8 +1,33 @@
 # AI 重大设计更新记录
 
-<<<<<<< HEAD
-## 2026-05-09: NATS broker 全面重构 — 升级 nats-py + 移入 contrib + 枚举重命名
-=======
+## 2026-05-12: NATS JetStream 简化设计 — 每队列独立 Stream，去掉共享 Stream + 通配符
+
+### 改动范围
+- 修改 `funboost/contrib/register_custom_broker_contrib/nats_jetstream_broker.py`
+
+### 背景
+原设计使用一个共享的 Stream（默认名 `funboost`），通过通配符 `funboost.*` 收集所有队列的消息，
+每个队列的 subject 为 `funboost.{queue_name}`。这种设计引入了不必要的间接层，概念复杂。
+
+### 新设计
+1. **每个队列 = 一个独立 Stream**：`stream_name = queue_name`，`subject = queue_name`
+2. **去掉 `stream_name` 配置项**：不再需要用户配置共享 Stream 名
+3. **去掉 `_subject` 属性**：直接使用 `self.queue_name`，无需 `f"{stream}.{queue}"` 拼接
+4. **去掉通配符 subjects**：`subjects=[self.queue_name]` 精确匹配，不用 `["funboost.*"]`
+5. **`get_message_count()` 改为真实计数**：利用独立 Stream 的 `stream_info().state.messages` 返回真实消息数（原来共享 Stream 无法区分，只能返回 -1）
+6. **`clear()` 简化**：直接 `purge_stream(queue_name)` 即清空该队列，无需指定 subject 过滤
+
+### 类比 Kafka
+- 一个 funboost 队列 = 一个 Kafka Topic = 一个 NATS Stream
+- `queue_name` 同时作为 Stream 名和 Subject 名，一一对应，无歧义
+
+### 优势
+- 概念清晰：queue_name = stream_name = subject，用户只需要理解"队列名"一个概念
+- 隔离性好：purge/监控/计数都是每队列独立的
+- 配置更少：去掉了 `stream_name` 配置项
+
+---
+
 ## 2026-05-10: 修复 active_cousumer_info_getter.py 三个 bug
 
 ### Bug 1: hmget_many_by_all_queue_names 键值对错位
