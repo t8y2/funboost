@@ -5,7 +5,7 @@
 """
 
 import inspect
-from funboost.core.consuming_func_iniput_params_check import FakeFunGenerator, ConsumingFuncInputParamsChecker
+from funboost.core.consuming_func_input_params_check import FakeFunGenerator, ConsumingFuncInputParamsChecker
 
 
 def test_gen_fun_basic():

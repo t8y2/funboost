@@ -34,7 +34,7 @@ from funboost.consumers.local_python_queue_consumer import LocalPythonQueueConsu
 from funboost.consumers.fastest_mem_queue_consumer import FastestMemQueueConsumer
 from funboost.consumers.mongomq_consumer import MongoMqConsumer
 
-from funboost.consumers.peewee_conusmer import PeeweeConsumer
+from funboost.consumers.peewee_consumer import PeeweeConsumer
 from funboost.consumers.persist_queue_consumer import PersistQueueConsumer
 
 

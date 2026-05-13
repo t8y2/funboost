@@ -6,7 +6,7 @@ from collections import deque
 
 from funboost.constant import BrokerEnum
 from funboost.consumers.base_consumer import AbstractConsumer
-from funboost.publishers import meomory_deque_publisher
+from funboost.publishers import memory_deque_publisher
 
 
 class LocalPythonQueueConsumer(AbstractConsumer):
@@ -16,7 +16,7 @@ class LocalPythonQueueConsumer(AbstractConsumer):
 
     @property
     def local_python_queue(self) -> deque:
-        return meomory_deque_publisher.deque_queue_name__deque_obj_map[self._queue_name]
+        return memory_deque_publisher.deque_queue_name__deque_obj_map[self._queue_name]
 
     def _dispatch_task(self):
         while True:

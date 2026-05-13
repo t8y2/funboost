@@ -1,7 +1,7 @@
 ﻿
 # 🤖 AI 上下文阅读协议 (由 nb_ai_context 生成)
 
-> **此文档生成时间**：2026-05-12 21:00:47
+> **此文档生成时间**：2026-05-13 20:05:30
 > **系统指令**：你正在解析一份由工具 **`nb_ai_context`** 自动生成的**结构化项目快照**。
 > **文档性质**：这**不是**一份普通的面向人类的文档，而是专为 AI 大模型（LLM）设计的上下文数据流。它将项目文档、源代码和 AST 架构元数据进行了特殊的结构化合并，请开启"代码解析器"的心智模式。
 
@@ -90,14 +90,7 @@
    4. 用户问“如何扩展中间件/自定义 broker” → 必须查阅 **`如何扩展增加新的中间件.md`**。
    5. 用户问底层实现细节 → 再通过速查表定位，深入具体的 `funboost codes` 源码文件进行推理。
 
-- 📁 **文件名拼写注意事项**（避免搜索源码时因作者历史拼写错误而找不到文件）：
-   - `funboost_config_deafult.py`（是 deafult 不是 default）
-   - `publisher_factotry.py`（是 factotry 不是 factory）
-   - `peewee_conusmer.py`（是 conusmer 不是 consumer）
-   - `active_cousumer_info_getter.py`（是 cousumer 不是 consumer）
-   - `muliti_process_enhance.py`（是 muliti 不是 multi）
-   - `consuming_func_iniput_params_check.py`（是 iniput 不是 input）
-   - `meomory_deque_publisher.py`（是 meomory 不是 memory）
+
 
 
 ## 📋 funboost_docs most core source files metadata (Entry Points)
@@ -165,7 +158,7 @@
 - `from funboost.publishers.empty_publisher import EmptyPublisher`
 - `from funboost.factories.broker_kind__publsiher_consumer_type_map import register_custom_broker`
 - `from funboost.core.broker_kind__exclusive_config_default_define import register_broker_exclusive_config_default`
-- `from funboost.factories.publisher_factotry import get_publisher`
+- `from funboost.factories.publisher_factory import get_publisher`
 - `from funboost.factories.consumer_factory import get_consumer`
 - `from funboost.timing_job import funboost_aps_scheduler`
 - `from funboost.timing_job.timing_push import ApsJobAdder`
@@ -226,8 +219,8 @@
 - `from funboost.core.func_params_model import PublisherParams`
 - `from funboost.factories.consumer_factory import get_consumer`
 - `from funboost.factories.consumer_factory import ConsumerCacheProxy`
-- `from funboost.factories.publisher_factotry import get_publisher`
-- `from funboost.factories.publisher_factotry import PublisherCacheProxy`
+- `from funboost.factories.publisher_factory import get_publisher`
+- `from funboost.factories.publisher_factory import PublisherCacheProxy`
 - `from funboost.consumers.base_consumer import AbstractConsumer`
 - `from funboost.publishers.base_publisher import AbstractPublisher`
 - `from funboost.core.msg_result_getter import AsyncResult`
@@ -1495,7 +1488,7 @@ print(MongoResultGetter(task_id,mongo_col_name).get_status_and_result())
 - `from funboost.funboost_config_deafult import BrokerConnConfig`
 - `from funboost.funboost_config_deafult import FunboostCommonConfig`
 - `from nb_libs.path_helper import PathHelper`
-- `from funboost.core.consuming_func_iniput_params_check import ConsumingFuncInputParamsChecker`
+- `from funboost.core.consuming_func_input_params_check import ConsumingFuncInputParamsChecker`
 - `from dataclasses import dataclass`
 
 #### 🏛️ Classes (2)
@@ -1701,7 +1694,7 @@ asyncio异步编程，最重要的方法有 aio_push aio_publish，
 - `from funboost.concurrent_pool.flexible_thread_pool import sync_or_async_fun_deco`
 - `from funboost.consumers.redis_filter import RedisFilter`
 - `from funboost.consumers.redis_filter import RedisImpermanencyFilter`
-- `from funboost.factories.publisher_factotry import get_publisher`
+- `from funboost.factories.publisher_factory import get_publisher`
 - `from funboost.utils import decorators`
 - `from funboost.utils import time_util`
 - `from funboost.utils import redis_manager`
@@ -1712,8 +1705,8 @@ asyncio异步编程，最重要的方法有 aio_push aio_publish，
 - `from funboost.core import kill_remote_task`
 - `from funboost.core.exceptions import ExceptionForRequeue`
 - `from funboost.core.exceptions import ExceptionForPushToDlxqueue`
-- `from funboost.core.consuming_func_iniput_params_check import ConsumingFuncInputParamsChecker`
-- `from funboost.core.consuming_func_iniput_params_check import FakeFunGenerator`
+- `from funboost.core.consuming_func_input_params_check import ConsumingFuncInputParamsChecker`
+- `from funboost.core.consuming_func_input_params_check import FakeFunGenerator`
 - `from funboost.core.lazy_impoter import funboost_lazy_impoter`
 - `from funboost.timing_job import FsdfBackgroundScheduler`
 - `from funboost.timing_job.apscheduler_use_redis_store import FunboostBackgroundSchedulerProcessJobsWithinRedisLock`
@@ -1918,7 +1911,7 @@ care_project_name 的作用是：
 - `import os`
 - `import copy`
 - `from funboost.factories.consumer_factory import ConsumerCacheProxy`
-- `from funboost.factories.publisher_factotry import get_publisher`
+- `from funboost.factories.publisher_factory import get_publisher`
 - `from funboost.publishers.base_publisher import AbstractPublisher`
 - `from funboost.utils.redis_manager import RedisMixin`
 - `from funboost.core.loggers import FunboostFileLoggerMixin`
@@ -1932,7 +1925,7 @@ care_project_name 的作用是：
 - `from funboost.core.func_params_model import PublisherParams`
 - `from funboost.core.func_params_model import BoosterParams`
 - `from funboost.core.function_result_status_saver import FunctionResultStatusPersistanceConfig`
-- `from funboost.core.consuming_func_iniput_params_check import FakeFunGenerator`
+- `from funboost.core.consuming_func_input_params_check import FakeFunGenerator`
 - `from funboost.core.exceptions import QueueNameNotExists`
 - `from funboost.timing_job.timing_push import ApsJobAdder`
 - `from funboost.constant import EnvConst`
@@ -3183,13 +3176,13 @@ Entry Points (not imported by other project files):
   行1014: ## 4.34 PyInstaller 打包
   行1020: ## 4.35 任务过滤
   行1043: ## 4.35c 使用 nb_cache 作为缓存装饰器
-  行1059: ## 4.36 自定义类型入参
-  行1082: ## 4.37 启动消费的方式大全
-  行1106: ## 4.38 FunboostPool
-  行1110: ### 4.38.1 MemoryFunboostPool（纯内存，快速替代线程池）
-  行1120: ### 4.38.2 FunboostPool（带消息队列持久化）
-  行1138: ## 4.100 控制变量法验证
-  行1179: ## 4.200 分布式函数调度框架 QQ 群
+  行1075: ## 4.36 自定义类型入参
+  行1098: ## 4.37 启动消费的方式大全
+  行1122: ## 4.38 FunboostPool
+  行1126: ### 4.38.1 MemoryFunboostPool（纯内存，快速替代线程池）
+  行1136: ### 4.38.2 FunboostPool（带消息队列持久化）
+  行1154: ## 4.100 控制变量法验证
+  行1195: ## 4.200 分布式函数调度框架 QQ 群
 
 ============================================================
 文件: c4b.md
@@ -10159,7 +10152,7 @@ async_result = long_task.push(3, 4)
 RemoteTaskKiller(long_task.queue_name, async_result.task_id).send_kill_remote_task_comd()
 ```
 
-> **安全警告**：`function_timeout` 和远程杀死功能通过杀死线程实现，如果函数内持有**不可重入锁**，可能导致死锁。建议使用**可过期锁**（如 Redis 分布式锁设置 TTL），避免永久锁死。
+> **安全警告**：`function_timeout` 和远程杀死功能通过杀死线程实现，如果函数内持有**不可重入锁**，可能导致死锁。推荐使用 `expire_lock`（`pip install expire_lock` 或 `from funboost.utils import expire_lock`），它规定了锁的最大占用时间，到期自动释放，避免永久锁死。详见 [expire_lock 文档](https://pypi.org/project/expire-lock/)。
 
 ---
 
@@ -10280,6 +10273,22 @@ def expensive_compute(x):
     import time
     time.sleep(10)
     return x * x
+```
+
+也可以将 cache 装饰器传给 `BoosterParams` 的 `consuming_function_decorator` 参数，好处是不需要设置 `should_check_publish_func_params=False`：
+
+```python
+from nb_cache import Cache
+
+dual_cache = Cache().setup("dual://localhost:6379/0?memory_size=1000&local_ttl=30", prefix="myapp")
+
+@boost(BoosterParams(
+    queue_name='queue_test', concurrent_num=10,
+    broker_kind=BrokerEnum.REDIS_ACK_ABLE,
+    consuming_function_decorator=dual_cache.cache(ttl=100, key="user:{user_id}"),
+))
+def get_user(user_id):
+    pass
 ```
 
 ---
@@ -12878,9 +12887,9 @@ class FunboostBackgroundScheduler(BackgroundScheduler):
 ## 7.40 2024-03 函数运行状态页面增加消息运行中状态  
 
 之前是只有消息运行完成后才会显示这条消息，运行中的消息不会显示，现在新增 running 状态的消息。  
+函数运行状态页面新增，失败消息可以点击重新运行按钮，从而重新投递到消息队列中。  
 
-
-![函数状态3.png](images/函数结果表好2.png)  
+![函数状态3.png](images/func_result_table2.png)  
 
 
 ## 7.41 2024-03 新增 funboost_current_task 上下文  
@@ -13197,9 +13206,9 @@ funboost发布性能是celery的22倍，消费性能是celery的46倍。
 
 例如 BoosterParams 这个类是funboost最核心的，现在能无门槛ide自动补全提示了。funboost很注重简单性和用户体验。
 
-## 7.80 2026-05 funweb增加高进配置功能
+## 7.80 2026-05 funweb增加告警配置功能
 
-funweb页面中也可以配置告警，原理是复用已有的上报到redis中的数据，用户在页面上针对队列名字，可以配置 积压超标、qps骤降、消费者掉线、失败率飙升、平均耗时高 5种告警指标。
+funweb页面中也可以配置告警，原理是复用已有的上报到redis中的数据，用户在页面上针对队列名字，可以配置 积压超标、qps骤降、消费者掉线、失败率飙升、平均耗时高 5种告警指标。不需要用户安装其他高大上的prometheus grafana等组件。
 
 详见`6.30.5`章节教程。
 `````
@@ -14172,7 +14181,7 @@ boost_spider 的分布式调度能力全部来自 funboost。关于 QPS 控频�
 ﻿
 # 🤖 AI 上下文阅读协议 (由 nb_ai_context 生成)
 
-> **此文档生成时间**：2026-05-12 21:00:45
+> **此文档生成时间**：2026-05-13 20:05:28
 > **系统指令**：你正在解析一份由工具 **`nb_ai_context`** 自动生成的**结构化项目快照**。
 > **文档性质**：这**不是**一份普通的面向人类的文档，而是专为 AI 大模型（LLM）设计的上下文数据流。它将项目文档、源代码和 AST 架构元数据进行了特殊的结构化合并，请开启"代码解析器"的心智模式。
 
@@ -14261,14 +14270,7 @@ boost_spider 的分布式调度能力全部来自 funboost。关于 QPS 控频�
    4. 用户问“如何扩展中间件/自定义 broker” → 必须查阅 **`如何扩展增加新的中间件.md`**。
    5. 用户问底层实现细节 → 再通过速查表定位，深入具体的 `funboost codes` 源码文件进行推理。
 
-- 📁 **文件名拼写注意事项**（避免搜索源码时因作者历史拼写错误而找不到文件）：
-   - `funboost_config_deafult.py`（是 deafult 不是 default）
-   - `publisher_factotry.py`（是 factotry 不是 factory）
-   - `peewee_conusmer.py`（是 conusmer 不是 consumer）
-   - `active_cousumer_info_getter.py`（是 cousumer 不是 consumer）
-   - `muliti_process_enhance.py`（是 muliti 不是 multi）
-   - `consuming_func_iniput_params_check.py`（是 iniput 不是 input）
-   - `meomory_deque_publisher.py`（是 meomory 不是 memory）
+
 
 
 ## 📋 funboost most core source files metadata (Entry Points)
@@ -14336,7 +14338,7 @@ boost_spider 的分布式调度能力全部来自 funboost。关于 QPS 控频�
 - `from funboost.publishers.empty_publisher import EmptyPublisher`
 - `from funboost.factories.broker_kind__publsiher_consumer_type_map import register_custom_broker`
 - `from funboost.core.broker_kind__exclusive_config_default_define import register_broker_exclusive_config_default`
-- `from funboost.factories.publisher_factotry import get_publisher`
+- `from funboost.factories.publisher_factory import get_publisher`
 - `from funboost.factories.consumer_factory import get_consumer`
 - `from funboost.timing_job import funboost_aps_scheduler`
 - `from funboost.timing_job.timing_push import ApsJobAdder`
@@ -14397,8 +14399,8 @@ boost_spider 的分布式调度能力全部来自 funboost。关于 QPS 控频�
 - `from funboost.core.func_params_model import PublisherParams`
 - `from funboost.factories.consumer_factory import get_consumer`
 - `from funboost.factories.consumer_factory import ConsumerCacheProxy`
-- `from funboost.factories.publisher_factotry import get_publisher`
-- `from funboost.factories.publisher_factotry import PublisherCacheProxy`
+- `from funboost.factories.publisher_factory import get_publisher`
+- `from funboost.factories.publisher_factory import PublisherCacheProxy`
 - `from funboost.consumers.base_consumer import AbstractConsumer`
 - `from funboost.publishers.base_publisher import AbstractPublisher`
 - `from funboost.core.msg_result_getter import AsyncResult`
@@ -15666,7 +15668,7 @@ print(MongoResultGetter(task_id,mongo_col_name).get_status_and_result())
 - `from funboost.funboost_config_deafult import BrokerConnConfig`
 - `from funboost.funboost_config_deafult import FunboostCommonConfig`
 - `from nb_libs.path_helper import PathHelper`
-- `from funboost.core.consuming_func_iniput_params_check import ConsumingFuncInputParamsChecker`
+- `from funboost.core.consuming_func_input_params_check import ConsumingFuncInputParamsChecker`
 - `from dataclasses import dataclass`
 
 #### 🏛️ Classes (2)
@@ -15872,7 +15874,7 @@ asyncio异步编程，最重要的方法有 aio_push aio_publish，
 - `from funboost.concurrent_pool.flexible_thread_pool import sync_or_async_fun_deco`
 - `from funboost.consumers.redis_filter import RedisFilter`
 - `from funboost.consumers.redis_filter import RedisImpermanencyFilter`
-- `from funboost.factories.publisher_factotry import get_publisher`
+- `from funboost.factories.publisher_factory import get_publisher`
 - `from funboost.utils import decorators`
 - `from funboost.utils import time_util`
 - `from funboost.utils import redis_manager`
@@ -15883,8 +15885,8 @@ asyncio异步编程，最重要的方法有 aio_push aio_publish，
 - `from funboost.core import kill_remote_task`
 - `from funboost.core.exceptions import ExceptionForRequeue`
 - `from funboost.core.exceptions import ExceptionForPushToDlxqueue`
-- `from funboost.core.consuming_func_iniput_params_check import ConsumingFuncInputParamsChecker`
-- `from funboost.core.consuming_func_iniput_params_check import FakeFunGenerator`
+- `from funboost.core.consuming_func_input_params_check import ConsumingFuncInputParamsChecker`
+- `from funboost.core.consuming_func_input_params_check import FakeFunGenerator`
 - `from funboost.core.lazy_impoter import funboost_lazy_impoter`
 - `from funboost.timing_job import FsdfBackgroundScheduler`
 - `from funboost.timing_job.apscheduler_use_redis_store import FunboostBackgroundSchedulerProcessJobsWithinRedisLock`
@@ -16089,7 +16091,7 @@ care_project_name 的作用是：
 - `import os`
 - `import copy`
 - `from funboost.factories.consumer_factory import ConsumerCacheProxy`
-- `from funboost.factories.publisher_factotry import get_publisher`
+- `from funboost.factories.publisher_factory import get_publisher`
 - `from funboost.publishers.base_publisher import AbstractPublisher`
 - `from funboost.utils.redis_manager import RedisMixin`
 - `from funboost.core.loggers import FunboostFileLoggerMixin`
@@ -16103,7 +16105,7 @@ care_project_name 的作用是：
 - `from funboost.core.func_params_model import PublisherParams`
 - `from funboost.core.func_params_model import BoosterParams`
 - `from funboost.core.function_result_status_saver import FunctionResultStatusPersistanceConfig`
-- `from funboost.core.consuming_func_iniput_params_check import FakeFunGenerator`
+- `from funboost.core.consuming_func_input_params_check import FakeFunGenerator`
 - `from funboost.core.exceptions import QueueNameNotExists`
 - `from funboost.timing_job.timing_push import ApsJobAdder`
 - `from funboost.constant import EnvConst`
@@ -19665,7 +19667,7 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
     │   ├── mysql_cdc_consumer.py
     │   ├── nameko_consumer.py
     │   ├── nsq_consumer.py
-    │   ├── peewee_conusmer.py
+    │   ├── peewee_consumer.py
     │   ├── persist_queue_consumer.py
     │   ├── postgres_consumer.py
     │   ├── pulsar_consumer.py
@@ -19743,7 +19745,7 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
     │   │   ├── discovery_boosters.py
     │   │   ├── funboost_cli_user_templ.py
     │   │   └── funboost_fire.py
-    │   ├── consuming_func_iniput_params_check.py
+    │   ├── consuming_func_input_params_check.py
     │   ├── current_task.py
     │   ├── exceptions.py
     │   ├── fabric_deploy_helper.py
@@ -19773,7 +19775,7 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
     │   ├── __init__.py
     │   ├── broker_kind__publsiher_consumer_type_map.py
     │   ├── consumer_factory.py
-    │   └── publisher_factotry.py
+    │   └── publisher_factory.py
     ├── funboost_config_deafult.py
     ├── funboost_web_manager
     │   ├── README.md
@@ -19810,7 +19812,7 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
     │   ├── kafka_publisher.py
     │   ├── kombu_publisher.py
     │   ├── local_python_queue_publisher.py
-    │   ├── meomory_deque_publisher.py
+    │   ├── memory_deque_publisher.py
     │   ├── mongomq_publisher.py
     │   ├── mqtt_publisher.py
     │   ├── mysql_cdc_publisher.py
@@ -20031,7 +20033,7 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
 
 - `funboost/consumers/nsq_consumer.py`
 
-- `funboost/consumers/peewee_conusmer.py`
+- `funboost/consumers/peewee_consumer.py`
 
 - `funboost/consumers/persist_queue_consumer.py`
 
@@ -20161,7 +20163,7 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
 
 - `funboost/core/broker_kind__exclusive_config_default_define.py`
 
-- `funboost/core/consuming_func_iniput_params_check.py`
+- `funboost/core/consuming_func_input_params_check.py`
 
 - `funboost/core/current_task.py`
 
@@ -20225,7 +20227,7 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
 
 - `funboost/factories/consumer_factory.py`
 
-- `funboost/factories/publisher_factotry.py`
+- `funboost/factories/publisher_factory.py`
 
 - `funboost/factories/__init__.py`
 
@@ -20285,7 +20287,7 @@ ai agent在运行 funboost 测试代码时候，让funboost运行1分钟左右�
 
 - `funboost/publishers/local_python_queue_publisher.py`
 
-- `funboost/publishers/meomory_deque_publisher.py`
+- `funboost/publishers/memory_deque_publisher.py`
 
 - `funboost/publishers/mongomq_publisher.py`
 
@@ -21172,7 +21174,7 @@ from funboost.publishers.base_publisher import (TaskOptions,
 from funboost.publishers.empty_publisher import EmptyPublisher
 from funboost.factories.broker_kind__publsiher_consumer_type_map import register_custom_broker
 from funboost.core.broker_kind__exclusive_config_default_define import register_broker_exclusive_config_default
-from funboost.factories.publisher_factotry import get_publisher
+from funboost.factories.publisher_factory import get_publisher
 from funboost.factories.consumer_factory import get_consumer
 
 from funboost.timing_job import funboost_aps_scheduler #,ApsJobAdder
@@ -24985,13 +24987,13 @@ from funboost.concurrent_pool.custom_threadpool_executor import check_not_monkey
 from funboost.concurrent_pool.flexible_thread_pool import FlexibleThreadPool, sync_or_async_fun_deco
 # from funboost.concurrent_pool.concurrent_pool_with_multi_process import ConcurrentPoolWithProcess
 from funboost.consumers.redis_filter import RedisFilter, RedisImpermanencyFilter
-from funboost.factories.publisher_factotry import get_publisher
+from funboost.factories.publisher_factory import get_publisher
 
 from funboost.utils import decorators, time_util, redis_manager
 from funboost.constant import ConcurrentModeEnum, BrokerEnum, ConstStrForClassMethod, RedisKeys
 from funboost.core import kill_remote_task
 from funboost.core.exceptions import ExceptionForRequeue, ExceptionForPushToDlxqueue
-from funboost.core.consuming_func_iniput_params_check import ConsumingFuncInputParamsChecker, FakeFunGenerator
+from funboost.core.consuming_func_input_params_check import ConsumingFuncInputParamsChecker, FakeFunGenerator
 
 # from funboost.core.booster import BoostersManager  互相导入
 from funboost.core.lazy_impoter import funboost_lazy_impoter
@@ -28093,7 +28095,7 @@ from collections import deque
 
 from funboost.constant import BrokerEnum
 from funboost.consumers.base_consumer import AbstractConsumer
-from funboost.publishers import meomory_deque_publisher
+from funboost.publishers import memory_deque_publisher
 
 
 class LocalPythonQueueConsumer(AbstractConsumer):
@@ -28103,7 +28105,7 @@ class LocalPythonQueueConsumer(AbstractConsumer):
 
     @property
     def local_python_queue(self) -> deque:
-        return meomory_deque_publisher.deque_queue_name__deque_obj_map[self._queue_name]
+        return memory_deque_publisher.deque_queue_name__deque_obj_map[self._queue_name]
 
     def _dispatch_task(self):
         while True:
@@ -28476,7 +28478,7 @@ class NsqConsumer(AbstractConsumer):
 ---
 
 
---- **start of file: funboost/consumers/peewee_conusmer.py** (project: funboost) --- 
+--- **start of file: funboost/consumers/peewee_consumer.py** (project: funboost) --- 
 
 `````python
 # -*- coding: utf-8 -*-
@@ -28516,7 +28518,7 @@ class PeeweeConsumer(AbstractConsumer):
 
 `````
 
---- **end of file: funboost/consumers/peewee_conusmer.py** (project: funboost) --- 
+--- **end of file: funboost/consumers/peewee_consumer.py** (project: funboost) --- 
 
 ---
 
@@ -37592,7 +37594,7 @@ import os
 import copy
 
 from funboost.factories.consumer_factory import ConsumerCacheProxy
-from funboost.factories.publisher_factotry import get_publisher
+from funboost.factories.publisher_factory import get_publisher
 from funboost.publishers.base_publisher import AbstractPublisher
 from funboost.utils.redis_manager import RedisMixin
 
@@ -37602,7 +37604,7 @@ from funboost.constant import RedisKeys
 from funboost.core.booster import  Booster,BoosterRegistry, booster_registry_default,gen_pid_queue_name_key
 from funboost.core.func_params_model import PublisherParams, BoosterParams
 from funboost.core.function_result_status_saver import FunctionResultStatusPersistanceConfig
-from funboost.core.consuming_func_iniput_params_check import FakeFunGenerator
+from funboost.core.consuming_func_input_params_check import FakeFunGenerator
 from funboost.core.exceptions import QueueNameNotExists
 from funboost.timing_job.timing_push import ApsJobAdder
 from funboost.constant import EnvConst
@@ -38379,7 +38381,7 @@ from funboost.core.func_params_model import (
 )
 
 from funboost.factories.consumer_factory import get_consumer, ConsumerCacheProxy
-from funboost.factories.publisher_factotry import get_publisher, PublisherCacheProxy
+from funboost.factories.publisher_factory import get_publisher, PublisherCacheProxy
 
 from funboost.consumers.base_consumer import AbstractConsumer
 from funboost.publishers.base_publisher import AbstractPublisher
@@ -39213,7 +39215,7 @@ register_broker_exclusive_config_default(
 ---
 
 
---- **start of file: funboost/core/consuming_func_iniput_params_check.py** (project: funboost) --- 
+--- **start of file: funboost/core/consuming_func_input_params_check.py** (project: funboost) --- 
 
 `````python
 import typing
@@ -39397,7 +39399,7 @@ def {func_name}({all_params}):
         return getattr(func,'is_fake_fun',False)
 `````
 
---- **end of file: funboost/core/consuming_func_iniput_params_check.py** (project: funboost) --- 
+--- **end of file: funboost/core/consuming_func_input_params_check.py** (project: funboost) --- 
 
 ---
 
@@ -46993,7 +46995,7 @@ from funboost.consumers.local_python_queue_consumer import LocalPythonQueueConsu
 from funboost.consumers.fastest_mem_queue_consumer import FastestMemQueueConsumer
 from funboost.consumers.mongomq_consumer import MongoMqConsumer
 
-from funboost.consumers.peewee_conusmer import PeeweeConsumer
+from funboost.consumers.peewee_consumer import PeeweeConsumer
 from funboost.consumers.persist_queue_consumer import PersistQueueConsumer
 
 
@@ -47276,7 +47278,7 @@ class ConsumerCacheProxy:
 ---
 
 
---- **start of file: funboost/factories/publisher_factotry.py** (project: funboost) --- 
+--- **start of file: funboost/factories/publisher_factory.py** (project: funboost) --- 
 
 `````python
 # -*- coding: utf-8 -*-
@@ -47342,7 +47344,7 @@ class PublisherCacheProxy:
         return self.pid_registry_queue_name__publisher_map[key]
 `````
 
---- **end of file: funboost/factories/publisher_factotry.py** (project: funboost) --- 
+--- **end of file: funboost/factories/publisher_factory.py** (project: funboost) --- 
 
 ---
 
@@ -50615,7 +50617,7 @@ from funboost.core.task_id_logger import TaskIdLogger
 from funboost.utils import decorators
 from funboost.funboost_config_deafult import BrokerConnConfig, FunboostCommonConfig
 from nb_libs.path_helper import PathHelper
-from funboost.core.consuming_func_iniput_params_check import ConsumingFuncInputParamsChecker
+from funboost.core.consuming_func_input_params_check import ConsumingFuncInputParamsChecker
 from dataclasses import dataclass
 
 RedisAsyncResult = AsyncResult  # 别名
@@ -52012,7 +52014,7 @@ class LocalPythonQueuePublisher(AbstractPublisher):
 ---
 
 
---- **start of file: funboost/publishers/meomory_deque_publisher.py** (project: funboost) --- 
+--- **start of file: funboost/publishers/memory_deque_publisher.py** (project: funboost) --- 
 
 `````python
 # -*- coding: utf-8 -*-
@@ -52054,7 +52056,7 @@ class DequePublisher(AbstractPublisher):
 
 `````
 
---- **end of file: funboost/publishers/meomory_deque_publisher.py** (project: funboost) --- 
+--- **end of file: funboost/publishers/memory_deque_publisher.py** (project: funboost) --- 
 
 ---
 
