@@ -26,7 +26,7 @@ from funboost.core.func_params_model import (
 )
 
 from funboost.factories.consumer_factory import get_consumer, ConsumerCacheProxy
-from funboost.factories.publisher_factotry import get_publisher, PublisherCacheProxy
+from funboost.factories.publisher_factory import get_publisher, PublisherCacheProxy
 
 from funboost.consumers.base_consumer import AbstractConsumer
 from funboost.publishers.base_publisher import AbstractPublisher

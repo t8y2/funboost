@@ -26,7 +26,7 @@ import os
 import copy
 
 from funboost.factories.consumer_factory import ConsumerCacheProxy
-from funboost.factories.publisher_factotry import get_publisher
+from funboost.factories.publisher_factory import get_publisher
 from funboost.publishers.base_publisher import AbstractPublisher
 from funboost.utils.redis_manager import RedisMixin
 
@@ -36,7 +36,7 @@ from funboost.constant import RedisKeys
 from funboost.core.booster import  Booster,BoosterRegistry, booster_registry_default,gen_pid_queue_name_key
 from funboost.core.func_params_model import PublisherParams, BoosterParams
 from funboost.core.function_result_status_saver import FunctionResultStatusPersistanceConfig
-from funboost.core.consuming_func_iniput_params_check import FakeFunGenerator
+from funboost.core.consuming_func_input_params_check import FakeFunGenerator
 from funboost.core.exceptions import QueueNameNotExists
 from funboost.timing_job.timing_push import ApsJobAdder
 from funboost.constant import EnvConst

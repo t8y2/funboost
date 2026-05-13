@@ -34,7 +34,7 @@ from funboost.core.task_id_logger import TaskIdLogger
 from funboost.utils import decorators
 from funboost.funboost_config_deafult import BrokerConnConfig, FunboostCommonConfig
 from nb_libs.path_helper import PathHelper
-from funboost.core.consuming_func_iniput_params_check import ConsumingFuncInputParamsChecker
+from funboost.core.consuming_func_input_params_check import ConsumingFuncInputParamsChecker
 from dataclasses import dataclass
 
 RedisAsyncResult = AsyncResult  # 别名

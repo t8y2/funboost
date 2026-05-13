@@ -9,3 +9,7 @@ class MyClass:
         pass
 
 print(str(type(MyClass)))
+
+import time
+time.sleep(10000)
+print(str(type(MyClass)))

@@ -78,13 +78,13 @@ from funboost.concurrent_pool.custom_threadpool_executor import check_not_monkey
 from funboost.concurrent_pool.flexible_thread_pool import FlexibleThreadPool, sync_or_async_fun_deco
 # from funboost.concurrent_pool.concurrent_pool_with_multi_process import ConcurrentPoolWithProcess
 from funboost.consumers.redis_filter import RedisFilter, RedisImpermanencyFilter
-from funboost.factories.publisher_factotry import get_publisher
+from funboost.factories.publisher_factory import get_publisher
 
 from funboost.utils import decorators, time_util, redis_manager
 from funboost.constant import ConcurrentModeEnum, BrokerEnum, ConstStrForClassMethod, RedisKeys
 from funboost.core import kill_remote_task
 from funboost.core.exceptions import ExceptionForRequeue, ExceptionForPushToDlxqueue
-from funboost.core.consuming_func_iniput_params_check import ConsumingFuncInputParamsChecker, FakeFunGenerator
+from funboost.core.consuming_func_input_params_check import ConsumingFuncInputParamsChecker, FakeFunGenerator
 
 # from funboost.core.booster import BoostersManager  互相导入
 from funboost.core.lazy_impoter import funboost_lazy_impoter

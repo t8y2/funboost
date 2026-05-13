@@ -140,7 +140,7 @@ class BrokerEnum:
 
     GRPC = 'GRPC' # 使用知名grpc作为broker,可以使用 sync_call 方法同步获取grpc的结果, 简单程度暴击用户手写原生的 grpc客户端 服务端
 
-    NATS_CORE = 'NATS_CORE'  # 高性能中间件nats Core模式(无持久化),使用nats-py官方asyncio客户端。pip install nats-py
+    NATS_CORE = 'NATS_CORE'  # 高性能中间件nats Core模式(无持久化),使用nats-py官方asyncio客户端。其booster.publisher.request方法支持nats的原生request-reply模式，用户可以不依赖redis做rpc。
 
     NATS_JETSTREAM = 'NATS_JETSTREAM'  # NATS JetStream持久化模式,支持消费确认/持久化/消费者组。用法见 contrib/register_custom_broker_contrib/nats_jetstream_broker.py
 

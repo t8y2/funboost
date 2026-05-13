@@ -38,7 +38,7 @@ from funboost.publishers.base_publisher import (TaskOptions,
 from funboost.publishers.empty_publisher import EmptyPublisher
 from funboost.factories.broker_kind__publsiher_consumer_type_map import register_custom_broker
 from funboost.core.broker_kind__exclusive_config_default_define import register_broker_exclusive_config_default
-from funboost.factories.publisher_factotry import get_publisher
+from funboost.factories.publisher_factory import get_publisher
 from funboost.factories.consumer_factory import get_consumer
 
 from funboost.timing_job import funboost_aps_scheduler #,ApsJobAdder
