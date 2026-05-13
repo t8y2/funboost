@@ -1,5 +1,6 @@
 # AI 重大设计更新记录
 
+<<<<<<< HEAD
 ## 2026-05-12: NATS JetStream 简化设计 — 每队列独立 Stream，去掉共享 Stream + 通配符
 
 ### 改动范围
@@ -28,6 +29,11 @@
 
 ---
 
+=======
+<<<<<<< HEAD
+## 2026-05-09: NATS broker 全面重构 — 升级 nats-py + 移入 contrib + 枚举重命名
+=======
+>>>>>>> a741e9244b8e6fff5fca908ab3b9cb401ea3d825
 ## 2026-05-10: 修复 active_cousumer_info_getter.py 三个 bug
 
 ### Bug 1: hmget_many_by_all_queue_names 键值对错位
