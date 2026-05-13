@@ -38,7 +38,6 @@ import asyncio
 import threading
 
 import nats
-import nats.errors
 from nats.js.api import ConsumerConfig
 
 from funboost import register_custom_broker, AbstractConsumer, AbstractPublisher, BrokerEnum
@@ -188,10 +187,7 @@ class NatsJetStreamConsumer(AbstractConsumer):
             )
 
             while True:
-                try:
-                    msgs = await sub.fetch(batch=10, timeout=5)
-                except nats.errors.TimeoutError:
-                    continue
+                msgs = await sub.fetch(batch=10, timeout=5)
                 for msg in msgs:
                     kw = {'body': msg.data, '_nats_msg': msg}
                     self._submit_task(kw)

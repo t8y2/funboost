@@ -3,7 +3,7 @@
 测试 NATS_JETSTREAM 中间件 (持久化模式，支持ACK/消费者组)
 
 使用方式：
-    1. 确保 NATS 服务器已启动且启用了 JetStream (默认 nats://192.168.6.134:4222)
+    1. 确保 NATS 服务器已启动且启用了 JetStream (默认 nats://127.0.0.1:4222)
     2. pip install nats-py
     3. 运行此脚本
 
@@ -22,8 +22,7 @@ from funboost import boost, BoosterParams, BrokerEnum
     queue_name='jetstream_test_queue',
     broker_kind=BrokerEnum.NATS_JETSTREAM,
     broker_exclusive_config={
-        'nats_url': 'nats://127.0.0.1:4222',
-        'stream_name': 'funboost',
+        'nats_url': 'nats://127.0.0.1:4222', # 可以独立优先配置，也可以使用funboost_config.py 的 NATS_URL  全局配置
         'consumer_group': 'test_group',
         'ack_wait': 60,
         'max_deliver': 3,
@@ -43,8 +42,6 @@ def jetstream_task(x: int, y: int):
     queue_name='jetstream_order_queue',
     broker_kind=BrokerEnum.NATS_JETSTREAM,
     broker_exclusive_config={
-        'nats_url': 'nats://127.0.0.1:4222',
-        'stream_name': 'funboost',
         'consumer_group': 'order_group',
         'ack_wait': 30,
         'max_deliver': 5,
@@ -72,5 +69,3 @@ if __name__ == '__main__':
     jetstream_task.consume()
     jetstream_order_task.consume()
 
-    from funboost import ctrl_c_recv
-    ctrl_c_recv()
