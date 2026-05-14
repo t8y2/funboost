@@ -20,7 +20,7 @@ def task_basic(x: int, y: int):
     print(f"--- basic task ---")
     print(f"task_id  : {fct.task_id}")
     print(f"queue    : {fct.queue_name}")
-    print(f"params   : {fct.function_params}")          # {'x': x, 'y': y}
+    print(f"params   : {fct.function_result_status.function_params}")          # {'x': x, 'y': y}
     print(f"full_msg : {fct.full_msg}")                  # 原始消息 dict
     print(f"status   : {fct.function_result_status}")    # FunctionResultStatus 对象
     print(f"str(fct) : {fct}")                           # 自动打印 status dict
@@ -61,7 +61,7 @@ def _sub_thread_worker():
 ))
 def task_context_thread(msg: str):
     """使用 FctContextThread 让子线程自动继承 fct 上下文"""
-    _ = msg  # 参数已通过 fct.function_params 间接展示
+    _ = msg  # 参数已通过 fct.function_result_status.function_params 间接展示
     print(f"--- context_thread task ---")
     print(f"  [父线程] task_id = {fct.task_id}")
     t = FctContextThread(target=_sub_thread_worker)
