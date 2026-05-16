@@ -1,6 +1,23 @@
 
 # 🕷️ funspider – Funboost 爬虫辅助扩展
 
+funspider 不是爬虫框架——它是基于 funboost 分布式函数调度引擎的爬虫辅助层。funboost 有多强大，funspider 就有多强大。百分之百利用funboost的所有功能,例如50种消息队列 + 5种并发方式 + 30种任务控制功能 + funweb可视化管理 完全可以利用。
+
+## 🧩 funspider + funboost + funweb 三件套
+
+三件套合在一起，就是完整的 **爬虫开发 + 分布式运行 + 可视化管理** 闭环：
+
+| 组件 | 角色 | 核心能力 |
+|------|------|----------|
+| **funboost** | 调度底座 | 40+消息队列、5种并发模式、QPS、去重、ACK、重试、定时任务（APScheduler） |
+| **funspider** | 爬虫辅助 | HTTP客户端（同步+异步）、ORM Item、响应解析、数据入库 |
+| **funweb** | 可视化管理 | 任务监控、队列状态、启停控制、告警 |
+
+- **开发**：一行 `@boost` 写爬虫函数，`funspider` 提供 HTTP 客户端和 ORM 入库
+- **运行**：`consume_group` 一键拉起，分布式部署，QPS 精确控频
+- **管理**：funweb 看队列积压、成功率、失败任务告警
+- **周期**：`ApsJobAdder` 定时 push 种子，几行代码搞定周期爬虫
+
 > **基于 `Funboost` 的工程化爬虫辅助组件，提供 ORM 模型与双引擎客户端。**
 
 **`funspider`** 是 `Funboost` 分布式函数调度框架的一个用户贡献扩展。如果说 `boost_spider` 代表着极致的**自由与简洁**，那么 `funspider` 则提供了一种**结构化与强类型**的辅助选择。

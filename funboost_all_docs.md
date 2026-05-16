@@ -13431,7 +13431,7 @@ from funboost import boost, BoosterParams, fct
 def my_task(x):
     print(f'task_id: {fct.task_id}')
     print(f'queue_name: {fct.queue_name}')
-    print(f'function_params: {fct.function_params}')
+    print(f'function_params: {fct.function_result_status.function_params}')
     print(f'publish_time: {fct.function_result_status.publish_time}')
     print(f'run_times: {fct.function_result_status.run_times}')
     return x

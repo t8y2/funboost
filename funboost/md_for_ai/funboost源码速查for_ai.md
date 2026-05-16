@@ -551,9 +551,9 @@ get_message_count() -> int                               # 获取消息数量
 ```python
 fct.task_id              # 当前任务ID
 fct.queue_name           # 队列名
-fct.run_times            # 运行次数(含重试)
+fct.function_result_status.run_times           # 运行次数(含重试)
 fct.full_msg             # 完整消息体
-fct.function_params      # 函数参数
+fct.function_result_status.function_params      # 函数参数
 fct.function_result_status  # FunctionResultStatus对象
 fct.logger               # 当前任务的logger
 ```

@@ -13431,7 +13431,7 @@ from funboost import boost, BoosterParams, fct
 def my_task(x):
     print(f'task_id: {fct.task_id}')
     print(f'queue_name: {fct.queue_name}')
-    print(f'function_params: {fct.function_params}')
+    print(f'function_params: {fct.function_result_status.function_params}')
     print(f'publish_time: {fct.function_result_status.publish_time}')
     print(f'run_times: {fct.function_result_status.run_times}')
     return x
@@ -24686,9 +24686,9 @@ get_message_count() -> int                               # 获取消息数量
 ```python
 fct.task_id              # 当前任务ID
 fct.queue_name           # 队列名
-fct.run_times            # 运行次数(含重试)
+fct.function_result_status.run_times           # 运行次数(含重试)
 fct.full_msg             # 完整消息体
-fct.function_params      # 函数参数
+fct.function_result_status.function_params      # 函数参数
 fct.function_result_status  # FunctionResultStatus对象
 fct.logger               # 当前任务的logger
 ```
@@ -55715,9 +55715,9 @@ get_message_count() -> int                               # 获取消息数量
 ```python
 fct.task_id              # 当前任务ID
 fct.queue_name           # 队列名
-fct.run_times            # 运行次数(含重试)
+fct.function_result_status.run_times           # 运行次数(含重试)
 fct.full_msg             # 完整消息体
-fct.function_params      # 函数参数
+fct.function_result_status.function_params      # 函数参数
 fct.function_result_status  # FunctionResultStatus对象
 fct.logger               # 当前任务的logger
 ```
