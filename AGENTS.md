@@ -1,14 +1,5 @@
-<<<<<<< HEAD
----
-noteId: "7d162880512511f190467d7d8c8b831a"
-tags: []
-
----
-
 # AGENTS.md — Funboost 项目全貌（AI 专用指南）
-=======
-# AGENTS.md — Funboost AI 编程指南
->>>>>>> eacf88320cbd491fb084ecf82f00ebd571312570
+
 
 > **Funboost = 一行 `@boost` 装饰器，让你的任意 Python 函数瞬间获得分布式调度 + FaaS 微服务 + 50 种消息队列 + 5种并发模式 + 30+ 种任务控制功能 + 工作流编排的能力。**
 
