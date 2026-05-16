@@ -1,3 +1,9 @@
+---
+noteId: "7d162880512511f190467d7d8c8b831a"
+tags: []
+
+---
+
 # AGENTS.md — Funboost 项目全貌（AI 专用指南）
 
 > 本文档专为 AI 代理设计，基于 `funboost/md_for_ai/` 目录下的所有资料综合编写。
