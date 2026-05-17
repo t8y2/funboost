@@ -28,19 +28,22 @@ class HTTPPublisher(AbstractPublisher, ):
         url = self._ip_port_str + '/queue'
         self._http.request('post', url, fields={'msg': msg,'call_type':'publish'})
 
-    def sync_call(self, msg_dict: dict, is_return_rpc_data_obj=True):
+    def sync_call(self, msg_dict: dict, task_id=None,
+                  task_options=None, is_return_rpc_data_obj=True):
         url = self._ip_port_str + '/queue'
-        response = self._http.request('post', url, 
-                  fields={'msg': Serialization.to_json_str(msg_dict),'call_type':'sync_call'})
+        publish_msg_context = self.generate_msg_context_for_publish(msg_dict, task_id, task_options)
+        response = self._http.request('post', url,
+                  fields={'msg': publish_msg_context.msg_json,'call_type':'sync_call'})
         json_resp =  response.data.decode('utf-8')
         # import requests
         # response = requests.request('post', url, 
         #           data={'msg': Serialization.to_json_str(msg_dict),'call_type':'sync_call'})
         # json_resp =  response.text()
+        json_resp_dict = Serialization.to_dict(json_resp)
         if is_return_rpc_data_obj:
-            return FunctionResultStatus.parse_status_and_result_to_obj(Serialization.to_dict(json_resp))
+            return FunctionResultStatus.parse_status_and_result_to_obj(json_resp_dict)
         else:
-            return Serialization.to_dict(json_resp)
+            return json_resp_dict['result']
 
 
     def clear(self):

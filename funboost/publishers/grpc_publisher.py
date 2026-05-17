@@ -22,7 +22,8 @@ class GrpcPublisher(AbstractPublisher, ):
         response = self._stub.Call(request)
         return response.json_resp
 
-    def sync_call(self, msg_dict: dict, is_return_rpc_data_obj=True):
+    def sync_call(self, msg_dict: dict, task_id=None,
+                  task_options=None, is_return_rpc_data_obj=True):
         """
         同步请求,并阻塞等待结果返回.
         不像push那样依赖AsyncResult + redis 实现的rpc
@@ -32,16 +33,18 @@ class GrpcPublisher(AbstractPublisher, ):
 
         """
         用法例子
-        $booster.publisher.sync_call({'x':i,'y':i*2}) 
+        $booster.publisher.sync_call({'x':i,'y':i*2})
         """
-        request = funboost_grpc_pb2.FunboostGrpcRequest(json_req=Serialization.to_json_str(msg_dict),
+        publish_msg_context = self.generate_msg_context_for_publish(msg_dict, task_id, task_options)
+        request = funboost_grpc_pb2.FunboostGrpcRequest(json_req=publish_msg_context.msg_json,
                                                         call_type="sync_call")
         response = self._stub.Call(request)
         json_resp =  response.json_resp
+        json_resp_dict = Serialization.to_dict(json_resp)
         if is_return_rpc_data_obj:
-            return FunctionResultStatus.parse_status_and_result_to_obj(Serialization.to_dict(json_resp))
+            return FunctionResultStatus.parse_status_and_result_to_obj(json_resp_dict)
         else:
-            return Serialization.to_dict(json_resp)
+            return json_resp_dict['result']
 
     def clear(self):
         pass

@@ -7,7 +7,7 @@ os.environ['SYS_STD_FILE_NAME'] = 'bm_funboost_st_std.std'
 import nb_log
 from funboost import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum
 
-TOTAL = 100000
+TOTAL = 500000
 counter = {'done': 0}
 lock = threading.Lock()
 start = [None]

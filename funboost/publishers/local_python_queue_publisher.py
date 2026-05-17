@@ -90,5 +90,7 @@ class LocalPythonQueuePublisher(AbstractPublisher):
         loop = asyncio.get_running_loop()
         return asyncio.wrap_future(sync_future, loop=loop)
 
+ 
+
 
 

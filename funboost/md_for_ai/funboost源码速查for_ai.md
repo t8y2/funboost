@@ -904,7 +904,7 @@ fct.logger               # 当前任务的logger
 
 | 文件 | 功能 |
 |------|------|
-| `contrib/queue2queue.py` | `consume_and_push_to_another_queue`, `multi_prcocess_queue2queue` |
+| `contrib/queue2queue_helper.py` | `queue2queue`, `multi_prcocess_queue2queue` |
 | `contrib/django_db_deco.py` | `close_old_connections_deco` Django连接管理 |
 | `contrib/redis_consume_latest_msg_broker.py` | `RedisConsumeLatestPublisher/Consumer` 只消费最新消息 |
 | `contrib/cdc/mysql2mysql.py` | `MySql2Mysql` MySQL CDC数据同步 |

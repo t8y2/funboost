@@ -343,10 +343,7 @@ The first argument of the push method must be the instance of the class.
     def _publish_impl(self, msg: str):
         raise NotImplementedError
 
-    def sync_call(self, msg_dict: dict, is_return_rpc_data_obj=True) -> typing.Union[dict, FunctionResultStatus]:
-        """仅有部分中间件支持同步调用并阻塞等待返回结果,不依赖AsyncResult + redis作为rpc，例如 http grpc 等"""
-        raise NotImplementedError(f'broker  {self.publisher_params.broker_kind} not support sync_call method')
-
+   
     @abc.abstractmethod
     def clear(self):
         raise NotImplementedError
@@ -383,6 +380,25 @@ The first argument of the push method must be the instance of the class.
         但为了更好的防止网络波动(例如发布消息到外网的消息队列耗时达到10毫秒),可以使用aio_push"""
         async_result = await simple_run_in_executor(self.publish, msg, task_id, task_options)
         return AioAsyncResult(async_result.task_id, timeout=async_result.timeout)
+    
+    def sync_call(self, msg_dict: dict, task_id=None,
+                  task_options: TaskOptions = None, is_return_rpc_data_obj=True) -> typing.Union[typing.Any, FunctionResultStatus]:
+        """
+        仅有部分中间件支持同步调用并阻塞等待返回结果,不依赖AsyncResult + redis作为rpc，例如 http grpc 等待结果
+        :param msg_dict:函数的入参字典
+        :param task_id:任务id
+        :param task_options:任务选项
+        :param is_return_rpc_data_obj:是否返回rpc数据对象FunctionResultStatus(可以携带更多有用的辅助信息)，默认只返回函数返回值
+        :return:函数返回值或 FunctionResultStatus 对象
+        """
+        raise NotImplementedError(f'broker  {self.publisher_params.broker_kind} not support sync_call method')
+
+    async def aio_sync_call(self, msg_dict: dict, task_id=None,
+                            task_options: TaskOptions = None, is_return_rpc_data_obj=True) -> typing.Union[typing.Any, FunctionResultStatus]:
+        """asyncio 生态下同步调用，仅有部分中间件支持同步调用并阻塞等待返回结果，不依赖AsyncResult + redis作为rpc，例如 http grpc 等待结果"""
+        async_result = await simple_run_in_executor(self.sync_call, msg_dict, task_id,
+                                                    task_options, is_return_rpc_data_obj)
+        return async_result
 
     def check_func_msg_dict(self, msg_dict: dict):
         if self.publish_params_checker and self.publisher_params.should_check_publish_func_params:

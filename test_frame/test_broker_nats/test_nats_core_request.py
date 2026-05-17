@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-测试 NATS_CORE Request-Reply 模式
+测试 NATS_CORE sync_call 模式
 
 验证：
     1. 普通的 publish/push 消费仍然正常
-    2. request() 发送消息后能同步等待消费者响应结果
-    3. 消费者端无需任何修改，框架自动检测 request 消息并响应
+    2. sync_call() 发送消息后能同步等待消费者响应结果
+    3. 消费者端无需任何修改，框架自动检测 sync_call 消息并响应
 """
 import time
-import json
-from funboost import boost, BoosterParams, BrokerEnum
+from funboost import boost, BoosterParams, BrokerEnum, TaskOptions
 
 
 @boost(BoosterParams(
@@ -47,16 +46,16 @@ if __name__ == '__main__':
 
     time.sleep(2)
 
-    print('\n=== 测试1: publisher.request() 同步等待响应 ===')
+    print('\n=== 测试1: publisher.sync_call() 同步等待响应 ===')
     for i in range(5):
-        response_bytes = rpc_add.publisher.request({"x": i, "y": i * 10}, timeout=5)
-        result = json.loads(response_bytes)
-        print(f'  request({i}, {i * 10}) -> 响应: {result}')
+        result = rpc_add.publisher.sync_call({"x": i, "y": i * 10},
+            task_options=TaskOptions(other_extra_params={'nats_reply_timeout': 5}))
+        print(f'  sync_call({i}, {i * 10}) -> 响应: {result}')
 
-    print('\n=== 测试2: publisher.request() 字符串返回值 ===')
-    response_bytes = rpc_echo.publisher.request({"name": "funboost", "greeting": "Hello"}, timeout=5)
-    result = json.loads(response_bytes)
-    print(f'  request(echo) -> 响应: {result}')
+    print('\n=== 测试2: publisher.sync_call() 字符串返回值 ===')
+    result = rpc_echo.publisher.sync_call({"name": "funboost", "greeting": "Hello"},
+        task_options=TaskOptions(other_extra_params={'nats_reply_timeout': 5}))
+    print(f'  sync_call(echo) -> 响应: {result}')
 
     print('\n=== 测试3: 普通 push 仍然正常 ===')
     for i in range(3):
