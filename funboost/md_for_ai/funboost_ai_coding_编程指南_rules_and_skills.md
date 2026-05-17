@@ -69,13 +69,27 @@ tags: []
 - 如果用户需要传递自定义配置，**必须**放在 `BoosterParams(user_options={'my_key': 'value'})` 字典中。
 - 如果用户需要重写拦截逻辑（如格式化消息、限流），**必须**使用 OOP 继承 `AbstractConsumer` 并通过 `consumer_override_cls` 传入。
 
-### 11. AI Agent 应该使用 `python -c "import subprocess; subprocess.run(['python','your_script.py'], timeout=30)"` 启动funboost消费脚本。
+### 11. AI Agent 运行 Funboost 脚本的两种方式
 - **核心问题**：Funboost 消费函数启动后是无限循环拉取消息，程序不会自动结束，AI Agent 运行测试时会被阻塞。
-- **必须主动关闭**：AI Agent 在运行 Funboost 启动消费程序后，**必须**在适当时间后主动强制kill关闭程序，避免长时间阻塞。ai最多50秒钟后就应该强制关闭funboost消费程序。
-- **ai应该使用subprocess启动funboost消费** :
-  ai agent 启动测试funboost程序，请记住永远使用 `python -c "import subprocess; subprocess.run(['python','your_script.py'], timeout=30)"`  , 这样就会自动杀死funboost程序了。 your_script.py 替换成ai需要启动的消费脚本.
-  ai agent 禁止直接使用 `python your_script.py` 启动 funboost程序，以免ai流程被一直阻塞。
-- `subprocess.run(['python','your_script.py'], timeout=30)` 中的 your_script.py 替换成实际需要运行的脚本，timeout可以按需修改，但最大不超过50秒，python替换成真正的python解释器绝对路径。
+- **必须主动关闭**：AI Agent 在运行 Funboost 启动消费程序后，**必须**在适当时间后主动强制关闭程序，避免长时间阻塞。ai最多50秒钟后就应该强制关闭funboost消费程序。
+- **有两种方式运行和检查**：
+  - **第一种方式（CMD/PowerShell + timeout）**：AI 直接用命令行运行，靠 timeout 超时自动终止进程，**脚本里不需要手写 `os._exit`**。AI 通过检查控制台输出内容判断是否符合预期。
+    - **CMD 语法**：`set PYTHONPATH=项目根目录 & cmd /c "timeout /t 30 /nobreak >nul & python script.py"`
+    - **PowerShell 语法**：`$env:PYTHONPATH="项目根目录"; cmd /c "timeout /t 30 /nobreak >nul & python script.py"`
+    - **timeout 时间评估**：AI 应自行评估合理时间，**一般要大于 10 秒**（框架启动需要一定时间）。根据消息个数、qps、并发数量、函数耗时预估：
+      - **默认值**：`concurrent_num=50`，`qps=None`（不限制）
+      - 不设置 qps：`实际吞吐量 ≈ concurrent_num / 函数耗时`
+      - 设置 qps：`实际吞吐量 ≈ min(qps, concurrent_num / 函数耗时)`
+      - `合理时间 ≈ 框架启动时间(5-10秒) + (消息个数 / 实际吞吐量) + 缓冲时间(2-5秒)`
+      - timeout 最大不超过 50 秒。
+  - **第二种方式（推荐，参考 for_ai_run_demo.py）**：脚本开头设置 `LOG_PATH`、`PRINT_WRTIE_FILE_NAME`、`SYS_STD_FILE_NAME` 三个环境变量，脚本末尾写 `time.sleep(休眠秒数); os._exit(66)` 自动退出。AI 运行后主动去读取 `D:\pythonlogs\ai_console_outs` 下生成的 print 和 std 文件来检查输出，**这种方式不需要用 subprocess.run + timeout**。
+    - **运行前必须设置**：`$env:PYTHONPATH="项目根目录"`（PowerShell）或 `set PYTHONPATH=项目根目录`（CMD）
+    - **重要**：每次运行时，`PRINT_WRTIE_FILE_NAME` 和 `SYS_STD_FILE_NAME` 必须设置不同的文件名后缀（如加时间戳或序号），防止 AI 读取到上一次的老日志内容。
+    - **time.sleep 时间评估**：AI 应自行评估合理休眠时间，**一般要大于 10 秒**（框架启动需要一定时间）。根据消息个数、qps、并发数量、函数耗时预估：
+      - **默认值**：`concurrent_num=50`，`qps=None`（不限制）
+      - 不设置 qps：`实际吞吐量 ≈ concurrent_num / 函数耗时`
+      - 设置 qps：`实际吞吐量 ≈ min(qps, concurrent_num / 函数耗时)`
+      - `合理时间 ≈ 框架启动时间(5-10秒) + (消息个数 / 实际吞吐量) + 缓冲时间(2-5秒)`
 
 
 ---

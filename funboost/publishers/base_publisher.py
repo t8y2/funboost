@@ -172,8 +172,28 @@ class AbstractPublisher(metaclass=abc.ABCMeta, ):
         msg['extra'] = new_extra
         extra_params = new_extra
         return msg, msg_function_kw, extra_params, task_id
-
     
+    
+    def push(self, *func_args, **func_kwargs):
+        """
+        简写，只支持传递消费函数的本身参数，不支持task_options参数。
+        类似于 publish和push的关系类似 apply_async 和 delay的关系。前者更强大，后者更简略。
+
+        例如消费函数是
+        def add(x,y):
+            print(x+y)
+
+        publish({"x":1,'y':2}) 和 push(1,2)是等效的。但前者可以传递task_options参数。后者只能穿add函数所接受的入参。
+        :param func_args:
+        :param func_kwargs:
+        :return:
+        """
+        # print(msg_dict)
+        publish_msg_context: PublishMsgContext =  self.generate_msg_context_for_push(
+            *func_args, **func_kwargs)
+        return self._execute_publish(publish_msg_context)
+
+    delay = push  # 那就来个别名吧，两者都可以。
 
     def publish(self, msg: typing.Union[str, dict], task_id=None,
                 task_options: TaskOptions = None):
@@ -317,26 +337,7 @@ The first argument of the push method must be the instance of the class.
                     msg_function_kw=msg_function_kw, extra_params=extra_params, task_id=task_id)
 
 
-    def push(self, *func_args, **func_kwargs):
-        """
-        简写，只支持传递消费函数的本身参数，不支持task_options参数。
-        类似于 publish和push的关系类似 apply_async 和 delay的关系。前者更强大，后者更简略。
 
-        例如消费函数是
-        def add(x,y):
-            print(x+y)
-
-        publish({"x":1,'y':2}) 和 push(1,2)是等效的。但前者可以传递task_options参数。后者只能穿add函数所接受的入参。
-        :param func_args:
-        :param func_kwargs:
-        :return:
-        """
-        # print(msg_dict)
-        publish_msg_context: PublishMsgContext =  self.generate_msg_context_for_push(
-            *func_args, **func_kwargs)
-        return self._execute_publish(publish_msg_context)
-
-    delay = push  # 那就来个别名吧，两者都可以。
 
     @abc.abstractmethod
     def _publish_impl(self, msg: str):

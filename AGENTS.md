@@ -292,14 +292,31 @@ funboost/
 1. **`funboost_all_docs_and_codes.md` 是最高事实标准** — 生成任何代码前，先检索它
 2. **禁止臆造参数名** — `BoosterParams` 的所有字段都是固定的，必须从 `md_for_ai` 中查找正确字段名
 3. **禁止使用 Celery 思维** — 获取上下文用 `fct`，不要用 `self` 或 `bind=True`
-4. **消费启动后不会自动结束** — AI 运行测试必须用 `subprocess.run(['python', 'script.py'], timeout=30)` 自动终止，另一种方式 或者参考funboost/md_for_ai/for_ai_run_demo.py 写代码。
 5. **`push` 和 `publish` 的区别** — `push` 传业务参数，`publish` 传字典 + 框架控制参数
 6. **实例方法的 push 语法特殊** — 必须写成 `ClassName.method.push(obj, args)`，第一个参数传对象实例
 
 ## 十二、 ai自己启动运行脚本的注意事项
-1. ai自己启动运行funboost脚本时候需要参考 funboost/md_for_ai/for_ai_run_demo.py ，里面教了ai怎么退出脚本。怎么检查输出内容是否符合预期。
-   ai需要检查指定的print文件和std文件的内容，以检查代码运行是否符合预期目标。
-2. ai启动funboost任何脚本之前，一定先设置 PYTHONPATH=当前项目根目录
+1. **消费启动后不会自动结束** — 有两种方式运行和检查：
+   - **第一种方式（CMD/PowerShell + timeout）**：AI 直接用命令行运行，靠 timeout 超时自动终止进程，**脚本里不需要手写 `os._exit`**。AI 通过检查控制台输出内容判断是否符合预期。
+     - **CMD 语法**：`set PYTHONPATH=项目根目录 & cmd /c "timeout /t 30 /nobreak >nul & python script.py"`
+     - **PowerShell 语法**：`$env:PYTHONPATH="项目根目录"; cmd /c "timeout /t 30 /nobreak >nul & python script.py"`
+     - **timeout 时间评估**：AI 应自行评估合理时间，**一般要大于 10 秒**（框架启动需要一定时间）。根据消息个数、qps、并发数量、函数耗时预估：
+       - **默认值**：`concurrent_num=50`，`qps=None`（不限制）
+       - 不设置 qps：`实际吞吐量 ≈ concurrent_num / 函数耗时`
+       - 设置 qps：`实际吞吐量 ≈ min(qps, concurrent_num / 函数耗时)`
+       - `合理时间 ≈ 框架启动时间(5-10秒) + (消息个数 / 实际吞吐量) + 缓冲时间(2-5秒)`
+       - timeout 最大不超过 50 秒。
+   - **第二种方式（推荐，参考 for_ai_run_demo.py）**：脚本开头设置 `LOG_PATH`、`PRINT_WRTIE_FILE_NAME`、`SYS_STD_FILE_NAME` 三个环境变量，脚本末尾写 `time.sleep(休眠秒数); os._exit(66)` 自动退出。AI 运行后主动去读取 `D:\pythonlogs\ai_console_outs` 下生成的 print 和 std 文件来检查输出，**这种方式不需要用 subprocess.run + timeout**。
+     - **运行前必须设置**：`$env:PYTHONPATH="项目根目录"`（PowerShell）或 `set PYTHONPATH=项目根目录`（CMD）
+     - **重要**：每次运行时，`PRINT_WRTIE_FILE_NAME` 和 `SYS_STD_FILE_NAME` 必须设置不同的文件名后缀（如加时间戳或序号），防止 AI 读取到上一次的老日志内容。
+     - **time.sleep 时间评估**：AI 应自行评估合理休眠时间，**一般要大于 10 秒**（框架启动需要一定时间）。根据消息个数、qps、并发数量、函数耗时预估：
+       - **默认值**：`concurrent_num=50`，`qps=None`（不限制）
+       - 不设置 qps：`实际吞吐量 ≈ concurrent_num / 函数耗时`
+       - 设置 qps：`实际吞吐量 ≈ min(qps, concurrent_num / 函数耗时)`
+       - `合理时间 ≈ 框架启动时间(5-10秒) + (消息个数 / 实际吞吐量) + 缓冲时间(2-5秒)`
+2. **ai启动funboost任何脚本之前，一定先设置 PYTHONPATH=当前项目根目录**
+   - **CMD 语法**：`set PYTHONPATH=D:\codes\funboost`
+   - **PowerShell 语法**：`$env:PYTHONPATH="D:\codes\funboost"`
 
 ## 十三、 ai 新写代码位置规范
 1. ai如果是被要求修改项目框架，写完后，请写单元测试/回归测试，请放在tests/ai_codes/regression_testing文件件下面，ai要运行和修改相关的测试用例
