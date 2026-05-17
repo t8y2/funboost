@@ -4,12 +4,12 @@ import json
 import logging
 
 os.environ['LOG_PATH'] = 'D:/pythonlogs'
-os.environ['PRINT_WRTIE_FILE_NAME'] = 'queue2queue_test_demo2'
-os.environ['SYS_STD_FILE_NAME'] = 'queue2queue_test_demo2'
+os.environ['PRINT_WRTIE_FILE_NAME'] = 'queue2queue_test_demo3'
+os.environ['SYS_STD_FILE_NAME'] = 'queue2queue_test_demo3'
 
 from funboost import get_publisher, BrokerEnum
 from funboost.core.func_params_model import PublisherParams
-from funboost.contrib.queue2queue import consume_and_push_to_another_queue
+from funboost.contrib.queue2queue_helper import queue2queue
 from funboost.queues.memory_queues_map import PythonQueues
 
 SOURCE_QUEUE = 'test_q2q_source_001'
@@ -22,7 +22,7 @@ for i in range(5):
 
 print(f'Pushed 5 messages to source queue. Source queue size: {source_pub.get_message_count()}')
 
-consume_and_push_to_another_queue(
+queue2queue(
     SOURCE_QUEUE, BrokerEnum.MEMORY_QUEUE,
     TARGET_QUEUE, BrokerEnum.MEMORY_QUEUE,
     log_level=logging.WARNING,
