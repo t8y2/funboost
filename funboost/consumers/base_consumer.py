@@ -222,7 +222,6 @@ class AbstractConsumer(metaclass=abc.ABCMeta, ):
         self._dlx_queue_name = f'{self.queue_name}_dlx'
         self._publisher_of_dlx_queue = None  # 死信队列发布者
 
-        self._do_not_delete_extra_from_msg = False
         self._concurrent_pool = None
 
         self.consumer_identification = f'{nb_log_config_default.computer_name}_{nb_log_config_default.computer_ip}_' \
@@ -691,12 +690,6 @@ class AbstractConsumer(metaclass=abc.ABCMeta, ):
         '''
         return concurrent_info
 
-    def _set_do_not_delete_extra_from_msg(self):
-        """例如从死信队列，把完整的包括extra的消息移到另一个正常队列，不要把extra中的参数去掉
-        queue2queue.py 的 consume_and_push_to_another_queue 中操作了这个，普通用户无需调用这个方法。
-        """
-        self._do_not_delete_extra_from_msg = True
-
     def _frame_custom_record_process_info_func(self, current_function_result_status: FunctionResultStatus, kw: dict):
         pass
 
@@ -949,7 +942,7 @@ class AbstractConsumer(metaclass=abc.ABCMeta, ):
     # noinspection PyProtectedMember
     def _run_consuming_function_with_confirm_and_retry(self, kw: dict, current_retry_times,
                                                        function_result_status: FunctionResultStatus, ):
-        function_only_params = kw['function_only_params'] if self._do_not_delete_extra_from_msg is False else kw['body']
+        function_only_params = kw['function_only_params']
         
         t_start = time.time()
         task_id = kw['body']['extra']['task_id']
@@ -1118,7 +1111,7 @@ class AbstractConsumer(metaclass=abc.ABCMeta, ):
                                                                    function_result_status: FunctionResultStatus, ):
         """虽然和上面有点大面积重复相似，这个是为了asyncio模式的，asyncio模式真的和普通同步模式的代码思维和形式区别太大，
         框架实现兼容async的消费函数很麻烦复杂，连并发池都要单独写"""
-        function_only_params = kw['function_only_params'] if self._do_not_delete_extra_from_msg is False else kw['body']
+        function_only_params = kw['function_only_params']
 
         # noinspection PyBroadException
         t_start = time.time()

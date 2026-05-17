@@ -5,7 +5,7 @@ from multiprocessing import Process
 import logging
 import threading
 
-from funboost import get_publisher, get_consumer, BrokerEnum, wait_for_possible_has_finish_all_tasks_by_conusmer_list
+from funboost import get_publisher, get_consumer, BrokerEnum, wait_for_possible_has_finish_all_tasks_by_conusmer_list, fct
 from funboost.core.func_params_model import PublisherParams, BoosterParams
 
 """ 将队列中的消息移到另一个队列名中，例如把死信队列的消息移到正常队列。"""
@@ -24,14 +24,12 @@ def consume_and_push_to_another_queue(source_queue_name: str, source_broker_kind
     msg_cnt_lock = threading.Lock()
 
     def _task_fun(**kwargs):
-        # print(kwargs)
         nonlocal msg_cnt
-        target_publisher.publish(kwargs)
+        target_publisher.send_msg(fct.full_msg)
         with msg_cnt_lock:
             msg_cnt += 1
 
     source_consumer = get_consumer(boost_params=BoosterParams(queue_name=source_queue_name, broker_kind=source_broker_kind, consuming_function=_task_fun, log_level=log_level))
-    source_consumer._set_do_not_delete_extra_from_msg()
     source_consumer.start_consuming_message()
     if exit_script_when_finish:
         source_consumer.wait_for_possible_has_finish_all_tasks(2)

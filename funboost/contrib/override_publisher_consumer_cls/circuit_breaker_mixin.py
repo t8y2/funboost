@@ -652,7 +652,7 @@ class CircuitBreakerConsumerMixin(AbstractConsumer):
                                                        function_result_status: FunctionResultStatus):
         if self._circuit_breaker_fallback and self._circuit_breaker.state == CircuitState.OPEN:
             kw[self._CB_FALLBACK_FLAG] = True
-            function_only_params = kw['function_only_params'] if self._do_not_delete_extra_from_msg is False else kw['body']
+            function_only_params = kw['function_only_params']
             try:
                 result = self._circuit_breaker_fallback(
                     **self._convert_real_function_only_params_by_conusuming_function_kind(
@@ -681,7 +681,7 @@ class CircuitBreakerConsumerMixin(AbstractConsumer):
                                                                    function_result_status: FunctionResultStatus):
         if self._circuit_breaker_fallback and self._circuit_breaker.state == CircuitState.OPEN:
             kw[self._CB_FALLBACK_FLAG] = True
-            function_only_params = kw['function_only_params'] if self._do_not_delete_extra_from_msg is False else kw['body']
+            function_only_params = kw['function_only_params']
             try:
                 result = self._circuit_breaker_fallback(
                     **self._convert_real_function_only_params_by_conusuming_function_kind(
