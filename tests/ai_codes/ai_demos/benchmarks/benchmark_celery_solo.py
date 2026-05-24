@@ -6,13 +6,13 @@ os.environ['SYS_STD_FILE_NAME'] = 'bm_celery_solo_std.std'
 
 from celery import Celery, Task as CeleryTask
 
-TOTAL = 10000
+TOTAL = 20000
 counter = {'done': 0}
 lock = threading.Lock()
 start = [None]
 results = {}
 
-app = Celery('bm_celery', broker='redis://127.0.0.1:6379/12', backend='redis://127.0.0.1:6379/13')
+app = Celery('bm_celery', broker='redis://127.0.0.1:6379/12')
 app.conf.task_acks_late = True
 app.conf.worker_redirect_stdouts = False
 app.conf.task_ignore_result = True

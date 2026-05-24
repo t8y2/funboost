@@ -6,7 +6,7 @@ from funboost.concurrent_pool.custom_threadpool_executor import ThreadPoolExecut
 
 # 没有使用内置的concurrent.futures.ThreadpoolExecutor线程池，而是使用智能伸缩线程池。
 async_executor_default = ThreadPoolExecutorShrinkAble(500)
-# async_executor_default = FlexibleThreadPool(50)  # 这个不支持future特性
+# async_executor_default = FlexibleThreadPool(50)  # 这个也能支持future特性
 
 
 def get_or_create_event_loop():

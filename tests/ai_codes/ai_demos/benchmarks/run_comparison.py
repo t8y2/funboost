@@ -28,14 +28,14 @@ def run_bench(script_name, label, timeout):
             result[key] = {'count': int(n), 'elapsed': float(t), 'rate': float(r)}
     return result, elapsed
 
-fb_result, fb_total = run_bench('benchmark_funboost_singlethread.py', 'Funboost(单线程)', 300)
-cl_result, cl_total = run_bench('benchmark_celery_solo.py', 'Celery(solo)', 600)
+fb_result, fb_total = run_bench('benchmark_funboost_singlethread.py', 'Funboost(单线程)', 600)
+cl_result, cl_total = run_bench('benchmark_celery_solo.py', 'Celery(solo)', 1200)
 
 print()
 print('=' * 70)
 print('               Funboost vs Celery 性能对比 (Redis, 单线程模式)')
 print('=' * 70)
-print(f'Funboost: 100,000 条 | Celery: 10,000 条')
+print(f'Funboost: 500,000 条 | Celery: 20,000 条')
 print()
 
 for label, r in [('Funboost SINGLE_THREAD', fb_result), ('Celery solo', cl_result)]:

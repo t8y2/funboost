@@ -7,7 +7,7 @@ NATS Core Broker - 基于 NATS Core 的轻量级消息队列
     - 轻量高性能，适用于对延迟敏感但不需要持久化的场景
     - 不支持持久化和消费确认，消息丢失风险由业务层自行处理
     - 支持 Queue Group（消费者组），多个消费者实例可负载均衡分摊消息
-    - 支持 Request-Reply 模式，发布者可同步等待消费者响应结果
+    - 支持 sync_call 模式，发布者可同步等待消费者响应结果
 
 使用方式：
     from funboost import boost, BoosterParams, BrokerEnum
@@ -29,9 +29,14 @@ NATS Core Broker - 基于 NATS Core 的轻量级消息队列
     def broadcast_handler(x, y):
         return x + y
 
-    # Request-Reply 模式：发布者同步等待消费者响应
-    result = process_message.request({"x": 1, "y": 2}, timeout=5)
-    print(result)  # b'3'
+    # sync_call 模式：发布者同步等待消费者响应
+    result = process_message.publisher.sync_call({"x": 1, "y": 2})
+    print(result)  # 3
+
+    # sync_call 模式：自定义超时时间
+    from funboost import TaskOptions
+    result = process_message.publisher.sync_call({"x": 1, "y": 2},
+        task_options=TaskOptions(other_extra_params={'nats_reply_timeout': 10}))
 
     如需持久化+ACK，请使用 BrokerEnum.NATS_JETSTREAM
 
@@ -48,6 +53,9 @@ import nats
 from funboost import register_custom_broker, AbstractConsumer, AbstractPublisher, BrokerEnum
 from funboost.core.broker_kind__exclusive_config_default_define import register_broker_exclusive_config_default
 from funboost.funboost_config_deafult import BrokerConnConfig
+from funboost.core.func_params_model import TaskOptions
+from funboost.core.function_result_status_saver import FunctionResultStatus
+
 
 register_broker_exclusive_config_default(BrokerEnum.NATS_CORE, {
     'nats_url': '',          # 可选，覆盖全局 BrokerConnConfig.NATS_URL
@@ -85,28 +93,25 @@ class NatsPublisher(AbstractPublisher):
         future = asyncio.run_coroutine_threadsafe(_pub(), self._loop)
         future.result(timeout=5)
 
-    def request(self, msg: dict, timeout: float = 5):
-        """
-        NATS Request-Reply 模式：发送消息并同步等待消费者响应。
-
-        消费者端无需任何修改，当消费者检测到消息 extra.other_extra_params._nats_need_reply=True 时，
-        框架会自动将函数返回值响应回去。
-
-        :param msg: 消费函数的入参字典，例如 {"x": 1, "y": 2}
-        :param timeout: 等待响应的超时秒数，默认5秒
-        :return: 消费者响应的原始 bytes 数据
-        :raises nats.errors.TimeoutError: 超时未收到响应
-        """
-        future = asyncio.run_coroutine_threadsafe(self.aio_request(msg, timeout), self._loop)
+    def sync_call(self, msg_dict: dict, task_id=None, task_options=None, is_return_rpc_data_obj=True):
+        future = asyncio.run_coroutine_threadsafe(self.aio_sync_call(msg_dict, task_id, task_options, is_return_rpc_data_obj), self._loop)
+        timeout = (task_options.other_extra_params or {}).get('nats_reply_timeout', 5) if task_options else 5
         return future.result(timeout=timeout + 2)
 
-    async def aio_request(self, msg: dict, timeout: float = 5):
-        msg = dict(msg)
-        msg.setdefault('extra', {}).setdefault('other_extra_params', {})['_nats_need_reply'] = True
-        publish_msg_context = self.generate_msg_context_for_publish(msg)
+    async def aio_sync_call(self, msg_dict: dict, task_id=None, task_options=None, is_return_rpc_data_obj=True):
+        nats_task_options = task_options or TaskOptions()
+        nats_task_options.other_extra_params = nats_task_options.other_extra_params or {}
+        nats_task_options.other_extra_params['_nats_need_reply'] = True
+        timeout = nats_task_options.other_extra_params.get('nats_reply_timeout', 5)
+        publish_msg_context = self.generate_msg_context_for_publish(msg_dict, task_id, nats_task_options)
         data = publish_msg_context.msg_json.encode() if isinstance(publish_msg_context.msg_json, str) else publish_msg_context.msg_json
         response = await self._nc.request(self.queue_name, data, timeout=timeout)
-        return json.loads(response.data) # 可以直接返回真实类型，而不返回bytes 和字符串
+        func_result_status_dict = json.loads(response.data)
+        func_result_status_obj = FunctionResultStatus.parse_status_and_result_to_obj(func_result_status_dict)
+        if is_return_rpc_data_obj:
+            return func_result_status_obj
+        else:
+            return func_result_status_obj.result
 
     def clear(self):
         pass
@@ -140,7 +145,7 @@ class NatsConsumer(AbstractConsumer):
         - queue_group 为空字符串时，所有消费者都会收到每条消息（广播模式）
 
     Request-Reply 模式：
-        - 当发布者使用 request() 发送消息时，NATS 会自动在消息上设置 reply subject
+        - 当发布者使用 sync_call() 发送消息时，NATS 会自动在消息上设置 reply subject
         - 消费者通过框架钩子自动检测并响应，无需用户额外编码
     """
 
@@ -187,11 +192,7 @@ class NatsConsumer(AbstractConsumer):
     async def _nats_reply(self, current_function_result_status, kw: dict):
         if not kw.get('_nats_need_reply'):
             return
-        if current_function_result_status.success:
-            result = current_function_result_status.result
-            response_data = json.dumps(result).encode() if not isinstance(result, bytes) else result
-        else:
-            response_data = json.dumps({'error': 'function failed after retries'}).encode()
+        response_data = json.dumps(current_function_result_status.get_status_dict()).encode()
         nats_msg = kw['_nats_msg']
         try:
             await nats_msg.respond(response_data)

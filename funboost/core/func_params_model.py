@@ -4,6 +4,7 @@ pydantic 模型定义， funboost 使用pydantic 作为重要函数的入参，
 
 BoosterParams 是 funboost 最核心的入参模型，掌握了 BoosterParams 就是掌握了 funboost 的90% 用法。
 
+!!! 每次修改这个文件要修改 funboost/core/func_params_model.pyi 文件
 """
 
 import functools
