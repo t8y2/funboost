@@ -3,6 +3,7 @@ import os, time, sys, threading
 os.environ["LOG_PATH"] = 'd:/pythonlogs/ai_console_outs'
 os.environ['PRINT_WRTIE_FILE_NAME'] = 'bm_celery_solo_print.print'
 os.environ['SYS_STD_FILE_NAME'] = 'bm_celery_solo_std.std'
+# 关键：关闭 stdout/stderr 重定向
 
 from celery import Celery, Task as CeleryTask
 
@@ -16,6 +17,9 @@ app = Celery('bm_celery', broker='redis://127.0.0.1:6379/12')
 app.conf.task_acks_late = True
 app.conf.worker_redirect_stdouts = False
 app.conf.task_ignore_result = True
+
+
+
 
 @app.task(bind=True, name='bm_celery_task', max_retries=0)
 def bench_task(self, msg_id: int):

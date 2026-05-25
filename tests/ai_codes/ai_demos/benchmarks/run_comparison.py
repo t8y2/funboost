@@ -1,3 +1,10 @@
+"""
+运行测试funboost 和celery的发布和消费吞吐速率对比，
+
+测试用的几乎是没逻辑的空函数，这就是阿姆达尔定律——框架开销占业务耗时的比例趋近于零，所有框架看起来都一样。
+所以测框架性能必须让业务函数尽量空，才能剥离出框架本身的调度开销差
+"""
+
 import subprocess, sys, os, time
 
 SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))

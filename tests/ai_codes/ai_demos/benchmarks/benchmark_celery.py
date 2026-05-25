@@ -24,7 +24,6 @@ start_time = [None]
 celery_app = Celery(
     'benchmark',
     broker='redis://127.0.0.1:6379/12',
-    backend='redis://127.0.0.1:6379/13',
 )
 celery_app.conf.task_acks_late = True
 celery_app.conf.worker_redirect_stdouts = False

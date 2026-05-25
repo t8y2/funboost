@@ -189,3 +189,18 @@ client = SimpleSpiderClient(proxy_getter_list=[abuyun_proxy])
 真正的核心竞争力——分布式调度、QPS 控频、自动重试、断点续传——完全由 **`Funboost`** 核心引擎驱动。
 
 我们希望你的爬虫代码是平铺直叙的函数，而不是层层嵌套的回调。
+
+### 🧩 无限扩展能力
+
+`funspider` 不内置浏览器渲染，但它是纯粹的 Python 函数，**可以导入 PyPI 上任何第三方包**，包括但不限于：
+
+| 场景 | 可用的 PyPI 三方包 |
+|------|-------------------|
+| 浏览器渲染 | `selenium`、`playwright`、`pyppeteer`、`splash` |
+| 验证码识别 | `ddddocr`、`pytesseract`、付费打码平台 SDK |
+| 图像处理 | `Pillow`、`opencv-python` |
+| NLP/文本 | `jieba`、`transformers`、`openai` |
+| 反反爬 | `curl_cffi`（TLS 指纹伪装）、`tls_client` |
+| 数据清洗 | `pandas`、`numpy` |
+
+在 funboost 函数内直接 `from selenium import webdriver` 或 `from playwright.sync_api import sync_playwright` 即可，**没有任何框架限制**。funspider 不强绑定任何浏览器方案，你始终可以选择最适合当前任务的 PyPI 三方库。
