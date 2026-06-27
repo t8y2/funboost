@@ -1,0 +1,13 @@
+D:\ProgramData\miniconda3\envs\py39b\lib\site-packages\nameko\testing\pytest.py:94: DeprecationWarning: 
+Eventlet is deprecated. It is currently being maintained in bugfix mode, and
+we strongly recommend against using it for new projects.
+
+If you are already using Eventlet, we recommend migrating to a different
+framework.  For more detail see
+https://eventlet.readthedocs.io/en/latest/asyncio/migration.html
+
+  from eventlet import patcher
+D:\ProgramData\miniconda3\envs\py39b\lib\site-packages\nameko\testing\pytest.py:101: UserWarning: For versions after 2.13.0, it is recommended to use the `nameko test` cli command. Nameko's pytest plugin no longer applies the eventlet monkeypatch as a pytest hook. This was removed to prevent polluting the environment in case a monkeypatch was not desired. 
+If you need to invoke pytest directly instead of using `nameko test`, you can install the pytest-eventlet plugin, which just performs the automatic monkeypatching that was removed from Nameko. Alternatively you can apply the monkeypatch manually in your conftest.py file.
+This warning can be suppressed with the --suppress-nameko-eventlet-notification pytest option.
+  warnings.warn(

@@ -56,6 +56,19 @@ if get_pydantic_major_version() == 1:
         def to_dict(self):
             return self.dict()
 
+        def copy_model(self,):
+            """兼容 pydantic v2 的 model_copy 方法"""
+            return self.copy()
+
+        @staticmethod
+        def _get_model_fields(model_type: typing.Type[BaseModel]):
+            """兼容 pydantic v1 (__fields__) 和 v2 (model_fields)"""
+            return getattr(model_type, '__fields__', {})
+
+
+        
+
+
 elif get_pydantic_major_version() >= 2:
     from pydantic import ConfigDict
 
@@ -72,6 +85,15 @@ elif get_pydantic_major_version() >= 2:
 
         def to_dict(self):
             return self.model_dump()
+
+        def copy_model(self,):
+            """兼容 pydantic v2 的 model_copy 方法"""
+            return self.model_copy()
+
+        @staticmethod
+        def _get_model_fields(model_type: typing.Type[BaseModel]):
+            """兼容 pydantic v1 (__fields__) 和 v2 (model_fields)"""
+            return getattr(model_type, 'model_fields', {})
 
 
 # 统一兼容 root_validator / model_validator 的装饰器
@@ -215,8 +237,9 @@ class BaseJsonAbleModel(CompatibleModel):
     @staticmethod
     def init_by_another_model(model_type: typing.Type[BaseModel], modelx: BaseModel):
         init_dict = {}
+        model_fields = CompatibleModel._get_model_fields(model_type)
         for k, v in modelx.to_dict().items():
-            if k in model_type.__fields__.keys():
+            if k in model_fields.keys():
                 init_dict[k] = v
         return model_type(**init_dict)
 

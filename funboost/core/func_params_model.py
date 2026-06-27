@@ -306,8 +306,8 @@ class BoosterParams(BaseJsonAbleModel):
         
         # 禁止子类添加 BoosterParams 中不存在的字段，主要是担心用户继承的子类中拼写错误，本以为自己是覆盖父类字段默认值，实际却变成了新增了字段。
         # 兼容 Pydantic v1 和 v2 获取所有字段
-        self_fields = self.model_fields.keys() if hasattr(self, 'model_fields') else self.__fields__.keys()
-        parent_fields = BoosterParams.model_fields.keys() if hasattr(BoosterParams, 'model_fields') else BoosterParams.__fields__.keys()
+        self_fields = self._get_model_fields(self.__class__)
+        parent_fields = self._get_model_fields(BoosterParams)
         for k in self_fields:
             if k not in parent_fields:
                 raise ValueError(f'{self.__class__.__name__} 的字段新增了父类 BoosterParams 不存在的字段 "{k}"')  # 使 BoosterParams的子类,不能增加字段,只能覆盖字段.

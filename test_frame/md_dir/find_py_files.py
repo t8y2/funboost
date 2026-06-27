@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+# 1111
 def scan_files(root_dir, excluded_dirs,specify_files):
     all_codesr_str = '# funboost 项目代码文件大全 \n'
     for f in specify_files:
