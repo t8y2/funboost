@@ -4,7 +4,7 @@
 """
 
 
-from funboost import boost, BrokerEnum,ConcurrentModeEnum,ctrl_c_recv
+from funboost import boost, BrokerEnum,ConcurrentModeEnum,enable_ctrl_c_quit_on_windows
 import asyncio
 import time
 import aiohttp
@@ -82,4 +82,4 @@ if __name__ == '__main__':
     loop.run_forever()
 
 
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

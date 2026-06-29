@@ -313,7 +313,7 @@ funboost/
 │   ├── time_util.py               # 时间工具
 │   ├── uuid7.py                   # UUID7
 │   ├── system_util.py             # 系统信息
-│   ├── ctrl_c_end.py              # ctrl_c_recv
+│   ├── ctrl_c_end.py              # enable_ctrl_c_quit_on_windows
 │   ├── block_exit.py              # 阻止退出
 │   ├── task_dispatcher.py         # LocalFunctionsDispatcher
 │   ├── bulk_operation.py          # 批量Mongo/ES/Redis写入
@@ -945,7 +945,7 @@ fct.logger               # 当前任务的logger
 
 | 文件 | 核心 | 说明 |
 |------|------|------|
-| `utils/ctrl_c_end.py` | `ctrl_c_recv()` | 阻塞主线程，Ctrl+C优雅退出 |
+| `utils/ctrl_c_end.py` | `enable_ctrl_c_quit_on_windows()` | 阻塞主线程，Ctrl+C优雅退出 |
 | `utils/block_exit.py` | — | 阻止进程退出 |
 | `utils/paramiko_util.py` | `ParamikoFolderUploader` | SSH文件夹上传 |
 | `utils/bulk_operation.py` | — | 批量Mongo/ES/Redis写入 |
@@ -1128,7 +1128,7 @@ start_funboost_web_manager()   # 启动Web管理界面
 | **52** | `BrokerConnConfig`, `FunboostCommonConfig` | `funboost_config_deafult` |
 | **53** | `BoosterDiscovery` | `core.cli.discovery_boosters` |
 | **56** | `run_forever` | `core.helper_funs` (= `block_python_main_thread_exit`) |
-| **58** | `ctrl_c_recv` | `utils.ctrl_c_end` |
+| **58** | `enable_ctrl_c_quit_on_windows` | `utils.ctrl_c_end` |
 | **59** | `RedisMixin` | `utils.redis_manager` |
 | **60** | `show_current_threads_num` | `concurrent_pool.custom_threadpool_executor` |
 | **62** | `funboost_current_task`, `fct`, `get_current_taskid` | `core.current_task` |

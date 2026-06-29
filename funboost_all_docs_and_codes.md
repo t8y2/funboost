@@ -78,10 +78,10 @@
    6. **消费外部 JSON 的幻觉**：若要消费 Java/Go 发布的带有多余字段的 JSON，**严禁**定义 `def task_fun(msg):` 企图接收整个字典。**必须**定义为 `def task_fun(**kwargs):` 并设置 `should_check_publish_func_params=False`。
    7. **重复造轮子/改源码的幻觉**：若用户要提供 HTTP 发版/查结果接口，**严禁手搓 FastAPI 路由**，必须直接 `app.include_router(fastapi_router)`；若要修改消费逻辑，**严禁提议改 funboost 源码**，必须让用户通过 `consumer_override_cls` 传参！
    8. **老式语法的幻觉**：绝对禁止生成 `@boost('queue_name')` 这种过时语法。**永远**使用 Pydantic 模型传参：`@boost(BoosterParams(queue_name='xxx'))`。
-   9. 9. **`ctrl_c_recv()` 的幻觉**：  
-      严禁认为 `ctrl_c_recv()` 的作用是“优雅退出”或“防止程序结束”。实际上，不加它程序也会一直运行。  
+   9. 9. **`enable_ctrl_c_quit_on_windows()` 的幻觉**：  
+      严禁认为 `enable_ctrl_c_quit_on_windows()` 的作用是“优雅退出”或“防止程序结束”。实际上，不加它程序也会一直运行。  
       真实作用：在 Windows 下如果不加这行代码，按 `Ctrl+C` **无法停止程序**。加上后即可正常退出。详细原理和用法见教程 **6.25b 章节**。  
-      **AI 生成启动脚本时，应在 `func.consume()` 后默认加上 `ctrl_c_recv()`**。
+      **AI 生成启动脚本时，应在 `func.consume()` 后默认加上 `enable_ctrl_c_quit_on_windows()`**。
 
 - 🧠 **AI 回答问题的思考与检索优先级**：
    1. 用户问“怎么使用某个功能” → 优先查 **教程示例 (`source/articles/`)** 以及 **`Rules & Skills`**。
@@ -172,7 +172,7 @@
 - `from funboost.funboost_config_deafult import FunboostCommonConfig`
 - `from funboost.core.cli.discovery_boosters import BoosterDiscovery`
 - `from funboost.core.helper_funs import run_forever`
-- `from funboost.utils.ctrl_c_end import ctrl_c_recv`
+- `from funboost.utils.ctrl_c_end import enable_ctrl_c_quit_on_windows`
 - `from funboost.utils.redis_manager import RedisMixin`
 - `from funboost.concurrent_pool.custom_threadpool_executor import show_current_threads_num`
 - `from funboost.core.current_task import funboost_current_task`
@@ -207,7 +207,7 @@
 - `from funboost.constant import FunctionKind`
 - `from funboost.constant import StrConst`
 - `from funboost.utils.class_utils import ClsHelper`
-- `from funboost.utils.ctrl_c_end import ctrl_c_recv`
+- `from funboost.utils.ctrl_c_end import enable_ctrl_c_quit_on_windows`
 - `from funboost.core.loggers import flogger`
 - `from funboost.core.loggers import develop_logger`
 - `from funboost.core.loggers import logger_prompt`
@@ -845,7 +845,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `from funboost.constant import RedisKeys`
 - `from funboost import boost`
 - `from funboost import BrokerEnum`
-- `from funboost import ctrl_c_recv`
+- `from funboost import enable_ctrl_c_quit_on_windows`
 - `from funboost import BoosterParams`
 - `from funboost import ApsJobAdder`
 
@@ -3305,12 +3305,12 @@ Entry Points (not imported by other project files):
   行425: ### 6.23.b 作者为什么不开发 pip 选装方式？例如实现选装 pip install funboost[rabbitmq]
   行431: ## 6.24 funboost 从消息队列获取多少条消息？有没有负载均衡？
   行453: ## 6.25 funboost 消费启动后，按 ctrl+c 无法结束代码？
-  行459: ## 6.25b `ctrl_c_recv` 到底要不要加？
+  行459: ## 6.25b `enable_ctrl_c_quit_on_windows` 到底要不要加？
   行463: ### 6.25b.1 核心结论
   行468: ### 6.25b.2 效果对比
-  行476: ### 6.25b.3 ctrl_c_recv 的源码本质
+  行476: ### 6.25b.3 enable_ctrl_c_quit_on_windows 的源码本质
   行492: ### 6.25b.4 最终结论
-  行499: ## 6.25b.5 `ctrl_c_recv` 和 apscheduler 的定时器之间的关系
+  行499: ## 6.25b.5 `enable_ctrl_c_quit_on_windows` 和 apscheduler 的定时器之间的关系
   行501: ### 6.25b.5.1 APScheduler 的两种原生定时器
   行506: ### 6.25b.5.2 早期版本（2025 年之前）的问题
   行510: ### 6.25b.5.3 2025 年之后的改进
@@ -3482,7 +3482,7 @@ from funboost import (
     ConcurrentModeEnum,     # 并发模式枚举
     TaskOptions, # 优先级/延时配置
     ApsJobAdder,            # 定时任务添加器
-    ctrl_c_recv,            # 阻塞主线程工具
+    enable_ctrl_c_quit_on_windows,            # 阻塞主线程工具
     fct,                    # 上下文对象 (Funboost Current Task)
     BoostersManager,        # 消费者管理器 (用于分组启动)
     AsyncResult,            # 同步编程生态的异步结果对象
@@ -3729,7 +3729,7 @@ if __name__ == '__main__':
 
 
     
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 `````
 
 --- **end of file: examples/example_all_usage.py** (project: funboost_docs) --- 
@@ -3745,7 +3745,7 @@ Funboost 最最基础示例
 演示如何使用 @boost 装饰器创建分布式任务队列
 """
 import time
-from funboost import boost, BrokerEnum, BoosterParams,ctrl_c_recv
+from funboost import boost, BrokerEnum, BoosterParams,enable_ctrl_c_quit_on_windows
 
 
 # 示例1: 最简单的任务函数
@@ -3773,7 +3773,7 @@ if __name__ == '__main__':
         
         
     add_task.consume()
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 `````
 
 --- **end of file: examples/example_easy.py** (project: funboost_docs) --- 
@@ -4900,7 +4900,7 @@ if __name__ == '__main__':
 
 ```python
 import time
-from funboost import boost, BrokerEnum, BoosterParams, ctrl_c_recv, ConcurrentModeEnum, ApsJobAdder
+from funboost import boost, BrokerEnum, BoosterParams, enable_ctrl_c_quit_on_windows, ConcurrentModeEnum, ApsJobAdder
 
 # 1. 定义公共配置基类，减少重复代码
 class MyBoosterParams(BoosterParams):
@@ -4959,8 +4959,8 @@ if __name__ == '__main__':
         trigger='interval', seconds=30, args=(4, 6, 10), id='job2'
     )
 
-    # ctrl_c_recv使windows能ctrl+c退出，这是非必须的，不加也可以。
-    ctrl_c_recv()
+    # enable_ctrl_c_quit_on_windows使windows能ctrl+c退出，这是非必须的，不加也可以。
+    enable_ctrl_c_quit_on_windows()
 ```
 
 > **🧠 设计哲学**
@@ -6211,7 +6211,7 @@ import time
 from pathlib import Path
 
 
-from funboost import boost, BoosterParams, ctrl_c_recv, BrokerEnum
+from funboost import boost, BoosterParams, enable_ctrl_c_quit_on_windows, BrokerEnum
 
 
 # 测试目录
@@ -6326,7 +6326,7 @@ if __name__ == "__main__":
     time.sleep(5)
     create_test_files()
     manual_push()
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 
 
 
@@ -6631,7 +6631,7 @@ import asyncio
 import time  
 import random  
 
-from funboost import boost, FunctionResultStatusPersistanceConfig, BoosterParams,BrokerEnum,ctrl_c_recv,ConcurrentModeEnum  
+from funboost import boost, FunctionResultStatusPersistanceConfig, BoosterParams,BrokerEnum,enable_ctrl_c_quit_on_windows,ConcurrentModeEnum  
 from funboost.funweb.app import start_funboost_web_manager  
 
 
@@ -6684,7 +6684,7 @@ if __name__ == '__main__':
         f2.push(i)  
         aio_f3.push(i)  
         time.sleep(1)  
-    ctrl_c_recv()  
+    enable_ctrl_c_quit_on_windows()  
     
 
     
@@ -11867,31 +11867,31 @@ def heavy_task(x):
 
 ## 6.25 funboost 消费启动后，按 ctrl+c 无法结束代码？
 
-funboost 消费者启动后是永久运行的守护线程，在 Windows 下按 Ctrl+C 默认无法停止进程。可以通过在末尾加 `ctrl_c_recv()` 来响应 Ctrl+C 退出，但这不是必须的——关闭终端窗口或 kill 进程同样可以停止。funboost 依靠 MQ 确认消费机制保障消息不丢，无需"优雅退出"。
+funboost 消费者启动后是永久运行的守护线程，在 Windows 下按 Ctrl+C 默认无法停止进程。可以通过在末尾加 `enable_ctrl_c_quit_on_windows()` 来响应 Ctrl+C 退出，但这不是必须的——关闭终端窗口或 kill 进程同样可以停止。funboost 依靠 MQ 确认消费机制保障消息不丢，无需"优雅退出"。
 
 ---
 
-## 6.25b `ctrl_c_recv` 到底要不要加？
+## 6.25b `enable_ctrl_c_quit_on_windows` 到底要不要加？
 
-ctrl_c_recv 的源码很简单——它不是"优雅退出"（没有等待任务完成、没有清理资源）。funboost 依靠 MQ 确认消费防丢消息，不需要优雅退出。
+enable_ctrl_c_quit_on_windows 的源码很简单——它不是"优雅退出"（没有等待任务完成、没有清理资源）。funboost 依靠 MQ 确认消费防丢消息，不需要优雅退出。
 
 ### 6.25b.1 核心结论
 
-- **不加 `ctrl_c_recv()`**：程序照样永久运行、正常消费，但按 Ctrl+C **无法停止**（Windows），只能关窗口或 kill 进程。
-- **加了 `ctrl_c_recv()`**：按 Ctrl+C 即可停止。
+- **不加 `enable_ctrl_c_quit_on_windows()`**：程序照样永久运行、正常消费，但按 Ctrl+C **无法停止**（Windows），只能关窗口或 kill 进程。
+- **加了 `enable_ctrl_c_quit_on_windows()`**：按 Ctrl+C 即可停止。
 
 ### 6.25b.2 效果对比
 
-| 操作 | 加 ctrl_c_recv | 不加 ctrl_c_recv |
+| 操作 | 加 enable_ctrl_c_quit_on_windows | 不加 enable_ctrl_c_quit_on_windows |
 | :--- | :--- | :--- |
 | 启动后 | 持续运行，打印日志 | **同样持续运行，打印日志** |
 | 按 Ctrl+C | 程序立即退出 | **毫无反应** |
 | 关闭终端窗口 | 程序结束 | 程序结束 |
 
-### 6.25b.3 ctrl_c_recv 的源码本质
+### 6.25b.3 enable_ctrl_c_quit_on_windows 的源码本质
 
 ```python
-def ctrl_c_recv(confirmation_count=1):
+def enable_ctrl_c_quit_on_windows(confirmation_count=1):
     for i in range(confirmation_count):
         while 1:
             try:
@@ -11906,12 +11906,12 @@ def ctrl_c_recv(confirmation_count=1):
 
 ### 6.25b.4 最终结论
 
-- 不加 `ctrl_c_recv()` 的最大坏处：无法用 Ctrl+C 方便地停止程序，只能关窗口或杀进程。
+- 不加 `enable_ctrl_c_quit_on_windows()` 的最大坏处：无法用 Ctrl+C 方便地停止程序，只能关窗口或杀进程。
 - 建议：在所有需要交互式停止的 funboost 脚本末尾加上这一行。
 
 ---
 
-## 6.25b.5 `ctrl_c_recv` 和 apscheduler 的定时器之间的关系
+## 6.25b.5 `enable_ctrl_c_quit_on_windows` 和 apscheduler 的定时器之间的关系
 
 ### 6.25b.5.1 APScheduler 的两种原生定时器
 
@@ -11920,7 +11920,7 @@ def ctrl_c_recv(confirmation_count=1):
 
 ### 6.25b.5.2 早期版本（2025 年之前）的问题
 
-Funboost 早期继承 `BackgroundScheduler`，其工作线程是守护线程（`_daemon=True`）。主线程结束后守护线程被强杀，触发 `RuntimeError: cannot schedule new futures after interpreter shutdown`。所以早期文档强调必须加 `ctrl_c_recv()` 或 `while 1: time.sleep(10)` 让主线程活着。
+Funboost 早期继承 `BackgroundScheduler`，其工作线程是守护线程（`_daemon=True`）。主线程结束后守护线程被强杀，触发 `RuntimeError: cannot schedule new futures after interpreter shutdown`。所以早期文档强调必须加 `enable_ctrl_c_quit_on_windows()` 或 `while 1: time.sleep(10)` 让主线程活着。
 
 ### 6.25b.5.3 2025 年之后的改进
 
@@ -11928,7 +11928,7 @@ Funboost 早期继承 `BackgroundScheduler`，其工作线程是守护线程（`
 
 ### 6.25b.5.4 三种定时器的行为对比
 
-| 定时器类型 | 是否阻塞 | 线程类型 | 不加 ctrl_c_recv 会怎样？ |
+| 定时器类型 | 是否阻塞 | 线程类型 | 不加 enable_ctrl_c_quit_on_windows 会怎样？ |
 | :--- | :--- | :--- | :--- |
 | 原生 `BlockingScheduler` | 阻塞 | - | start() 后卡住，没有这个问题 |
 | 原生 `BackgroundScheduler` | 非阻塞 | 守护线程 | 主线程结束后报 RuntimeError |
@@ -11936,8 +11936,8 @@ Funboost 早期继承 `BackgroundScheduler`，其工作线程是守护线程（`
 
 ### 6.25b.5.5 总结
 
-- 2025 年之后的 Funboost 使用定时任务**可以不加** `ctrl_c_recv()`
-- 旧版本建议加上 `ctrl_c_recv()` 或 `while 1: time.sleep(10)`
+- 2025 年之后的 Funboost 使用定时任务**可以不加** `enable_ctrl_c_quit_on_windows()`
+- 旧版本建议加上 `enable_ctrl_c_quit_on_windows()` 或 `while 1: time.sleep(10)`
 - 新版本中加上也没有副作用，还能方便用 Ctrl+C 停止
 
 ---
@@ -13675,7 +13675,7 @@ your_utils:    用户自己的业务工具(加密/签名等)         → decrypt
 from typing import Optional
 
 # 分别从各自包导入，体现"四组件混合"
-from funboost import boost, BoosterParams, BrokerEnum, BoostersManager, ctrl_c_recv
+from funboost import boost, BoosterParams, BrokerEnum, BoostersManager, enable_ctrl_c_quit_on_windows
 from boost_spider import RequestClient, SpiderResponse
 from funboost.contrib.funspider import SpiderItem, Field, create_engine
 from your_utils import decrypt_sign, encrypt_token  # 用户自己的工具函数
@@ -13784,7 +13784,7 @@ if __name__ == '__main__':
         crawl_list.push(cat_id)
 
     # ★ 阻塞主线程，保持进程运行，Ctrl+C 优雅退出
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 
 ```
 
@@ -14440,10 +14440,10 @@ boost_spider 的分布式调度能力全部来自 funboost。关于 QPS 控频�
    6. **消费外部 JSON 的幻觉**：若要消费 Java/Go 发布的带有多余字段的 JSON，**严禁**定义 `def task_fun(msg):` 企图接收整个字典。**必须**定义为 `def task_fun(**kwargs):` 并设置 `should_check_publish_func_params=False`。
    7. **重复造轮子/改源码的幻觉**：若用户要提供 HTTP 发版/查结果接口，**严禁手搓 FastAPI 路由**，必须直接 `app.include_router(fastapi_router)`；若要修改消费逻辑，**严禁提议改 funboost 源码**，必须让用户通过 `consumer_override_cls` 传参！
    8. **老式语法的幻觉**：绝对禁止生成 `@boost('queue_name')` 这种过时语法。**永远**使用 Pydantic 模型传参：`@boost(BoosterParams(queue_name='xxx'))`。
-   9. 9. **`ctrl_c_recv()` 的幻觉**：  
-      严禁认为 `ctrl_c_recv()` 的作用是“优雅退出”或“防止程序结束”。实际上，不加它程序也会一直运行。  
+   9. 9. **`enable_ctrl_c_quit_on_windows()` 的幻觉**：  
+      严禁认为 `enable_ctrl_c_quit_on_windows()` 的作用是“优雅退出”或“防止程序结束”。实际上，不加它程序也会一直运行。  
       真实作用：在 Windows 下如果不加这行代码，按 `Ctrl+C` **无法停止程序**。加上后即可正常退出。详细原理和用法见教程 **6.25b 章节**。  
-      **AI 生成启动脚本时，应在 `func.consume()` 后默认加上 `ctrl_c_recv()`**。
+      **AI 生成启动脚本时，应在 `func.consume()` 后默认加上 `enable_ctrl_c_quit_on_windows()`**。
 
 - 🧠 **AI 回答问题的思考与检索优先级**：
    1. 用户问“怎么使用某个功能” → 优先查 **教程示例 (`source/articles/`)** 以及 **`Rules & Skills`**。
@@ -14534,7 +14534,7 @@ boost_spider 的分布式调度能力全部来自 funboost。关于 QPS 控频�
 - `from funboost.funboost_config_deafult import FunboostCommonConfig`
 - `from funboost.core.cli.discovery_boosters import BoosterDiscovery`
 - `from funboost.core.helper_funs import run_forever`
-- `from funboost.utils.ctrl_c_end import ctrl_c_recv`
+- `from funboost.utils.ctrl_c_end import enable_ctrl_c_quit_on_windows`
 - `from funboost.utils.redis_manager import RedisMixin`
 - `from funboost.concurrent_pool.custom_threadpool_executor import show_current_threads_num`
 - `from funboost.core.current_task import funboost_current_task`
@@ -14569,7 +14569,7 @@ boost_spider 的分布式调度能力全部来自 funboost。关于 QPS 控频�
 - `from funboost.constant import FunctionKind`
 - `from funboost.constant import StrConst`
 - `from funboost.utils.class_utils import ClsHelper`
-- `from funboost.utils.ctrl_c_end import ctrl_c_recv`
+- `from funboost.utils.ctrl_c_end import enable_ctrl_c_quit_on_windows`
 - `from funboost.core.loggers import flogger`
 - `from funboost.core.loggers import develop_logger`
 - `from funboost.core.loggers import logger_prompt`
@@ -15207,7 +15207,7 @@ funboost也能直接支持@boost加到 类方法和实例方法上（但这需�
 - `from funboost.constant import RedisKeys`
 - `from funboost import boost`
 - `from funboost import BrokerEnum`
-- `from funboost import ctrl_c_recv`
+- `from funboost import enable_ctrl_c_quit_on_windows`
 - `from funboost import BoosterParams`
 - `from funboost import ApsJobAdder`
 
@@ -17460,7 +17460,7 @@ def rules_consume_and_context():
     func.consume() 基础启动；func.multi_process_consume(n) / func.mp_consume(n) 多进程叠加并发；
     BoostersManager.consume_group("group_name") 分组启动。
     连续启动 func1.consume(); func2.consume()，不要用 threading.Thread 包装。
-    ctrl_c_recv() 阻塞主线程让 Ctrl+C 能停止。
+    enable_ctrl_c_quit_on_windows() 阻塞主线程让 Ctrl+C 能停止。
     
     ### 4. 上下文获取 (禁止 Celery 思维)
     禁止在参数中加 self/bind=True。必须 from funboost import fct。
@@ -17501,7 +17501,7 @@ def skill_hello_world():
     ## Skill 0: Hello World 任务 (零配置/本地单进程)
     使用 MEMORY_QUEUE，无需安装中间件。
     @boost(BrokerParams(queue_name="hello_queue", broker_kind=BrokerEnum.MEMORY_QUEUE, qps=2))
-    func.push(word="funboost_0"); func.consume(); ctrl_c_recv()
+    func.push(word="funboost_0"); func.consume(); enable_ctrl_c_quit_on_windows()
     """
 
 def skill_standard_task():
@@ -17509,7 +17509,7 @@ def skill_standard_task():
     ## Skill 1: 标准后台任务
     @boost(BrokerParams(queue_name="my_standard_task", broker_kind=BrokerEnum.REDIS_ACK_ABLE,
            concurrent_num=50, qps=10, max_retry_times=3))
-    func.push(user_id=i, action="login"); func.mp_consume(2); ctrl_c_recv()
+    func.push(user_id=i, action="login"); func.mp_consume(2); enable_ctrl_c_quit_on_windows()
     """
 
 def skill_rpc():
@@ -17690,7 +17690,7 @@ def source_code_structure():
     funweb/ — Web管理界面: start_funboost_web_manager
     queues/ — 队列实现: PythonQueues, FastestMemQueue, SqlaQueue, PeeweeQueue, PostgresQueue
     
-    utils/ — 工具: redis_manager(RedisMixin), ctrl_c_end(ctrl_c_recv), 
+    utils/ — 工具: redis_manager(RedisMixin), ctrl_c_end(enable_ctrl_c_quit_on_windows), 
              decorators(run_many_times/keep_circulating/synchronized),
              func_timeout(函数超时控制), notify_util(Notifier)
     """
@@ -17879,7 +17879,7 @@ def public_api_exports():
     ApsJobAdder, funboost_aps_scheduler — timing_job
     fastapi_router — faas/fastapi_adapter
     flask_blueprint — faas/flask_adapter
-    ctrl_c_recv — utils/ctrl_c_end
+    enable_ctrl_c_quit_on_windows — utils/ctrl_c_end
     RedisMixin — utils/redis_manager
     MemoryFunboostPool, FunboostPool, FunboostPoolPickleFunc — core/funboost_pool
     RemoteTaskKiller — core/kill_remote_task
@@ -17952,7 +17952,7 @@ os.environ['SYS_STD_FILE_NAME'] = 'ai自己去取个合适的唯一的名字std�
 import nb_log  # 导入 nb_log ，如果导入了funboost，就不需要亲自导入nb_log
 
 import time
-from funboost import boost, BrokerEnum, BoosterParams,ctrl_c_recv
+from funboost import boost, BrokerEnum, BoosterParams,enable_ctrl_c_quit_on_windows
 
 
 # 示例1: 最简单的任务函数
@@ -18022,7 +18022,7 @@ tags: []
 - 基础启动：`func.consume()`。
 - 多进程+多线程叠加并发（性能炸裂）：`func.multi_process_consume(n)` 或简写 `func.mp_consume(n)`。
 - 分组启动：`BoostersManager.consume_group("group_name")` （BoosterParams 里需要先设置 booster_group 的值）。
-- 启动代码的末尾，如果主线程没有其他阻塞任务，**建议**使用 `from funboost import ctrl_c_recv; ctrl_c_recv()` 阻止主线程退出。
+- 启动代码的末尾，如果主线程没有其他阻塞任务，**建议**使用 `from funboost import enable_ctrl_c_quit_on_windows; enable_ctrl_c_quit_on_windows()` 阻止主线程退出。
 - 连续启动多个函数.consume()消费：`func1.consume(); func2.consume()`， 不要一厢情愿的使用子线程来启动消费，`func1.consume()`不会阻塞主线程。 
   不要使用 `threading.Thread(target=func1.consume).start()` 和  `threading.Thread(target=func2.consume).start()` 来连续启动消费，这样做是多此一举，funboost框架很人性化，早就从框架层面让用户可以避免这样写代码了。
   
@@ -18096,7 +18096,7 @@ tags: []
 **模板**：
 ```python
 import time
-from funboost import boost, BoosterParams, BrokerEnum, ctrl_c_recv
+from funboost import boost, BoosterParams, BrokerEnum, enable_ctrl_c_quit_on_windows
 
 @boost(BoosterParams(
     queue_name="hello_queue",
@@ -18117,7 +18117,7 @@ if __name__ == '__main__':
     hello_task.consume() 
     
     # 3. 阻塞主线程
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 ```
 
 ### Skill 1: 创建标准的基础后台任务 (含高阶控制)
@@ -18125,7 +18125,7 @@ if __name__ == '__main__':
 **模板**：
 ```python
 import time
-from funboost import boost, BoosterParams, BrokerEnum, ctrl_c_recv
+from funboost import boost, BoosterParams, BrokerEnum, enable_ctrl_c_quit_on_windows
 
 @boost(BoosterParams(
     queue_name="my_standard_task",
@@ -18146,7 +18146,7 @@ if __name__ == '__main__':
     
     # 启动消费 (多进程叠加多线程)
     my_task.mp_consume(2)  # mp_consume(n) 是 multi_process_consume(n) 的简写
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 ```
 
 ### Skill 2: 实现 RPC 模式（发布后等待结果）
@@ -18176,7 +18176,7 @@ if __name__ == '__main__':
 **场景**：用户需要每天定时、或每隔几秒钟执行一次任务。
 **模板**：
 ```python
-from funboost import boost, BoosterParams, BrokerEnum, ApsJobAdder, ctrl_c_recv
+from funboost import boost, BoosterParams, BrokerEnum, ApsJobAdder, enable_ctrl_c_quit_on_windows
 
 @boost(BoosterParams(queue_name="daily_report", broker_kind=BrokerEnum.REDIS))
 def generate_report(report_type: str):
@@ -18194,7 +18194,7 @@ if __name__ == '__main__':
         id='daily_sales_report',
         replace_existing=True
     )
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 ```
 
 ### Skill 4: Asyncio 异步任务与协程发布
@@ -18390,7 +18390,7 @@ def crawl_page(url: str):
 **场景**：当项目中有多个消费函数时，通常会有大量重复的配置参数。通过继承 `BoosterParams` 创建自定义子类，可以避免在每个 `@boost` 装饰器中重复书写相同的配置。
 **模板**：
 ```python
-from funboost import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum, ctrl_c_recv
+from funboost import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum, enable_ctrl_c_quit_on_windows
 
 # 定义项目统一的配置子类
 class MyBoosterParams(BoosterParams):
@@ -18415,7 +18415,7 @@ def task3(report_type: str):
 if __name__ == '__main__':
     task1.consume()
     task3.consume()
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 ```
 
 ### Skill 9: 消费异构系统/第三方的任意 JSON 消息
@@ -19102,7 +19102,7 @@ funboost/
 │   ├── time_util.py               # 时间工具
 │   ├── uuid7.py                   # UUID7
 │   ├── system_util.py             # 系统信息
-│   ├── ctrl_c_end.py              # ctrl_c_recv
+│   ├── ctrl_c_end.py              # enable_ctrl_c_quit_on_windows
 │   ├── block_exit.py              # 阻止退出
 │   ├── task_dispatcher.py         # LocalFunctionsDispatcher
 │   ├── bulk_operation.py          # 批量Mongo/ES/Redis写入
@@ -19734,7 +19734,7 @@ fct.logger               # 当前任务的logger
 
 | 文件 | 核心 | 说明 |
 |------|------|------|
-| `utils/ctrl_c_end.py` | `ctrl_c_recv()` | 阻塞主线程，Ctrl+C优雅退出 |
+| `utils/ctrl_c_end.py` | `enable_ctrl_c_quit_on_windows()` | 阻塞主线程，Ctrl+C优雅退出 |
 | `utils/block_exit.py` | — | 阻止进程退出 |
 | `utils/paramiko_util.py` | `ParamikoFolderUploader` | SSH文件夹上传 |
 | `utils/bulk_operation.py` | — | 批量Mongo/ES/Redis写入 |
@@ -19917,7 +19917,7 @@ start_funboost_web_manager()   # 启动Web管理界面
 | **52** | `BrokerConnConfig`, `FunboostCommonConfig` | `funboost_config_deafult` |
 | **53** | `BoosterDiscovery` | `core.cli.discovery_boosters` |
 | **56** | `run_forever` | `core.helper_funs` (= `block_python_main_thread_exit`) |
-| **58** | `ctrl_c_recv` | `utils.ctrl_c_end` |
+| **58** | `enable_ctrl_c_quit_on_windows` | `utils.ctrl_c_end` |
 | **59** | `RedisMixin` | `utils.redis_manager` |
 | **60** | `show_current_threads_num` | `concurrent_pool.custom_threadpool_executor` |
 | **62** | `funboost_current_task`, `fct`, `get_current_taskid` | `core.current_task` |
@@ -22003,7 +22003,7 @@ from funboost.core.cli.discovery_boosters import BoosterDiscovery
 # from funboost.core.exit_signal import set_interrupt_signal_handler
 from funboost.core.helper_funs import run_forever
 
-from funboost.utils.ctrl_c_end import ctrl_c_recv
+from funboost.utils.ctrl_c_end import enable_ctrl_c_quit_on_windows
 from funboost.utils.redis_manager import RedisMixin
 from funboost.concurrent_pool.custom_threadpool_executor import show_current_threads_num
 
@@ -24964,7 +24964,7 @@ class ThreadPoolExecutorShrinkAbleNonDaemon(ThreadPoolExecutorShrinkAble):
     raise RuntimeError('cannot schedule new futures after ' RuntimeError: cannot schedule new futures after interpreter shutdown
 
     之前backgroud scheduler使用得是线程池里面是守护线程，为了避免cannot schedule new futures after ，
-    用户需要手动在主线程加个 ctrl_c_recv() 或者 while 1::time.sleep(10) 来阻止主线程结束，这样会麻烦用户。
+    用户需要手动在主线程加个 enable_ctrl_c_quit_on_windows() 或者 while 1::time.sleep(10) 来阻止主线程结束，这样会麻烦用户。
     """
     MIN_WORKERS = 0
     THREAD_USE_DAEMON = False
@@ -32840,7 +32840,7 @@ if __name__ == "__main__":
 `````python
 import re
 from typing import ClassVar, Optional
-from funboost import boost, BoosterParams, BoostersManager, BrokerEnum, ctrl_c_recv, ConcurrentModeEnum
+from funboost import boost, BoosterParams, BoostersManager, BrokerEnum, enable_ctrl_c_quit_on_windows, ConcurrentModeEnum
 from funboost.contrib.funspider import SimpleSpiderClient, AsyncSpiderClient, SpiderItem, create_engine, create_async_engine, Field
 
 NEWS_GROUP = "news_crawler"
@@ -32972,7 +32972,7 @@ if __name__ == '__main__':
 
     crawl_list.push(page=1)
 
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 
 `````
 
@@ -39205,7 +39205,7 @@ from funboost.concurrent_pool.async_helper import simple_run_in_executor
 from funboost.constant import FunctionKind, StrConst
 from funboost.utils.class_utils import ClsHelper
 
-from funboost.utils.ctrl_c_end import ctrl_c_recv
+from funboost.utils.ctrl_c_end import enable_ctrl_c_quit_on_windows
 from funboost.core.loggers import flogger, develop_logger, logger_prompt
 
 from functools import wraps
@@ -39636,7 +39636,7 @@ class BoosterRegistry:
         """
         for queue_name in queue_names:
             self.get_booster(queue_name).consume()
-        ctrl_c_recv()
+        enable_ctrl_c_quit_on_windows()
 
     consume = consume_queues
 
@@ -39648,7 +39648,7 @@ class BoosterRegistry:
         for queue_name in self.get_all_queues():
             self.get_booster(queue_name).consume()
         if block:
-            ctrl_c_recv()
+            enable_ctrl_c_quit_on_windows()
 
     consume_all = consume_all_queues
 
@@ -39660,7 +39660,7 @@ class BoosterRegistry:
         """
         for queue_name, process_num in queue_name__process_num.items():
             self.get_booster(queue_name).multi_process_consume(process_num)
-        ctrl_c_recv()
+        enable_ctrl_c_quit_on_windows()
 
     mp_consume = multi_process_consume_queues
 
@@ -39681,7 +39681,7 @@ class BoosterRegistry:
         for queue_name in need_consume_queue_names:
             self.get_or_create_booster_by_queue_name(queue_name).consume()
         if block:
-            ctrl_c_recv()
+            enable_ctrl_c_quit_on_windows()
 
     def multi_process_consume_group(self, booster_group: str, process_num=1):
         """
@@ -39699,7 +39699,7 @@ class BoosterRegistry:
         """
         for queue_name in self.get_all_queues():
             self.get_booster(queue_name).multi_process_consume(process_num)
-        ctrl_c_recv()
+        enable_ctrl_c_quit_on_windows()
 
     mp_consume_all = multi_process_consume_all_queues
 
@@ -44059,7 +44059,7 @@ from os import PathLike
 
 from funboost.core.booster import BoostersManager
 from funboost.core.cli.discovery_boosters import BoosterDiscovery
-from funboost.utils.ctrl_c_end import ctrl_c_recv
+from funboost.utils.ctrl_c_end import enable_ctrl_c_quit_on_windows
 
 env_dict = {'project_root_path': None}
 
@@ -49109,7 +49109,7 @@ def rules_consume_and_context():
     func.consume() 基础启动；func.multi_process_consume(n) / func.mp_consume(n) 多进程叠加并发；
     BoostersManager.consume_group("group_name") 分组启动。
     连续启动 func1.consume(); func2.consume()，不要用 threading.Thread 包装。
-    ctrl_c_recv() 阻塞主线程让 Ctrl+C 能停止。
+    enable_ctrl_c_quit_on_windows() 阻塞主线程让 Ctrl+C 能停止。
     
     ### 4. 上下文获取 (禁止 Celery 思维)
     禁止在参数中加 self/bind=True。必须 from funboost import fct。
@@ -49150,7 +49150,7 @@ def skill_hello_world():
     ## Skill 0: Hello World 任务 (零配置/本地单进程)
     使用 MEMORY_QUEUE，无需安装中间件。
     @boost(BrokerParams(queue_name="hello_queue", broker_kind=BrokerEnum.MEMORY_QUEUE, qps=2))
-    func.push(word="funboost_0"); func.consume(); ctrl_c_recv()
+    func.push(word="funboost_0"); func.consume(); enable_ctrl_c_quit_on_windows()
     """
 
 def skill_standard_task():
@@ -49158,7 +49158,7 @@ def skill_standard_task():
     ## Skill 1: 标准后台任务
     @boost(BrokerParams(queue_name="my_standard_task", broker_kind=BrokerEnum.REDIS_ACK_ABLE,
            concurrent_num=50, qps=10, max_retry_times=3))
-    func.push(user_id=i, action="login"); func.mp_consume(2); ctrl_c_recv()
+    func.push(user_id=i, action="login"); func.mp_consume(2); enable_ctrl_c_quit_on_windows()
     """
 
 def skill_rpc():
@@ -49339,7 +49339,7 @@ def source_code_structure():
     funweb/ — Web管理界面: start_funboost_web_manager
     queues/ — 队列实现: PythonQueues, FastestMemQueue, SqlaQueue, PeeweeQueue, PostgresQueue
     
-    utils/ — 工具: redis_manager(RedisMixin), ctrl_c_end(ctrl_c_recv), 
+    utils/ — 工具: redis_manager(RedisMixin), ctrl_c_end(enable_ctrl_c_quit_on_windows), 
              decorators(run_many_times/keep_circulating/synchronized),
              func_timeout(函数超时控制), notify_util(Notifier)
     """
@@ -49528,7 +49528,7 @@ def public_api_exports():
     ApsJobAdder, funboost_aps_scheduler — timing_job
     fastapi_router — faas/fastapi_adapter
     flask_blueprint — faas/flask_adapter
-    ctrl_c_recv — utils/ctrl_c_end
+    enable_ctrl_c_quit_on_windows — utils/ctrl_c_end
     RedisMixin — utils/redis_manager
     MemoryFunboostPool, FunboostPool, FunboostPoolPickleFunc — core/funboost_pool
     RemoteTaskKiller — core/kill_remote_task
@@ -49601,7 +49601,7 @@ os.environ['SYS_STD_FILE_NAME'] = 'ai自己去取个合适的唯一的名字std�
 import nb_log  # 导入 nb_log ，如果导入了funboost，就不需要亲自导入nb_log
 
 import time
-from funboost import boost, BrokerEnum, BoosterParams,ctrl_c_recv
+from funboost import boost, BrokerEnum, BoosterParams,enable_ctrl_c_quit_on_windows
 
 
 # 示例1: 最简单的任务函数
@@ -49671,7 +49671,7 @@ tags: []
 - 基础启动：`func.consume()`。
 - 多进程+多线程叠加并发（性能炸裂）：`func.multi_process_consume(n)` 或简写 `func.mp_consume(n)`。
 - 分组启动：`BoostersManager.consume_group("group_name")` （BoosterParams 里需要先设置 booster_group 的值）。
-- 启动代码的末尾，如果主线程没有其他阻塞任务，**建议**使用 `from funboost import ctrl_c_recv; ctrl_c_recv()` 阻止主线程退出。
+- 启动代码的末尾，如果主线程没有其他阻塞任务，**建议**使用 `from funboost import enable_ctrl_c_quit_on_windows; enable_ctrl_c_quit_on_windows()` 阻止主线程退出。
 - 连续启动多个函数.consume()消费：`func1.consume(); func2.consume()`， 不要一厢情愿的使用子线程来启动消费，`func1.consume()`不会阻塞主线程。 
   不要使用 `threading.Thread(target=func1.consume).start()` 和  `threading.Thread(target=func2.consume).start()` 来连续启动消费，这样做是多此一举，funboost框架很人性化，早就从框架层面让用户可以避免这样写代码了。
   
@@ -49745,7 +49745,7 @@ tags: []
 **模板**：
 ```python
 import time
-from funboost import boost, BoosterParams, BrokerEnum, ctrl_c_recv
+from funboost import boost, BoosterParams, BrokerEnum, enable_ctrl_c_quit_on_windows
 
 @boost(BoosterParams(
     queue_name="hello_queue",
@@ -49766,7 +49766,7 @@ if __name__ == '__main__':
     hello_task.consume() 
     
     # 3. 阻塞主线程
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 ```
 
 ### Skill 1: 创建标准的基础后台任务 (含高阶控制)
@@ -49774,7 +49774,7 @@ if __name__ == '__main__':
 **模板**：
 ```python
 import time
-from funboost import boost, BoosterParams, BrokerEnum, ctrl_c_recv
+from funboost import boost, BoosterParams, BrokerEnum, enable_ctrl_c_quit_on_windows
 
 @boost(BoosterParams(
     queue_name="my_standard_task",
@@ -49795,7 +49795,7 @@ if __name__ == '__main__':
     
     # 启动消费 (多进程叠加多线程)
     my_task.mp_consume(2)  # mp_consume(n) 是 multi_process_consume(n) 的简写
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 ```
 
 ### Skill 2: 实现 RPC 模式（发布后等待结果）
@@ -49825,7 +49825,7 @@ if __name__ == '__main__':
 **场景**：用户需要每天定时、或每隔几秒钟执行一次任务。
 **模板**：
 ```python
-from funboost import boost, BoosterParams, BrokerEnum, ApsJobAdder, ctrl_c_recv
+from funboost import boost, BoosterParams, BrokerEnum, ApsJobAdder, enable_ctrl_c_quit_on_windows
 
 @boost(BoosterParams(queue_name="daily_report", broker_kind=BrokerEnum.REDIS))
 def generate_report(report_type: str):
@@ -49843,7 +49843,7 @@ if __name__ == '__main__':
         id='daily_sales_report',
         replace_existing=True
     )
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 ```
 
 ### Skill 4: Asyncio 异步任务与协程发布
@@ -50039,7 +50039,7 @@ def crawl_page(url: str):
 **场景**：当项目中有多个消费函数时，通常会有大量重复的配置参数。通过继承 `BoosterParams` 创建自定义子类，可以避免在每个 `@boost` 装饰器中重复书写相同的配置。
 **模板**：
 ```python
-from funboost import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum, ctrl_c_recv
+from funboost import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum, enable_ctrl_c_quit_on_windows
 
 # 定义项目统一的配置子类
 class MyBoosterParams(BoosterParams):
@@ -50064,7 +50064,7 @@ def task3(report_type: str):
 if __name__ == '__main__':
     task1.consume()
     task3.consume()
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 ```
 
 ### Skill 9: 消费异构系统/第三方的任意 JSON 消息
@@ -50751,7 +50751,7 @@ funboost/
 │   ├── time_util.py               # 时间工具
 │   ├── uuid7.py                   # UUID7
 │   ├── system_util.py             # 系统信息
-│   ├── ctrl_c_end.py              # ctrl_c_recv
+│   ├── ctrl_c_end.py              # enable_ctrl_c_quit_on_windows
 │   ├── block_exit.py              # 阻止退出
 │   ├── task_dispatcher.py         # LocalFunctionsDispatcher
 │   ├── bulk_operation.py          # 批量Mongo/ES/Redis写入
@@ -51383,7 +51383,7 @@ fct.logger               # 当前任务的logger
 
 | 文件 | 核心 | 说明 |
 |------|------|------|
-| `utils/ctrl_c_end.py` | `ctrl_c_recv()` | 阻塞主线程，Ctrl+C优雅退出 |
+| `utils/ctrl_c_end.py` | `enable_ctrl_c_quit_on_windows()` | 阻塞主线程，Ctrl+C优雅退出 |
 | `utils/block_exit.py` | — | 阻止进程退出 |
 | `utils/paramiko_util.py` | `ParamikoFolderUploader` | SSH文件夹上传 |
 | `utils/bulk_operation.py` | — | 批量Mongo/ES/Redis写入 |
@@ -51566,7 +51566,7 @@ start_funboost_web_manager()   # 启动Web管理界面
 | **52** | `BrokerConnConfig`, `FunboostCommonConfig` | `funboost_config_deafult` |
 | **53** | `BoosterDiscovery` | `core.cli.discovery_boosters` |
 | **56** | `run_forever` | `core.helper_funs` (= `block_python_main_thread_exit`) |
-| **58** | `ctrl_c_recv` | `utils.ctrl_c_end` |
+| **58** | `enable_ctrl_c_quit_on_windows` | `utils.ctrl_c_end` |
 | **59** | `RedisMixin` | `utils.redis_manager` |
 | **60** | `show_current_threads_num` | `concurrent_pool.custom_threadpool_executor` |
 | **62** | `funboost_current_task`, `fct`, `get_current_taskid` | `core.current_task` |
@@ -57080,7 +57080,7 @@ if __name__ == '__main__':
     2025年后定时任务现在推荐使用 ApsJobAdder 写法 ，用户不需要亲自选择使用 apscheduler对象来添加定时任务
     特别是使用redis作为jobstores时候，你可以看源码就知道了。
     """
-    from funboost import boost, BrokerEnum, ctrl_c_recv, BoosterParams, ApsJobAdder
+    from funboost import boost, BrokerEnum, enable_ctrl_c_quit_on_windows, BoosterParams, ApsJobAdder
 
 
     # 定义任务处理函数
@@ -57129,7 +57129,7 @@ if __name__ == '__main__':
     
 
 
-    # ctrl_c_recv() # 启动了守护线程的定时器，一定要阻止主线程退出。 你可以代码最末尾加这个 ctrl_c_recv() 或者加个 while 1:time.sleep(10)
+    # enable_ctrl_c_quit_on_windows() # 启动了守护线程的定时器，一定要阻止主线程退出。 你可以代码最末尾加这个 enable_ctrl_c_quit_on_windows() 或者加个 while 1:time.sleep(10)
 
 `````
 
@@ -57645,14 +57645,14 @@ def signal_handler(signum, frame):
 
 
 
-def ctrl_c_recv(confirmation_count=1):
+def enable_ctrl_c_quit_on_windows(confirmation_count=1):
     """ 
-    程序最末尾加 ctrl_c_recv() 主要是为了主线程持续在运行，方便你在 windows系统下敲击键盘 ctrl + c 可以停止程序而已。  
-    你即使程序最末尾不加 ctrl_c_recv(),funboost消费程序也会永久持续运行，控制台也会不断打印日志和 `print` 输出。
+    程序最末尾加 enable_ctrl_c_quit_on_windows() 主要是为了主线程持续在运行，方便你在 windows系统下敲击键盘 ctrl + c 可以停止程序而已。  
+    你即使程序最末尾不加 enable_ctrl_c_quit_on_windows(),funboost消费程序也会永久持续运行，控制台也会不断打印日志和 `print` 输出。
     
-    加与不加的详细区别，可以看教程6.25b章节 `## 6.25b `ctrl_c_recv` 到底要不要加？—— 直接看效果`
+    加与不加的详细区别，可以看教程6.25b章节 `## 6.25b `enable_ctrl_c_quit_on_windows` 到底要不要加？—— 直接看效果`
     
-    你也可以不用ctrl_c_recv(),  直接在你的启动脚本文件的最末尾加上：
+    你也可以不用enable_ctrl_c_quit_on_windows(),  直接在你的启动脚本文件的最末尾加上：
     while 1:
         time.sleep(100) 
     也能达到主线程在持续运行的目的，从而在windows系统下敲击键盘 ctrl + c 可以停止程序。
@@ -61813,7 +61813,7 @@ Funboost Workflow 示例 - 视频处理 Pipeline
 import time
 import typing
 
-from funboost import boost, ctrl_c_recv, BrokerEnum, fct
+from funboost import boost, enable_ctrl_c_quit_on_windows, BrokerEnum, fct
 from funboost.workflow import chain, group, chord, WorkflowBoosterParams
 
 
@@ -61962,7 +61962,7 @@ if __name__ == '__main__':
     print('=' * 60)
     
     # 保持运行
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 
 `````
 

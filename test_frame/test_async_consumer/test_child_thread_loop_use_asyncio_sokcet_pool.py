@@ -36,7 +36,7 @@ RuntimeError: Timeout context manager should be used inside a task
 
 """
 
-from funboost import boost, BrokerEnum, ConcurrentModeEnum, ctrl_c_recv, BoosterParams
+from funboost import boost, BrokerEnum, ConcurrentModeEnum, enable_ctrl_c_quit_on_windows, BoosterParams
 import asyncio
 import aiohttp
 import time
@@ -107,4 +107,4 @@ if __name__ == '__main__':
     main_tasks = [loop.create_task(do_req(i)) for i in range(20)]
     loop.run_forever()  # 如果你除了要在funboost运行异步函数,也要在自己脚本调用,那么装饰器配置  is_auto_start_specify_async_loop_in_child_thread=False,,自己手动 启动loop.run_forever()
 
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

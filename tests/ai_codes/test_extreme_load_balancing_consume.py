@@ -1,6 +1,6 @@
 import logging
 import time
-from funboost import boost, BrokerEnum, BoosterParams, ctrl_c_recv, ConcurrentModeEnum
+from funboost import boost, BrokerEnum, BoosterParams, enable_ctrl_c_quit_on_windows, ConcurrentModeEnum
 
 # 极端的消费负载均衡示例
 @boost(BoosterParams(
@@ -24,5 +24,5 @@ def extreme_load_balancing_consumer(x):
 if __name__ == '__main__':
     # 启动消费
     extreme_load_balancing_consumer.consume()
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 

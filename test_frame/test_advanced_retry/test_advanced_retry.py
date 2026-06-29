@@ -2,7 +2,7 @@
 
 import datetime
 import time
-from funboost import boost, BoosterParams, BrokerEnum, ctrl_c_recv
+from funboost import boost, BoosterParams, BrokerEnum, enable_ctrl_c_quit_on_windows
 
 
 
@@ -72,4 +72,4 @@ if __name__ == '__main__':
     task_sleep_retry.consume()
     # task_requeue_retry.consume()
 
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

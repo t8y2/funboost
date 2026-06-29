@@ -3,7 +3,7 @@ Funboost 最最基础示例
 演示如何使用 @boost 装饰器创建分布式任务队列
 """
 import time
-from funboost import boost, BrokerEnum, BoosterParams,ctrl_c_recv
+from funboost import boost, BrokerEnum, BoosterParams,enable_ctrl_c_quit_on_windows
 
 
 # 示例1: 最简单的任务函数
@@ -31,4 +31,4 @@ if __name__ == '__main__':
         
         
     add_task.consume()
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

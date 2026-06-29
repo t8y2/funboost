@@ -1,6 +1,6 @@
 import re
 from typing import ClassVar, Optional
-from funboost import boost, BoosterParams, BoostersManager, BrokerEnum, ctrl_c_recv, ConcurrentModeEnum
+from funboost import boost, BoosterParams, BoostersManager, BrokerEnum, enable_ctrl_c_quit_on_windows, ConcurrentModeEnum
 from funboost.contrib.funspider import SimpleSpiderClient, AsyncSpiderClient, SpiderItem, create_engine, create_async_engine, Field
 
 NEWS_GROUP = "news_crawler"
@@ -132,4 +132,4 @@ if __name__ == '__main__':
 
     crawl_list.push(page=1)
 
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

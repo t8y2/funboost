@@ -1,7 +1,7 @@
 import os
 import time
 from filelock import FileLock  # 使用 filelock 库实现进程锁
-from funboost import boost, BrokerEnum, BoosterParams, EmptyConsumer, EmptyPublisher,ctrl_c_recv
+from funboost import boost, BrokerEnum, BoosterParams, EmptyConsumer, EmptyPublisher,enable_ctrl_c_quit_on_windows
 
 class TxtFileConsumer(EmptyConsumer):
     def custom_init(self):
@@ -96,4 +96,4 @@ if __name__ == '__main__':
     
     # 开始消费队列中的消息
     example_function.consume()
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

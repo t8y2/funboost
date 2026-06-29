@@ -9,7 +9,7 @@
 import time
 import threading
 from collections import defaultdict
-from funboost import boost, BrokerEnum, BoosterParams, ctrl_c_recv, EmptyConsumer, EmptyPublisher
+from funboost import boost, BrokerEnum, BoosterParams, enable_ctrl_c_quit_on_windows, EmptyConsumer, EmptyPublisher
 from funboost.constant import BrokerEnum as OriginalBrokerEnum
 
 
@@ -142,6 +142,6 @@ if __name__ == '__main__':
     # 继续等待直到所有消息处理完毕
     # 注意：由于我们使用的是内存 list，消息处理完后队列为空
     # 但消费者线程会继续运行（空闲等待），主线程不能退出
-    # 因此使用 ctrl_c_recv() 阻塞主线程，方便用 Ctrl+C 退出
+    # 因此使用 enable_ctrl_c_quit_on_windows() 阻塞主线程，方便用 Ctrl+C 退出
     print("按 Ctrl+C 停止程序...")
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

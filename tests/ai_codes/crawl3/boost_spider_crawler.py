@@ -1,6 +1,6 @@
 import re
 import os
-from boost_spider import boost, BoosterParams, BrokerEnum, RequestClient, BoostersManager, ctrl_c_recv
+from boost_spider import boost, BoosterParams, BrokerEnum, RequestClient, BoostersManager, enable_ctrl_c_quit_on_windows
 from boost_spider.sink.dataset_sink import DatasetSink
 
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -94,4 +94,4 @@ def crawl_news_detail(news_url: str):
 if __name__ == "__main__":
     BoostersManager.consume_group("bspider_group", block=False)
     crawl_categories.push()
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

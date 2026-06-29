@@ -422,7 +422,7 @@ if __name__ == '__main__':
 
 ```python
 import time
-from funboost import boost, BrokerEnum, BoosterParams, ctrl_c_recv, ConcurrentModeEnum, ApsJobAdder
+from funboost import boost, BrokerEnum, BoosterParams, enable_ctrl_c_quit_on_windows, ConcurrentModeEnum, ApsJobAdder
 
 # 1. 定义公共配置基类，减少重复代码
 class MyBoosterParams(BoosterParams):
@@ -481,8 +481,8 @@ if __name__ == '__main__':
         trigger='interval', seconds=30, args=(4, 6, 10), id='job2'
     )
 
-    # ctrl_c_recv使windows能ctrl+c退出，这是非必须的，不加也可以。
-    ctrl_c_recv()
+    # enable_ctrl_c_quit_on_windows使windows能ctrl+c退出，这是非必须的，不加也可以。
+    enable_ctrl_c_quit_on_windows()
 ```
 
 > **🧠 设计哲学**

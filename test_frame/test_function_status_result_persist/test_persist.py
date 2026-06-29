@@ -1,6 +1,6 @@
 import asyncio
 
-from funboost import boost, FunctionResultStatusPersistanceConfig, BoosterParams,BrokerEnum,ctrl_c_recv,ConcurrentModeEnum
+from funboost import boost, FunctionResultStatusPersistanceConfig, BoosterParams,BrokerEnum,enable_ctrl_c_quit_on_windows,ConcurrentModeEnum
 from funboost.funweb.app import start_funboost_web_manager
 import time
 import random
@@ -99,7 +99,7 @@ if __name__ == '__main__':
         aio_f6.push(i)
         f7.push(i)
         time.sleep(1)
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
     
 
     

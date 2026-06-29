@@ -61,5 +61,5 @@ if __name__ == '__main__':
     for i in range(5):
         nats_core_broadcast_task.push(msg=f'broadcast_msg_{i}')
 
-    from funboost import ctrl_c_recv
-    ctrl_c_recv()
+    from funboost import enable_ctrl_c_quit_on_windows
+    enable_ctrl_c_quit_on_windows()

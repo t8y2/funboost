@@ -6,7 +6,7 @@ from os import PathLike
 
 from funboost.core.booster import BoostersManager
 from funboost.core.cli.discovery_boosters import BoosterDiscovery
-from funboost.utils.ctrl_c_end import ctrl_c_recv
+
 
 env_dict = {'project_root_path': None}
 

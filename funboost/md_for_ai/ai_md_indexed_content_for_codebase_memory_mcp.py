@@ -30,7 +30,7 @@ def rules_consume_and_context():
     func.consume() 基础启动；func.multi_process_consume(n) / func.mp_consume(n) 多进程叠加并发；
     BoostersManager.consume_group("group_name") 分组启动。
     连续启动 func1.consume(); func2.consume()，不要用 threading.Thread 包装。
-    ctrl_c_recv() 阻塞主线程让 Ctrl+C 能停止。
+    enable_ctrl_c_quit_on_windows() 阻塞主线程让 Ctrl+C 能停止。
     
     ### 4. 上下文获取 (禁止 Celery 思维)
     禁止在参数中加 self/bind=True。必须 from funboost import fct。
@@ -71,7 +71,7 @@ def skill_hello_world():
     ## Skill 0: Hello World 任务 (零配置/本地单进程)
     使用 MEMORY_QUEUE，无需安装中间件。
     @boost(BrokerParams(queue_name="hello_queue", broker_kind=BrokerEnum.MEMORY_QUEUE, qps=2))
-    func.push(word="funboost_0"); func.consume(); ctrl_c_recv()
+    func.push(word="funboost_0"); func.consume(); enable_ctrl_c_quit_on_windows()
     """
 
 def skill_standard_task():
@@ -79,7 +79,7 @@ def skill_standard_task():
     ## Skill 1: 标准后台任务
     @boost(BrokerParams(queue_name="my_standard_task", broker_kind=BrokerEnum.REDIS_ACK_ABLE,
            concurrent_num=50, qps=10, max_retry_times=3))
-    func.push(user_id=i, action="login"); func.mp_consume(2); ctrl_c_recv()
+    func.push(user_id=i, action="login"); func.mp_consume(2); enable_ctrl_c_quit_on_windows()
     """
 
 def skill_rpc():
@@ -260,7 +260,7 @@ def source_code_structure():
     funweb/ — Web管理界面: start_funboost_web_manager
     queues/ — 队列实现: PythonQueues, FastestMemQueue, SqlaQueue, PeeweeQueue, PostgresQueue
     
-    utils/ — 工具: redis_manager(RedisMixin), ctrl_c_end(ctrl_c_recv), 
+    utils/ — 工具: redis_manager(RedisMixin), ctrl_c_end(enable_ctrl_c_quit_on_windows), 
              decorators(run_many_times/keep_circulating/synchronized),
              func_timeout(函数超时控制), notify_util(Notifier)
     """
@@ -449,7 +449,7 @@ def public_api_exports():
     ApsJobAdder, funboost_aps_scheduler — timing_job
     fastapi_router — faas/fastapi_adapter
     flask_blueprint — faas/flask_adapter
-    ctrl_c_recv — utils/ctrl_c_end
+    enable_ctrl_c_quit_on_windows — utils/ctrl_c_end
     RedisMixin — utils/redis_manager
     MemoryFunboostPool, FunboostPool, FunboostPoolPickleFunc — core/funboost_pool
     RemoteTaskKiller — core/kill_remote_task

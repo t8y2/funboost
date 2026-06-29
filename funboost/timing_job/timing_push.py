@@ -123,7 +123,7 @@ if __name__ == '__main__':
     2025年后定时任务现在推荐使用 ApsJobAdder 写法 ，用户不需要亲自选择使用 apscheduler对象来添加定时任务
     特别是使用redis作为jobstores时候，你可以看源码就知道了。
     """
-    from funboost import boost, BrokerEnum, ctrl_c_recv, BoosterParams, ApsJobAdder
+    from funboost import boost, BrokerEnum, enable_ctrl_c_quit_on_windows, BoosterParams, ApsJobAdder
 
 
     # 定义任务处理函数
@@ -172,4 +172,4 @@ if __name__ == '__main__':
     
 
 
-    # ctrl_c_recv() # 启动了守护线程的定时器，一定要阻止主线程退出。 你可以代码最末尾加这个 ctrl_c_recv() 或者加个 while 1:time.sleep(10)
+    # enable_ctrl_c_quit_on_windows() # 启动了守护线程的定时器，一定要阻止主线程退出。 你可以代码最末尾加这个 enable_ctrl_c_quit_on_windows() 或者加个 while 1:time.sleep(10)

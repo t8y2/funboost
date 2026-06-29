@@ -11,14 +11,14 @@ def signal_handler(signum, frame):
 
 
 
-def ctrl_c_recv(confirmation_count=1):
+def enable_ctrl_c_quit_on_windows(confirmation_count=1):
     """ 
-    程序最末尾加 ctrl_c_recv() 主要是为了主线程持续在运行，方便你在 windows系统下敲击键盘 ctrl + c 可以停止程序而已。  
-    你即使程序最末尾不加 ctrl_c_recv(),funboost消费程序也会永久持续运行，控制台也会不断打印日志和 `print` 输出。
+    程序最末尾加 enable_ctrl_c_quit_on_windows() 主要是为了主线程持续在运行，方便你在 windows系统下敲击键盘 ctrl + c 可以停止程序而已。  
+    你即使程序最末尾不加 enable_ctrl_c_quit_on_windows(),funboost消费程序也会永久持续运行，控制台也会不断打印日志和 `print` 输出，无论是否加这个，消费函数都能持续运行。
     
-    加与不加的详细区别，可以看教程6.25b章节 `## 6.25b `ctrl_c_recv` 到底要不要加？—— 直接看效果`
+    加与不加的详细区别，可以看教程6.25b章节 `## 6.25b `enable_ctrl_c_quit_on_windows` 到底要不要加？—— 直接看效果`
     
-    你也可以不用ctrl_c_recv(),  直接在你的启动脚本文件的最末尾加上：
+    你也可以不用enable_ctrl_c_quit_on_windows(),  直接在你的启动脚本文件的最末尾加上：
     while 1:
         time.sleep(100) 
     也能达到主线程在持续运行的目的，从而在windows系统下敲击键盘 ctrl + c 可以停止程序。
@@ -34,4 +34,7 @@ def ctrl_c_recv(confirmation_count=1):
                 break
 
     os._exit(44)
+
+ctrl_c_recv = enable_ctrl_c_quit_on_windows  # 兼容一下旧的名字，ctrl_c_recv太容易让人和ai误解了，误以为不加这个会导致程序迅速结束。
+
 

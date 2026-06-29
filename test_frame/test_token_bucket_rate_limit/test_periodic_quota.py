@@ -15,7 +15,7 @@
 """
 
 import datetime
-from funboost import boost, BoosterParams, BrokerEnum, ctrl_c_recv
+from funboost import boost, BoosterParams, BrokerEnum, enable_ctrl_c_quit_on_windows
 from funboost.contrib.override_publisher_consumer_cls.periodic_quota_mixin import (
     PeriodicQuotaConsumerMixin,
 )
@@ -66,4 +66,4 @@ if __name__ == '__main__':
     # 启动消费
     task_periodic_quota.consume()
     
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

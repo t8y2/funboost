@@ -9,7 +9,7 @@ from auto_run_on_remote import run_current_script_on_remote
 run_current_script_on_remote() 
 
 import time
-from funboost import boost, BoosterParams, BrokerEnum,ctrl_c_recv
+from funboost import boost, BoosterParams, BrokerEnum,enable_ctrl_c_quit_on_windows
 
 
 @boost(BoosterParams(
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     test_rabbitmq_amqp_task.consume()
     
     
-    # ctrl_c_recv()
+    # enable_ctrl_c_quit_on_windows()
     
     
     # time.sleep(1000)

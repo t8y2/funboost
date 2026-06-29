@@ -1,5 +1,5 @@
 from funcs import fun_sum
-from funboost import ApsJobAdder,ctrl_c_recv
+from funboost import ApsJobAdder,enable_ctrl_c_quit_on_windows
 
 if __name__ == '__main__':
     """
@@ -10,4 +10,4 @@ if __name__ == '__main__':
     ApsJobAdder(fun_sum,job_store_kind='redis',)  # 这行代码内部帮你启动了 apschduler对象，apschduler对象会扫描redis中的定时任务，并执行定时任务，定时任务的功能就是push消息到消息队列中。
 
     fun_sum.consume()  # 启动消费消息队列的消息
-    ctrl_c_recv()   # 这行很重要，一定要阻止主线程退出，否则主线程退出了， background的apschduler对象就会退出，到时候你又懵逼为什么不执行定时任务了。这些都是apschrudler本身的知识，我就不多说了。
+    enable_ctrl_c_quit_on_windows()   # 这行很重要，一定要阻止主线程退出，否则主线程退出了， background的apschduler对象就会退出，到时候你又懵逼为什么不执行定时任务了。这些都是apschrudler本身的知识，我就不多说了。

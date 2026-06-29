@@ -15,7 +15,7 @@
 现在可以在多机器多进程随意反复启动多次 apscheduler对象，不会造成定时任务执行重复。
 """
 
-from funboost import boost, BrokerEnum,ctrl_c_recv,BoosterParams,ApsJobAdder
+from funboost import boost, BrokerEnum,enable_ctrl_c_quit_on_windows,BoosterParams,ApsJobAdder
 
 
 
@@ -81,4 +81,4 @@ if __name__ == '__main__':
         args=('hi python',)
     )
 
-    ctrl_c_recv() # 这个是阻止代码主线程结束，这在background类型的apscheduler很重要，否则会报错提示主线程已退出。 当然，你也可以在末尾加 time.sleep 来阻止主线结束。
+    enable_ctrl_c_quit_on_windows() # 这个是阻止代码主线程结束，这在background类型的apscheduler很重要，否则会报错提示主线程已退出。 当然，你也可以在末尾加 time.sleep 来阻止主线结束。

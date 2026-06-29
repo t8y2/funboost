@@ -1,8 +1,8 @@
 import time
-from funboost.utils.ctrl_c_end import ctrl_c_recv
+from funboost.utils.ctrl_c_end import enable_ctrl_c_quit_on_windows
 
 from funboost.core.func_params_model import TaskOptions
-from funboost import boost, BrokerEnum,ConcurrentModeEnum,BoosterParams,Booster,ctrl_c_recv
+from funboost import boost, BrokerEnum,ConcurrentModeEnum,BoosterParams,Booster,enable_ctrl_c_quit_on_windows
 
 from logging_tree import printout
 
@@ -41,5 +41,5 @@ if __name__ == '__main__':
     """
     # while 1: # 这一行是阻止主线程退出，解决RuntimeError: cannot schedule new futures after interpreter shutdown
     #     time.sleep(100)
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 

@@ -4,7 +4,7 @@ Funboost 最最基础示例
 演示如何使用 @boost 装饰器创建分布式任务队列
 """
 import time
-from funboost import boost, BrokerEnum, BoosterParams,ctrl_c_recv
+from funboost import boost, BrokerEnum, BoosterParams,enable_ctrl_c_quit_on_windows
 import random
 import nb_log
 import threading
@@ -62,5 +62,5 @@ if __name__ == '__main__':
         time.sleep(1)
         add_task.push(i, i * 2)
     
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 

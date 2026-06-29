@@ -18,7 +18,7 @@
 # # def_tasks3.py 文件由于没有导入,如果想操作def_tasks3的队列,那么需要  --import_modules_str
 #
 # if __name__ == '__main__':
-#     # ctrl_c_recv()
+#     # enable_ctrl_c_quit_on_windows()
 #
 #     '''
 #

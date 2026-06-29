@@ -1,7 +1,7 @@
 import time
 import asyncio
 import copy
-from funboost import boost, BrokerEnum, BoosterParams, ConcurrentModeEnum, ctrl_c_recv,ApsJobAdder
+from funboost import boost, BrokerEnum, BoosterParams, ConcurrentModeEnum, enable_ctrl_c_quit_on_windows,ApsJobAdder
 from funboost.contrib.save_function_result_status.save_result_status_use_dataset import ResultStatusUseDatasetMixin
 from funboost.utils.class_utils import ClsHelper
 
@@ -122,4 +122,4 @@ if __name__ == '__main__':
 
 
     # 10. 阻塞主线程，以便后台的消费者可以持续运行
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

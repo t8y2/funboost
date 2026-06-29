@@ -1,5 +1,5 @@
 import time
-from funboost import boost, BoosterParams, BrokerEnum, ctrl_c_recv
+from funboost import boost, BoosterParams, BrokerEnum, enable_ctrl_c_quit_on_windows
 from funboost.assist.celery_helper import CeleryHelper
 
 @boost(BoosterParams(

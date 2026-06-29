@@ -4,7 +4,7 @@ Funboost 综合能力演示 Demo
 展示：基础消费、RPC结果获取、QPS控频、并发模式、延时任务、工作流编排
 """
 import time
-from funboost import boost, BrokerEnum, ctrl_c_recv, ConcurrentModeEnum
+from funboost import boost, BrokerEnum, enable_ctrl_c_quit_on_windows, ConcurrentModeEnum
 from funboost.timing_job.timing_push import ApsJobAdder
 from funboost.workflow import chain
 
@@ -162,4 +162,4 @@ if __name__ == '__main__':
     print('\n' + '=' * 50)
     print('所有演示已启动，按 Ctrl+C 退出...')
     print('=' * 50)
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

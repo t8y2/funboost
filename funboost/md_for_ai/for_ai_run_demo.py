@@ -55,7 +55,7 @@ os.environ['SYS_STD_FILE_NAME'] = 'ai自己去取个合适的唯一的名字std�
 import nb_log  # 导入 nb_log ，如果导入了funboost，就不需要亲自导入nb_log
 
 import time
-from funboost import boost, BrokerEnum, BoosterParams,ctrl_c_recv
+from funboost import boost, BrokerEnum, BoosterParams
 
 
 # 示例1: 最简单的任务函数

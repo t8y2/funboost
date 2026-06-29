@@ -16,7 +16,7 @@
 
 import time
 import datetime
-from funboost import boost, BoosterParams, BrokerEnum, ctrl_c_recv
+from funboost import boost, BoosterParams, BrokerEnum, enable_ctrl_c_quit_on_windows
 from funboost.contrib.override_publisher_consumer_cls.token_bucket_rate_limit_mixin import (
     TokenBucketRateLimitConsumerMixin,
     TokenBucketBoosterParams,
@@ -79,4 +79,4 @@ if __name__ == '__main__':
     task_token_bucket.consume()
     # task_native_qps.consume()
     
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

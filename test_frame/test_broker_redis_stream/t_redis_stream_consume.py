@@ -2,7 +2,7 @@
 
 
 import time
-from funboost import boost, BrokerEnum,BoosterParams,ctrl_c_recv
+from funboost import boost, BrokerEnum,BoosterParams,enable_ctrl_c_quit_on_windows
 
 
 @BoosterParams(queue_name='test_redis_stream_queue_2',

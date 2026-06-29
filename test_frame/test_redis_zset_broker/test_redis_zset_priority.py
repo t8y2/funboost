@@ -11,7 +11,7 @@
 import random
 import time
 
-from funboost import boost, BoosterParams, TaskOptions, ctrl_c_recv
+from funboost import boost, BoosterParams, TaskOptions, enable_ctrl_c_quit_on_windows
 from funboost.constant import BrokerEnum
 
 consumed_order = []
@@ -53,4 +53,4 @@ def test_priority():
 if __name__ == '__main__':
     test_priority()
     priority_task.consume()
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

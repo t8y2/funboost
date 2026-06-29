@@ -1,6 +1,6 @@
 import re
 from typing import ClassVar, Optional
-from funboost import boost, BoosterParams, BoostersManager, BrokerEnum, ctrl_c_recv
+from funboost import boost, BoosterParams, BoostersManager, BrokerEnum, enable_ctrl_c_quit_on_windows
 from funboost.contrib.funspider import SimpleSpiderClient, SpiderItem, create_engine, Field
 
 NEWS_GROUP = "funspider_news_crawler"
@@ -121,4 +121,4 @@ if __name__ == "__main__":
     BoostersManager.consume_group(NEWS_GROUP)
     crawl_categories.push()
     print("正在启动 funspider 爬虫...")
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

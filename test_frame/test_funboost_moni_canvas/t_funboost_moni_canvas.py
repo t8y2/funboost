@@ -48,7 +48,7 @@ import time
 
 os.environ['path'] = os.path.dirname(sys.executable) + os.pathsep + os.environ['PATH']
 
-from funboost import (boost, BoosterParams, BrokerEnum, ctrl_c_recv,
+from funboost import (boost, BoosterParams, BrokerEnum, enable_ctrl_c_quit_on_windows,
                       ConcurrentModeEnum, AsyncResult,FunctionResultStatus,
                       BoostersManager, AioAsyncResult, fct
                       )
@@ -149,4 +149,4 @@ if __name__ == '__main__':
     print(r4_b.wait_rpc_data_or_raise(raise_exception=False).to_pretty_json_str())
     print('funboost_url_video_b 下载->转码->通知 耗时', r4_b.rpc_data.time_cost)
 
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

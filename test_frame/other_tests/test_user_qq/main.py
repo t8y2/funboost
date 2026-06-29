@@ -1,7 +1,7 @@
 
 import asyncio
 
-from funboost import boost, BrokerEnum, ConcurrentModeEnum, BoosterParams, ExceptionForRequeue, run_forever, ctrl_c_recv,fct
+from funboost import boost, BrokerEnum, ConcurrentModeEnum, BoosterParams, ExceptionForRequeue, run_forever, enable_ctrl_c_quit_on_windows,fct
 
 from PauseConsumer import PauseConsumer
 
@@ -40,6 +40,6 @@ async def main():
 if __name__ == '__main__':
     asyncio.run(main())
     # run_forever()
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 
 

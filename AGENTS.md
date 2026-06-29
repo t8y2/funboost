@@ -51,7 +51,7 @@ def my_task(x, y):
 | `func.consume()` | 启动消费（非阻塞），可连续调用多个：`func1.consume(); func2.consume()` |
 | `func.multi_process_consume(n)` / `func.mp_consume(n)` | 多进程 + 多线程叠加并发 |
 | `BoostersManager.consume_group("group_name")` | 按分组启动多个消费函数 |
-| `ctrl_c_recv()` | 阻塞主线程，让 Ctrl+C 能在windows系统上 方便的停止程序（非必需，不加也可关窗口或 kill 进程） |
+| `enable_ctrl_c_quit_on_windows()` | 阻塞主线程，让 Ctrl+C 能在windows系统上 方便的停止程序（非必需，不加也可关窗口或 kill 进程） |
 
 **注意**：
 - 连续启动多个消费者：`func1.consume(); func2.consume()` 即可，**不要**用 `threading.Thread` 包装
@@ -304,3 +304,4 @@ funboost/
 1. 禁止ai flush redis，ai不要主动去清空redis。
 
 ## 十五 funboost文档仓库
+D:/codes/funboost_docs/  ,文档在 source/articles 目录下

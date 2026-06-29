@@ -3,7 +3,7 @@ import sys
 
 import time
 import random
-from funboost import boost, BrokerEnum, ConcurrentModeEnum, BoosterParams,ctrl_c_recv
+from funboost import boost, BrokerEnum, ConcurrentModeEnum, BoosterParams,enable_ctrl_c_quit_on_windows
 from funboost.core.msg_result_getter import AsyncResult
 
 
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     #     for i in range(1000):
     #         pool.submit(f.push, i)
     print('cost time is :', time.time() - start_time)
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 
     
 

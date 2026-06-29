@@ -1,4 +1,4 @@
-from funboost import boost, BrokerEnum,ctrl_c_recv,BoosterParams,APSJobAdder
+from funboost import boost, BrokerEnum,enable_ctrl_c_quit_on_windows,BoosterParams,APSJobAdder
 
 
 
@@ -29,4 +29,4 @@ if __name__ == '__main__':
                                                                       hour=23, minute=36, second=50, 
                                                                       kwargs={"x":50,"y":60},replace_existing=True,id='cron_job1')
     
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

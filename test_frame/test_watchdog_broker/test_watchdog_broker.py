@@ -13,7 +13,7 @@ import time
 from pathlib import Path
 
 
-from funboost import boost, BoosterParams, ctrl_c_recv, BrokerEnum
+from funboost import boost, BoosterParams, enable_ctrl_c_quit_on_windows, BrokerEnum
 
 
 # 测试目录
@@ -128,4 +128,4 @@ if __name__ == "__main__":
     time.sleep(5)
     create_test_files()
     manual_push()
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

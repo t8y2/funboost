@@ -23,7 +23,7 @@ load_dotenv('/my_dotenv.env')
 from test_frame.test_mongo_alert.t_tasks import task_high_failure, task_low_failure
 
 from funboost.core.mongo_alert_monitor import MongoAlertMonitor
-from funboost import ctrl_c_recv
+from funboost import enable_ctrl_c_quit_on_windows
 
 WECHAT_WEBHOOK = os.getenv('QYWEIXIN_WEBHOOK')
 

@@ -1,6 +1,6 @@
 import time
 import random
-from funboost import boost, BrokerEnum,BoosterParams,ctrl_c_recv
+from funboost import boost, BrokerEnum,BoosterParams,enable_ctrl_c_quit_on_windows
 from funboost.concurrent_pool.custom_threadpool_executor import ThreadPoolExecutorShrinkAble
 
 pool = ThreadPoolExecutorShrinkAble(200)
@@ -54,4 +54,4 @@ if __name__ == '__main__':
     test_fun.consume()
     test_fun2.push(1)
     test_fun2.consume()
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

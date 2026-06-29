@@ -34,7 +34,7 @@ import random
 
 from funboost import (
     boost, BoosterParams, BrokerEnum,
-    BoostersManager, ctrl_c_recv
+    BoostersManager, enable_ctrl_c_quit_on_windows
 )
 
 

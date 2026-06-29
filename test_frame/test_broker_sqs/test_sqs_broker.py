@@ -13,7 +13,7 @@ AWS SQS 中间件测试示例
 """
 
 import time
-from funboost import boost, BrokerEnum, BoosterParams,ctrl_c_recv
+from funboost import boost, BrokerEnum, BoosterParams,enable_ctrl_c_quit_on_windows
 
 
 @boost(BoosterParams(
@@ -49,4 +49,4 @@ if __name__ == '__main__':
     # 启动消费
     print("开始消费任务...")
     process_sqs_task.consume()
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
