@@ -243,29 +243,6 @@ from funboost.faas import flask_blueprint
 
 ---
 
-## 八、代码风格
-
-| 项 | 值 |
-|----|-----|
-| 缩进 | 4 空格 |
-| 最大行宽 | 400 |
-| 换行符 | CRLF（Windows） |
-| 参数模型 | Pydantic（v1/v2 兼容，`core/pydantic_compatible_base.py`） |
-| 日志 | `nb_log` |
-| 序列化 | JSON（支持 datetime），可选 Pickle |
-| Python 兼容 | 3.7+ |
-
----
-
-## 九、异常类
-
-| 异常 | 说明 |
-|------|------|
-| `ExceptionForRetry` | 手动触发重试（函数内抛出即可） |
-| `ExceptionForRequeue` | 消息重新入队 |
-| `ExceptionForPushToDlxqueue` | 推送消息到死信队列 |
-| `FunboostWaitRpcResultTimeout` | RPC 结果等待超时 |
-
 ---
 
 ## 十、项目结构
@@ -326,3 +303,4 @@ funboost/
 ## 十四、 ai禁止行为
 1. 禁止ai flush redis，ai不要主动去清空redis。
 
+## 十五 funboost文档仓库
