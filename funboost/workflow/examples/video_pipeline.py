@@ -17,7 +17,7 @@ Funboost Workflow 示例 - 视频处理 Pipeline
 import time
 import typing
 
-from funboost import boost, ctrl_c_recv, BrokerEnum, fct
+from funboost import boost, enable_ctrl_c_quit_on_windows, BrokerEnum, fct
 from funboost.workflow import chain, group, chord, WorkflowBoosterParams
 
 
@@ -166,4 +166,4 @@ if __name__ == '__main__':
     print('=' * 60)
     
     # 保持运行
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

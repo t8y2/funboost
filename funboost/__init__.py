@@ -53,9 +53,9 @@ from funboost.funboost_config_deafult import BrokerConnConfig, FunboostCommonCon
 from funboost.core.cli.discovery_boosters import BoosterDiscovery
 
 # from funboost.core.exit_signal import set_interrupt_signal_handler
-from funboost.core.helper_funs import run_forever
+# from funboost.core.helper_funs import run_forever
 
-from funboost.utils.ctrl_c_end import ctrl_c_recv
+from funboost.utils.ctrl_c_end import enable_ctrl_c_quit_on_windows,ctrl_c_recv
 from funboost.utils.redis_manager import RedisMixin
 from funboost.concurrent_pool.custom_threadpool_executor import show_current_threads_num
 

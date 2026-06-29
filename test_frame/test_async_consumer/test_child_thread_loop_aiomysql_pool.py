@@ -21,7 +21,7 @@ async_aiomysql_f2_use_thread_local_aio_mysql_pool 使用 thread local 级别的�
 """
 import threading
 
-from funboost import boost, BrokerEnum, ConcurrentModeEnum, ctrl_c_recv, BoosterParams
+from funboost import boost, BrokerEnum, ConcurrentModeEnum, enable_ctrl_c_quit_on_windows, BoosterParams
 import asyncio
 import  time
 import aiomysql
@@ -150,4 +150,4 @@ if __name__ == '__main__':
 
     async_aiomysql_f1.consume()
     async_aiomysql_f2_use_thread_local_aio_mysql_pool.consume()
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

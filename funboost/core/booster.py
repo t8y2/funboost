@@ -12,7 +12,7 @@ from funboost.concurrent_pool.async_helper import simple_run_in_executor
 from funboost.constant import FunctionKind, StrConst
 from funboost.utils.class_utils import ClsHelper
 
-from funboost.utils.ctrl_c_end import ctrl_c_recv
+from funboost.utils.block_exit import keep_sleep
 from funboost.core.loggers import flogger, develop_logger, logger_prompt
 
 from functools import wraps
@@ -443,7 +443,7 @@ class BoosterRegistry:
         """
         for queue_name in queue_names:
             self.get_booster(queue_name).consume()
-        ctrl_c_recv()
+        keep_sleep()
 
     consume = consume_queues
 
@@ -455,7 +455,7 @@ class BoosterRegistry:
         for queue_name in self.get_all_queues():
             self.get_booster(queue_name).consume()
         if block:
-            ctrl_c_recv()
+            keep_sleep()
 
     consume_all = consume_all_queues
 
@@ -467,7 +467,7 @@ class BoosterRegistry:
         """
         for queue_name, process_num in queue_name__process_num.items():
             self.get_booster(queue_name).multi_process_consume(process_num)
-        ctrl_c_recv()
+        keep_sleep()
 
     mp_consume = multi_process_consume_queues
 
@@ -488,7 +488,7 @@ class BoosterRegistry:
         for queue_name in need_consume_queue_names:
             self.get_or_create_booster_by_queue_name(queue_name).consume()
         if block:
-            ctrl_c_recv()
+            keep_sleep()
 
     def multi_process_consume_group(self, booster_group: str, process_num=1):
         """
@@ -506,7 +506,7 @@ class BoosterRegistry:
         """
         for queue_name in self.get_all_queues():
             self.get_booster(queue_name).multi_process_consume(process_num)
-        ctrl_c_recv()
+        keep_sleep()
 
     mp_consume_all = multi_process_consume_all_queues
 

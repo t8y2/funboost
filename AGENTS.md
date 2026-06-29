@@ -51,7 +51,7 @@ def my_task(x, y):
 | `func.consume()` | 启动消费（非阻塞），可连续调用多个：`func1.consume(); func2.consume()` |
 | `func.multi_process_consume(n)` / `func.mp_consume(n)` | 多进程 + 多线程叠加并发 |
 | `BoostersManager.consume_group("group_name")` | 按分组启动多个消费函数 |
-| `ctrl_c_recv()` | 阻塞主线程，让 Ctrl+C 能在windows系统上 方便的停止程序（非必需，不加也可关窗口或 kill 进程） |
+| `enable_ctrl_c_quit_on_windows()` | 阻塞主线程，让 Ctrl+C 能在windows系统上 方便的停止程序（非必需，不加也可关窗口或 kill 进程） |
 
 **注意**：
 - 连续启动多个消费者：`func1.consume(); func2.consume()` 即可，**不要**用 `threading.Thread` 包装
@@ -243,29 +243,6 @@ from funboost.faas import flask_blueprint
 
 ---
 
-## 八、代码风格
-
-| 项 | 值 |
-|----|-----|
-| 缩进 | 4 空格 |
-| 最大行宽 | 400 |
-| 换行符 | CRLF（Windows） |
-| 参数模型 | Pydantic（v1/v2 兼容，`core/pydantic_compatible_base.py`） |
-| 日志 | `nb_log` |
-| 序列化 | JSON（支持 datetime），可选 Pickle |
-| Python 兼容 | 3.7+ |
-
----
-
-## 九、异常类
-
-| 异常 | 说明 |
-|------|------|
-| `ExceptionForRetry` | 手动触发重试（函数内抛出即可） |
-| `ExceptionForRequeue` | 消息重新入队 |
-| `ExceptionForPushToDlxqueue` | 推送消息到死信队列 |
-| `FunboostWaitRpcResultTimeout` | RPC 结果等待超时 |
-
 ---
 
 ## 十、项目结构
@@ -326,3 +303,5 @@ funboost/
 ## 十四、 ai禁止行为
 1. 禁止ai flush redis，ai不要主动去清空redis。
 
+## 十五 funboost文档仓库
+D:/codes/funboost_docs/  ,文档在 source/articles 目录下

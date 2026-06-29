@@ -10,7 +10,7 @@ os.environ['path'] = os.path.dirname(sys.executable) + os.pathsep + os.environ['
 """
 
 from pydantic import BaseModel
-from funboost import (boost, BoosterParams, BrokerEnum, ctrl_c_recv, fct)
+from funboost import (boost, BoosterParams, BrokerEnum, enable_ctrl_c_quit_on_windows, fct)
 
 
 class MyClass:
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     func0.push('hello',100,{'a':1,'b':2},[1,2,3]) # 以前只允许发布这样基本类型入参的消息
     print(func0.publisher.generate_msg_context_for_push('hello',100,{'a':1,'b':2},[1,2,3]))
 
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 
 
 

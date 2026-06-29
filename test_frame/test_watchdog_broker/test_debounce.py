@@ -15,7 +15,7 @@
 
 import time
 from pathlib import Path
-from funboost import boost, BoosterParams, ctrl_c_recv, BrokerEnum
+from funboost import boost, BoosterParams, enable_ctrl_c_quit_on_windows, BrokerEnum
 
 # 测试目录
 TEST_DIR = Path(__file__).parent / "debounce_test_data"
@@ -112,4 +112,4 @@ if __name__ == "__main__":
     time.sleep(3)  # 等待消费者启动
     test_debounce()
     print("\n等待观察结果（约10秒后可 Ctrl+C 退出）...\n")
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

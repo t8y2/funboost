@@ -7,7 +7,7 @@
 3.连续丝滑启动多个消费函数
 4.定时任务
 """
-from funboost import boost, BrokerEnum,BoosterParams,ctrl_c_recv,ConcurrentModeEnum,ApsJobAdder
+from funboost import boost, BrokerEnum,BoosterParams,enable_ctrl_c_quit_on_windows,ConcurrentModeEnum,ApsJobAdder
 import time
 
 class MyBoosterParams(BoosterParams):  # 自定义的参数类，继承BoosterParams，用于减少每个消费函数装饰器的重复相同入参个数
@@ -93,4 +93,4 @@ if __name__ == '__main__':
         replace_existing=True,
         id='cron_job1')
     
-    ctrl_c_recv()  # 用于阻塞代码，阻止主线程退出，使主线程永久运行。  相当于 你在代码最末尾，加了个 while 1:time.sleep(10)，使主线程永不结束。apscheduler background定时器守护线程需要这样保持定时器不退出。
+    enable_ctrl_c_quit_on_windows()  # 用于阻塞代码，阻止主线程退出，使主线程永久运行。  相当于 你在代码最末尾，加了个 while 1:time.sleep(10)，使主线程永不结束。apscheduler background定时器守护线程需要这样保持定时器不退出。

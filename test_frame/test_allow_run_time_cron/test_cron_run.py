@@ -1,7 +1,7 @@
 
 import time
 import datetime
-from funboost import boost, BoosterParams, BrokerEnum,ctrl_c_recv
+from funboost import boost, BoosterParams, BrokerEnum,enable_ctrl_c_quit_on_windows
 
 # 场景1：只在工作日上班时间运行 (测试通过前提：当前必须是工作日9-18点，否则这也会被暂停)
 # * 9-18 * * 1-5 表示周一到周五的 9:00-18:59 允许运行
@@ -44,6 +44,6 @@ if __name__ == '__main__':
     # 2. 启动消费
     task_allow.consume()
     task_deny.consume()
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 
  

@@ -10,7 +10,7 @@ Funboost 天然支持消费任意 JSON 消息，且不要求任务必须通过 F
 import time
 import redis
 import json
-from funboost import boost, BrokerEnum, BoosterParams, fct,ctrl_c_recv
+from funboost import boost, BrokerEnum, BoosterParams, fct,enable_ctrl_c_quit_on_windows
 
 @boost(boost_params=BoosterParams(queue_name="task_queue_name2c", qps=5,
                                    broker_kind=BrokerEnum.REDIS, 
@@ -34,5 +34,5 @@ if __name__ == "__main__":
 
     task_fun.consume()
    
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 

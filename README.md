@@ -296,16 +296,16 @@ if __name__ == '__main__':
         pool.submit(f, i)
 ```
 
-#### ✅ 方式 B：Funboost 模式 (推荐)
+#### ✅ 方式 B：Funboost @boost 模式 (推荐)
 ```python
 import time
-from funboost import BoosterParams, BrokerEnum
+from funboost import boost,BoosterParams, BrokerEnum
 
 # 仅需一行装饰器，即可获得 10 线程并发 + 消息队列能力
-@BoosterParams(queue_name="test_insteda_thread_queue", 
+@boost(BoosterParams(queue_name="test_insteda_thread_queue", 
                broker_kind=BrokerEnum.MEMORY_QUEUE, 
                concurrent_num=10, 
-               is_auto_start_consuming_message=True)
+               is_auto_start_consuming_message=True))   
 def f(x):
     time.sleep(3)
     print(x)
@@ -313,6 +313,19 @@ def f(x):
 if __name__ == '__main__':
     for i in range(100):
         f.push(i)
+```
+
+####  ✅ 方式 C：FunboostPool 模式 
+
+`FunboostPool` 完美平替 `concurrent.futures.ThreadPoolExecutor`，只需要替换一行实例化代码，无任何负担，兼容用户老项目到极致了。
+
+详见教程 4.38章节 `## 4.38 MemoryFunboostPool 和 FunboostPool 的使用`
+
+```python
+from funboost import MemoryFunboostPool,FunboostPool
+pool = MemoryFunboostPool(10,) # 完美支持submit 和map，入参和返回类型一致。
+future = pool.submit(task_fun, 1, 2) # future类型是 concurrent.futures.Future 。
+print(future.result()) # 一样能通过future获取结果
 ```
 
 ### 1.2.2 🚀 任务控制功能矩阵
@@ -328,7 +341,6 @@ Funboost 将分布式系统的复杂性封装于内核，向下屏蔽基础设�
 | **CDC 事件驱动** | **Binlog 监听**：支持 `MYSQL_CDC`，实现数据库变更实时触发函数执行，轻量级替代 Canal/Flink 组件。 |
 | **框架托管** | **无缝兼容**：支持接管 Celery, Dramatiq, RQ, Huey 等框架作为底层驱动，统一上层 API。 |
 | **异构通信** | **多协议支持**：支持 gRPC 双向通信与 MQTT 物联网协议集成。 |
-| **超级装饰器** | **funboost当做超级装饰器使用**：即使你不用消息队列，也建议使用funboost，因为@boost控制函数功能极其丰富 |
 
 #### ⚡ 维度二：并发与吞吐 (Concurrency & Throughput)
 
@@ -343,8 +355,8 @@ Funboost 将分布式系统的复杂性封装于内核，向下屏蔽基础设�
 *   **异常重试**：支持指数退避策略，支持针对特定异常类型的重试配置。
 *   **死信队列 (DLQ)**：重试耗尽或捕获特定异常后，自动将消息移交死信队列，保障现场数据不丢失。
 *   **全量持久化**：支持将函数入参、执行结果、耗时、异常堆栈自动持久化至 MongoDB/MySQL，实现数据可回溯。
-*   **多维监控告警**：内置**五种开箱即用的告警方式**（内置告警 Mixin、熔断器钩子、Prometheus 指标、Mongo 轮询、ELK 日志），可按连续失败次数或滑动窗口错误率配置告警规则，支持钉钉、企业微信、飞书、Webhook 等多种通道；任务恢复后自动发送恢复通知，形成故障感知与解决的完整闭环。（在文档 **6.30 funboost 如何实配置触发失败告警和恢复告警** 一节中有详细说明）
-
+*   **多维监控告警**：内置 **5 种告警方式**（告警 Mixin、熔断器钩子、Prometheus 指标、Mongo 轮询、ELK 日志），支持按连续失败次数或滑动窗口错误率触发告警。
+    *   **告警通道**：钉钉、企业微信、飞书、Webhook 等；任务恢复后自动发送恢复通知，形成故障闭环。详见文档 **6.30 章节**。
 
 #### 🕹️ 维度四：流量治理 (Traffic Governance)
 
@@ -368,8 +380,7 @@ Funboost 将分布式系统的复杂性封装于内核，向下屏蔽基础设�
 *   **链路追踪**：原生集成 **OpenTelemetry**，支持接入 Jaeger/SkyWalking，自动注入 Context 实现跨组件全链路追踪。
 *   **指标监控**：内置 **Prometheus** Exporter，支持 Pull 和 PushGateway 模式，通过 Grafana 展示实时指标。
 *   **Web 控制台**：自带可视化管理界面，支持查看积压量、QPS 曲线、消费者元数据
-*   **远程运维**：支持 `RemoteTaskKiller` 终止特定执行中的任务；支持 `fabric_deploy` 实现代码热部署。
-                funweb (funboost_web_manager) 支持脚本更新和部署/进程存活监控/日志查看/便捷的文件日志检索
+*   **远程运维**：支持 `RemoteTaskKiller` 终止执行中的任务；支持 `fabric_deploy` 代码热部署；funweb 支持脚本部署、进程监控、日志查看与检索。
 
 #### 🧬 维度七：开发体验 (Developer Experience)
 
@@ -378,10 +389,6 @@ Funboost 将分布式系统的复杂性封装于内核，向下屏蔽基础设�
 *   **生命周期 Hook**：提供 `consumer_override_cls` 接口，支持重写消息清洗、结果回调等核心逻辑，兼容 **非标准格式消息**，**支持重写任何任意父类方法**。
 *   **对象传输**：支持 Pickle 序列化选项，允许直接传递自定义 Python 对象作为任务参数。
 *   **超级装饰器**： 即使用户不需要分布式和消息队列，也可以使用 `@boost` 装饰器配合 **MEMORY_QUEUE** 模式，一个@boost装饰器就能实现并发控制、QPS 限流、自动重试、任务去重等 10+ 种功能，抵得上 10 个常规装饰器叠加使用。
-
-
-
-
 
 ## 1.3 🚀 快速上手：你的第一个 Funboost 程序
 
@@ -413,11 +420,13 @@ from funboost import boost, BrokerEnum, BoosterParams
 def task_fun(x, y):
     print(f'{x} + {y} = {x + y}')
     time.sleep(3)  # 模拟耗时，框架会自动并发绕过阻塞
+    return x + y
 
 if __name__ == "__main__":
     # 1. 生产者：发布 100 个任务
+    print(task_fun(10,20)) # 即使task_fun加了@boost装饰器，task_fun函数仍能直接本地调用，函数入参不会发到消息队列。这就是双模运行。
     for i in range(100):
-        task_fun.push(i, y=i * 2)
+        task_fun.push(i, y=i * 2) # 发布消息 {"x":i,"y":i*2} 到消息队列task_queue_name1 中。
     
     # 2. 消费者：启动循环调度
     task_fun.consume()
@@ -436,7 +445,42 @@ if __name__ == "__main__":
 
 
 
-### 1.3.2 🔥 进阶实战：RPC、定时任务与丝滑连招
+### 1.3.2 ⚡ 异步 (asyncio) 模式
+
+如果你的消费函数是 `async def`，可以开启 `ConcurrentModeEnum.ASYNC` 并发模式，配合 `aio_push` 发布消息。
+
+```python
+import asyncio
+from funboost import boost, BrokerEnum, BoosterParams, ConcurrentModeEnum,AioAsyncResult
+
+@boost(BoosterParams(
+    queue_name='async_demo_queue',
+    qps=10,
+    concurrent_mode=ConcurrentModeEnum.ASYNC,  # 切换为 asyncio 并发
+    broker_kind=BrokerEnum.REDIS_ACK_ABLE,
+    is_using_rpc_mode=True
+))
+async def async_task(x: int, y: int):
+    await asyncio.sleep(0.5)  # 模拟异步 IO
+    return x + y
+
+async def main():
+    # 异步发布，直接返回 AioAsyncResult
+    aio_result:AioAsyncResult = await async_task.aio_push(10, 20)
+    result = await aio_result.result  # await 获取 RPC 结果
+    print(f'异步结果: {result}')
+
+if __name__ == '__main__':
+    async_task.consume()  # 非阻塞启动消费
+    asyncio.run(main())
+```
+
+> **💡 要点**
+> - 消费函数必须为 `async def`，且设置 `concurrent_mode=ConcurrentModeEnum.ASYNC`
+> - 发布用 `await func.aio_push()`，获取结果用 `await aio_result.result`
+> - 不需要 RPC 结果时，可去掉 `is_using_rpc_mode=True`，直接 `await func.aio_push()` 即可
+
+### 1.3.3 🔥 进阶实战：RPC、定时任务与丝滑连招
 
 这是一个集大成的例子，展示了 Funboost 的核心能力：
 *   ✅ **参数复用**：继承 `BoosterParams` 减少重复代码。
@@ -446,7 +490,7 @@ if __name__ == "__main__":
 
 ```python
 import time
-from funboost import boost, BrokerEnum, BoosterParams, ctrl_c_recv, ConcurrentModeEnum, ApsJobAdder
+from funboost import boost, BrokerEnum, BoosterParams, enable_ctrl_c_quit_on_windows, ConcurrentModeEnum, ApsJobAdder
 
 # 1. 定义公共配置基类，减少重复代码
 class MyBoosterParams(BoosterParams):
@@ -505,8 +549,8 @@ if __name__ == '__main__':
         trigger='interval', seconds=30, args=(4, 6, 10), id='job2'
     )
 
-    # 阻塞主线程，保持程序运行
-    ctrl_c_recv()
+    # enable_ctrl_c_quit_on_windows使windows能ctrl+c退出，这是非必须的，不加也可以。
+    enable_ctrl_c_quit_on_windows()
 ```
 
 > **🧠 设计哲学**
@@ -516,7 +560,7 @@ if __name__ == '__main__':
 
 ---
 
-### 1.3.3 ✂️ 极简写法：省略 `@boost`
+### 1.3.4 ✂️ 极简写法：省略 `@boost`
 
 如果你追求极致简洁，也可以直接使用 `@BoosterParams` 作为装饰器，效果等同于 `@boost(BoosterParams(...))`。
 
@@ -527,7 +571,7 @@ def task_fun(a, b):
     return a + b
 ```
 
-### 1.3.4 ❌ 过时写法： 直接在 @boost传各种配置入参，不推荐
+### 1.3.5 ❌ 过时写法： 直接在 @boost传各种配置入参，不推荐
 这种直接在 `@boost`传参，而不使用 `BoosterParams`来传各种配置，是过气写法不推荐，因为不能代码补全了。   
 ```python
 # ⚠️ 反例：过时写法，不推荐！
@@ -541,12 +585,10 @@ def task_fun(a, b):
 
 可视化管理后台提供了强大的监控与运维能力，以下是核心功能截图：
 
-
-
 函数消费结果：可查看和搜索函数实时消费状态和结果  
 [![函数结果表](https://s41.ax1x.com/2025/12/19/pZ1L5h4.png)](https://imgchr.com/i/pZ1L5h4)
 
-队列操作：查看和操作队列，包括清空、暂停消费、恢复消费、调整QPS和并发  
+队列操作：查看和操作队列，包括清空、暂停消费、恢复消费
 [![队列操作1](https://s41.ax1x.com/2025/12/17/pZlrYPH.png)](https://imgchr.com/i/pZlrYPH)
 [![队列操作2](https://s41.ax1x.com/2025/12/17/pZlrUxI.png)](https://imgchr.com/i/pZlrUxI)
 
@@ -559,63 +601,24 @@ RPC调用：在网页上对30种消息队列发布消息并获取函数执行结
 定时任务管理：列表页  
 [![定时任务列表](https://s41.ax1x.com/2025/12/17/pZlrNRA.png)](https://imgchr.com/i/pZlrNRA)
 
-
-
 ## 1.4 💡 为什么 Python 极其需要分布式函数计算？
 
-Python 语言的特性决定了它比 Java/Go 等语言更依赖分布式调度框架。主要原因有两点：
-
-### 1️⃣ 痛点一：GIL 锁的限制 (多核利用率低)
-> 🛑 **现状**：由于 GIL (全局解释器锁) 的存在，普通的 Python 脚本无法利用多核 CPU。在 16 核机器上，CPU 利用率最高只能达到 **6.25% (1/16)**。
-> 😓 **难点**：手动编写 `multiprocessing` 多进程代码非常麻烦，涉及复杂的进程间通信 (IPC)、任务分配和状态共享。
-
-✅ **Funboost 的解法**：
-*   **天生解耦**：利用中间件（如 Redis/RabbitMQ）解耦任务,无法手写怎么给多进程分配任务和进程间通信。
-*   **无感多进程**：单进程脚本与多进程脚本写法完全一致，**无需**手写 `multiprocessing`，自动榨干多核性能。
-
-### 2️⃣ 痛点二：原生性能瓶颈 (动态语言特性)
-> 🐌 **现状**：作为动态语言，Python 的单线程执行速度通常慢于静态语言。
-> 🚀 **需求**：为了弥补单机速度，必须通过**横向扩展**来换取时间。
-
-✅ **Funboost 的解法**：
-*   **无缝扩展**：代码无需任何修改，即可适应多种运行环境：
-    *   🔄 **多解释器**：同一台机器启动多个 Python 进程。
-    *   🐳 **容器化**：部署在多个 Docker 容器中。
-    *   ☁️ **跨物理机**：部署在多台物理服务器上。
-*   **统一驱动**：Funboost 作为调度核心，让 Python 跑在集群之上，获得媲更高的系统吞吐量。
+Python 受限于 **GIL（全局解释器锁）**，单进程无法利用多核 CPU；加上动态语言的原生性能瓶颈，**横向扩展**是提升吞吐量的必经之路。Funboost 让这一切变得简单——代码无需任何修改，即可从单机无缝扩展到多进程、Docker 容器或多台物理机。
 
 
 ## 1.5 🎓 最佳学习路径
 
-Funboost 的设计哲学是 **“极简主义”**。您无需阅读长篇大论，只需通过实践掌握核心：
+以 **1.3 章节** 的求和代码为蓝本，修改 `@boost` 中的参数（如 `qps`、`concurrent_num`），添加 `time.sleep()` 模拟耗时，观察控制台输出即可体会分布式、并发和控频的实际效果。
 
-1.  **🧪 实验式学习**：
-    *   以 **1.3 章节** 的求和代码为蓝本。
-    *   修改 `@boost` 装饰器中的参数（如 `qps`、`concurrent_num`）。
-    *   在函数中添加 `time.sleep()` 模拟耗时。
-    *   **观察**：观察控制台输出，体会分布式、并发和控频的实际效果。
-
-2.  **✨ 一行代码原则**：
-    *   这是最简单的框架：核心只有一行 `@boost` 代码。
-    *   如果您能掌握这个装饰器，就掌握了整个框架。这比学习那些需要继承多个类、配置多个文件的传统框架要简单得多。
-
-> **🤖 AI 助教**
-> 强烈推荐参考 **[文档第 14 章]**，学习如何利用 AI 大模型快速精通 `funboost` 的各种高级用法。
+> **🤖 AI 助教**：强烈推荐参考 **[文档第 14 章]**，利用 AI 大模型快速精通 funboost。
 
 ---
 
 ## 1.6 🥋 funboost 练就吸星大法神功，一招吸走 Celery 毕生内力
 
-**Funboost 的极简招式 + Celery 的深厚内力 = 独步武林**
-
-> “江湖中人多迷信 Celery 的名门光环，虽 Funboost 身法快过其数十倍，且有演武场（2.6章节）实测为证，奈何部分豪杰固步自封，不愿亲自试剑。
-> Funboost 遂施展 **‘吸星大法’**，将 Celery 纳为己用（作为 Broker）。**既入我门，便由我控**，以此化解众生执念。”
-
-Celery 称霸 Python 异步江湖十数载，内力虽深厚，但其招式繁复、门规森严（配置繁琐），令无数豪杰望而却步。 
-今 Funboost 施展 **“吸星大法”**，只需一招 `BrokerEnum.CELERY`，顷刻间将 Celery 化为 **座下护法**。自此，Celery 竟成 Funboost 之一大 **子集**，听凭号令！ 
+Funboost 自身性能与 Celery 相比已有数量级优势（见文档 **2.6**、**2.9**）。将 Celery 作为 **Broker**（`BrokerEnum.CELERY`），是在保留 Funboost 调度与开发体验的前提下，借 Celery 生态打消部分用户对“调度核心是否够稳”的顾虑——**底层仍是 Celery 队列与执行，上层由 Funboost 统一入口与配置**。
 
 ### ⚔️ 降维打击：化繁为简的绝世武功
-通过 Funboost 驾驭 Celery，犹如令狐冲习得独孤九剑，破尽天下繁琐招式，直击要害：
 
 | 🆚 招式对决 | 🛑 原生 Celery (旧派宗门的桎梏) | 🟢 Funboost 御剑术 (新派宗师的洒脱) |
 | :--- | :--- | :--- |
@@ -624,13 +627,7 @@ Celery 称霸 Python 异步江湖十数载，内力虽深厚，但其招式繁�
 | **心法运转**<br>(门槛) | **经脉逆行**：需手动修炼 `includes` 和 `task_routes`，极易气血翻涌（配置报错）。 | **浑然天成**：自动打通任督二脉，框架自动发现并注册任务，行云流水。 |
 | **洞察天地**<br>(体验) | **盲人摸象**：`@app.task` 入参如雾里看花，IDE 无法感知，极易行差踏错。 | **天眼通**：`BoosterParams` 开启全知视角，代码补全如神助，所见即所得。 |
 
-> **📜 藏经阁 (代码示例)**
-> 欲练此功，请翻阅 **[11.1 章节]**。
-> 您只需施展 Funboost 的极简剑法，底层那拥有万钧之力的 Celery 引擎便会自动为您移山填海，虽有雷霆之威，却无反噬之虞。
-
-
- 需要说明的是，funboost性能是已经远超celery，吸纳celery作为broker，兼容celery作为funboost的broker，是为了打消有的人对funboost的调度核心的稳定性的疑虑。   
- > 你可以看文档2.6章节**funboost vs celery控制变量法性能对比**，以及2.9章节，**funboost到底为什么性能比celery高几十倍？太离谱了,太假了是吗？**
+> **📜 藏经阁 (代码示例)**：完整示例见 **[11.1 章节](https://funboost.readthedocs.io/zh-cn/latest/articles/c11.html)**。
 
 
 [查看 funboost 分布式函数调度平台 完整教程](https://funboost.readthedocs.io/)  
@@ -639,20 +636,4 @@ Celery 称霸 Python 异步江湖十数载，内力虽深厚，但其招式繁�
 
 <div> </div>  
 
-[//]: #  
-[//]: #  
-[//]: #  
-[//]: #  
-[//]: #  
-[//]: #  
-[//]: #  
-[//]: #  
-[//]: #  
-[//]: #  
-[//]: #  
-[//]: #  
-[//]: #  
-[//]: #  
-[//]: #  
-[//]: #  
 

@@ -11,7 +11,7 @@
 
 import time
 
-from funboost import boost, BoosterParams, TaskOptions, ctrl_c_recv
+from funboost import boost, BoosterParams, TaskOptions, enable_ctrl_c_quit_on_windows
 from funboost.constant import BrokerEnum
 
 
@@ -74,4 +74,4 @@ def test_delay():
 if __name__ == '__main__':
     test_delay()
     delay_task.consume()
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

@@ -1,5 +1,5 @@
 import time
-from funboost import boost, BoosterParams,ctrl_c_recv,BrokerEnum
+from funboost import boost, BoosterParams,enable_ctrl_c_quit_on_windows,BrokerEnum
 
 @boost(BoosterParams(queue_name='test_redis_conn',broker_kind=BrokerEnum.REDIS,is_using_rpc_mode=True))
 def add(x, y):

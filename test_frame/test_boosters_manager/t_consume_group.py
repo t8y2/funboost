@@ -9,7 +9,7 @@ BoostersManager.consume_group(booster_group=GROUP1_NAME)
 
 import time
 from funboost import boost, BoosterParams, BoostersManager, ConcurrentModeEnum
-from funboost.utils.ctrl_c_end import ctrl_c_recv
+from funboost.utils.ctrl_c_end import enable_ctrl_c_quit_on_windows
 
 
 GROUP1_NAME = "my_group1"
@@ -68,4 +68,4 @@ if __name__ == "__main__":
         GROUP1_NAME
     )  # 当前进程内启动消费组 GROUP1_NAME , 内部相当于是执行了 f1.consume() f2.consume() 
     # BoostersManager.multi_process_consume_group(GROUP1_NAME,2) # 多进程启动消费组
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

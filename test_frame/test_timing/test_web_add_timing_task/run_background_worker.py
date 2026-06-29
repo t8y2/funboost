@@ -1,6 +1,6 @@
 # run_background_worker.py
 import time
-from funboost import ApsJobAdder, ctrl_c_recv
+from funboost import ApsJobAdder, enable_ctrl_c_quit_on_windows
 from tasks import dynamic_task # 导入任务函数
 
 if __name__ == '__main__':
@@ -20,4 +20,4 @@ if __name__ == '__main__':
     print("[Scheduler] 定时任务调度器已启动，正在扫描任务计划...")
 
     print("\n后台服务已准备就绪，按 Ctrl+C 退出。")
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

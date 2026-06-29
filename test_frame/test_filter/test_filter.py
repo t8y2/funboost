@@ -7,7 +7,7 @@
 import threading
 
 import time
-from funboost import BoosterParams, BrokerEnum,ctrl_c_recv,TaskOptions,ConcurrentModeEnum
+from funboost import BoosterParams, BrokerEnum,enable_ctrl_c_quit_on_windows,TaskOptions,ConcurrentModeEnum
 
 
 # 通过设置broker_kind，一键切换中间件为mq或redis等20种中间件或包。
@@ -58,6 +58,6 @@ if __name__ == '__main__':
         f3.publish(msg={'a':i,'b':i*2},task_options=TaskOptions(filter_str=str(i)))
 
     
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 
 

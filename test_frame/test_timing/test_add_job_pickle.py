@@ -10,7 +10,7 @@ aps_obj_sum_two_numbers2.add_job(
 
 用户看这个脚本主要是需要对比 add_push_job 和 add_job 的区别.
 """
-from funboost import boost, BrokerEnum,ctrl_c_recv,BoosterParams,ApsJobAdder
+from funboost import boost, BrokerEnum,enable_ctrl_c_quit_on_windows,BoosterParams,ApsJobAdder
 
 # 定义任务处理函数
 @boost(BoosterParams(queue_name='sum_queue552', broker_kind=BrokerEnum.REDIS))
@@ -62,4 +62,4 @@ if __name__ == '__main__':
     )
 
 
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

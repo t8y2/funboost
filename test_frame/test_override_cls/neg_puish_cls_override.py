@@ -7,7 +7,7 @@
 import random
 import time
 
-from funboost import boost, BrokerEnum, BoosterParams, ConcurrentModeEnum,fct,ctrl_c_recv
+from funboost import boost, BrokerEnum, BoosterParams, ConcurrentModeEnum,fct,enable_ctrl_c_quit_on_windows
 from funboost.core.serialization import Serialization
 
 from funboost.publishers.redis_publisher import RedisPublisher
@@ -44,4 +44,4 @@ if __name__ == '__main__':
     for i in range(100):
         cost_long_time_fun.push(i)
     cost_long_time_fun.consume()
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

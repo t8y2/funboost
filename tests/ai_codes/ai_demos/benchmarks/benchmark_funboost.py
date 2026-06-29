@@ -11,7 +11,7 @@ os.environ['PRINT_WRTIE_FILE_NAME'] = 'benchmark_funboost_print.print'
 os.environ['SYS_STD_FILE_NAME'] = 'benchmark_funboost_std.std'
 
 import nb_log  # noqa
-from funboost import boost, BoosterParams, BrokerEnum, ctrl_c_recv
+from funboost import boost, BoosterParams, BrokerEnum, enable_ctrl_c_quit_on_windows
 
 TOTAL_MSGS = 100000
 BATCH_SIZE = 10000

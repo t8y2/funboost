@@ -15,7 +15,7 @@ os.environ['SYS_STD_FILE_NAME'] = f'ai_std_{timestamp}.txt'
 # ====================================================================
 
 from funboost import boost, BoosterParams
-from funboost import ctrl_c_recv
+from funboost import enable_ctrl_c_quit_on_windows
 
 # ============ 定义任务函数 ============
 @boost(BoosterParams(

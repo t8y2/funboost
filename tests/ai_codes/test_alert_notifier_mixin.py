@@ -9,7 +9,7 @@ AlertNotifierConsumerMixin 使用示例
 """
 import time
 import random
-from funboost import boost, BoosterParams, BrokerEnum, ctrl_c_recv,ConcurrentModeEnum
+from funboost import boost, BoosterParams, BrokerEnum, enable_ctrl_c_quit_on_windows,ConcurrentModeEnum
  
 from funboost.contrib.override_publisher_consumer_cls.alert_notifier_mixin import (
     AlertNotifierConsumerMixin,
@@ -127,4 +127,4 @@ if __name__ == '__main__':
     task_rate.consume()
     # task_filtered.consume()
 
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

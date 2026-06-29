@@ -4,7 +4,7 @@
 此脚本演示，funboost的 redis jobstore的apscheudler 不害怕你反复部署，因为使用用redis分布式锁，防止扫描取出同样的定时任务。
 """
 
-from funboost import boost, BrokerEnum,ctrl_c_recv,BoosterParams,ApsJobAdder
+from funboost import boost, BrokerEnum,enable_ctrl_c_quit_on_windows,BoosterParams,ApsJobAdder
 
 
 
@@ -22,4 +22,4 @@ if __name__ == '__main__':
         replace_existing=True,
         id='interval_job501',
     )
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

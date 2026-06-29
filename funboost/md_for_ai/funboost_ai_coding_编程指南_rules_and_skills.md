@@ -29,7 +29,7 @@ tags: []
 - 基础启动：`func.consume()`。
 - 多进程+多线程叠加并发（性能炸裂）：`func.multi_process_consume(n)` 或简写 `func.mp_consume(n)`。
 - 分组启动：`BoostersManager.consume_group("group_name")` （BoosterParams 里需要先设置 booster_group 的值）。
-- 启动代码的末尾，如果主线程没有其他阻塞任务，**建议**使用 `from funboost import ctrl_c_recv; ctrl_c_recv()` 阻止主线程退出。
+- 启动代码的末尾，如果主线程没有其他阻塞任务，**建议**使用 `from funboost import enable_ctrl_c_quit_on_windows; enable_ctrl_c_quit_on_windows()` 阻止主线程退出。
 - 连续启动多个函数.consume()消费：`func1.consume(); func2.consume()`， 不要一厢情愿的使用子线程来启动消费，`func1.consume()`不会阻塞主线程。 
   不要使用 `threading.Thread(target=func1.consume).start()` 和  `threading.Thread(target=func2.consume).start()` 来连续启动消费，这样做是多此一举，funboost框架很人性化，早就从框架层面让用户可以避免这样写代码了。
   
@@ -103,7 +103,7 @@ tags: []
 **模板**：
 ```python
 import time
-from funboost import boost, BoosterParams, BrokerEnum, ctrl_c_recv
+from funboost import boost, BoosterParams, BrokerEnum, enable_ctrl_c_quit_on_windows
 
 @boost(BoosterParams(
     queue_name="hello_queue",
@@ -124,7 +124,7 @@ if __name__ == '__main__':
     hello_task.consume() 
     
     # 3. 阻塞主线程
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 ```
 
 ### Skill 1: 创建标准的基础后台任务 (含高阶控制)
@@ -132,7 +132,7 @@ if __name__ == '__main__':
 **模板**：
 ```python
 import time
-from funboost import boost, BoosterParams, BrokerEnum, ctrl_c_recv
+from funboost import boost, BoosterParams, BrokerEnum, enable_ctrl_c_quit_on_windows
 
 @boost(BoosterParams(
     queue_name="my_standard_task",
@@ -153,7 +153,7 @@ if __name__ == '__main__':
     
     # 启动消费 (多进程叠加多线程)
     my_task.mp_consume(2)  # mp_consume(n) 是 multi_process_consume(n) 的简写
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 ```
 
 ### Skill 2: 实现 RPC 模式（发布后等待结果）
@@ -183,7 +183,7 @@ if __name__ == '__main__':
 **场景**：用户需要每天定时、或每隔几秒钟执行一次任务。
 **模板**：
 ```python
-from funboost import boost, BoosterParams, BrokerEnum, ApsJobAdder, ctrl_c_recv
+from funboost import boost, BoosterParams, BrokerEnum, ApsJobAdder, enable_ctrl_c_quit_on_windows
 
 @boost(BoosterParams(queue_name="daily_report", broker_kind=BrokerEnum.REDIS))
 def generate_report(report_type: str):
@@ -201,7 +201,7 @@ if __name__ == '__main__':
         id='daily_sales_report',
         replace_existing=True
     )
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 ```
 
 ### Skill 4: Asyncio 异步任务与协程发布
@@ -397,7 +397,7 @@ def crawl_page(url: str):
 **场景**：当项目中有多个消费函数时，通常会有大量重复的配置参数。通过继承 `BoosterParams` 创建自定义子类，可以避免在每个 `@boost` 装饰器中重复书写相同的配置。
 **模板**：
 ```python
-from funboost import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum, ctrl_c_recv
+from funboost import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum, enable_ctrl_c_quit_on_windows
 
 # 定义项目统一的配置子类
 class MyBoosterParams(BoosterParams):
@@ -422,7 +422,7 @@ def task3(report_type: str):
 if __name__ == '__main__':
     task1.consume()
     task3.consume()
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
 ```
 
 ### Skill 9: 消费异构系统/第三方的任意 JSON 消息

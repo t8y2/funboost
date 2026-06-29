@@ -16,7 +16,7 @@ from funboost import (
     ConcurrentModeEnum,     # 并发模式枚举
     TaskOptions, # 优先级/延时配置
     ApsJobAdder,            # 定时任务添加器
-    ctrl_c_recv,            # 阻塞主线程工具
+    enable_ctrl_c_quit_on_windows,            # 阻塞主线程工具
     fct,                    # 上下文对象 (Funboost Current Task)
     BoostersManager,        # 消费者管理器 (用于分组启动)
     AsyncResult,            # 同步编程生态的异步结果对象
@@ -263,4 +263,4 @@ if __name__ == '__main__':
 
 
     
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

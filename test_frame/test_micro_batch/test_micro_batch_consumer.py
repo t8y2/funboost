@@ -9,7 +9,7 @@
 
 例如可以批量100条插入数据库，做数据库表同步性能好。
 """
-from funboost import boost, BrokerEnum,ctrl_c_recv
+from funboost import boost, BrokerEnum,enable_ctrl_c_quit_on_windows
 from funboost.contrib.override_publisher_consumer_cls.funboost_micro_batch_mixin import (
     MicroBatchConsumerMixin,MicroBatchBoosterParams
 )
@@ -47,6 +47,6 @@ if __name__ == '__main__':
     for i in range(25):  
         batch_insert_task.push(x=i, y=i * 2)  # 发布还是按照单条消息发布，消费是自动微批操作
         print(f"发布消息: x={i}, y={i * 2}")
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
     
     

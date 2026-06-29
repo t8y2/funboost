@@ -170,7 +170,7 @@ class ThreadPoolExecutorShrinkAbleNonDaemon(ThreadPoolExecutorShrinkAble):
     raise RuntimeError('cannot schedule new futures after ' RuntimeError: cannot schedule new futures after interpreter shutdown
 
     之前backgroud scheduler使用得是线程池里面是守护线程，为了避免cannot schedule new futures after ，
-    用户需要手动在主线程加个 ctrl_c_recv() 或者 while 1::time.sleep(10) 来阻止主线程结束，这样会麻烦用户。
+    用户需要手动在主线程加个 keep_sleep() 或者 while 1:time.sleep(10) 来阻止主线程结束，这样会麻烦用户。
     """
     MIN_WORKERS = 0
     THREAD_USE_DAEMON = False

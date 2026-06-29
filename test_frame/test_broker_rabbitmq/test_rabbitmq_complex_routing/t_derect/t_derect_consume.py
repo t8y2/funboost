@@ -3,7 +3,7 @@
 # @Author  : ydf
 
 import time
-from funboost import BoosterParams, BrokerEnum, TaskOptions, ctrl_c_recv, BoostersManager, PublisherParams
+from funboost import BoosterParams, BrokerEnum, TaskOptions, enable_ctrl_c_quit_on_windows, BoostersManager, PublisherParams
 
 # 假设 RABBITMQ_COMPLEX_ROUTING 是您自定义的支持复杂路由的 amqpstorm broker
 # 如果不是，请替换为 funboost 内置的 BrokerEnum.RABBITMQ_AMQPSTORM
@@ -56,4 +56,4 @@ if __name__ == '__main__':
     # error_fun.consume()
 
     # 阻塞主线程，使消费者可以持续运行
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()

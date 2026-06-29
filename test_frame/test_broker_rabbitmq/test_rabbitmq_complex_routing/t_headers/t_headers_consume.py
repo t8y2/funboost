@@ -2,7 +2,7 @@
 # @Author  : ydf
 
 import time
-from funboost import BoosterParams, BrokerEnum, ctrl_c_recv
+from funboost import BoosterParams, BrokerEnum, enable_ctrl_c_quit_on_windows
 
 # 使用 RABBITMQ_COMPLEX_ROUTING 支持复杂路由的 broker
 BROKER_KIND_FOR_TEST = BrokerEnum.RABBITMQ_COMPLEX_ROUTING
@@ -170,4 +170,4 @@ if __name__ == '__main__':
     print("按 Ctrl+C 停止消费...")
 
     # 阻塞主线程，使消费者可以持续运行
-    ctrl_c_recv()
+    enable_ctrl_c_quit_on_windows()
