@@ -1,7 +1,7 @@
 
 # 🕷️ funspider – Funboost 爬虫辅助扩展
 
-funspider 不是爬虫框架——它是基于 funboost 分布式函数调度引擎的爬虫辅助层。funboost 有多强大，funspider 就有多强大。百分之百利用funboost的所有功能,例如50种消息队列 + 5种并发方式 + 30种任务控制功能 + funweb可视化管理 完全可以利用。
+funspider 不是爬虫框架,也不是为funboost自身量身定制的紧耦合的插件，它是基于 funboost 分布式函数调度引擎的爬虫辅助层，只是增加请求 和 响应解析 和保存数据库三个类。funboost 有多强大，funspider 就有多强大。百分之百利用funboost的所有功能,例如50种消息队列 + 5种并发方式 + 30种任务控制功能 + funweb可视化管理 完全可以利用。
 
 ## 🧩 funspider + funboost + funweb 三件套
 
