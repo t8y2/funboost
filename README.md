@@ -1,9 +1,10 @@
 
-# 1. Python  分布式函数调度平台 Funboost 简介
+
+# 1. Python 分布式函数调度平台 Funboost 简介
 
 [![pZf68L6.png](https://s41.ax1x.com/2026/01/30/pZf68L6.png)](https://imgchr.com/i/pZf68L6)
 
-**Funboost** 是一个 Python 分布式函数调度平台。以下是您的核心学习资源导航：
+**Funboost** — 一行 `@boost` 装饰器，让 Python 函数获得 40+ 种消息队列 + 分布式调度 + FaaS 微服务的能力。以下是您的核心学习资源导航：
 
 | 资源类型 | 链接地址 | 说明 |
 | :--- | :--- | :--- |
@@ -12,15 +13,13 @@
 | 🤖 **AI 助教** | [👉 AI 学习指南](https://funboost.readthedocs.io/zh-cn/latest/articles/c14.html) | **[必读]** 利用 AI 掌握框架的最佳捷径 |
 | 📄 **超级 AI 上下文文档** | [👉 funboost_all_docs_and_codes.md](https://github.com/ydf0509/funboost/blob/master/funboost_all_docs_and_codes.md) | 约 900K 上下文，包含 Rules、Skills、完整教程、源码和使用 Demo，直接投喂给 AI 即可让它帮你写代码 |
 
-
 ## 1.0 funboost 框架说明介绍
 
-`funboost`是一个 万能 强大 简单  自由 的 `python` 全功能分布式调度框架,是一个 Python 分布式函数调度平台,它的作用是给用户任意项目的任意函数赋能
+**Funboost** 用一行 `@boost` 即可为项目中任意函数接入分布式调度、队列与 FaaS 等能力；宏观定位与典型场景见下文 **1.0.4**。
 
 **Funboost 的核心价值主张：把复杂留给框架，把简单留给用户。**
 
 <iframe src="https://ydf0509.github.io/funboost_git_pages/index2.html" width="100%" height="2400" style="border:none;"></iframe>
-
 
 <h4>📹 观看 funboost 视频</h4>
 <video controls width="800" 
@@ -36,7 +35,6 @@
 
 ### 1.0.1 funboost 示意图
 
-
 #### 1.0.1.1 funboost 运行流程图
 
 funboost 采用经典的 **生产者 → Broker → 消费者** 架构模型，并支持可选的 RPC 模式（消费者 → 生产者）。
@@ -49,16 +47,13 @@ funboost 采用经典的 **生产者 → Broker → 消费者** 架构模型，�
 
 funboost使用极其简单，只有一行@boost，但是用户能想得到的功能全都有。良好的软件设计架构，以致funboost框架可以扩展无限可能。
 
-从funboost 思维导图来看，funboost支持 40+ 种消息队列支持、30+ 种任务控制功能、所有python并发模式、roc、微批消费、cdc事件驱动、 funboost管理可视化、分布式定时任务、faas 热加载、workflow任务编排、boost_spider爬虫、promethus指标监控、opentelemetry全链路任务追踪等， 适用范围顶python编程半边天。
+从funboost 思维导图来看，funboost支持 40+ 种消息队列支持、30+ 种任务控制功能、所有python并发模式、rpc、微批消费、cdc事件驱动、 funboost管理可视化、分布式定时任务、faas 热加载、workflow任务编排、funspider和boost_spider爬虫、promethus指标监控、opentelemetry全链路任务追踪等， 适用范围顶python编程半边天。
 
 思维导图图片分辨率大，建议下载保存，用本地图片软件查看。
 <!-- ![funboost 功能思维导图](img_94.png) -->
 ![funboost 功能思维导图](mermaid-diagram0311e.png)
 
-
-
-### 1.0.2 快速了解和上手funboost，直接看[1.3例子](#13-框架使用例子)
-
+### 1.0.2 快速了解和上手funboost，直接看 1.3 章节例子
 
 ### 1.0.3 funboost 框架安装方式  
 
@@ -68,28 +63,11 @@ pip install funboost --upgrade
 或 pip install funboost[all]  #一次性安装所有小众三方中间件  
 ```  
 
+### 1.0.4 funboost 核心能力与适用场景
 
-### 1.0.4 funboost 功能作用
+`funboost` 通过一行 `@boost` 装饰器，将普通函数升级为分布式计算单元。功能是**重量级**的，使用方式却是**极致轻量级**的——只有 `@boost` 一行代码需要写。99% 用过 funboost 的用户核心感受是：**方便、高速、强大、自由**。
 
-- **万能分布式调度**：`funboost` 通过一行 @boost 装饰器，将普通函数瞬间升级为具备 分布式执行、FaaS 微服务化、CDC 事件驱动 能力的超级计算单元，连接一切，调度万物。
-- **全能支持**：自动支持 **40+种** 消息队列 + **30+种** 任务控制功能 + `python`中**所有**的并发执行方式。
-- **FaaS 能力**：通过 `funboost.faas` 的功能，可以一键快速实现 **FaaS (Function as a Service)**，让函数秒变自动发现的微服务。
-
-- **重功能，轻使用**：
-   `funboost` 的功能是**全面性重量级**，用户能想得到的功能 99% 全都有；但使用方式却是**极致轻量级**，只有 `@boost` 一行代码需要写。
-
-- **颠覆性设计**：
-   `funboost` 的神奇之处在于它同时拥有“**轻量级使用方式**”和“**重量级功能集**”，完全颠覆了“功能强大=使用复杂”的传统思维。它是对传统 Python 框架设计的一次巧妙超越。
-   
-   只需要一行 `@boost` 代码即可分布式执行 `python` 一切任意函数，99% 用过 `funboost` 的 `pythoner` 核心感受是：**方便、高速、强大、自由**。  
-
-
-
-#### 1.0.4.1 Funboost 的适用场景
-
-`funboost` 是 **Python 函数的万能加速器**。它包罗万象，一统编程思维，将经典的 **生产者 + 消息中间件 + 消费者** 模式封装到了极致。
-
-无论新老项目，Funboost 都能无缝融入，为您提供以下核心能力：
+无论新老项目，Funboost 都能无缝融入，提供以下核心能力：
 
 *   🌐 **需要分布式？**
     没问题！Funboost 支持 **40+种** 消息队列中间件。只要是叫得上名字的 MQ（甚至包括数据库、文件系统），它都能支持。
@@ -112,29 +90,12 @@ pip install funboost --upgrade
 *   🦅 **需要自由？**
     零侵入！它不绑架您的代码，不强管您的项目结构。**随时能用，随时能走**，还您最纯粹的 Python 编程体验。
 
+### 1.0.5 延伸阅读：如何理解 Funboost、是否值得投入
 
-#### 1.0.4.2 🤔 灵魂发问：Funboost 到底是什么？
-
-**Funboost 的功能已经极其丰富，甚至可以用“功能过剩”或“全能怪兽”来形容。**
-
-> **Funboost 早已超越了“任务队列框架”的传统定义，它已进化为新一代的「分布式函数调度平台 (Universal Function Computing Platform)」。**
->
-> 如果说 Celery 是异步任务的“工具”，那么 Funboost 则是函数计算的“基础设施”。它不仅完美覆盖了 Celery 的核心能力，更打破了技术栈的边界，以**“函数”**为原子核心，贪婪地吞噬并融合了 **FaaS、RPC、微服务架构、网络爬虫、实时数据同步 (CDC/ETL) 、IOT（MQTT）、分布式定时任务、部署、运维；并完整支持 事件驱动 (EDA) 与 全链路可观测性（OpenTelemetry）**。
->
-> 在 Funboost 的世界里，不再是对标 Celery，而是重新定义 Python 函数的生产力边界。
-
-> **答**：很难用一句话定义它。Funboost 是一个**万能框架**，几乎覆盖了 Python 所有的编程业务场景。它的答案是发散的，拥有无限可能。
-
-👉 **[点击查看发散性答案 (文档 6.0b 章节)](https://funboost.readthedocs.io/zh-cn/latest/articles/c6.html#b-funboost)**
-
-#### 1.0.4.3 💖 核心关切：值得我投入时间学习吗？
-
-> **答**：**绝对值得**。选择一个用途狭窄、性能平庸、写法受限的框架，确实是在浪费生命。Funboost 则完全不同。
-
-👉 **[查看详细评估报告 (文档 6.0 章节)](https://funboost.readthedocs.io/zh-cn/latest/articles/c6.html#funboost)**
+边界与定位难用一句话概括，**[发散性阐述见文档 6.0b 章节](https://funboost.readthedocs.io/zh-cn/latest/articles/c6.html#b-funboost)**；学习是否值得花时间，**[详见文档 6.0 章节评估](https://funboost.readthedocs.io/zh-cn/latest/articles/c6.html#funboost)**。
 
 
-#### 1.0.4.4 Funboost 与 Celery 的理念区别
+### 1.0.6 Funboost 与 Celery 的理念区别
 
 > **核心比喻**：
 > `funboost` 与 `celery` 的关系，如同 **iPhone** 与 **诺基亚塞班**。
@@ -157,14 +118,14 @@ pip install funboost --upgrade
 | **AI 辅助编程** | 官方文档需人工亲自阅读，学习成本高。 | **超级 AI 上下文文档**：`funboost_all_docs_and_codes.md`<br>（约 900K 上下文），可直接投喂给 AI，让 AI 帮你写代码、解答问题，无需吃苦看文档。 |
 
 
-#### 1.0.4.5 Funboost 支持的并发模式
+### 1.0.7 Funboost 支持的并发模式
 
 `funboost` 全面覆盖 Python 生态下的并发执行方式，并支持灵活的组合叠加：
 
 *   **基础并发模式**：支持 `threading` (多线程)、`asyncio` (异步IO)、`gevent` (协程)、`eventlet` (协程) 以及 `单线程` 模式。
 *   **叠加增强模式**：支持 **多进程 (Multi-Processing)** 与上述任一细粒度并发模式（如多线程或协程）进行叠加，最大限度利用多核 CPU 资源。
 
-#### 1.0.4.6 Funboost 支持的消息队列中间件 (Broker)
+### 1.0.8 Funboost 支持的消息队列中间件 (Broker)
 
 得益于强大的架构设计，在 `funboost` 中 **“万物皆可为 Broker”**。不仅涵盖了传统 MQ，更拓展了数据库、网络协议及第三方框架。
 
@@ -178,53 +139,29 @@ pip install funboost --upgrade
 *   **第三方框架集成**：可直接将 Celery, Dramatiq, Huey, RQ, Nameko 等框架作为底层 Broker，利用 Funboost 的统一接口调度它们的核心。
 
 
+### 1.0.9 **funboost 学习难吗?**
 
-
-
-#### 1.0.4.7 **funboost 学习难吗?**   
-
-
-**答案是：极易上手。Funboost 是“反框架”的框架。**
+**答案是：极易上手。Funboost 是"反框架"的框架。**
 
 *   🎯 **核心极简**
     整个框架只需要掌握 **`@boost`** 这一个装饰器及其入参（`BoosterParams`）。所有的用法几乎都遵循 **1.3 章节** 示例的模式，一通百通。
 
-*   🛡️ **零代码侵入**
-    *   **拒绝“框架奴役”**：不像 `Celery`、`Django` 或 `Scrapy` 那样强迫你按照特定的目录结构组织代码（一旦不用了，代码往往需要大改）。
-    *   **即插即用**：Funboost 对你的项目文件结构 **0 要求**，你可以随时将其引入任何新老项目中。
-
 *   🔄 **进退自如（双模运行）**
-    即使引入了 Funboost，也不需要担心代码被绑定。加上 `@boost` 装饰器后，你的函数依然保持纯洁：
-    *   调用 `fun(x, y)`：**直接运行函数**（同步执行，不经过队列，即使加了装饰器也和没加装饰器一样）。
+    加上 `@boost` 装饰器后，你的函数依然保持纯洁：
+    *   调用 `fun(x, y)`：**直接运行函数**（同步执行，不经过队列）。
     *   调用 `fun.push(x, y)`：**发送到消息队列**（分布式异步执行）。
 
-*   🤖 **面向 AI 编程的超级ai上下文文档**
-    Funboost 提供了 **`funboost_all_docs_and_codes.md`**（约 900K 上下文），包含完整教程、源码和示例。你可以直接将其投喂给 AI（如 DeepSeek、Gemini 等百万上下文模型），让 AI 帮你快速生成 Funboost 代码、解答问题或定制扩展，实现极致的 AI 辅助编程体验。
+*   🤖 **面向 AI 编程的超级 AI 上下文文档**
+    Funboost 提供了 **`funboost_all_docs_and_codes.md`**（约 900K 上下文），可直接投喂给 AI（如 DeepSeek、Gemini 等百万上下文模型），实现极致的 AI 辅助编程体验。
 
 👉 *关于"Funboost 学习和使用难吗？"的详细深度回答，请参阅文档 **`6.0.c`** 章节。*
 
 
-#### 1.0.4.8 📊 可视化监控与管理
-Funboost 内置了强大的 **funweb (Funboost Web Manager)** 管理系统。
-*   **全方位掌控**：支持对任务消费情况进行全面的查看、监控和管理。
-*   **开箱即用**：无需额外部署复杂的监控组件，即可掌握队列积压、消费者状态等核心指标。
+### 1.0.10 📊 监控与口碑
 
-#### 1.0.4.9 🚀 性能表现：断层式领先
-Funboost 的性能与 Celery 相比，有着**数量级**的优势（基于控制变量法测试）：
-*   **发布性能**：是 Celery 的 **22倍**。
-*   **消费性能**：是 Celery 的 **46倍**。
-> *注：详细的控制变量法对比测试报告，请参阅文档 **2.6 章节**。*
+**可视化管理**：Funboost 内置 **funweb (Funboost Web Manager)**，支持队列积压、消费者状态等核心指标监控，开箱即用。
 
-#### 1.0.4.10 ⭐ 用户口碑与评价
-**95% 的用户**在初步使用后都表示“相见恨晚”。核心评价如下：
-*   **极致自由**：Funboost 对用户代码的编程思维**零侵入**。
-*   **拒绝改造**：不像其他框架要求用户围绕框架逻辑重构代码，Funboost 尊重用户的原生代码结构。
-*   **核心体验**：简单、强大、丰富。
-
-
-
-
-
+**用户口碑**：**95% 的用户**初步使用后表示"相见恨晚"，核心评价：**极致自由、零侵入、简单强大**。
 
 ## 1.1 📚 核心资源与文档导航
 
@@ -238,18 +175,17 @@ Funboost 的性能与 Celery 相比，有着**数量级**的优势（基于控�
 > *   **🤖 AI 辅助**：强烈推荐阅读 **[第 14 章]**，学习如何利用 AI 大模型快速掌握 `funboost` 的用法。
 
 **🔗 在线文档地址**：[ReadTheDocs - Funboost Latest](https://funboost.readthedocs.io/zh-cn/latest/index.html)
-**超级ai上下文文档**：[funboost_all_docs_and_codes.md](https://github.com/ydf0509/funboost/blob/master/funboost_all_docs_and_codes.md)
-
+**超级 AI 上下文文档**：[funboost_all_docs_and_codes.md](https://github.com/ydf0509/funboost/blob/master/funboost_all_docs_and_codes.md)
 
 #### 📖 文档章节速览
 
-| 🔰 基础入门 & 核心概念 | 🚀 进阶功能 & 场景实战 | 🤖 AI 辅助 & 问题排查 |
+| 🔰 基础入门 & 核心概念 | 🚀 进阶功能 & 场景实战 | 🤖 AI & 参考资料 |
 | :--- | :--- | :--- |
 | [1. funboost 框架简介](https://funboost.readthedocs.io/zh-cn/latest/articles/c1.html) | [4b. 代码示例 (**高级进阶**)](https://funboost.readthedocs.io/zh-cn/latest/articles/c4b.html) | [**14. AI 辅助学习指南 (必读)**](https://funboost.readthedocs.io/zh-cn/latest/articles/c14.html) |
 | [2. funboost 对比 Celery](https://funboost.readthedocs.io/zh-cn/latest/articles/c2.html) | [8. 爬虫实战：自由编程 vs 框架奴役](https://funboost.readthedocs.io/zh-cn/latest/articles/c8.html) | [6. 常见问题 Q&A](https://funboost.readthedocs.io/zh-cn/latest/articles/c6.html) |
 | [3. 框架详细介绍](https://funboost.readthedocs.io/zh-cn/latest/articles/c3.html) | [9. 轻松远程服务器部署](https://funboost.readthedocs.io/zh-cn/latest/articles/c9.html) | [10. 常见报错与问题反馈](https://funboost.readthedocs.io/zh-cn/latest/articles/c10.html) |
 | [4. **各种代码示例 (核心)**](https://funboost.readthedocs.io/zh-cn/latest/articles/c4.html) | [11. 集成第三方框架 (Celery/Kombu等)](https://funboost.readthedocs.io/zh-cn/latest/articles/c11.html) | [7. 更新记录](https://funboost.readthedocs.io/zh-cn/latest/articles/c7.html) |
-| [5. 运行时截图展示](https://funboost.readthedocs.io/zh-cn/latest/articles/c5.html) | [12. 命令行控制台支持](https://funboost.readthedocs.io/zh-cn/latest/articles/c12.html) | [20. Gemini AI 生成的框架中心思想](https://funboost.readthedocs.io/zh-cn/latest/articles/c20.html) |
+| [5. 运行时截图展示](https://funboost.readthedocs.io/zh-cn/latest/articles/c5.html) | [12. 命令行控制台支持](https://funboost.readthedocs.io/zh-cn/latest/articles/c12.html) | [20. 框架中心思想](https://funboost.readthedocs.io/zh-cn/latest/articles/c20.html) |
 | | [13. funweb 可视化管理](https://funboost.readthedocs.io/zh-cn/latest/articles/c13.html) | |
 | | [⚡ **15. FaaS Serverless 微服务 (战略级核心)**](https://funboost.readthedocs.io/zh-cn/latest/articles/c15.html) | |
 
@@ -264,14 +200,10 @@ Funboost 的性能与 Celery 相比，有着**数量级**的优势（基于控�
 
 ## 1.2 框架功能介绍  
 
-有了 `funboost`，开发者将获得“上帝视角”的调度能力：
-*   🚫 **告别繁琐**：无需亲自手写进程、线程、协程的底层并发代码。
-*   🔌 **万能连接**：无需亲自编写操作 `Redis`、`RabbitMQ`、`Kafka`、`Socket` 等中间件的连接代码。
-*   🧰 **全能控制**：直接拥有 30+ 种企业级任务控制功能。
+本节用示意图、与线程池的对比以及 **1.2.2 任务控制功能矩阵** 展开能力细节；框架总体定位与适用场景已在上文 **1.0.4** 说明。
 
 **funboost示图：**  
 ![funboost示图](https://s21.ax1x.com/2024/04/29/pkFFghj.png)
-
 
 **也就是这种非常普通的流程图,一样的意思**  
 ![funboost示图](https://s21.ax1x.com/2024/04/29/pkFFcNQ.png)
@@ -579,6 +511,7 @@ def task_fun(a, b):
 def task_fun(a, b):
     return a + b
 ```
+
 
 
 ## 🖥️ funweb (Funboost Web Manager) 界面预览
