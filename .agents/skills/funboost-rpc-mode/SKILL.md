@@ -39,6 +39,8 @@ RPC 模式让你获取已消费任务函数的返回值。发布者推送消息�
 
 ## 同步 RPC 模式
 
+> **前置条件：** RPC 模式依赖 Redis 存储结果，需在 `funboost_config.py` 中配置 `REDIS_HOST`、`REDIS_PORT`、`REDIS_PASSWORD`。详见 `funboost-broker-selection` skill。
+
 ```python
 from funboost import boost, BoosterParams, BrokerEnum
 
@@ -63,7 +65,6 @@ if __name__ == "__main__":
 ```python
 import asyncio
 from funboost import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum
-from funboost.core.msg_result_getter import AioAsyncResult
 
 @boost(BoosterParams(
     queue_name="async_add_queue",
@@ -88,7 +89,7 @@ if __name__ == "__main__":
 ## 根据 task_id 查询结果
 
 ```python
-from funboost.core.msg_result_getter import AsyncResult, AioAsyncResult
+from funboost import AsyncResult, AioAsyncResult
 
 # 如果之前保存了 task_id
 task_id = "some-task-id-string"
@@ -124,6 +125,13 @@ async def query_result():
 | 期望 `publish()` 直接返回结果 | `publish()`/`push()` 返回结果对象，需调用 `.result` |
 | 用 `MEMORY_QUEUE` 作为 broker 并期望 RPC | RPC 支持任何 broker，但结果始终存储在 Redis 中 |
 
+> **超时行为：** `AsyncResult.result` 默认等待 1800 秒（30 分钟），可通过 `AsyncResult(task_id, timeout=30)` 设置较短超时。
+
 ## 铁律
 
 **必须设置 `is_using_rpc_mode=True`。** 不设置此项，框架不会持久化函数返回值。未设置时 `status_and_result` 超时返回 None，`.result` 将阻塞后抛出 `HasNotAsyncResult` 异常。
+
+## 相关 Skill
+
+- `funboost-async-programming` — async/await 异步编程
+- `funboost-faas-deploy` — HTTP 微服务部署

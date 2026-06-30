@@ -22,8 +22,8 @@ funboost 对 asyncio 生态有直接支持：**消费**支持 `async def` 函数
 ## 铁律（绝对不可违反）
 
 1. **异步 RPC 必须用 `AioAsyncResult`** — 禁止在 `async def` 里调用 `async_result.result`
-2. **RPC 模式必须设置 `is_using_rpc_mode=True`** — 且需配置 Redis（结果存 Redis）
-3. **ASYNC 模式禁止阻塞代码** — 不能用 `time.sleep`、`requests.get` 等同步阻塞调用
+2. **RPC 模式必须设置 `is_using_rpc_mode=True`** — 且需配置 Redis（结果存 Redis）（MEMORY_QUEUE 场景可使用 `publisher.get_future()` / `publisher.get_aio_future()` 替代 Redis RPC）
+3. **`async def` 消费函数内禁止同步阻塞 IO** — 如 `time.sleep`、`requests.get`。注意：ASYNC 模式仍支持同步 `def` 消费函数（会在线程池中执行）
 4. **禁止臆造 API** — 不存在 `async_consume`、`aio_consume` 等，启动消费仍是 `func.consume()`
 5. **必须使用 `BoosterParams` 对象** — 禁止向 `@boost` 传递裸参数
 
@@ -204,20 +204,20 @@ from funboost import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum
 
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
-session = aiohttp.ClientSession(loop=loop)
 
 @boost(BoosterParams(
     queue_name="aiohttp_task",
     broker_kind=BrokerEnum.MEMORY_QUEUE,
     concurrent_mode=ConcurrentModeEnum.ASYNC,
-    specify_async_loop=loop,  # ← 核心：让 funboost 使用同一 loop
+    specify_async_loop=loop,  # ← 共享全局连接池时需要；函数内临时创建可省略
 ))
 async def fetch(url: str):
-    async with session.get(url) as resp:
-        return (await resp.text())[:50]
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            return (await resp.text())[:50]
 ```
 
-**不需要 specify_async_loop 的情况：** 函数内临时创建请求（如 `async with aiohttp.request(...)`），不用全局连接池。
+**不需要 specify_async_loop 的情况：** 函数内临时创建 Session（如上例），不用全局连接池。
 
 ### 5.2 `context manager should be used inside a task`
 
@@ -456,12 +456,10 @@ if __name__ == "__main__":
 | `is_auto_start_specify_async_loop_in_child_thread` | `bool` | 默认 True；False 时需手动 `loop.run_forever()` |
 | `is_using_rpc_mode` | `bool` | RPC 模式，异步结果获取前置条件 |
 
-## 与其他 Skill 的关系
+## 相关 Skill
 
-- **using-funboost-basics** — `@boost`、push/consume 基础
-- **funboost-rpc-mode** — `AsyncResult` / `AioAsyncResult` 详细用法
-- **funboost-faas-deploy** — FastAPI 一键 FaaS 路由
-- **funboost-workflow** — 异步版任务编排（`aio_canvas_task`）
+- `funboost-memory-queue-pool` — 内存队列替代线程池
+- `funboost-rpc-mode` — 获取任务执行返回值
 
 ## 参考
 

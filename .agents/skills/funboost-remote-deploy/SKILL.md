@@ -336,3 +336,8 @@ Celery 需要在每台机器手动拉代码并启动 worker；Funboost `fabric_d
 | `funboost/core/booster.py` | Booster 对象 `.fabric_deploy()` 方法 |
 | `funboost/utils/paramiko_util.py` | `ParamikoFolderUploader` SFTP 上传 |
 | `test_frame/test_fabric_deploy/test_deploy1.py` | 官方示例 |
+
+## 相关 Skill
+
+- `using-funboost-basics` — 基础使用入门
+- `funboost-broker-selection` — Broker 中间件选型

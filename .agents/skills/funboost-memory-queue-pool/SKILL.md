@@ -337,9 +337,7 @@ if __name__ == '__main__':
 4. **MemoryFunboostPool 无 queue_name 参数** — 队列名自动生成，勿臆造参数
 5. **BoosterParams 字段固定** — 超时用 `function_timeout`，重试用 `max_retry_times`，禁止臆造 `timeout`/`max_retries`
 
-## 相关技能
+## 相关 Skill
 
-- `using-funboost-basics` — @boost 基础用法
-- `funboost-broker-selection` — 从内存队列迁移到分布式 broker
-- `funboost-rpc-mode` — 非 MEMORY_QUEUE 的 RPC 结果获取
-- `funboost-advanced-retry` — 重试策略详细配置
+- `funboost-broker-selection` — Broker 中间件选型
+- `funboost-async-programming` — async/await 异步编程

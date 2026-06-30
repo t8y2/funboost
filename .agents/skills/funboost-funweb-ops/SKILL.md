@@ -1,6 +1,6 @@
 ---
 name: funboost-funweb-ops
-description: 当需要使用 funboost 的 Web 管理界面进行队列运维时使用。触发场景：启动管理后台、查看消费状态、调整 QPS/并发、失败重投、查看结果、定时任务管理。关键词：funweb, Web 管理, 运维, start_funboost_web_manager, 队列监控, 消费控制。
+description: 当需要使用 funboost 的 Web 管理界面进行队列运维时使用。触发场景：启动管理后台、查看消费状态、查看消费者配置、失败重投、查看结果、定时任务管理。关键词：funweb, Web 管理, 运维, start_funboost_web_manager, 队列监控, 消费曲线。
 compatibility: Python 3.7+, funboost with `pip install funboost[flask]`
 ---
 
@@ -8,7 +8,7 @@ compatibility: Python 3.7+, funboost with `pip install funboost[flask]`
 
 ## 概述
 
-**funweb** 是 `funboost_web_manager` 的简称，是 funboost 内置的 Flask Web 管理界面。安装 funboost 后无需单独下载 Web 代码，即可在浏览器中完成队列运维：查看消费结果、管理消费者、实时调节 QPS/并发、失败重投、RPC 调用、定时任务管理等。
+**funweb** 是 `funboost_web_manager` 的简称，是 funboost 内置的 Flask Web 管理界面。安装 funboost 后无需单独下载 Web 代码，即可在浏览器中完成队列运维：查看消费结果、管理消费者、失败重投、RPC 调用、定时任务管理等。
 
 **核心原则：** Web 界面依赖 Redis 心跳上报获取运行时信息；函数结果持久化依赖 MongoDB（可选）。大部分运维页面只需 Redis，不必安装 Mongo。
 
@@ -23,7 +23,7 @@ from funboost.funweb.app import start_funboost_web_manager
 
 - 启动 funboost Web 管理后台，在浏览器中运维队列
 - 查看函数消费状态、失败记录，一键重新投递失败消息
-- 实时调节 QPS、并发数，暂停/恢复消费
+- 查看在线消费者及其 BoosterParams 配置
 - 按 IP 或队列名查看在线消费者
 - 在页面上发起 RPC 调用、管理 APScheduler 定时任务
 - 配置队列告警、脚本部署、日志查看、服务器资源监控
@@ -129,11 +129,8 @@ funboost/funweb/
 |------|------|
 | 查看队列深度 | 剩余待消费消息数量 |
 | 清空队列 | 清空队列中待消费消息 |
-| 暂停消费 / 恢复消费 | 远程控制消费者暂停或恢复 |
-| 调整 QPS | 实时修改限频，无需重启消费者 |
-| 调整并发数 | 实时修改 `concurrent_num` |
 | 查看消费者详情 | 查看某队列所有消费者的 IP、PID、启动时间等 |
-| 查看 BoosterParams 配置 | 在页面上查看消费者完整装饰器参数 |
+| 查看 BoosterParams 配置 | 在页面上查看消费者完整装饰器参数（只读） |
 | 消费曲线图 | 历史运行次数、失败次数、近 10 秒完成/失败、平均耗时、剩余消息数 |
 
 ### 其他功能
@@ -156,7 +153,7 @@ funboost/funweb/
 在 `funboost_config.py` 中配置 Redis 连接（`BrokerConnConfig.REDIS_*`）。以下功能依赖 Redis：
 
 - 消费者心跳与在线状态
-- 队列暂停/恢复、QPS/并发动态调整
+- 队列深度、消费指标曲线
 - 队列深度、消费指标曲线
 - 定时任务存储（`job_store_kind='redis'`）
 - 告警规则与记录
@@ -228,7 +225,7 @@ start_funboost_web_manager(care_project_name="my_project")
 
 1. 查看该队列所有消费者详情（多进程 `multi_process_consume` 场景下每个进程独立显示）
 2. 查看每个消费者的完整 `BoosterParams` 配置
-3. 对该队列**统一下发**暂停/恢复/QPS/并发调整指令（所有在线消费者同步生效）
+3. 查看该队列**所有在线消费者**的完整 `BoosterParams` 配置（只读）
 4. 查看消费曲线：近 10 秒完成数、失败数、平均耗时、剩余消息数等
 
 ### 多进程消费示例
@@ -419,5 +416,10 @@ python your_script.py
 | 心跳开关 | `BoosterParams(is_send_consumer_heartbeat_to_redis=True)` |
 | 项目过滤 | `start_funboost_web_manager(care_project_name="xxx")` 或 Web 页面设置 |
 | 失败重投 | 函数结果表 → 选中失败记录 → 重新运行 |
-| 暂停/恢复 | 队列操作 → 选中队列 → 暂停消费 / 恢复消费 |
-| 调 QPS/并发 | 队列操作 → 选中队列 → 修改 QPS 或并发数 |
+| 暂停/恢复 | 需通过 FaaS FastAPI 接口 `/funboost/pause_consume`、`/funboost/resume_consume`（funweb 页面可能不支持） |
+| 调 QPS/并发 | 需重启消费者进程并修改 BoosterParams 配置 |
+
+## 相关 Skill
+
+- `funboost-observability` — 监控、链路追踪与告警
+- `funboost-timing-jobs` — 定时/周期性任务

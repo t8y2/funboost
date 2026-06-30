@@ -271,3 +271,8 @@ class MyPublisherMixin(AbstractPublisher):
 - 基础 consumer 类：`funboost/consumers/base_consumer.py`
 - 基础 publisher 类：`funboost/publishers/base_publisher.py`
 - 教程：`funboost_all_docs_and_codes.md` 4.21b 章节
+
+## 相关 Skill
+
+- `developing-funboost-broker` — 新增消息中间件
+- `funboost-observability` — 监控、链路追踪与告警

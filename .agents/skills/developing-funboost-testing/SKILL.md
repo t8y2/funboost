@@ -258,3 +258,8 @@ if __name__ == "__main__":
 - import 错误：确认 PYTHONPATH 设置正确
 - 超时无输出：框架可能卡在缺失依赖上
 - 消息消费了但结果不对：检查函数签名是否与发布参数匹配
+
+## 相关 Skill
+
+- `using-funboost-basics` — 基础使用入门
+- `funboost-troubleshooting` — 排错与 FAQ

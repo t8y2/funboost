@@ -1,6 +1,6 @@
 ---
 name: funboost-workflow
-description: 当需要编排多个 funboost 任务按顺序或并行执行时使用。触发场景：chain 串行流水线、group 并行执行、chord 扇出聚合、DAG 工作流、任务依赖编排。关键词：workflow, chain, group, chord, pipeline, DAG, 工作流, 任务依赖, fan-out, fan-in, WorkflowBoosterParams。
+description: 当需要编排多个 funboost 任务按顺序或并行执行时使用。触发场景：chain 串行流水线、group 并行执行、chord 扇出聚合、嵌套 chain/group/chord 组合、任务依赖编排。关键词：workflow, chain, group, chord, pipeline, 嵌套组合, 工作流, 任务依赖, fan-out, fan-in, WorkflowBoosterParams。
 compatibility: Python 3.7+, funboost with workflow module
 ---
 
@@ -66,6 +66,9 @@ def notify(results: list, user_id: int):
 ## Chain — 串行流水线
 
 ```python
+download.consume()
+process.consume()
+
 workflow = chain(
     download.s("https://example.com/video.mp4"),
     process.s(resolution="1080p"),
@@ -73,11 +76,15 @@ workflow = chain(
 result = workflow.apply()
 ```
 
+> **注意：** 使用 workflow 前，所有参与的任务函数必须先调用 `consume()` 启动消费。`apply()` 返回最后一步的 `FunctionResultStatus` 对象（非直接值），通过 `.result` 属性取实际返回值。`group.apply()` 返回结果列表。
+
 每个任务的返回值作为下一个任务的第一个参数传入（使用 `.si()` 可忽略上游结果）。
 
 ## Group — 并行执行
 
 ```python
+process.consume()
+
 parallel_tasks = group(
     process.s("/tmp/video.mp4", resolution="360p"),
     process.s("/tmp/video.mp4", resolution="720p"),
@@ -86,11 +93,16 @@ parallel_tasks = group(
 result = parallel_tasks.apply()
 ```
 
+> **注意：** 参与 group 的任务函数需先 `consume()` 启动消费（同一函数只需调用一次）。
+
 所有任务并发运行。
 
 ## Chord — 扇出后聚合
 
 ```python
+process.consume()
+notify.consume()
+
 workflow = chord(
     group(
         process.s("/tmp/v.mp4", resolution=r)
@@ -101,11 +113,17 @@ workflow = chord(
 result = workflow.apply()
 ```
 
+> **注意：** chord 涉及的所有任务函数（group 成员 + 回调）都需先 `consume()` 启动消费。
+
 group 中所有任务并行执行；全部完成后，结果收集为列表传给回调函数。
 
 ## 复杂嵌套流水线
 
 ```python
+download.consume()
+process.consume()
+notify.consume()
+
 workflow = chain(
     download.s("https://example.com/video.mp4"),
     chord(
@@ -118,6 +136,8 @@ workflow = chain(
 )
 result = workflow.apply()
 ```
+
+> **注意：** 嵌套 chain/group/chord 组合时，每个参与的任务函数都需 `consume()` 启动消费。
 
 ## 重要注意事项
 
@@ -137,3 +157,8 @@ result = workflow.apply()
 | 直接调用 `func(args)` 而非 `func.s(args)` | `.s()` 创建签名，不要直接调用函数 |
 | 工作流中混用不同 broker | 所有工作流任务保持相同 broker |
 | 没有启动消费者 | 每个任务函数都需要 `func.consume()` 运行 |
+
+## 相关 Skill
+
+- `using-funboost-basics` — 基础使用入门
+- `funboost-rpc-mode` — 获取任务执行返回值

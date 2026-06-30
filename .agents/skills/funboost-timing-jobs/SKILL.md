@@ -35,6 +35,8 @@ Funboost 集成 APScheduler 实现定时任务发布。`ApsJobAdder` 封装了 A
 
 ## 核心代码模式
 
+> **注意：** 以下示例使用 `REDIS_ACK_ABLE` broker，需配置 Redis 连接。改用 `BrokerEnum.MEMORY_QUEUE` 可零依赖本地测试。
+
 ```python
 from funboost import boost, BoosterParams, BrokerEnum, ApsJobAdder
 
@@ -144,3 +146,8 @@ if __name__ == "__main__":
 | 没有启动消费者 | `ApsJobAdder` 只负责定时发布，消费端需要 `func.consume()` |
 | 用 `job_store_kind="redis"` 但没配 Redis | 确保 `BrokerConnConfig.REDIS_HOST` 等已配置 |
 | 将函数参数直接传给 `add_push_job` | 使用 `args=()` 或 `kwargs={}` 传递任务参数 |
+
+## 相关 Skill
+
+- `using-funboost-basics` — 基础使用入门
+- `funboost-funweb-ops` — Web 管理界面运维

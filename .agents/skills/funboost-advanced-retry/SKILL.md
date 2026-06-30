@@ -24,7 +24,7 @@ Funboost 提供多层错误恢复能力：自动重试、指数退避、死信�
 
 | 功能 | BoosterParams 字段 | 默认值 |
 |------|-------------------|--------|
-| 最大重试次数 | `max_retry_times` | 3 |
+| 最大重试次数 | `max_retry_times` | 3（最多重试 N 次 + 首次执行 = 共 N+1 次机会） |
 | 指数退避 | `is_using_advanced_retry` | False |
 | 死信队列 | `is_push_to_dlx_queue_when_retry_max_times` | False |
 | 任务去重 | `do_task_filtering` | False |
@@ -46,6 +46,10 @@ def call_external_api(url: str):
     resp.raise_for_status()
     return resp.json()
 ```
+
+> `max_retry_times=N` 表示最多重试 N 次，加上首次执行，共 N+1 次执行机会。
+
+> 当 `is_using_advanced_retry=False`（默认）时，失败后会在**同一线程内立即重试**，无等待间隔。只有启用高级重试后才走指数退避。
 
 ## 指数退避重试
 
@@ -111,6 +115,31 @@ def process_payment(order_id: str, amount: float):
     """3 次重试全部失败后，消息进入 'important_task_dlx' 队列"""
     charge(order_id, amount)
 ```
+
+## 主动控制重试/入队的异常类
+
+funboost 提供 3 个内置异常类，可在消费函数中主动 `raise` 来控制任务流向：
+
+| 异常类 | 行为 | 是否计入 max_retry_times |
+|--------|------|--------------------------|
+| `ExceptionForRequeue` | 立即将消息重新放回当前队列（不等待、不计重试次数） | **否** |
+| `ExceptionForPushToDlxqueue` | 立即将消息推入死信队列 `{queue_name}_dlx` | — |
+| `ExceptionForRetry` | 语义标记（任意异常本就触发重试，此类仅增强语义清晰度） | 是 |
+
+```python
+from funboost import ExceptionForRequeue, ExceptionForPushToDlxqueue
+
+@boost(BoosterParams(queue_name="controlled_retry", broker_kind=BrokerEnum.REDIS_ACK_ABLE))
+def process_order(order_id):
+    status = check_order_status(order_id)
+    if status == "not_ready":
+        raise ExceptionForRequeue()  # 还没准备好，重回队列稍后再试
+    if status == "invalid":
+        raise ExceptionForPushToDlxqueue()  # 无效订单，直接进死信
+    # 正常处理...
+```
+
+> **注意：** `ExceptionForRequeue` 不受 `max_retry_times` 限制，消息会无限重回队列直到不再抛此异常。使用时需确保有退出条件，避免无限循环。
 
 ## 熔断器 (Mixin)
 
@@ -192,3 +221,8 @@ def resilient_task(job_id: str, payload: dict):
 | `do_task_filtering=True` 但没配 Redis | 任务过滤依赖 Redis |
 | 搞混 DLX 队列名 | 自动命名为 `{原队列名}_dlx` |
 | 用 `try/except` 吞掉所有异常 | 让异常正常抛出，funboost 才能执行重试 |
+
+## 相关 Skill
+
+- `developing-funboost-mixin` — Consumer/Publisher Mixin 扩展
+- `funboost-troubleshooting` — 排错与 FAQ

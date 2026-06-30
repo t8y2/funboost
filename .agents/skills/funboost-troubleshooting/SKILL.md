@@ -455,3 +455,8 @@ os._exit(66)
 - Ctrl+C 实现：`funboost/utils/ctrl_c_end.py`
 - AI 运行规范：`AGENTS.md` 第十二节
 - 测试 skill：`.agents/skills/developing-funboost-testing/SKILL.md`
+
+## 相关 Skill
+
+- `developing-funboost-testing` — 编写与运行测试
+- `funboost-async-programming` — async/await 异步编程

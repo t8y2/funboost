@@ -482,3 +482,8 @@ pip install boost_spider
 | 基础任务技能 | `.agents/skills/using-funboost-basics/SKILL.md` |
 | Broker 选型 | `.agents/skills/funboost-broker-selection/SKILL.md` |
 | 高级重试 | `.agents/skills/funboost-advanced-retry/SKILL.md` |
+
+## 相关 Skill
+
+- `funboost-async-programming` — async/await 异步编程
+- `funboost-broker-selection` — Broker 中间件选型

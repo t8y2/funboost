@@ -561,6 +561,7 @@ from funboost.contrib.override_publisher_consumer_cls.funboost_promethus_mixin i
     PrometheusConsumerMixin, PrometheusPublisherMixin, start_prometheus_http_server,
 )
 from funboost.contrib.override_publisher_consumer_cls.funboost_otel_mixin import (
+    AutoOtelConsumerMixin,
     AutoOtelPublisherMixin,
 )
 from funboost.contrib.override_publisher_consumer_cls.alert_notifier_mixin import (
@@ -576,7 +577,7 @@ def init_opentelemetry():
     trace.set_tracer_provider(provider)
 
 
-class FullObservabilityConsumer(PrometheusConsumerMixin, AlertNotifierConsumerMixin):
+class FullObservabilityConsumer(PrometheusConsumerMixin, AutoOtelConsumerMixin, AlertNotifierConsumerMixin):
     pass
 
 
@@ -664,3 +665,8 @@ pip install requests
 | 持久化演示 | `test_frame/test_function_status_result_persist/test_persist.py` |
 | MongoDB 聚合告警 | `funboost/core/mongo_alert_monitor.py` |
 | 文档章节 | `4b.7` OTel / `4b.9` Prometheus / `4b.12` 周期额度 / `6.30` 告警 |
+
+## 相关 Skill
+
+- `developing-funboost-mixin` — Consumer/Publisher Mixin 扩展
+- `funboost-funweb-ops` — Web 管理界面运维

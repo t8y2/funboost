@@ -42,8 +42,34 @@ Funboost 用一个 `@boost` 装饰器把任意 Python 函数变成分布式任�
 
 ## 核心代码模式
 
+以下是零依赖最小示例（使用 `MEMORY_QUEUE`，无需 Redis/RabbitMQ）：
+
 ```python
-from funboost import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum, enable_ctrl_c_quit_on_windows
+from funboost import boost, BoosterParams, BrokerEnum
+
+@boost(BoosterParams(
+    queue_name="hello_funboost",
+    broker_kind=BrokerEnum.MEMORY_QUEUE,
+))
+def add(a, b):
+    print(f"计算: {a} + {b} = {a + b}")
+    return a + b
+
+if __name__ == "__main__":
+    add.push(1, 2)
+    add.push(10, 20)
+    add.consume()
+
+    import time
+    time.sleep(5)
+    import os
+    os._exit(0)
+```
+
+以下示例使用 Redis（需先在 `funboost_config.py` 中配置 `REDIS_HOST` 等参数）：
+
+```python
+from funboost import boost, BoosterParams, BrokerEnum, enable_ctrl_c_quit_on_windows
 
 @boost(BoosterParams(
     queue_name="my_task_queue",
@@ -120,8 +146,21 @@ def my_task(x):
     print(f"Task ID: {fct.task_id}")
     print(f"队列名: {fct.queue_name}")
     print(f"执行次数: {fct.function_result_status.run_times}")
+    print(f"函数参数: {fct.function_result_status.function_params}")
     print(f"完整消息: {fct.full_msg}")
+    fct.logger.info("当前任务 logger")
 ```
+
+常用属性：
+
+| 属性 | 说明 |
+|------|------|
+| `fct.task_id` | 当前任务 ID |
+| `fct.queue_name` | 队列名 |
+| `fct.function_result_status.run_times` | 运行次数（含重试） |
+| `fct.function_result_status.function_params` | 函数入参 |
+| `fct.full_msg` | 完整消息体 |
+| `fct.logger` | 当前任务 logger |
 
 ## BoosterParams 核心字段
 
@@ -147,6 +186,9 @@ def my_task(x):
 | `max_retries=5` | `max_retry_times=5` |
 | 用 threading 启动多个消费者 | 直接顺序调用 `func1.consume(); func2.consume()` |
 | `func.push(msg_dict)` 带控制参数 | 使用 `func.publish(msg_dict, task_options=TaskOptions(...))` |
+| `obj.method.push(arg1)` 实例方法 push | `ClassName.method.push(obj_instance, arg1, arg2)`，第一个参数传对象实例 |
+
+> **实例方法 push 语法：** 必须写成 `ClassName.method.push(obj_instance, arg1, arg2)`，第一个参数传对象实例。禁止写 `obj.method.push(arg1)`。
 
 ## 消费来自其他系统的消息
 
@@ -163,3 +205,10 @@ def handle_external(**kwargs):
 ```
 
 **绝对禁止** 用 `def handle(msg):` 单参数接收整个字典——必须用 `**kwargs` 或 `**msg` 解包接收。
+
+## 相关 Skill
+
+- `understanding-funboost-concepts` — 框架概念入门
+- `funboost-rpc-mode` — 获取任务执行返回值
+- `funboost-async-programming` — async/await 异步编程
+- `funboost-broker-selection` — Broker 中间件选型

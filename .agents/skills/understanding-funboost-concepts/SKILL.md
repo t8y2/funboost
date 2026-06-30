@@ -18,7 +18,9 @@ def process(url, depth=1):
 process("http://example.com")  # 普通函数调用
 
 # 加上 @boost — 函数本身不变，但获得了分布式能力
-@boost(BoosterParams(queue_name="spider", broker_kind=BrokerEnum.REDIS_ACK_ABLE))
+from funboost import boost, BoosterParams, BrokerEnum
+
+@boost(BoosterParams(queue_name="spider", broker_kind=BrokerEnum.MEMORY_QUEUE))
 def process(url, depth=1):
     return download(url)
 
@@ -33,7 +35,7 @@ process.push("http://example.com") # 发到队列，由消费者异步执行
 
 ## 二、BoosterParams — 掌握 funboost 的重中之重
 
-`BoosterParams` 是一个 Pydantic 模型，包含 **40+ 个字段**，控制着 funboost 的任务级行为。理解 funboost 等于理解 BoosterParams。
+`BoosterParams` 是一个 Pydantic 模型，包含 **50+ 个字段**，控制着 funboost 的任务级行为。理解 funboost 等于理解 BoosterParams。
 
 ### 核心原则
 
@@ -206,3 +208,8 @@ BoosterParams.broker_exclusive_config
 - [ ] 异步函数必须设置 `concurrent_mode=ConcurrentModeEnum.ASYNC`
 - [ ] 运行前设置 `PYTHONPATH=项目根目录`
 - [ ] 测试脚本必须有退出机制（`timeout` 或 `os._exit(66)`）
+
+## 相关 Skill
+
+- `using-funboost-basics` — 基础使用入门
+- `funboost-broker-selection` — Broker 中间件选型

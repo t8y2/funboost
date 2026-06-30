@@ -172,3 +172,8 @@ def task(x): ...
 | 臆造 `broker_exclusive_config` 的键名 | 查阅源码或文档确认有效键名 |
 | 生产环境用 `MEMORY_QUEUE` | 重启会丢失所有消息 |
 | 使用 `do_task_filtering` 等功能却没配置 Redis | 这些功能依赖 Redis，需正确配置连接 |
+
+## 相关 Skill
+
+- `funboost-memory-queue-pool` — 内存队列替代线程池
+- `using-funboost-basics` — 基础使用入门

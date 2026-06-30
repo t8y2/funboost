@@ -29,6 +29,8 @@ Funboost 提供内置的 HTTP Router（FastAPI、Flask、Django），一行代�
 
 ## FastAPI 集成
 
+> **前置条件：** FaaS 接口依赖 Redis 发现已注册队列的元数据。需确保消费者已启动且通过心跳注册到 Redis，并在 `funboost_config.py` 中配置 Redis 连接。
+
 ```python
 from fastapi import FastAPI
 from funboost.faas import fastapi_router
@@ -152,3 +154,8 @@ async def get_result(task_id: str):
 | 需要查询结果但忘了 `is_using_rpc_mode=True` | 自定义 API 需启用 RPC；FastAPI/Flask 内置 router 可通过 `need_result=true` 自动启用；Django adapter 仍要求消费端已配置 `is_using_rpc_mode=True` |
 | Web 应用中没有配置队列发现 | 确保 Consumer 进程已启动（会向 Redis 注册队列元数据） |
 | 在 async FastAPI 中用同步 `AsyncResult.result` | 使用 `AioAsyncResult` + `await` |
+
+## 相关 Skill
+
+- `funboost-rpc-mode` — 获取任务执行返回值
+- `funboost-funweb-ops` — Web 管理界面运维

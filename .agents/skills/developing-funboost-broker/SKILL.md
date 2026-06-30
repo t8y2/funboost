@@ -232,3 +232,8 @@ register_broker_exclusive_config_default("MY_BROKER", {
 - 发布消息 -> 启动消费 -> 验证消费结果
 - 运行约 30 秒后 kill（funboost 不会自动停止）
 - AI 测试时使用 `timeout` 或 `os._exit` 自动终止
+
+## 相关 Skill
+
+- `developing-funboost-mixin` — Consumer/Publisher Mixin 扩展
+- `developing-funboost-testing` — 编写与运行测试
