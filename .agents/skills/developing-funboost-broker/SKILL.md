@@ -78,7 +78,9 @@ class MyConsumer(AbstractConsumer):
         kw["raw_msg"].ack()
 
     def _requeue(self, kw):
-        self._client.send(self.queue_name, kw["body"])
+        # 注意：_requeue 被调用时 kw["body"] 已是 dict，需序列化后再入队
+        from funboost.core.serialization import Serialization
+        self._client.send(self.queue_name, Serialization.to_json_str(kw["body"]))
 
 # 注册
 register_custom_broker("MY_BROKER", MyPublisher, MyConsumer)
@@ -117,13 +119,13 @@ def my_task(x):
 
 | 方法 | 是否抽象 | 说明 |
 |------|----------|------|
-| `_publish_impl(msg: str)` | 是 | 核心发布逻辑——**必须实现**。`msg` 是 JSON 字符串（由框架序列化后传入） |
+| `_publish_impl(msg)` | 是 | 核心发布逻辑——**必须实现**。普通 MQ broker 收到 JSON 字符串；`MEMORY_QUEUE`/`FASTEST_MEM_QUEUE` 收到 dict |
 | `clear()` | 是 | 清空队列所有消息 |
 | `get_message_count()` | 是 | 返回队列深度 |
 | `close()` | 是 | 关闭连接（可以写 `pass`） |
 | `custom_init()` | 否 | 可选的初始化钩子 |
 
-> **注意：** `_publish_impl` 接收的 `msg` 已经是 JSON 字符串，直接写入中间件即可。框架在调用 `_publish_impl` 之前已完成参数序列化和 extra 字段注入。
+> **注意：** 自定义 broker 的 `_publish_impl` 接收的 `msg` 通常是 JSON 字符串（框架已完成序列化），直接写入中间件即可。内存队列例外，可能收到 dict。
 
 ## Consumer 必须实现的方法
 

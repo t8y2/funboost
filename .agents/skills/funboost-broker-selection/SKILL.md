@@ -39,18 +39,29 @@ Funboost 支持 50+ 种消息中间件。根据可靠性需求、基础设施和
 
 | 场景 | broker_kind | 原因 |
 |------|-------------|------|
+| **⭐ 本地并发/超级装饰器** | **`MEMORY_QUEUE`** | **SSS 级推荐！零序列化、零中间件、支持不可 pickle 的对象、自带 QPS 控频/并发/重试/超时，完美替代 ThreadPoolExecutor** |
 | 开发/测试 | `SQLITE_QUEUE` | 零配置，自带持久化 |
 | 生产环境（大多数场景） | `REDIS_ACK_ABLE` | ACK 确认，快速可靠 |
 | 消费者组、消息回溯 | `REDIS_STREAM` | 类似 Kafka 但更简单 |
 | 复杂路由/Exchange | `RABBITMQ_AMQPSTORM` | 完整 AMQP 特性 |
 | 海量吞吐 | `KAFKA_CONFLUENT` | 至少消费一次，适合反复重启部署 |
-| 极致速度（内存） | `MEMORY_QUEUE` | 零序列化开销 |
 | 优先级队列 | `REDIS_ZSET_PRIORITY` | 基于有序集合 |
 | 延迟消息 | `REDIS_ZSET_DELAY` | 基于时间的投递 |
 | IoT/嵌入式 | `MQTT` | 轻量级 pub/sub（须先启动消费端，不存消息） |
 | AWS 云服务 | `SQS` | 托管，Serverless |
 | 文件变更触发 | `WATCHDOG` | 文件系统监控 |
 | MySQL Binlog 事件 | `MYSQL_CDC` | 数据库事件驱动 |
+
+> **为什么 MEMORY_QUEUE 是 SSS 级推荐？**
+>
+> 很多场景其实不需要分布式 MQ。当你只需要「控频 + 并发 + 重试 + 超时」但不需要跨进程/跨机器时，`MEMORY_QUEUE` 是最佳选择：
+> - **零安装**：不需要 Redis/RabbitMQ/Kafka 等任何中间件
+> - **零序列化开销**：函数入参可以是任何 Python 对象（socket连接、数据库连接、GUI对象）
+> - **极致性能**：无网络IO，性能显著高于分布式 broker
+> - **完整能力**：QPS 控频、并发数控制、函数超时、重试、`get_future()` 获取结果
+> - **无缝切换**：后续需要分布式时，只需把 `broker_kind` 改成 `REDIS_ACK_ABLE`，代码零改动
+>
+> 详见 skill：`funboost-memory-queue-pool`
 
 ## 所有 Broker 枚举
 
@@ -78,7 +89,8 @@ Funboost 支持 50+ 种消息中间件。根据可靠性需求、基础设施和
 - `KAFKA_CONFLUENT_SASlPlAIN` — SASL 认证（连接参数在 `BrokerConnConfig.KFFKA_SASL_CONFIG`）
 
 ### 其他
-- `ROCKETMQ`, `ROCKETMQ5` — Apache RocketMQ（仅 Linux 支持）
+- `ROCKETMQ` — Apache RocketMQ 4.x（仅 Linux/macOS）
+- `ROCKETMQ5` — RocketMQ 5.x（纯 Python gRPC 客户端，支持 Windows/Linux/macOS）
 - `PULSAR` — Apache Pulsar
 - `NSQ` — NSQ 分布式消息系统
 - `MQTT` — 轻量级 pub/sub（不存消息，须先启动消费端）
@@ -115,24 +127,25 @@ def my_task(data: dict):
 **配置加载机制：** funboost 启动时通过 `importlib.import_module('funboost_config')` 从 `sys.path` 中查找配置文件。设置 `PYTHONPATH=项目根目录` 使该目录进入 `sys.path`，框架就能找到并加载 `funboost_config.py`。优先级：脚本所在目录 > PYTHONPATH 目录。找不到时自动在项目根目录生成模板。
 
 ```python
-# funboost_config.py（项目根目录）
-from funboost.funboost_config_deafult import BrokerConnConfig
+# funboost_config.py（项目根目录，首次运行自动生成）
+from funboost.utils.simple_data_class import DataClassBase
 
-# Redis
-BrokerConnConfig.REDIS_HOST = "127.0.0.1"
-BrokerConnConfig.REDIS_PORT = 6379
-BrokerConnConfig.REDIS_PASSWORD = ""
-BrokerConnConfig.REDIS_DB = 7
+class BrokerConnConfig(DataClassBase):
+    # Redis
+    REDIS_HOST = "127.0.0.1"
+    REDIS_PORT = 6379
+    REDIS_PASSWORD = ""
+    REDIS_DB = 7
 
-# RabbitMQ
-BrokerConnConfig.RABBITMQ_HOST = "127.0.0.1"
-BrokerConnConfig.RABBITMQ_PORT = 5672
-BrokerConnConfig.RABBITMQ_USER = "guest"
-BrokerConnConfig.RABBITMQ_PASS = "guest"
-BrokerConnConfig.RABBITMQ_VIRTUAL_HOST = "/"
+    # RabbitMQ（按实际账号修改）
+    RABBITMQ_HOST = "127.0.0.1"
+    RABBITMQ_PORT = 5672
+    RABBITMQ_USER = "rabbitmq_user"
+    RABBITMQ_PASS = "rabbitmq_pass"
+    RABBITMQ_VIRTUAL_HOST = "/"
 
-# Kafka
-BrokerConnConfig.KAFKA_BOOTSTRAP_SERVERS = ["127.0.0.1:9092"]
+    # Kafka
+    KAFKA_BOOTSTRAP_SERVERS = ["127.0.0.1:9092"]
 ```
 
 ## broker_exclusive_config

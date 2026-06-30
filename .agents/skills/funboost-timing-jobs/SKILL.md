@@ -23,6 +23,8 @@ Funboost 集成 APScheduler 实现定时任务发布。`ApsJobAdder` 封装了 A
 
 **绝对禁止** 使用 `apscheduler.add_job(my_task, ...)` — 这会在调度进程中直接执行函数，完全绕过队列。必须使用 `ApsJobAdder`，它在调度时间点调用 `push` 发送消息。
 
+> **重要提醒：** `ApsJobAdder` 的第一个参数**必须是 `@boost` 装饰后的函数**（即 booster），严禁传入普通未装饰的函数。只有经过 `@boost` 装饰的函数才拥有 `.push()` 方法，`ApsJobAdder` 内部依赖此方法定时将消息推入队列。
+
 ## 速查表
 
 | 触发器 | 用途 | 关键参数 |
@@ -47,6 +49,8 @@ def cleanup_expired_data(table_name: str):
 if __name__ == "__main__":
     cleanup_expired_data.consume()
 
+    # ⚠️ ApsJobAdder 第一个参数必须是 @boost 装饰后的函数（即 booster），
+    #    禁止传入普通未装饰的函数！否则定时 push 无法进入队列。
     # 间隔：每 30 秒执行（默认 job_store_kind='memory'，重启后丢失）
     ApsJobAdder(cleanup_expired_data).add_push_job(
         trigger="interval",

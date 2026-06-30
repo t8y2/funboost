@@ -136,7 +136,7 @@ def call_fragile_service(data: dict):
 
 ## 任务去重（过滤）
 
-消费端过滤：相同入参已成功执行过则跳过（需 Redis）：
+消费端过滤：相同入参的任务**完成一次消费周期后**，再次发布会被跳过（需 Redis）：
 
 ```python
 @boost(BoosterParams(
@@ -144,7 +144,7 @@ def call_fragile_service(data: dict):
     do_task_filtering=True,  # 需要 Redis 配置
 ))
 def send_notification(user_id: int, message: str):
-    """相同 (user_id, message) 组合已成功执行过后不会重复处理"""
+    """相同 (user_id, message) 组合完成消费后不会重复处理"""
     notify(user_id, message)
 ```
 
@@ -176,7 +176,7 @@ def resilient_task(job_id: str, payload: dict):
     """
     - 指数退避重试 5 次
     - 每次超时 60 秒
-    - 相同入参成功执行过后自动跳过
+    - 相同入参完成消费后自动跳过
     - 重试耗尽后进入死信队列
     """
     process(job_id, payload)

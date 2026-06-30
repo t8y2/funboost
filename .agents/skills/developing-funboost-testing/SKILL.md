@@ -92,14 +92,21 @@ os._exit(66)
 
 **重要：** 每次运行使用不同的文件名后缀（时间戳或序号），避免读到上次的老日志。
 
-### 方式二：PowerShell + timeout
+### 方式二：subprocess.run 外部超时
 
-```powershell
-$env:PYTHONPATH="D:\codes\funboost"
-cmd /c "timeout /t 20 /nobreak >nul & python tests/ai_codes/my_test.py"
+```python
+import subprocess
+result = subprocess.run(
+    ['python', 'tests/ai_codes/my_test.py'],
+    cwd=r'D:\codes\funboost',
+    timeout=30,
+    env={**os.environ, 'PYTHONPATH': r'D:\codes\funboost'}
+)
 ```
 
-脚本无需 `os._exit` — 外部 timeout 自动终止进程。
+脚本无需 `os._exit` — subprocess 超时后自动终止子进程。
+
+⚠️ **不要使用** `cmd /c "timeout /t N & python xxx.py"`：`timeout` 命令是先空等 N 秒再启动 python，不会限制 python 运行时长。
 
 **超时/休眠时间估算（一般要大于 10 秒）：**
 - 框架启动时间：5-10 秒

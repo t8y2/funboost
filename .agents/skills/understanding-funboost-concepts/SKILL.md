@@ -33,11 +33,11 @@ process.push("http://example.com") # 发到队列，由消费者异步执行
 
 ## 二、BoosterParams — 掌握 funboost 的重中之重
 
-`BoosterParams` 是一个 Pydantic 模型，包含 **50+ 个字段**，控制着 funboost 的一切行为。理解 funboost 等于理解 BoosterParams。
+`BoosterParams` 是一个 Pydantic 模型，包含 **40+ 个字段**，控制着 funboost 的任务级行为。理解 funboost 等于理解 BoosterParams。
 
 ### 核心原则
 
-1. **所有配置都在 BoosterParams 中** — 没有分散的配置文件、没有全局变量、没有装饰器参数
+1. **任务级配置在 BoosterParams** — 并发、重试、控频、超时等；**中间件连接配置**在 `funboost_config.py` 的 `BrokerConnConfig`
 2. **Pydantic 严格校验** — 传了不存在的字段会直接报错，禁止臆造参数
 3. **唯一必填字段是 `queue_name`** — 其他都有默认值
 
@@ -70,32 +70,33 @@ Funboost 的中间件连接信息（Redis/RabbitMQ/Kafka 等的 host、port、pa
 ### 加载原理
 
 ```
-项目根目录/funboost_config.py
-        ↓
 set_frame_config.py 中：importlib.import_module('funboost_config')
         ↓
-通过 sys.path 搜索（PYTHONPATH 中的所有目录）
+按 sys.path 顺序搜索（sys.path[0]=脚本目录, sys.path[1]=PYTHONPATH项目根）
         ↓
-找到后覆盖 funboost_config_deafult.py 中的默认值
+找到后通过 BrokerConnConfig.update_cls_attribute 覆盖默认值
+        ↓
+找不到时自动在 sys.path[1] 生成模板文件
 ```
 
 ### 关键规则
 
-1. **设置 PYTHONPATH** — 运行脚本前必须将项目根目录加入 PYTHONPATH，否则框架找不到配置文件
-2. **优先级** — 脚本所在目录的 `funboost_config.py` > 项目根目录的 > 默认值
-3. **自动生成** — 第一次运行时框架会自动在项目根目录生成模板 `funboost_config.py`
+1. **设置 PYTHONPATH** — 运行脚本前必须将项目根目录加入 PYTHONPATH（`$env:PYTHONPATH="项目根"`）
+2. **优先级** — `sys.path[0]`（脚本所在目录）> `sys.path[1]`（PYTHONPATH 项目根）> 默认值
+3. **自动生成** — 首次运行时框架会在 `sys.path[1]` 自动生成模板 `funboost_config.py`
 4. **按需配置** — 只需配置实际使用的中间件（用 Redis 就只配 Redis，不用管 RabbitMQ）
 
 ### 配置文件内容示例
 
 ```python
-# funboost_config.py
-from funboost.funboost_config_deafult import BrokerConnConfig
+# funboost_config.py（项目根目录，框架首次运行自动生成）
+from funboost.utils.simple_data_class import DataClassBase
 
-BrokerConnConfig.REDIS_HOST = '127.0.0.1'
-BrokerConnConfig.REDIS_PORT = 6379
-BrokerConnConfig.REDIS_PASSWORD = 'your_password'
-BrokerConnConfig.REDIS_DB = 7
+class BrokerConnConfig(DataClassBase):
+    REDIS_HOST = '127.0.0.1'
+    REDIS_PORT = 6379
+    REDIS_PASSWORD = 'your_password'
+    REDIS_DB = 7
 ```
 
 ## 四、push vs publish — 本质区别
@@ -109,7 +110,6 @@ BrokerConnConfig.REDIS_DB = 7
 - 需要指定 `task_id`（幂等/追踪）
 - 需要设置 `countdown`（延迟执行）
 - 需要设置 `eta`（定时执行）
-- 需要设置 `priority`（优先级）
 
 **90% 的场景用 `push` 就够了。**
 
@@ -167,7 +167,7 @@ def my_task(x):
     fct.logger                          # 当前任务 logger
 ```
 
-`fct` 是线程安全的全局上下文对象，在消费函数执行期间自动注入当前任务信息。
+`fct` 是线程安全的全局上下文对象，**仅在消费函数执行期间**自动注入当前任务信息。在消费函数外部或直接调用 `func()` 时，`fct` 无上下文，访问属性会报错。
 
 ## 七、Broker 与配置的三层关系
 
@@ -187,6 +187,12 @@ BoosterParams.broker_exclusive_config
 - `BrokerConnConfig` = 全局固定连接信息（所有队列共用）
 - `broker_kind` = 选择中间件类型
 - `broker_exclusive_config` = 单个队列的 broker 专属配置
+
+> **SSS 级推荐：`BrokerEnum.MEMORY_QUEUE`**
+>
+> 很多场景不需要分布式 MQ。`MEMORY_QUEUE` 让 `@boost` 成为**超级装饰器**：
+> 零中间件、无 JSON/pickle 序列化（同进程直传对象）、自带 QPS/并发/重试/超时——完美替代 `ThreadPoolExecutor`。
+> 后续需要分布式时只改 `broker_kind` 一行。详见 skill：`funboost-memory-queue-pool`
 
 ## 八、AI 编码前的自检清单
 

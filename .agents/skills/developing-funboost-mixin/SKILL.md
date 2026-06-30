@@ -52,10 +52,9 @@ class MyConsumerMixin(AbstractConsumer):
         self._counter = 0
 
     def _submit_task(self, kw):
-        """任务提交到线程池前的前置检查"""
-        self._counter += 1
+        """任务提交到线程池前的前置检查/限流"""
         if self._counter > self._threshold:
-            print(f"[WARN] 连续失败 {self._counter} 次，超过阈值 {self._threshold}")
+            print(f"[WARN] 已提交 {self._counter} 次，超过阈值 {self._threshold}，可进行限流")
         super()._submit_task(kw)
 
     def _both_sync_and_aio_frame_custom_record_process_info_func(
@@ -118,7 +117,7 @@ def my_task(x):
   **禁止 IO 阻塞**。在任务框架的核心路径上调用（同步/异步统一入口），适合纯内存操作（计数器递增、状态标记）。
 
 - `_frame_custom_record_process_info_func(self, current_function_result_status, kw)`
-  **允许同步 IO**。在同步消费模式（threading/gevent/eventlet）下独立线程中调用，适合写数据库、发 HTTP 请求等阻塞操作。不会影响主消费速度。
+  **允许同步 IO**。在同步消费模式（threading/gevent/eventlet）下的并发池工作线程中调用（与任务执行同线程），适合写数据库、发 HTTP 请求等阻塞操作。不会阻塞拉取消息的调度线程，但长时间 IO 会占用 worker 降低有效并发。
 
 - `_aio_frame_custom_record_process_info_func(self, current_function_result_status, kw)`
   **允许异步 IO**。在异步消费模式（`concurrent_mode=ASYNC`）下作为协程调用，适合 `await` 异步数据库写入。

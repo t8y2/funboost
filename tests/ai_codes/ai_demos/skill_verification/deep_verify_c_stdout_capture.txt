@@ -1,0 +1,227 @@
+﻿14:48:03  "D:\ProgramData\miniconda3\envs\py39b\lib\site-packages\nb_log\set_nb_log_config.py:27"  - <module> - The project root directory is:
+ D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification
+14:48:03  "D:\ProgramData\miniconda3\envs\py39b\lib\site-packages\nb_log\set_nb_log_config.py:53"  - use_config_form_nb_log_config_module - nb_log has read the configuration variables in the 
+ "D:\codes\funboost\nb_log_config.py:1" file as priority configuration
+
+[0;34m2026-06-30 14:48:03  "D:\ProgramData\miniconda3\envs\py39b\lib\site-packages\nb_log\__init__.py:53" -<module>-[print]-  [0;37;44m[0m
+    
+    .__   __. .______           __        ______     _______ 
+    |  \ |  | |   _  \         |  |      /  __  \   /  _____|
+    |   \|  | |  |_)  |  ______|  |     |  |  |  | |  |  __  
+    |  . `  | |   _  <  |______|  |     |  |  |  | |  | |_ | 
+    |  |\   | |  |_)  |        |  `----.|  `--'  | |  |__| | 
+    |__| \__| |______/         |_______| \______/   \______|      
+    
+         [0m[0m [0m
+[0;34m2026-06-30 14:48:03  "D:\ProgramData\miniconda3\envs\py39b\lib\site-packages\nb_log\__init__.py:100" -<module>-[print]-  [0;37;44m[0m
+        1)When using PyCharm, it is strongly recommended to re-customize the theme colors in PyCharm's console as follows, otherwise the color display may be harsh on the eyes. The colors specified in the code are just approximate red, yellow, blue, and green. The display effect varies across different IDE software, themes, and fonts, so users need to set them up themselves.
+        The setup method is: Open PyCharm -> File -> Settings -> Editor -> Color Scheme -> Console Colors, select monokai, click to expand ANSI colors,
+        and re-modify 7 custom colors: set Blue to 0454F3, Cyan to 06F0F6, Green to 13FC02, Magenta to ff1cd5, red to F80606, yellow to EAFA04, gray to FFFFFF, and white to FFFFFF.
+        Different versions of PyCharm, themes, or IDEs can be set according to the actual console display.
+
+        2)When using tools like xshell or finashell to connect to Linux, you can also customize the theme colors, or use the default colors of the shell connection tool.
+
+        Color effect as shown at https://ibb.co/qRssXTr
+
+        You can modify the default logging behavior when the get_logger method is called without parameters in nb_log_config.py at the root directory of the current project.
+
+        nb_log documentation https://nb-log-doc.readthedocs.io/zh_CN/latest/
+
+        Why set PyCharm terminal colors, explaining why  cannot determine the final color https://nb-log-doc.readthedocs.io/zh_CN/latest/articles/c1.html#c
+        [0m
+        [0m [0m
+[0;32m2026-06-30 14:48:03 - funboost.prompt - "D:\codes\funboost\funboost\set_frame_config.py:64" - show_funboost_flag - DEBUG - [0;30;42m[0m
+
+          ___                  ___                    ___                                           ___                    ___                    ___                          
+         /  /\                /__/\                  /__/\                  _____                  /  /\                  /  /\                  /  /\                   ___   
+        /  /:/_               \  \:\                 \  \:\                /  /::\                /  /::\                /  /::\                /  /:/_                 /  /\  
+       /  /:/ /\               \  \:\                 \  \:\              /  /:/\:\              /  /:/\:\              /  /:/\:\              /  /:/ /\               /  /:/  
+      /  /:/ /:/           ___  \  \:\            _____\__\:\            /  /:/~/::\            /  /:/  \:\            /  /:/  \:\            /  /:/ /::\             /  /:/   
+     /__/:/ /:/           /__/\  \__\:\          /__/::::::::\          /__/:/ /:/\:|          /__/:/ \__\:\          /__/:/ \__\:\          /__/:/ /:/\:\           /  /::\   
+     \  \:\/:/            \  \:\ /  /:/          \  \:\~~\~~\/          \  \:\/:/~/:/          \  \:\ /  /:/          \  \:\ /  /:/          \  \:\/:/~/:/          /__/:/\:\  
+      \  \::/              \  \:\  /:/            \  \:\  ~~~            \  \::/ /:/            \  \:\  /:/            \  \:\  /:/            \  \::/ /:/           \__\/  \:\ 
+       \  \:\               \  \:\/:/              \  \:\                 \  \:\/:/              \  \:\/:/              \  \:\/:/              \__\/ /:/                 \  \:\
+        \  \:\               \  \::/                \  \:\                 \  \::/                \  \::/                \  \::/                 /__/:/                   \__\/
+         \__\/                \__\/                  \__\/                  \__\/                  \__\/                  \__\/                  \__\/                         
+
+
+
+    [0m[0m[0m
+
+[0;32m2026-06-30 14:48:03 - funboost.prompt - "D:\codes\funboost\funboost\set_frame_config.py:66" - show_funboost_flag - DEBUG - [0;30;42m分布式函数调度框架funboost文档地址：  [0m https://funboost.readthedocs.io/zh-cn/latest/ [0m [0m[0m
+
+[0;32m2026-06-30 14:48:03 - funboost.prompt - "D:\codes\funboost\funboost\set_frame_config.py:127" - use_config_form_funboost_config_module - DEBUG - [0;30;42m[0;93m14:48:03[0m  "D:\codes\funboost\funboost\set_frame_config.py:127"   [0;93;100m
+    分布式函数调度框架会自动导入funboost_config模块
+    当第一次运行脚本时候，函数调度框架会在你的python当前项目的根目录下 D:/codes/funboost/tests/ai_codes/ai_demos/skill_verification 下，创建一个名为 funboost_config.py 的文件。
+    自动读取配置，会优先读取启动脚本的所在目录 D:/codes/funboost 的funboost_config.py文件，
+    如果没有 D:/codes/funboost/funboost_config.py 文件，则读取项目根目录 D:/codes/funboost/tests/ai_codes/ai_demos/skill_verification 下的funboost_config.py做配置。
+    只要 funboost_config.py 在任意 PYTHONPATH 的文件夹下，就能自动读取到。
+    在 "D:/codes/funboost/tests/ai_codes/ai_demos/skill_verification/funboost_config.py:1" 文件中，需要按需重新设置要使用到的中间件的键和值，例如没有使用rabbitmq而是使用redis做中间件，则不需要配置rabbitmq。
+    [0m
+[0m[0m
+
+[0;32m2026-06-30 14:48:03 - funboost.prompt - "D:\codes\funboost\funboost\set_frame_config.py:136" - use_config_form_funboost_config_module - DEBUG - [0;30;42m分布式函数调度框架 读取到
+ "D:\codes\funboost\funboost_config.py:1" 文件里面的变量作为优先配置了
+[0m[0m
+
+[0;32m2026-06-30 14:48:03 - funboost.prompt - "D:\codes\funboost\funboost\set_frame_config.py:85" - show_frame_config - DEBUG - [0;30;42m显示当前的项目中间件配置参数[0m[0m
+
+[0;32m2026-06-30 14:48:03 - funboost.prompt - "D:\codes\funboost\funboost\set_frame_config.py:101" - show_frame_config - DEBUG - [0;30;42m读取的 BrokerConnConfig 配置是:
+ {
+    "REDIS_HOST": "127.0.0.1",
+    "REDIS_USERNAME": "",
+    "REDIS_PASSWORD": "***",
+    "REDIS_PORT": 6379,
+    "REDIS_DB": 7,
+    "REDIS_DB_FILTER_AND_RPC_RESULT": 8,
+    "REDIS_SSL": false,
+    "REDIS_URL": "redis://:***@127.0.0.1:6379/7",
+    "MONGO_CONNECT_URL": "mongodb://127.0.0.1:27017",
+    "RABBITMQ_USER": "rabbitmq_user",
+    "RABBITMQ_PASS": "***bitmq_p***",
+    "RABBITMQ_HOST": "127.0.0.1",
+    "RABBITMQ_PORT": 5672,
+    "RABBITMQ_VIRTUAL_HOST": "/",
+    "RABBITMQ_URL": "amqp://rabbitmq_user:***bitmq_p***@127.0.0.1:5672//",
+    "NSQD_TCP_ADDRESSES": "['127.0.0.1:4150']",
+    "NSQD_HTTP_CLIENT_HOST": "127.0.0.1",
+    "NSQD_HTTP_CLIENT_PORT": 4151,
+    "KAFKA_BOOTSTRAP_SERVERS": "['127.0.0.1:9092']",
+    "KFFKA_SASL_CONFIG": {
+        "bootstrap_servers": [
+            "127.0.0.1:9092"
+        ],
+        "sasl_plain_username": "",
+        "sasl_plain_password": "",
+        "sasl_mechanism": "SCRAM-SHA-256",
+        "security_protocol": "SASL_PLAINTEXT"
+    },
+    "SQLACHEMY_ENGINE_URL": "sqlite:////sqlachemy_queues/queues.db",
+    "MYSQL_HOST": "127.0.0.1",
+    "MYSQL_PORT": 3306,
+    "MYSQL_USER": "root",
+    "MYSQL_PASSWORD": "***",
+    "MYSQL_DATABASE": "testdb6",
+    "SQLLITE_QUEUES_PATH": "/sqllite_queues",
+    "TXT_FILE_PATH": "D:\\codes\\funboost\\txt_queues",
+    "ROCKETMQ_NAMESRV_ADDR": "192.168.199.202:9876",
+    "ROCKETMQ_ENDPOINTS": "127.0.0.1:8081",
+    "ROCKETMQ_ACCESS_KEY": "",
+    "ROCKETMQ_SECRET_KEY": "",
+    "MQTT_HOST": "127.0.0.1",
+    "MQTT_TCP_PORT": 1883,
+    "HTTPSQS_HOST": "127.0.0.1",
+    "HTTPSQS_PORT": 1218,
+    "HTTPSQS_AUTH": "123456",
+    "NATS_URL": "nats://127.0.0.1:4222",
+    "KOMBU_URL": "redis://127.0.0.1:6379/9",
+    "CELERY_BROKER_URL": "redis://127.0.0.1:6379/12",
+    "CELERY_RESULT_BACKEND": "redis://127.0.0.1:6379/13",
+    "DRAMATIQ_URL": "amqp://rabbitmq_user:***bitmq_p***@127.0.0.1:5672//",
+    "PULSAR_URL": "pulsar://192.168.70.128:6650",
+    "SQS_REGION_NAME": "us-east-1",
+    "SQS_AWS_ACCESS_KEY_ID": "",
+    "SQS_AWS_SECRET_ACCESS_KEY": "",
+    "SQS_ENDPOINT_URL": "",
+    "POSTGRES_DSN": "host=127.0.0.1 port=5432 dbname=funboost user=postgres password=***"
+} [0m[0m
+
+[0;32m2026-06-30 14:48:03 - funboost.prompt - "D:\codes\funboost\funboost\set_frame_config.py:103" - show_frame_config - DEBUG - [0;30;42m读取的 FunboostCommonConfig 配置是:
+  {
+    "NB_LOG_FORMATER_INDEX_FOR_CONSUMER_AND_PUBLISHER": "<logging.Formatter object at 0x0000023C2ADBAE20>",
+    "TIMEZONE": "Asia/Shanghai",
+    "SHOW_HOW_FUNBOOST_CONFIG_SETTINGS": true,
+    "FUNBOOST_PROMPT_LOG_LEVEL": 10,
+    "KEEPALIVETIMETHREAD_LOG_LEVEL": 10
+} [0m[0m
+
+[0;36m2026-06-30 14:48:04 - persistqueue.serializers.pickle - "D:\ProgramData\miniconda3\envs\py39b\lib\site-packages\persistqueue\serializers\pickle.py:11" - <module> - INFO - [0;30;46mSelected pickle protocol: '4'[0m[0m
+
+[0;36m2026-06-30 14:48:04 - persistqueue - "D:\ProgramData\miniconda3\envs\py39b\lib\site-packages\persistqueue\__init__.py:22" - <module> - INFO - [0;30;46mAsync queues not available, may need to install aiofiles and aiosqlite: No module named 'aiofiles'[0m[0m
+
+[0;32m2026-06-30 14:48:04 - funboost.prompt - "D:\codes\funboost\funboost\core\booster.py:146" - __call__ - DEBUG - [0;30;42m deep_verify_c_mixin booster 配置是 {"queue_name": "deep_verify_c_mixin", "broker_kind": "MEMORY_QUEUE", "project_name": null, "concurrent_mode": "threading", "concurrent_num": 1, "specify_concurrent_pool": null, "specify_async_loop": null, "is_auto_start_specify_async_loop_in_child_thread": true, "qps": null, "is_using_distributed_frequency_control": false, "is_send_consumer_heartbeat_to_redis": false, "max_retry_times": 3, "is_using_advanced_retry": false, "advanced_retry_config": {"retry_mode": "sleep", "retry_base_interval": 1.0, "retry_multiplier": 2.0, "retry_max_interval": 60.0, "retry_jitter": false}, "is_push_to_dlx_queue_when_retry_max_times": false, "consuming_function_decorator": null, "function_timeout": null, "is_support_remote_kill_task": false, "log_level": 10, "logger_prefix": "", "create_logger_file": true, "logger_name": "", "log_filename": null, "is_show_message_get_from_broker": false, "is_print_detail_exception": true, "publish_msg_log_use_full_msg": false, "msg_expire_seconds": null, "do_task_filtering": false, "task_filtering_expire_seconds": 0, "function_result_status_persistance_conf": {"is_save_status": false, "is_save_result": false, "expire_seconds": 604800, "is_use_bulk_insert": false, "table_name": "deep_verify_c_mixin"}, "user_custom_record_process_info_func": null, "is_using_rpc_mode": false, "rpc_result_expire_seconds": 1800, "rpc_timeout": 1800, "delay_task_apscheduler_jobstores_kind": "redis", "allow_run_time_cron": null, "schedule_tasks_on_main_thread": false, "is_auto_start_consuming_message": false, "booster_group": null, "consuming_function": "<function mixin_task at 0x0000023C289FFC10>", "consuming_function_raw": "<function mixin_task at 0x0000023C289FFC10>", "consuming_function_name": "mixin_task", "broker_exclusive_config": {}, "should_check_publish_func_params": true, "manual_func_input_params": {"is_manual_func_input_params": false, "must_arg_name_list": [], "optional_arg_name_list": []}, "consumer_override_cls": "<class '__main__.MyMonitorMixin'>", "publisher_override_cls": null, "consuming_function_kind": "COMMON_FUNCTION", "user_options": {}, "auto_generate_info": {}, "is_fake_booster": false, "booster_registry_name": "booster_registry_default"}[0m[0m
+
+[0;36m2026-06-30 14:48:04-(10.0.112.74,PC-20260325PWBG)-[p78620_t9980] - funboost.LocalPythonQueueConsumer__MyMonitorMixin--deep_verify_c_mixin - "base_consumer.py:304" - _build_logger - INFO - no_task_id - [0;30;46m队列 deep_verify_c_mixin 的日志写入到 D:\pythonlogs\ai_console_outs 文件夹的 funboost.deep_verify_c_mixin.log 和 funboost.deep_verify_c_mixin.error.log 文件中[0m[0m
+
+[0;34m2026-06-30 14:48:04  "D:\codes\funboost\funboost\consumers\base_consumer.py:168" -__init__-[print]-  [0;37;44m[0m
+         "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:27" [0m此行 实例化队列名 deep_verify_c_mixin 的消费者, 类型为 <class 'abc.LocalPythonQueueConsumer__MyMonitorMixin'> [0m [0m
+[0;34m2026-06-30 14:48:04  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:19" -custom_init-[print]-  [0;37;44m[MIXIN] custom_init 被调用[0m [0m
+[0;36m2026-06-30 14:48:04-(10.0.112.74,PC-20260325PWBG)-[p78620_t9980] - funboost.LocalPythonQueueConsumer__MyMonitorMixin--deep_verify_c_mixin - "base_consumer.py:263" - __init__ - INFO - no_task_id - [0;30;46mdeep_verify_c_mixin consumer 的消费者配置:
+ {"queue_name": "deep_verify_c_mixin", "broker_kind": "MEMORY_QUEUE", "project_name": null, "concurrent_mode": "threading", "concurrent_num": 1, "specify_concurrent_pool": null, "specify_async_loop": null, "is_auto_start_specify_async_loop_in_child_thread": true, "qps": null, "is_using_distributed_frequency_control": false, "is_send_consumer_heartbeat_to_redis": false, "max_retry_times": 3, "is_using_advanced_retry": false, "advanced_retry_config": {"retry_mode": "sleep", "retry_base_interval": 1.0, "retry_multiplier": 2.0, "retry_max_interval": 60.0, "retry_jitter": false}, "is_push_to_dlx_queue_when_retry_max_times": false, "consuming_function_decorator": null, "function_timeout": null, "is_support_remote_kill_task": false, "log_level": 10, "logger_prefix": "", "create_logger_file": true, "logger_name": "", "log_filename": null, "is_show_message_get_from_broker": false, "is_print_detail_exception": true, "publish_msg_log_use_full_msg": false, "msg_expire_seconds": null, "do_task_filtering": false, "task_filtering_expire_seconds": 0, "function_result_status_persistance_conf": {"is_save_status": false, "is_save_result": false, "expire_seconds": 604800, "is_use_bulk_insert": false, "table_name": "deep_verify_c_mixin"}, "user_custom_record_process_info_func": null, "is_using_rpc_mode": false, "rpc_result_expire_seconds": 1800, "rpc_timeout": 1800, "delay_task_apscheduler_jobstores_kind": "redis", "allow_run_time_cron": null, "schedule_tasks_on_main_thread": false, "is_auto_start_consuming_message": false, "booster_group": null, "consuming_function": "<function mixin_task at 0x0000023C289FFC10>", "consuming_function_raw": "<function mixin_task at 0x0000023C289FFC10>", "consuming_function_name": "mixin_task", "broker_exclusive_config": {"maxsize": 0}, "should_check_publish_func_params": true, "manual_func_input_params": {"is_manual_func_input_params": false, "must_arg_name_list": [], "optional_arg_name_list": []}, "consumer_override_cls": "<class '__main__.MyMonitorMixin'>", "publisher_override_cls": null, "consuming_function_kind": "COMMON_FUNCTION", "user_options": {}, "auto_generate_info": {"where_to_instantiate": "D:\\codes\\funboost\\tests\\ai_codes\\ai_demos\\skill_verification\\deep_verify_c.py:27", "final_func_input_params_info": {"func_name": "mixin_task", "func_position": "<function mixin_task at 0x0000023C289FFC10>", "is_manual_func_input_params": false, "all_arg_name_list": ["x"], "must_arg_name_list": ["x"], "optional_arg_name_list": []}}, "is_fake_booster": false, "booster_registry_name": "booster_registry_default"}[0m[0m
+
+[0;36m2026-06-30 14:48:04-(10.0.112.74,PC-20260325PWBG)-[p78620_t9980] - funboost.LocalPythonQueuePublisher--deep_verify_c_mixin - "broker_kind__exclusive_config_default_define.py:32" - generate_broker_exclusive_config - INFO - no_task_id - [0;30;46m当前消息队列中间件能支持特殊独有配置 dict_keys(['maxsize'])[0m[0m
+
+[0;36m2026-06-30 14:48:04-(10.0.112.74,PC-20260325PWBG)-[p78620_t9980] - funboost.LocalPythonQueuePublisher--deep_verify_c_mixin - "base_publisher.py:75" - __init__ - INFO - no_task_id - [0;30;46m<class 'funboost.publishers.local_python_queue_publisher.LocalPythonQueuePublisher'> 被实例化了[0m[0m
+
+[0;32m2026-06-30 14:48:04-(10.0.112.74,PC-20260325PWBG)-[p78620_t9980] - funboost.LocalPythonQueuePublisher--deep_verify_c_mixin - "base_publisher.py:235" - _post_publish_log_and_count - DEBUG - 019f1748-f2a2-7baa-a9d5-1f2f407b4a04 - [0;30;42m向deep_verify_c_mixin 队列，推送消息 耗时0.0秒  {'x': 1}[0m[0m
+
+[0;32m2026-06-30 14:48:04-(10.0.112.74,PC-20260325PWBG)-[p78620_t9980] - funboost.LocalPythonQueuePublisher--deep_verify_c_mixin - "base_publisher.py:235" - _post_publish_log_and_count - DEBUG - 019f1748-f307-7cfc-8d31-5ffce520d871 - [0;30;42m向deep_verify_c_mixin 队列，推送消息 耗时0.0秒  {'x': 2}[0m[0m
+
+[0;32m2026-06-30 14:48:04-(10.0.112.74,PC-20260325PWBG)-[p78620_t9980] - funboost.LocalPythonQueuePublisher--deep_verify_c_mixin - "base_publisher.py:235" - _post_publish_log_and_count - DEBUG - 019f1748-f307-73e2-b565-8375a6f52c27 - [0;30;42m向deep_verify_c_mixin 队列，推送消息 耗时0.0秒  {'x': 3}[0m[0m
+
+[0;34m2026-06-30 14:48:04  "D:\codes\funboost\funboost\core\lazy_impoter.py:65" -__init__-[print]-  [0;37;44m导入gevent[0m [0m
+[0;34m2026-06-30 14:48:04  "D:\codes\funboost\funboost\core\lazy_impoter.py:84" -__init__-[print]-  [0;37;44m导入eventlet[0m [0m
+[0;36m2026-06-30 14:48:04-(10.0.112.74,PC-20260325PWBG)-[p78620_t9980] - funboost.LocalPythonQueueConsumer__MyMonitorMixin--deep_verify_c_mixin - "base_consumer.py:413" - start_consuming_message - INFO - no_task_id - [0;30;46m开始消费 deep_verify_c_mixin 中的消息[0m[0m
+
+[0;36m2026-06-30 14:48:04-(10.0.112.74,PC-20260325PWBG)-[p78620_t89300] - funboost.LocalPythonQueueConsumer__MyMonitorMixin--deep_verify_c_mixin - "base_consumer.py:1182" - check_heartbeat_and_message_count - INFO - no_task_id - [0;30;46m队列 [deep_verify_c_mixin] 中还有 [3] 个任务[0m[0m
+
+[0;32m2026-06-30 14:48:04 - _KeepAliveTimeThread - "D:\codes\funboost\funboost\concurrent_pool\flexible_thread_pool.py:105" - _worker - DEBUG - [0;30;42m新启动线程 104612[0m[0m
+
+[0;34m2026-06-30 14:48:04  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:34" -mixin_task-[print]-  [0;37;44m[CONSUMED] mixin_task(1)[0m [0m
+[0;32m2026-06-30 14:48:04-(10.0.112.74,PC-20260325PWBG)-[p78620_t104612] - funboost.LocalPythonQueueConsumer__MyMonitorMixin--deep_verify_c_mixin - "base_consumer.py:971" - _run_consuming_function_with_confirm_and_retry - DEBUG - 019f1748-f2a2-7baa-a9d5-1f2f407b4a04 - [0;30;42m 函数 mixin_task  第1次 运行, 正确了，函数运行时间是 0.0 秒,入参是 {'x': 1} , 结果是  10     [0m[0m
+
+[0;34m2026-06-30 14:48:04  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:25" -_both_sync_and_aio_frame_custom_record_process_info_func-[print]-  [0;37;44m[MIXIN] _both_sync_and_aio_frame_custom_record_process_info_func: success=True[0m [0m
+[0;34m2026-06-30 14:48:04  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:34" -mixin_task-[print]-  [0;37;44m[CONSUMED] mixin_task(2)[0m [0m
+[0;32m2026-06-30 14:48:04-(10.0.112.74,PC-20260325PWBG)-[p78620_t104612] - funboost.LocalPythonQueueConsumer__MyMonitorMixin--deep_verify_c_mixin - "base_consumer.py:971" - _run_consuming_function_with_confirm_and_retry - DEBUG - 019f1748-f307-7cfc-8d31-5ffce520d871 - [0;30;42m 函数 mixin_task  第1次 运行, 正确了，函数运行时间是 0.0 秒,入参是 {'x': 2} , 结果是  20     [0m[0m
+
+[0;34m2026-06-30 14:48:04  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:25" -_both_sync_and_aio_frame_custom_record_process_info_func-[print]-  [0;37;44m[MIXIN] _both_sync_and_aio_frame_custom_record_process_info_func: success=True[0m [0m
+[0;34m2026-06-30 14:48:04  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:34" -mixin_task-[print]-  [0;37;44m[CONSUMED] mixin_task(3)[0m [0m
+[0;32m2026-06-30 14:48:04-(10.0.112.74,PC-20260325PWBG)-[p78620_t104612] - funboost.LocalPythonQueueConsumer__MyMonitorMixin--deep_verify_c_mixin - "base_consumer.py:971" - _run_consuming_function_with_confirm_and_retry - DEBUG - 019f1748-f307-73e2-b565-8375a6f52c27 - [0;30;42m 函数 mixin_task  第1次 运行, 正确了，函数运行时间是 0.0 秒,入参是 {'x': 3} , 结果是  30     [0m[0m
+
+[0;34m2026-06-30 14:48:04  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:25" -_both_sync_and_aio_frame_custom_record_process_info_func-[print]-  [0;37;44m[MIXIN] _both_sync_and_aio_frame_custom_record_process_info_func: success=True[0m [0m
+[0;32m2026-06-30 14:48:04 - funboost.prompt - "D:\codes\funboost\funboost\core\booster.py:146" - __call__ - DEBUG - [0;30;42m deep_verify_c_custom booster 配置是 {"queue_name": "deep_verify_c_custom", "broker_kind": "DEEP_VERIFY_C_BROKER", "project_name": null, "concurrent_mode": "threading", "concurrent_num": 1, "specify_concurrent_pool": null, "specify_async_loop": null, "is_auto_start_specify_async_loop_in_child_thread": true, "qps": null, "is_using_distributed_frequency_control": false, "is_send_consumer_heartbeat_to_redis": false, "max_retry_times": 3, "is_using_advanced_retry": false, "advanced_retry_config": {"retry_mode": "sleep", "retry_base_interval": 1.0, "retry_multiplier": 2.0, "retry_max_interval": 60.0, "retry_jitter": false}, "is_push_to_dlx_queue_when_retry_max_times": false, "consuming_function_decorator": null, "function_timeout": null, "is_support_remote_kill_task": false, "log_level": 10, "logger_prefix": "", "create_logger_file": true, "logger_name": "", "log_filename": null, "is_show_message_get_from_broker": false, "is_print_detail_exception": true, "publish_msg_log_use_full_msg": false, "msg_expire_seconds": null, "do_task_filtering": false, "task_filtering_expire_seconds": 0, "function_result_status_persistance_conf": {"is_save_status": false, "is_save_result": false, "expire_seconds": 604800, "is_use_bulk_insert": false, "table_name": "deep_verify_c_custom"}, "user_custom_record_process_info_func": null, "is_using_rpc_mode": false, "rpc_result_expire_seconds": 1800, "rpc_timeout": 1800, "delay_task_apscheduler_jobstores_kind": "redis", "allow_run_time_cron": null, "schedule_tasks_on_main_thread": false, "is_auto_start_consuming_message": false, "booster_group": null, "consuming_function": "<function custom_broker_task at 0x0000023C2DB4AAF0>", "consuming_function_raw": "<function custom_broker_task at 0x0000023C2DB4AAF0>", "consuming_function_name": "custom_broker_task", "broker_exclusive_config": {}, "should_check_publish_func_params": true, "manual_func_input_params": {"is_manual_func_input_params": false, "must_arg_name_list": [], "optional_arg_name_list": []}, "consumer_override_cls": null, "publisher_override_cls": null, "consuming_function_kind": "COMMON_FUNCTION", "user_options": {}, "auto_generate_info": {}, "is_fake_booster": false, "booster_registry_name": "booster_registry_default"}[0m[0m
+
+[0;36m2026-06-30 14:48:04-(10.0.112.74,PC-20260325PWBG)-[p78620_t9980] - funboost.MyConsumer--deep_verify_c_custom - "base_consumer.py:304" - _build_logger - INFO - no_task_id - [0;30;46m队列 deep_verify_c_custom 的日志写入到 D:\pythonlogs\ai_console_outs 文件夹的 funboost.deep_verify_c_custom.log 和 funboost.deep_verify_c_custom.error.log 文件中[0m[0m
+
+[0;34m2026-06-30 14:48:04  "D:\codes\funboost\funboost\consumers\base_consumer.py:168" -__init__-[print]-  [0;37;44m[0m
+         "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:79" [0m此行 实例化队列名 deep_verify_c_custom 的消费者, 类型为 <class '__main__.MyConsumer'> [0m [0m
+[0;36m2026-06-30 14:48:04-(10.0.112.74,PC-20260325PWBG)-[p78620_t9980] - funboost.MyConsumer--deep_verify_c_custom - "base_consumer.py:263" - __init__ - INFO - no_task_id - [0;30;46mdeep_verify_c_custom consumer 的消费者配置:
+ {"queue_name": "deep_verify_c_custom", "broker_kind": "DEEP_VERIFY_C_BROKER", "project_name": null, "concurrent_mode": "threading", "concurrent_num": 1, "specify_concurrent_pool": null, "specify_async_loop": null, "is_auto_start_specify_async_loop_in_child_thread": true, "qps": null, "is_using_distributed_frequency_control": false, "is_send_consumer_heartbeat_to_redis": false, "max_retry_times": 3, "is_using_advanced_retry": false, "advanced_retry_config": {"retry_mode": "sleep", "retry_base_interval": 1.0, "retry_multiplier": 2.0, "retry_max_interval": 60.0, "retry_jitter": false}, "is_push_to_dlx_queue_when_retry_max_times": false, "consuming_function_decorator": null, "function_timeout": null, "is_support_remote_kill_task": false, "log_level": 10, "logger_prefix": "", "create_logger_file": true, "logger_name": "", "log_filename": null, "is_show_message_get_from_broker": false, "is_print_detail_exception": true, "publish_msg_log_use_full_msg": false, "msg_expire_seconds": null, "do_task_filtering": false, "task_filtering_expire_seconds": 0, "function_result_status_persistance_conf": {"is_save_status": false, "is_save_result": false, "expire_seconds": 604800, "is_use_bulk_insert": false, "table_name": "deep_verify_c_custom"}, "user_custom_record_process_info_func": null, "is_using_rpc_mode": false, "rpc_result_expire_seconds": 1800, "rpc_timeout": 1800, "delay_task_apscheduler_jobstores_kind": "redis", "allow_run_time_cron": null, "schedule_tasks_on_main_thread": false, "is_auto_start_consuming_message": false, "booster_group": null, "consuming_function": "<function custom_broker_task at 0x0000023C2DB4AAF0>", "consuming_function_raw": "<function custom_broker_task at 0x0000023C2DB4AAF0>", "consuming_function_name": "custom_broker_task", "broker_exclusive_config": {}, "should_check_publish_func_params": true, "manual_func_input_params": {"is_manual_func_input_params": false, "must_arg_name_list": [], "optional_arg_name_list": []}, "consumer_override_cls": null, "publisher_override_cls": null, "consuming_function_kind": "COMMON_FUNCTION", "user_options": {}, "auto_generate_info": {"where_to_instantiate": "D:\\codes\\funboost\\tests\\ai_codes\\ai_demos\\skill_verification\\deep_verify_c.py:79", "final_func_input_params_info": {"func_name": "custom_broker_task", "func_position": "<function custom_broker_task at 0x0000023C2DB4AAF0>", "is_manual_func_input_params": false, "all_arg_name_list": ["value"], "must_arg_name_list": ["value"], "optional_arg_name_list": []}}, "is_fake_booster": false, "booster_registry_name": "booster_registry_default"}[0m[0m
+
+[0;36m2026-06-30 14:48:04-(10.0.112.74,PC-20260325PWBG)-[p78620_t9980] - funboost.MyPublisher--deep_verify_c_custom - "base_publisher.py:75" - __init__ - INFO - no_task_id - [0;30;46m<class '__main__.MyPublisher'> 被实例化了[0m[0m
+
+[0;34m2026-06-30 14:48:04  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:48" -_publish_impl-[print]-  [0;37;44m[CUSTOM_BROKER] _publish_impl 收到: type=str, len=1[0m [0m
+[0;32m2026-06-30 14:48:04-(10.0.112.74,PC-20260325PWBG)-[p78620_t9980] - funboost.MyPublisher--deep_verify_c_custom - "base_publisher.py:235" - _post_publish_log_and_count - DEBUG - 019f1748-f41d-7318-b314-0d04b39fc994 - [0;30;42m向deep_verify_c_custom 队列，推送消息 耗时0.0秒  {'value': 100}[0m[0m
+
+[0;34m2026-06-30 14:48:04  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:48" -_publish_impl-[print]-  [0;37;44m[CUSTOM_BROKER] _publish_impl 收到: type=str, len=2[0m [0m
+[0;32m2026-06-30 14:48:04-(10.0.112.74,PC-20260325PWBG)-[p78620_t9980] - funboost.MyPublisher--deep_verify_c_custom - "base_publisher.py:235" - _post_publish_log_and_count - DEBUG - 019f1748-f41e-7aa4-8290-1aa6b6f479fc - [0;30;42m向deep_verify_c_custom 队列，推送消息 耗时0.0秒  {'value': 200}[0m[0m
+
+[0;36m2026-06-30 14:48:04-(10.0.112.74,PC-20260325PWBG)-[p78620_t9980] - funboost.MyConsumer--deep_verify_c_custom - "base_consumer.py:413" - start_consuming_message - INFO - no_task_id - [0;30;46m开始消费 deep_verify_c_custom 中的消息[0m[0m
+
+[0;36m2026-06-30 14:48:04-(10.0.112.74,PC-20260325PWBG)-[p78620_t88600] - funboost.MyConsumer--deep_verify_c_custom - "base_consumer.py:1182" - check_heartbeat_and_message_count - INFO - no_task_id - [0;30;46m队列 [deep_verify_c_custom] 中还有 [2] 个任务[0m[0m
+
+[0;34m2026-06-30 14:48:04  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:63" -_dispatch_task-[print]-  [0;37;44m[CUSTOM_BROKER] _dispatch_task 取出消息[0m [0m
+[0;32m2026-06-30 14:48:04 - _KeepAliveTimeThread - "D:\codes\funboost\funboost\concurrent_pool\flexible_thread_pool.py:105" - _worker - DEBUG - [0;30;42m新启动线程 78024[0m[0m
+
+[0;34m2026-06-30 14:48:04  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:86" -custom_broker_task-[print]-  [0;37;44m[CONSUMED] custom_broker_task(100)[0m [0m
+[0;32m2026-06-30 14:48:04-(10.0.112.74,PC-20260325PWBG)-[p78620_t78024] - funboost.MyConsumer--deep_verify_c_custom - "base_consumer.py:971" - _run_consuming_function_with_confirm_and_retry - DEBUG - 019f1748-f41d-7318-b314-0d04b39fc994 - [0;30;42m 函数 custom_broker_task  第1次 运行, 正确了，函数运行时间是 0.0 秒,入参是 {'value': 100} , 结果是  100     [0m[0m
+
+[0;34m2026-06-30 14:48:04  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:69" -_confirm_consume-[print]-  [0;37;44m[CUSTOM_BROKER] _confirm_consume[0m [0m
+[0;34m2026-06-30 14:48:05  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:63" -_dispatch_task-[print]-  [0;37;44m[CUSTOM_BROKER] _dispatch_task 取出消息[0m [0m
+[0;34m2026-06-30 14:48:05  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:86" -custom_broker_task-[print]-  [0;37;44m[CONSUMED] custom_broker_task(200)[0m [0m
+[0;32m2026-06-30 14:48:05-(10.0.112.74,PC-20260325PWBG)-[p78620_t78024] - funboost.MyConsumer--deep_verify_c_custom - "base_consumer.py:971" - _run_consuming_function_with_confirm_and_retry - DEBUG - 019f1748-f41e-7aa4-8290-1aa6b6f479fc - [0;30;42m 函数 custom_broker_task  第1次 运行, 正确了，函数运行时间是 0.0 秒,入参是 {'value': 200} , 结果是  200     [0m[0m
+
+[0;34m2026-06-30 14:48:05  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:69" -_confirm_consume-[print]-  [0;37;44m[CUSTOM_BROKER] _confirm_consume[0m [0m
+[0;32m2026-06-30 14:48:09 - _KeepAliveTimeThread - "D:\codes\funboost\funboost\concurrent_pool\flexible_thread_pool.py:124" - _worker - DEBUG - [0;30;42m停止线程 104612, 当前空闲: 0，总数: 1[0m[0m
+
+[0;32m2026-06-30 14:48:10 - _KeepAliveTimeThread - "D:\codes\funboost\funboost\concurrent_pool\flexible_thread_pool.py:124" - _worker - DEBUG - [0;30;42m停止线程 78024, 当前空闲: 0，总数: 1[0m[0m
+
+[0;34m2026-06-30 14:48:19  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:97" -<module>-[print]-  [0;37;44m
+===== 最终验证 =====[0m [0m
+[0;34m2026-06-30 14:48:19  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:98" -<module>-[print]-  [0;37;44m[CHECK] mixin_events = ['custom_init', 'record:True', 'record:True', 'record:True'][0m [0m
+[0;34m2026-06-30 14:48:19  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:100" -<module>-[print]-  [0;37;44m[PASS] Mixin: custom_init 被调用[0m [0m
+[0;34m2026-06-30 14:48:19  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:106" -<module>-[print]-  [0;37;44m[PASS] Mixin: _both_sync_and_aio_frame_custom_record_process_info_func 被调用 3 次[0m [0m
+[0;34m2026-06-30 14:48:19  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:110" -<module>-[print]-  [0;37;44m[CHECK] custom_broker_results = [100, 200][0m [0m
+[0;34m2026-06-30 14:48:19  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:112" -<module>-[print]-  [0;37;44m[PASS] 自定义 Broker: 2条消息全部被消费[0m [0m
+[0;34m2026-06-30 14:48:19  "D:\codes\funboost\tests\ai_codes\ai_demos\skill_verification\deep_verify_c.py:116" -<module>-[print]-  [0;37;44m
+===== 验证完毕 =====[0m [0m
