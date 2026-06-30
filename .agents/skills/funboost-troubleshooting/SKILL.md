@@ -8,7 +8,7 @@ compatibility: Python 3.7+, funboost
 
 ## 概述
 
-本 skill 面向**用户和 AI agent**，在 funboost 运行异常时按症状快速定位原因。funboost 消费启动后是**永久运行的守护线程**；很多「问题」其实是预期行为（如 Ctrl+C 无效、主线程需阻塞）。
+本 skill 面向**用户和 AI agent**，在 funboost 运行异常时按症状快速定位原因。
 
 **排查原则：**
 1. 先确认 `PYTHONPATH` 和 `funboost_config.py` 是否被正确加载
@@ -17,59 +17,18 @@ compatibility: Python 3.7+, funboost
 
 ---
 
-## 1. 进程退出问题（Ctrl+C、enable_ctrl_c_quit_on_windows、os._exit）
+## 1. Windows 下 Ctrl+C 为什么无法退出程序
 
-### 1.1 现象与本质
-
-| 现象 | 原因 |
-|------|------|
-| `consume()` 后程序一直运行 | **正常**——消费者是守护线程，永久拉取消息 |
-| Windows 按 Ctrl+C 无反应 | 主线程已结束或未阻塞；Ctrl+C 默认无法停止守护消费线程 |
-| 定时任务报 `cannot schedule new futures after interpreter shutdown` | 主线程退出，APScheduler 后台调度器被 Python 3.9+ 强制关闭 |
-
-funboost **不依赖「优雅退出」**——依靠 MQ 的 ACK 机制防丢消息。强制 kill 进程后，未 ACK 的消息会被重新入队（见 FAQ 6.28）。
-
-### 1.2 解决方案（按场景选择）
-
-**交互式脚本（Windows 推荐）——脚本末尾加：**
+`consume()` 启动非守护线程（`daemon=False`），Windows 的 Ctrl+C 无法中断非守护线程。解决：
 
 ```python
 from funboost import enable_ctrl_c_quit_on_windows
 
 my_task.consume()
-enable_ctrl_c_quit_on_windows()  # 阻塞主线程，响应 Ctrl+C
+enable_ctrl_c_quit_on_windows()  # 让 Ctrl+C 能停止进程；不加也能消费，只是得关窗口或 kill
 ```
 
-源码本质（`funboost/utils/ctrl_c_end.py`）：循环 `time.sleep(2)` 捕获 `KeyboardInterrupt`，最后 `os._exit(44)`。**不是**等待任务完成或清理资源。
-
-**等价写法（阻止主线程退出）：**
-
-```python
-import time
-while 1:
-    time.sleep(100)
-```
-
-**定时任务 + 消费（旧版 funboost / Python 3.9+）：** 主线程必须保持存活。2025 年后 `FunboostBackgroundScheduler` 已改为非守护线程，一般可不加；旧版仍建议末尾加 `enable_ctrl_c_quit_on_windows()` 或 `while 1: time.sleep(100)`。
-
-**AI 测试脚本（必须能自动结束）：**
-
-```python
-import time, os
-time.sleep(15)  # 按消息量估算，一般 >10 秒
-os._exit(66)
-```
-
-**不加 `enable_ctrl_c_quit_on_windows()` 时：** 消费照样运行；停止方式 = 关终端窗口 / kill 进程。
-
-### 1.3 对比表
-
-| 操作 | 加了 `enable_ctrl_c_quit_on_windows` | 没加 |
-|------|----------------------------------------|------|
-| 启动后消费 | 正常 | 正常 |
-| Ctrl+C（Windows） | 立即退出 | 无反应 |
-| 关终端 | 进程结束 | 进程结束 |
-| 消息安全（ACK broker） | 未完成任务重回队列 | 同上 |
+AI 测试脚本用 `time.sleep(N); os._exit(66)` 自动退出。
 
 ---
 
@@ -106,94 +65,21 @@ PYTHONPATH 中**靠前**的路径优先被 `import funboost_config` 命中。
 2. 项目根目录（`sys.path[1]`）的 `funboost_config.py`
 3. 任意在 PYTHONPATH 中的目录
 
-首次找不到时，框架会在 `sys.path[1]` 自动生成模板；若 `sys.path[1]` 指向 Python 安装目录（未设 PYTHONPATH），会抛出 `EnvironmentError` 提示先设置 PYTHONPATH。
+首次找不到时，框架会在 `sys.path[1]`（通常是项目根目录）自动生成配置模板。
 
 ### 2.4 常见错误
 
 | 错误 | 处理 |
 |------|------|
-| `ModuleNotFoundError: funboost_config` | 设置 PYTHONPATH 指向项目根，或在该目录放置/生成 `funboost_config.py` |
-| `EnvironmentError` 提示设置 PYTHONPATH | CMD/Shell 运行且未设 PYTHONPATH；按提示在**当前会话**设置 |
-| `funboost 30.0版本升级了配置文件` | 删除旧版扁平变量式配置，改用 `BrokerConnConfig` / `FunboostCommonConfig` 类 |
-| `不支持 BoostDecoratorDefaultParams` | funboost 40.0+ 已移除，删除该配置块 |
-| Redis 连 localhost 但本机无 Redis | **未加载到用户配置**，检查 PYTHONPATH 是否指向含正确 `funboost_config.py` 的目录 |
+| `ModuleNotFoundError: funboost_config` | 设置 PYTHONPATH 指向项目根，或在项目根目录下运行脚本 |
 
-> Celery/Scrapy 等框架因固定项目结构、从根目录启动，通常不需 PYTHONPATH；funboost 为灵活性牺牲了这一点。
+> **何时需要设 PYTHONPATH**：只有当你从深层子目录或项目外部目录运行脚本时才需要。如果 cwd 就是项目根目录（含 `funboost_config.py`），Python 自动把 cwd 加入 `sys.path`，无需额外设置。funboost 允许脚本放在任意位置运行，这是它的灵活性所在。
 
 ---
 
-## 3. 消费者不消费的排查步骤
+## 3. 消费者不消费
 
-按顺序执行，多数问题在前 3 步可定位。
-
-### 步骤 1：确认消费者已启动
-
-```python
-my_task.consume()  # 非阻塞；不要再用 threading.Thread 包装
-```
-
-检查控制台是否有「队列 xxx 的日志写入到 …」等启动日志。多队列：`f1.consume(); f2.consume()` 连续调用即可。
-
-### 步骤 2：queue_name 必须完全一致
-
-发布端与消费端的 `BoosterParams(queue_name=...)` **字符串必须相同**（区分大小写）。不同 queue_name = 不同队列，消息永远不会被另一个消费者收到。
-
-```python
-# 发布
-@boost(BoosterParams(queue_name="order_process", ...))
-def task_a(x): ...
-
-# 消费 — queue_name 必须相同
-@boost(BoosterParams(queue_name="order_process", ...))
-def task_b(x): ...
-```
-
-### 步骤 3：broker_kind 与连接配置一致
-
-- 两端 `broker_kind` 必须相同（如都是 `BrokerEnum.REDIS_ACK_ABLE`）
-- `funboost_config.py` 中 Redis/RabbitMQ 等地址、端口、密码必须可达
-- 启动日志会打印当前读取的 `BrokerConnConfig`；核对是否为用户期望的配置
-
-**连接失败典型表现：** 启动时报 Connection refused、Authentication failed、超时；或消费者日志持续重连。
-
-### 步骤 4：消息是否在 Broker 中
-
-- Redis：`LLEN` / `XLEN` 查看队列 key（funboost 默认带前缀，可用 funweb 或框架日志中的队列名）
-- 本地调试：先用 `BrokerEnum.MEMORY_QUEUE` 或 `SQLITE_QUEUE` 排除中间件问题
-
-### 步骤 5：消息格式 / 函数参数不匹配
-
-funboost 从队列取出 JSON，执行 `func(**params)`。常见失败：
-
-| 问题 | 现象 | 解决 |
-|------|------|------|
-| 参数名不一致 | 日志有 TypeError / unexpected keyword | 统一 push 参数名与函数签名 |
-| 用了 `push` 但函数有额外装饰器 | 参数校验失败 | 改用 `publish({'x':1})` 并设 `should_check_publish_func_params=False` |
-| 消费异构 JSON | 收不到字段 | `def task(**kwargs):`，设 `should_check_publish_func_params=False` |
-| 用 `def task(msg):` 收整个 JSON | 参数对不上 | **禁止**；必须用 `**kwargs` 解包 |
-
-**预览消息格式（不真正发送）：**
-
-```python
-print(my_task.publisher.generate_msg_context_for_push(1, 2))
-print(my_task.publisher.generate_msg_context_for_publish({"x": 1, "y": 2}))
-```
-
-### 步骤 6：其他静默原因
-
-- **`qps` 极低**（如 `0.01`）：看起来「不消费」，实际每 100 秒才执行 1 次
-- **`allow_run_time_cron`**：当前时间不在允许窗口
-- **`do_task_filtering=True`**：相同入参被过滤，不会重复执行
-- **`msg_expire_seconds`**：消息已过期被丢弃
-- **RPC / 异步模式混用**：ASYNC 模式须 `await func.aio_push()`，不能用同步 `push`
-- **只 push 未 consume**：消息在队列中堆积，需另起进程或在同脚本 `consume()`
-
-### 步骤 7：等待消费完毕（调试）
-
-```python
-f.consume()
-f.wait_for_possible_has_finish_all_tasks(minutes=3)
-```
+确认写了 `my_task.consume()` 即可。
 
 ---
 
@@ -267,20 +153,10 @@ async def async_task(x):
 
 | 字段 | 说明 |
 |------|------|
-| `log_level=20` | INFO；不再记录每次函数入参/结果（DEBUG 很 verbose） |
+| `log_level=10` | 默认 DEBUG。**99.999% 的情况下保持 DEBUG 即可**——funboost 的 publisher/consumer 日志使用独立的 logger 命名空间，不会影响其他模块的日志级别 |
 | `create_logger_file=False` | 仅控制台，不写文件 |
 | `log_filename=None` | 默认用 `funboost.{queue_name}.log` |
 
-### 5.3 减少启动刷屏
-
-在 `funboost_config.py`：
-
-```python
-class FunboostCommonConfig(DataClassBase):
-    SHOW_HOW_FUNBOOST_CONFIG_SETTINGS = False
-    FUNBOOST_PROMPT_LOG_LEVEL = logging.INFO
-    KEEPALIVETIMETHREAD_LOG_LEVEL = logging.INFO
-```
 
 ### 5.4 AI agent 捕获输出（推荐）
 
@@ -316,11 +192,7 @@ funboost 40.0+ 使用 `BoosterParams`（Pydantic 模型）。臆造字段会 `Va
 
 IDE 补全：PyCharm 安装 pydantic 插件；高版本 PyCharm 已内置支持。
 
-### 6.3 APScheduler / 主线程退出
-
-见 **第 1 节**。`RuntimeError: cannot schedule new futures after interpreter shutdown` → 主线程保持存活（`enable_ctrl_c_quit_on_windows` / `while 1: sleep`）。2025+ 版 `FunboostBackgroundScheduler` 已修复守护线程问题。
-
-### 6.4 pywin32（仅 Windows）
+### 6.3 pywin32（仅 Windows）
 
 ```
 ImportError: DLL load failed while importing win32file
@@ -406,10 +278,8 @@ os._exit(66)
 
 | 错误信息 / 症状 | 原因 | 解决方案 |
 |-----------------|------|----------|
-| Ctrl+C 无反应（Windows） | 主线程未阻塞 | 末尾加 `enable_ctrl_c_quit_on_windows()` 或关窗口 kill |
-| `cannot schedule new futures after interpreter shutdown` | 主线程结束 + APScheduler 后台调度 | 阻塞主线程；或升级 funboost（2025+ 已修复） |
+| Ctrl+C 无反应（Windows） | 非守护线程阻止进程退出 | 如果想用 Ctrl+C 结束程序，加 `enable_ctrl_c_quit_on_windows()` |
 | `ModuleNotFoundError: funboost_config` | 未设 PYTHONPATH / 无配置文件 | 设置 PYTHONPATH；首次运行自动生成模板 |
-| `EnvironmentError` 要求设置 PYTHONPATH | 从 CMD 运行且 sys.path[1] 为 Python 安装目录 | 会话级 `set/export PYTHONPATH=项目根` |
 | Redis 连 localhost 失败 | 未加载用户 funboost_config | 检查 PYTHONPATH 与配置路径 |
 | 消息 push 成功但不执行 | queue_name 不一致 | 发布/消费 queue_name 完全相同 |
 | 消息 push 成功但不执行 | 未调用 consume() | 启动消费者 |
@@ -433,12 +303,12 @@ os._exit(66)
 
 ```
 遇到问题
-├─ 配置文件/连接不对？
-│   └─ 设 PYTHONPATH → 看启动日志里的 BrokerConnConfig
-├─ 消息不消费？
-│   └─ queue_name 一致？ → consume() 调了？ → broker 可达？ → 参数匹配？
-├─ 进程不退？
-│   └─ 交互：enable_ctrl_c_quit_on_windows | AI 测试：timeout / os._exit
+├─ 配置文件找不到？
+│   └─ 从项目根目录运行，或设 PYTHONPATH
+├─ 消费者不消费？
+│   └─ 确认调了 consume()
+├─ Windows Ctrl+C 停不掉？
+│   └─ 加 enable_ctrl_c_quit_on_windows()
 ├─ asyncio 报错？
 │   └─ specify_async_loop | 勿重复 run_forever | 勿在 ASYNC 里写同步阻塞
 └─ 安装/依赖报错？

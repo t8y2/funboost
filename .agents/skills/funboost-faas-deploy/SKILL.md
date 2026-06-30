@@ -107,11 +107,9 @@ app.include_router(fastapi_router)
 ```python
 # worker.py
 from tasks import send_email, process_order
-from funboost import enable_ctrl_c_quit_on_windows
 
 send_email.consume()
 process_order.consume()
-enable_ctrl_c_quit_on_windows()
 ```
 
 ## 自定义 API 接口（手动方式）

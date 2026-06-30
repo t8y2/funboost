@@ -127,8 +127,6 @@ func2.consume()  # 可以紧接着启动另一个
 func3.consume()  # 多个消费者共存
 
 # 主线程到达末尾后，进程不会退出（因为有子线程在跑）
-# 如果需要 Ctrl+C 优雅退出：
-enable_ctrl_c_quit_on_windows()
 ```
 
 ### 为什么永不自动停止？

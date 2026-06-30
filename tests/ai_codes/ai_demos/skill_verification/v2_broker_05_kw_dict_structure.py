@@ -1,0 +1,97 @@
+"""验证 developing-funboost-broker SKILL.md §kw 字典结构 (166-174)"""
+import os
+import time
+from collections import deque
+from threading import Lock
+
+_ts = int(time.time())
+os.environ["LOG_PATH"] = r"D:\pythonlogs\ai_console_outs"
+os.environ["PRINT_WRTIE_FILE_NAME"] = f"v2_broker_05_{_ts}"
+os.environ["SYS_STD_FILE_NAME"] = f"v2_broker_05_std_{_ts}"
+
+from funboost import register_custom_broker, boost, BoosterParams
+from funboost.publishers.base_publisher import AbstractPublisher
+from funboost.consumers.base_consumer import AbstractConsumer
+from funboost.core.serialization import Serialization
+
+_STORE = {}
+_LOCK = Lock()
+KW_CAPTURE = []
+
+
+class KwPublisher(AbstractPublisher):
+    def _publish_impl(self, msg: str):
+        with _LOCK:
+            _STORE.setdefault(self.queue_name, deque()).append(msg)
+
+    def clear(self):
+        with _LOCK:
+            _STORE[self.queue_name] = deque()
+
+    def get_message_count(self):
+        with _LOCK:
+            return len(_STORE.get(self.queue_name, deque()))
+
+    def close(self):
+        pass
+
+
+class KwConsumer(AbstractConsumer):
+    def _dispatch_task(self):
+        with _LOCK:
+            q = _STORE.get(self.queue_name, deque())
+            if not q:
+                return
+            message_body_string = q.popleft()
+        # SKILL 示例：kw 必须含 body 键（JSON 字符串）
+        kw = {
+            "body": message_body_string,
+            "receipt_handle": "mock_handle",
+        }
+        KW_CAPTURE.append({"body_type": type(kw["body"]).__name__, "body": kw["body"]})
+        self._submit_task(kw)
+
+    def _confirm_consume(self, kw):
+        pass
+
+    def _requeue(self, kw):
+        with _LOCK:
+            body = kw["body"]
+            if isinstance(body, dict):
+                body = Serialization.to_json_str(body)
+            _STORE.setdefault(self.queue_name, deque()).append(body)
+
+
+_KIND = f"KW_V2_{_ts}"
+register_custom_broker(_KIND, KwPublisher, KwConsumer)
+
+RESULT = []
+
+
+@boost(BoosterParams(
+    queue_name=f"kw_v2_{_ts}",
+    broker_kind=_KIND,
+    concurrent_num=1,
+    create_logger_file=False,
+    is_send_consumer_heartbeat_to_redis=False,
+))
+def kw_task(n):
+    RESULT.append(n)
+    print(f"[OK] kw_task n={n}")
+
+
+if __name__ == "__main__":
+    print("[START] v2_broker_05_kw_dict_structure")
+    kw_task.push(99)
+    kw_task.consume()
+    time.sleep(15)
+    ok = (
+        len(KW_CAPTURE) == 1
+        and KW_CAPTURE[0]["body_type"] == "str"
+        and RESULT == [99]
+    )
+    if ok:
+        print("[PASS] kw['body'] 为 JSON 字符串且消费成功")
+    else:
+        print(f"[FAIL] KW_CAPTURE={KW_CAPTURE!r}, RESULT={RESULT!r}")
+    os._exit(66)

@@ -24,7 +24,7 @@ funboost 对 asyncio 生态有直接支持：**消费**支持 `async def` 函数
 1. **异步 RPC 必须用 `AioAsyncResult`** — 禁止在 `async def` 里调用 `async_result.result`
 2. **RPC 模式必须设置 `is_using_rpc_mode=True`** — 且需配置 Redis（结果存 Redis）（MEMORY_QUEUE 场景可使用 `publisher.get_future()` / `publisher.get_aio_future()` 替代 Redis RPC）
 3. **`async def` 消费函数内禁止同步阻塞 IO** — 如 `time.sleep`、`requests.get`。注意：ASYNC 模式仍支持同步 `def` 消费函数（会在线程池中执行）
-4. **禁止臆造 API** — 不存在 `async_consume`、`aio_consume` 等，启动消费仍是 `func.consume()`
+4. **启动消费仍是 `func.consume()`** — 不存在 `async_consume`、`aio_consume` 等方法
 5. **必须使用 `BoosterParams` 对象** — 禁止向 `@boost` 传递裸参数
 
 ## 速查表
@@ -46,7 +46,7 @@ funboost 对 asyncio 生态有直接支持：**消费**支持 `async def` 函数
 
 ```python
 import asyncio
-from funboost import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum, enable_ctrl_c_quit_on_windows
+from funboost import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum
 
 @boost(BoosterParams(
     queue_name="async_fetch_queue",
@@ -64,7 +64,6 @@ if __name__ == "__main__":
     for i in range(5):
         async_fetch.push(f"https://example.com/{i}")
     async_fetch.consume()
-    enable_ctrl_c_quit_on_windows()
 ```
 
 **要点：**
@@ -309,7 +308,7 @@ async def create_order_sync_push(order_id: int):
 ```python
 import asyncio
 import time
-from funboost import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum, enable_ctrl_c_quit_on_windows
+from funboost import boost, BoosterParams, BrokerEnum, ConcurrentModeEnum
 
 @boost(BoosterParams(
     queue_name="mixed_async_queue",
@@ -341,7 +340,6 @@ if __name__ == "__main__":
 
     async_worker.consume()
     sync_worker.consume()
-    enable_ctrl_c_quit_on_windows()
 ```
 
 **注意：**

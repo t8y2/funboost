@@ -304,4 +304,6 @@ funboost/
 1. 禁止ai flush redis，ai不要主动去清空redis。
 
 ## 十五 funboost文档仓库
-D:/codes/funboost_docs/  ,文档在 source/articles 目录下
+D:/codes/funboost_docs/  ,文档教程在 source/articles 目录下
+
+## 十六 funboost开发和使用的skills在 `.agents/skills目录下`

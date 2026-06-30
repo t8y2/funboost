@@ -136,28 +136,22 @@ def my_task(x):
 | `_requeue(kw)` | 是 | 消息重入队 |
 | `custom_init()` | 否 | 可选的初始化钩子 |
 
-### `_dispatch_task` 两种实现模式
+### `_dispatch_task` 实现
 
-**模式 A：自带循环**（适合长连接 broker，如 RabbitMQ/Kafka）：
+`_dispatch_task` 负责从 MQ 拉取消息并交给框架处理。它必须阻塞（不能立即返回）：
 
 ```python
 def _dispatch_task(self):
+    # pull 模式：自写循环
     while True:
         msg = self._client.receive(timeout=5)
         if msg:
             self._submit_task({"body": msg.body, "raw_msg": msg})
 ```
 
-**模式 B：单次取消息**（框架通过 `___keep_circulating` 自动重复调用）：
+如果 MQ 客户端本身提供阻塞消费方法（如 RabbitMQ 的 `channel.start_consuming(callback=...)`），也可以直接调用它。
 
-```python
-def _dispatch_task(self):
-    msg = self._client.poll(timeout=0.5)
-    if msg:
-        self._submit_task({"body": msg.body})
-```
-
-两种模式均正确。模式 B 更简洁，框架自动处理异常重试和循环。
+`_dispatch_task` 内部**不需要**捕获网络异常。框架通过 `keep_circulating` 包裹它——如果因网络断开等异常退出，框架会自动重新调用实现重连。
 
 ## kw 字典结构
 
@@ -173,7 +167,7 @@ kw = {
 }
 ```
 
-> **重要：** `kw["body"]` 必须是字符串类型（JSON string），不能是 dict。框架会在 `_submit_task` 内部调用 `_convert_msg_before_run` 做反序列化。
+> `kw["body"]` 可以是 JSON 字符串，也可以是 dict。框架在 `_submit_task` 内部通过 `_convert_msg_before_run` 统一转为 dict（`Serialization.to_dict(msg)` 兼容两种输入）。
 
 ## super() 调用规则
 
@@ -196,7 +190,7 @@ value = self.consumer_params.broker_exclusive_config["my_key"]
 value = self.publisher_params.broker_exclusive_config["my_key"]
 ```
 
-**推荐用 `[]` 方括号访问（缺失 key 抛 KeyError）——新 broker 中已注册的 key 推荐用 `[]`。**
+**用 `[]` 方括号访问**——如果拼错了 key，直接 KeyError 报错。不要用 `.get(key)`，否则拼写错误会默默降级为默认值而不自知。
 
 在 `broker_kind__exclusive_config_default_define.py` 中注册默认值：
 

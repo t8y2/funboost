@@ -1,0 +1,233 @@
+[
+  {
+    "script": "obs_trouble_obs_01_import_paths.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.5,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_obs_02_prometheus_http.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.6,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_obs_03_prometheus_pushgateway.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.6,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_obs_04_prometheus_manual_mixin.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.7,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_obs_05_otel_init.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 15.5,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_obs_06_otel_chain.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.8,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_obs_07_otel_manual_mixin.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.9,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_obs_08_alert_consecutive.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.6,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_obs_09_alert_rate.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.6,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_obs_10_alert_custom.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.6,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_obs_11_periodic_quota_sliding.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.5,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_obs_12_periodic_quota_daily.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.6,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_obs_13_mongo_config_snippet.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.2,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_obs_14_mongo_persist_single.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 47.0,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_obs_15_mongo_persist_shared.py",
+    "ok": false,
+    "returncode": 1,
+    "elapsed": 1.2,
+    "error": "emos\\skill_verification\\round3\\obs_trouble_obs_15_mongo_persist_shared.py\", line 13, in <module>\n    class PersistBoosterParams(BoosterParams):\n  File \"D:\\ProgramData\\miniconda3\\envs\\py39b\\lib\\site-packages\\pydantic\\_internal\\_model_construction.py\", line 132, in __new__\n    private_attributes = inspect_namespace(\n  File \"D:\\ProgramData\\miniconda3\\envs\\py39b\\lib\\site-packages\\pydantic\\_internal\\_model_construction.py\", line 471, in inspect_namespace\n    raise PydanticUserError(\npydantic.errors.PydanticUserError: Field 'function_result_status_persistance_conf' defined on a base class was overridden by a non-annotated attribute. All field definitions, including overrides, require a type annotation.\n\nFor further information visit https://errors.pydantic.dev/2.12/u/model-field-overridden\u001b[0m\n\n"
+  },
+  {
+    "script": "obs_trouble_obs_16_mongo_alert_monitor.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 77.0,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_obs_17_combined_mixins.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.6,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_obs_18_full_comprehensive.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 47.1,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_ts_01_enable_ctrl_c.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.5,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_ts_02_while_sleep_block.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.6,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_ts_03_ai_test_exit.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.5,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_ts_04_pythonpath.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.2,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_ts_05_consume_direct.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.6,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_ts_06_queue_name_match.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.6,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_ts_07_generate_msg_context.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.3,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_ts_08_wait_for_finish.py",
+    "ok": false,
+    "returncode": "TIMEOUT",
+    "elapsed": 90,
+    "error": "0;30;42m 函数 f  第1次 运行, 正确了，函数运行时间是 0.0005 秒,入参是 {'x': 2} , 结果是  2     \u001b[0m\u001b[0m\n\n\u001b[0;34m2026-06-30 16:58:13  \"D:\\codes\\funboost\\tests\\ai_codes\\ai_demos\\skill_verification\\round3\\obs_trouble_ts_08_wait_for_finish.py:19\" -f-[print]-  \u001b[0;37;44mwait demo task: 3\u001b[0m \u001b[0m\n\u001b[0;32m2026-06-30 16:58:13-(10.0.112.74,PC-20260325PWBG)-[p105832_t41988] - funboost.LocalPythonQueueConsumer--obs_trouble_ts_wait_1782809891 - \"base_consumer.py:971\" - _run_consuming_function_with_confirm_and_retry - DEBUG - 019f17c0-17ba-7532-881a-611b97c2755b - \u001b[0;30;42m 函数 f  第1次 运行, 正确了，函数运行时间是 0.0 秒,入参是 {'x': 3} , 结果是  3     \u001b[0m\u001b[0m\n\n\u001b[0;34m2026-06-30 16:58:13  \"D:\\codes\\funboost\\tests\\ai_codes\\ai_demos\\skill_verification\\round3\\obs_trouble_ts_08_wait_for_finish.py:19\" -f-[print]-  \u001b[0;37;44mwait demo task: 4\u001b[0m \u001b[0m\n"
+  },
+  {
+    "script": "obs_trouble_ts_09_event_loop_fix.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.6,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_ts_10_specify_async_loop.py",
+    "ok": false,
+    "returncode": "TIMEOUT",
+    "elapsed": 90,
+    "error": ";37;45mUnhandled exception:\u001b[0m\nTraceback (most recent call last):\n  File \"D:\\codes\\funboost\\tests\\ai_codes\\ai_demos\\skill_verification\\round3\\obs_trouble_ts_10_specify_async_loop.py\", line 45, in <module>\n    loop.run_until_complete(ss.close())\n  File \"D:\\ProgramData\\miniconda3\\envs\\py39b\\lib\\asyncio\\base_events.py\", line 623, in run_until_complete\n    self._check_running()\n  File \"D:\\ProgramData\\miniconda3\\envs\\py39b\\lib\\asyncio\\base_events.py\", line 583, in _check_running\n    raise RuntimeError('This event loop is already running')\nRuntimeError: This event loop is already running\u001b[0m\n\n\u001b[0;34m2026-06-30 17:00:42  \"D:\\codes\\funboost\\tests\\ai_codes\\ai_demos\\skill_verification\\round3\\obs_trouble_ts_10_specify_async_loop.py:35\" -async_task-[print]-  \u001b[0;37;44maiohttp status=200 x=1\u001b[0m \u001b[0m\n"
+  },
+  {
+    "script": "obs_trouble_ts_11_log_config_snippet.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.3,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_ts_12_log_env_vars.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.7,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_ts_13_subprocess_pattern.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 31.9,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_ts_14_os_exit_pattern.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.6,
+    "error": ""
+  },
+  {
+    "script": "obs_trouble_ts_15_sqlite_path_snippet.py",
+    "ok": true,
+    "returncode": 66,
+    "elapsed": 16.2,
+    "error": ""
+  }
+]

@@ -1,6 +1,6 @@
 ---
 name: funboost-memory-queue-pool
-description: 当需要用 funboost 的内存队列替代传统线程池/协程池、或需要零中间件依赖的本地并发时使用。触发场景：不需要分布式但需要并发控制、替代 ThreadPoolExecutor、MEMORY_QUEUE、FASTEST_MEM_QUEUE、FunboostPool、get_future。关键词：MEMORY_QUEUE, FASTEST_MEM_QUEUE, MemoryFunboostPool, FunboostPool, 内存队列, 本地并发, 线程池替代。
+description: 当需要用 funboost 的内存队列替代传统线程池/协程池、或需要零中间件依赖的本地并发时使用。触发场景：不需要分布式但需要并发控制、替代 ThreadPoolExecutor、MEMORY_QUEUE、FunboostPool、get_future。关键词：MEMORY_QUEUE, MemoryFunboostPool, FunboostPool, 内存队列, 本地并发, 线程池替代。
 compatibility: Python 3.7+, funboost
 ---
 
@@ -21,19 +21,6 @@ compatibility: Python 3.7+, funboost
 - 开发阶段用内存队列，上线后一行切换到 Redis/RabbitMQ
 
 ---
-
-## 1. MEMORY_QUEUE vs FASTEST_MEM_QUEUE
-
-| 对比项 | `MEMORY_QUEUE` | `FASTEST_MEM_QUEUE` |
-|--------|----------------|---------------------|
-| 底层结构 | Python 标准库 `queue.Queue` | `collections.deque` |
-| 序列化 | **不序列化/反序列化** | 不序列化/反序列化 |
-| 性能 | 极高（无 socket IO） | 比 MEMORY_QUEUE 快 **2–5 倍** |
-| 额外能力 | 支持 `get_future()` / `get_aio_future()` RPC | 支持批量拉取：`broker_exclusive_config={'pull_msg_batch_size': 1000}` |
-| 开销 | 有 `task_done`/`join` 机制 | 去除 `task_done`/`join` 开销 |
-| 官方建议 | **默认首选** | 一般不推荐；极端性能场景才考虑 |
-
-> **选型建议：** 绝大多数场景用 `MEMORY_QUEUE` 即可。只有确认瓶颈在队列本身、且不需要 `get_future` 等 MEMORY_QUEUE 独有特性时，才考虑 `FASTEST_MEM_QUEUE`。
 
 别名：`BrokerEnum.LOCAL_PYTHON_QUEUE` = `MEMORY_QUEUE`。
 
@@ -205,7 +192,7 @@ pool = FunboostPool(BoosterParams(queue_name='pool', broker_kind=BrokerEnum.REDI
 
 ```python
 import time
-from funboost import boost, BoosterParams, BrokerEnum, enable_ctrl_c_quit_on_windows
+from funboost import boost, BoosterParams, BrokerEnum
 
 # 传统写法：
 # from concurrent.futures import ThreadPoolExecutor
@@ -222,7 +209,6 @@ if __name__ == '__main__':
     f.consume()
     for i in range(100):
         f.push(i, i * 2)
-    enable_ctrl_c_quit_on_windows()
 ```
 
 ### 示例 B：MemoryFunboostPool 一行替换 ThreadPoolExecutor
@@ -323,19 +309,13 @@ if __name__ == '__main__':
 
 `concurrent_num` 同时作为预取消息的有界队列大小。设过大（如 100 万）会导致内存暴涨。建议 **1000 以下**，配合 `qps` 控频即可。
 
-### 8.6 FASTEST_MEM_QUEUE 取舍
-
-性能提升 2–5 倍，但官方不推荐日常使用；lose 了部分 MEMORY_QUEUE 生态（如 `get_future` 走 LocalPythonQueuePublisher 路径）。仅在 benchmark 确认队列是瓶颈时使用。
-
 ---
 
 ## 铁律
 
 1. **同进程原则** — MEMORY_QUEUE 要求 push 和 consume 在同一进程；分离部署请换 broker
-2. **禁止 flush 内存队列** — 不要用 `clear()` 清空正在使用的队列
-3. **get_future 仅 MEMORY_QUEUE** — 其他 broker 用 `AsyncResult` / `is_using_rpc_mode`
-4. **MemoryFunboostPool 无 queue_name 参数** — 队列名自动生成，勿臆造参数
-5. **BoosterParams 字段固定** — 超时用 `function_timeout`，重试用 `max_retry_times`，禁止臆造 `timeout`/`max_retries`
+2. **get_future 仅 MEMORY_QUEUE** — 其他 broker 用 `AsyncResult` / `is_using_rpc_mode`
+3. **MemoryFunboostPool 无 queue_name 参数** — 队列名自动生成
 
 ## 相关 Skill
 

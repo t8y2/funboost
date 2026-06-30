@@ -239,7 +239,6 @@ if __name__ == "__main__":
     start_funboost_web_manager(port=27018)
     process_task.multi_process_consume(4)  # 4 进程，Web 可看到 4 个消费者
     process_task.push(1)
-    enable_ctrl_c_quit_on_windows()
 ```
 
 ---
@@ -293,7 +292,7 @@ import time
 
 from funboost import (
     boost, BoosterParams, BrokerEnum, ConcurrentModeEnum,
-    FunctionResultStatusPersistanceConfig, enable_ctrl_c_quit_on_windows,
+    FunctionResultStatusPersistanceConfig,
 )
 from funboost.funweb.app import start_funboost_web_manager
 
@@ -355,8 +354,6 @@ if __name__ == "__main__":
         f2.push(i, i)
         aio_f3.push(i)
         time.sleep(1)
-
-    enable_ctrl_c_quit_on_windows()
 ```
 
 **运行步骤：**

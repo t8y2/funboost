@@ -23,8 +23,7 @@ Funboost 用一个 `@boost` 装饰器把任意 Python 函数变成分布式任�
 ## 铁律（绝对不可违反）
 
 1. **必须使用 `BoosterParams` 对象** — 禁止向 `@boost` 传递裸参数
-2. **禁止臆造参数名** — `BoosterParams` 是 Pydantic 模型，字段是固定的
-3. **禁止使用 Celery 模式** — 不用 `self`、不用 `bind=True`，获取上下文用 `fct`
+2. **禁止使用 Celery 模式** — 不用 `self`、不用 `bind=True`，获取上下文用 `fct`
 4. **`push` 只传业务参数；`publish` 用字典传业务参数，并通过 `task_options=TaskOptions(...)` 附加框架控制参数**
 
 ## 速查表
@@ -38,7 +37,7 @@ Funboost 用一个 `@boost` 装饰器把任意 Python 函数变成分布式任�
 | 启动消费 | `func.consume()` |
 | 多进程消费 | `func.multi_process_consume(3)` |
 | 获取任务上下文 | `from funboost import fct; fct.task_id` |
-| 阻止主线程退出（Windows） | `enable_ctrl_c_quit_on_windows()` |
+| Windows 下 Ctrl+C 退出 | `enable_ctrl_c_quit_on_windows()`（可选，不加也能运行） |
 
 ## 核心代码模式
 
@@ -59,17 +58,16 @@ if __name__ == "__main__":
     add.push(1, 2)
     add.push(10, 20)
     add.consume()
-
-    import time
-    time.sleep(5)
-    import os
-    os._exit(0)
+    # funboost 消费者永久运行，不会自动退出（和 Celery worker 一样）
+    # 如果是 Windows 想用 Ctrl+C 停止：
+    from funboost import enable_ctrl_c_quit_on_windows
+    enable_ctrl_c_quit_on_windows()
 ```
 
 以下示例使用 Redis（需先在 `funboost_config.py` 中配置 `REDIS_HOST` 等参数）：
 
 ```python
-from funboost import boost, BoosterParams, BrokerEnum, enable_ctrl_c_quit_on_windows
+from funboost import boost, BoosterParams, BrokerEnum
 
 @boost(BoosterParams(
     queue_name="my_task_queue",
@@ -92,7 +90,6 @@ if __name__ == "__main__":
 
     # 启动消费
     my_task.consume()
-    enable_ctrl_c_quit_on_windows()
 ```
 
 ## 发布方法详解
@@ -131,7 +128,6 @@ async def publish_tasks():
 task_a.consume()
 task_b.consume()
 task_c.consume()
-enable_ctrl_c_quit_on_windows()
 ```
 
 **绝对禁止** 用 `threading.Thread` 包装 `consume()` — 它本身就是非阻塞的。
@@ -146,7 +142,7 @@ def my_task(x):
     print(f"Task ID: {fct.task_id}")
     print(f"队列名: {fct.queue_name}")
     print(f"执行次数: {fct.function_result_status.run_times}")
-    print(f"函数参数: {fct.function_result_status.function_params}")
+    print(f"函数参数: {fct.function_params}")
     print(f"完整消息: {fct.full_msg}")
     fct.logger.info("当前任务 logger")
 ```
@@ -158,7 +154,7 @@ def my_task(x):
 | `fct.task_id` | 当前任务 ID |
 | `fct.queue_name` | 队列名 |
 | `fct.function_result_status.run_times` | 运行次数（含重试） |
-| `fct.function_result_status.function_params` | 函数入参 |
+| `fct.function_params` | 函数入参 |
 | `fct.full_msg` | 完整消息体 |
 | `fct.logger` | 当前任务 logger |
 

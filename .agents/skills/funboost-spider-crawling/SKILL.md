@@ -210,7 +210,7 @@ await CommentItem(...).aio_upsert()
 **关键配置**：
 
 ```python
-from funboost import boost, BoosterParams, BrokerEnum, BoostersManager, enable_ctrl_c_quit_on_windows
+from funboost import boost, BoosterParams, BrokerEnum, BoostersManager
 
 CRAWLER_GROUP = "news_crawler"
 
@@ -228,7 +228,6 @@ if __name__ == '__main__':
     BoostersManager.consume_group(CRAWLER_GROUP)  # 一键启动全组消费
     crawl_list.push(page=1)
     # 极限性能：crawl_detail.multi_process_consume(8)  # 8 进程 × concurrent_num 线程
-    enable_ctrl_c_quit_on_windows()
 ```
 
 **横向扩展**：
@@ -270,7 +269,7 @@ import re
 from typing import ClassVar, Optional
 from funboost import (
     boost, BoosterParams, BoostersManager, BrokerEnum,
-    enable_ctrl_c_quit_on_windows, ConcurrentModeEnum,
+    ConcurrentModeEnum,
 )
 from funboost.contrib.funspider import (
     SimpleSpiderClient, AsyncSpiderClient, SpiderItem,
@@ -354,15 +353,13 @@ async def crawl_comments(news_id: int):
 if __name__ == '__main__':
     BoostersManager.consume_group(NEWS_GROUP)
     crawl_list.push(page=1)
-    enable_ctrl_c_quit_on_windows()
 ```
 
 ## 铁律（绝对不可违反）
 
 1. **必须使用 `BoosterParams` 对象** — 禁止 `@boost("queue_name", qps=5)` 老式写法
-2. **禁止臆造参数名** — 超时用 `function_timeout`，重试用 `max_retry_times`，去重用 `do_task_filtering`
-3. **禁止 Celery 思维** — 获取上下文用 `fct`，不用 `self` / `bind=True`
-4. **异步模式** — `concurrent_mode=ConcurrentModeEnum.ASYNC` 时必须 `async def` + `await aio_push`
+2. **获取上下文用 `fct`** — 不用 `self` / `bind=True`
+3. **异步模式** — `concurrent_mode=ConcurrentModeEnum.ASYNC` 时必须 `async def` + `await aio_push`
 5. **连续启动消费** — `func1.consume(); func2.consume()`，不要用 `threading.Thread` 包装
 6. **AI 运行脚本** — 必须设 `PYTHONPATH=项目根目录`，并用 timeout 或 `os._exit()` 终止（`consume()` 永不退出）
 7. **禁止 flush Redis** — 去重依赖 Redis，不要清空

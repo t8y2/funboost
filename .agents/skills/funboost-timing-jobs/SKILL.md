@@ -113,8 +113,8 @@ ApsJobAdder(my_task).add_push_job(
 ## 完整示例
 
 ```python
-from funboost import boost, BoosterParams, BrokerEnum, enable_ctrl_c_quit_on_windows
-from funboost.timing_job import ApsJobAdder
+from funboost import boost, BoosterParams, BrokerEnum, ApsJobAdder
+
 
 @boost(BoosterParams(
     queue_name="heartbeat_queue",
@@ -133,8 +133,6 @@ if __name__ == "__main__":
         kwargs={"service_name": "api-server"},
         id="api_heartbeat",
     )
-
-    enable_ctrl_c_quit_on_windows()
 ```
 
 ## 常见错误
