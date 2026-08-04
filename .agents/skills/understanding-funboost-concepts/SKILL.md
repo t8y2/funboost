@@ -1,7 +1,6 @@
 ---
 name: understanding-funboost-concepts
 description: 当 AI 首次接触 funboost 或需要建立正确心智模型时使用。触发场景：AI 准备编写 funboost 代码前、对框架设计理念不清楚时、容易把 funboost 当成 Celery 时。关键词：funboost 是什么, 怎么理解, 框架设计, BoosterParams, 配置文件, push vs publish, 消费模型, 入门概念。
-compatibility: Python 3.7+, funboost
 ---
 
 # 理解 Funboost 核心概念

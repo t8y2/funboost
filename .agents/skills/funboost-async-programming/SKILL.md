@@ -1,7 +1,6 @@
 ---
 name: funboost-async-programming
 description: 当需要在 funboost 中使用异步（async/await）编程时使用。触发场景：async def 消费函数、aio_push/aio_publish、concurrent_mode=ASYNC、event loop 报错。关键词：async, await, asyncio, aio_push, aio_publish, ConcurrentModeEnum.ASYNC, 异步消费, 协程。
-compatibility: Python 3.7+, funboost
 ---
 
 # Funboost 异步编程

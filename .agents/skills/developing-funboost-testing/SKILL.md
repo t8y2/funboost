@@ -1,7 +1,6 @@
 ---
 name: developing-funboost-testing
 description: 当需要为 funboost 框架编写测试、运行测试脚本、或验证新 broker/mixin 实现时使用。触发场景：编写测试脚本、验证消费者/发布者功能、AI Agent 运行 funboost 脚本。关键词：test funboost, 写测试, 运行测试, test_frame, regression test, 验证消费, AI testing, os._exit, timeout。
-compatibility: Python 3.7+, funboost source code access, Windows with PowerShell
 ---
 
 # Funboost 测试规范

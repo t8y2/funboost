@@ -1,7 +1,6 @@
 ---
 name: developing-funboost-mixin
 description: 当需要为 funboost 创建 Consumer 或 Publisher 的 Mixin 扩展类时使用。触发场景：添加监控、熔断、限流、链路追踪等横切关注点，编写自定义前置/后置处理钩子。关键词：mixin, consumer_override_cls, publisher_override_cls, ConsumerMixin, 自定义消费者, hook, 拦截器, 熔断器, 监控, Prometheus, OpenTelemetry。
-compatibility: Python 3.7+, funboost source code access
 ---
 
 # 开发 Funboost Mixin 扩展

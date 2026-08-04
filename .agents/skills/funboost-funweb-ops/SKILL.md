@@ -1,7 +1,6 @@
 ---
 name: funboost-funweb-ops
 description: 当需要使用 funboost 的 Web 管理界面进行队列运维时使用。触发场景：启动管理后台、查看消费状态、查看消费者配置、失败重投、查看结果、定时任务管理。关键词：funweb, Web 管理, 运维, start_funboost_web_manager, 队列监控, 消费曲线。
-compatibility: Python 3.7+, funboost with `pip install funboost[flask]`
 ---
 
 # Funweb 队列运维（Web 管理界面）

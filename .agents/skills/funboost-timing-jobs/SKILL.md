@@ -1,7 +1,6 @@
 ---
 name: funboost-timing-jobs
 description: 当需要使用 funboost 创建定时/周期性任务时使用。触发场景：cron 定时调度、interval 间隔执行、ApsJobAdder 定时发布消息、APScheduler 集成。关键词：ApsJobAdder, timing, schedule, cron, interval, 定时任务, apscheduler, add_push_job, 周期执行。
-compatibility: Python 3.7+, funboost with apscheduler installed
 ---
 
 # Funboost 定时任务

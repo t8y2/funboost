@@ -1,7 +1,6 @@
 ---
 name: funboost-troubleshooting
 description: 当使用 funboost 遇到错误、消费不正常、进程退出等问题时使用。触发场景：消费者不启动、消息不消费、进程卡死、event loop 报错、日志不输出、PYTHONPATH 问题、Ctrl+C 无法退出。关键词：troubleshooting, FAQ, 排错, 调试, PYTHONPATH, run_forever, Ctrl+C, event loop, 日志。
-compatibility: Python 3.7+, funboost
 ---
 
 # Funboost 故障排查

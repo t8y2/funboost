@@ -1,7 +1,6 @@
 ---
 name: funboost-rpc-mode
 description: 当需要获取 funboost 任务的执行返回值时使用。触发场景：实现请求-响应模式、使用 AsyncResult/AioAsyncResult 获取函数返回值、查询任务状态和结果。关键词：RPC, task result, AsyncResult, AioAsyncResult, is_using_rpc_mode, 获取任务结果, 返回值。
-compatibility: Python 3.7+, funboost with Redis configured
 ---
 
 # Funboost RPC 模式

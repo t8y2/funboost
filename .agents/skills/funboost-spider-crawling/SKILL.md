@@ -1,7 +1,6 @@
 ---
 name: funboost-spider-crawling
 description: 当需要用 funboost 进行 Web 爬虫或数据采集时使用。触发场景：分布式爬虫、URL 调度、funspider、boost_spider、httpx 爬虫。关键词：爬虫, spider, crawl, funspider, SimpleSpiderClient, AsyncSpiderClient, URL 调度, 分布式采集。
-compatibility: Python 3.7+, funboost
 ---
 
 # Funboost 爬虫 / 数据采集

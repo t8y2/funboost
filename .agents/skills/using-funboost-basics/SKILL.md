@@ -1,7 +1,6 @@
 ---
 name: using-funboost-basics
 description: 当需要使用 funboost 编写分布式任务时使用。触发场景：创建 @boost 装饰器任务函数、使用 push/publish 发布消息、启动 consume 消费者、配置 BoosterParams 参数、设置并发和限流。关键词：boost, BoosterParams, queue_name, push, publish, consume, distributed task, 分布式任务, 消息队列。
-compatibility: Python 3.7+, funboost package installed
 ---
 
 # Funboost 基础使用

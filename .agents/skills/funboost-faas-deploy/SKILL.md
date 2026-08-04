@@ -1,7 +1,6 @@
 ---
 name: funboost-faas-deploy
 description: 当需要将 funboost 任务部署为 HTTP 微服务时使用。触发场景：通过 FastAPI/Flask/Django 暴露发布和查询接口、使用内置 FaaS router、无需手写 API 代码。关键词：FaaS, 微服务, FastAPI, Flask, Django, HTTP API, REST, fastapi_router, flask_blueprint, web deploy。
-compatibility: Python 3.7+, funboost with FastAPI/Flask/Django installed
 ---
 
 # Funboost FaaS 微服务部署

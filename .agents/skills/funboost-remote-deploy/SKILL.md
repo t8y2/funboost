@@ -1,7 +1,6 @@
 ---
 name: funboost-remote-deploy
 description: 当需要将 funboost 消费者远程部署到 Linux 服务器时使用。触发场景：fabric 部署、远程启动消费者、multi_process_consume 多进程部署。关键词：fabric, deploy, 远程部署, Linux, SSH, multi_process_consume, 自动上传。
-compatibility: Python 3.7+, funboost, fabric2, paramiko（Python 3.12+ 需注意 fabric2 兼容性）
 ---
 
 # Funboost 远程部署（fabric_deploy）

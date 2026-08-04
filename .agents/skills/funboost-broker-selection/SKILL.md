@@ -1,7 +1,6 @@
 ---
 name: funboost-broker-selection
 description: 当需要为 funboost 任务选择消息中间件时使用。触发场景：对比 Redis/RabbitMQ/Kafka/本地队列、配置 broker 连接、设置 broker_exclusive_config。关键词：BrokerEnum, broker_kind, Redis, RabbitMQ, Kafka, MQTT, 中间件选型, 消息队列选择。
-compatibility: Python 3.7+, funboost package installed
 ---
 
 # Funboost 中间件选型

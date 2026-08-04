@@ -1,7 +1,6 @@
 ---
 name: funboost-workflow
 description: 当需要编排多个 funboost 任务按顺序或并行执行时使用。触发场景：chain 串行流水线、group 并行执行、chord 扇出聚合、嵌套 chain/group/chord 组合、任务依赖编排。关键词：workflow, chain, group, chord, pipeline, 嵌套组合, 工作流, 任务依赖, fan-out, fan-in, WorkflowBoosterParams。
-compatibility: Python 3.7+, funboost with workflow module
 ---
 
 # Funboost 工作流编排

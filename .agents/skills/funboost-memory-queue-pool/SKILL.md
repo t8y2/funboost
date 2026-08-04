@@ -1,7 +1,6 @@
 ---
 name: funboost-memory-queue-pool
 description: 当需要用 funboost 的内存队列替代传统线程池/协程池、或需要零中间件依赖的本地并发时使用。触发场景：不需要分布式但需要并发控制、替代 ThreadPoolExecutor、MEMORY_QUEUE、FunboostPool、get_future。关键词：MEMORY_QUEUE, MemoryFunboostPool, FunboostPool, 内存队列, 本地并发, 线程池替代。
-compatibility: Python 3.7+, funboost
 ---
 
 # Funboost 内存队列与任务池

@@ -1,7 +1,6 @@
 ---
 name: funboost-advanced-retry
 description: 当需要配置 funboost 的高级重试策略时使用。触发场景：指数退避重试、死信队列、熔断器、任务去重过滤、自定义错误处理。关键词：retry, max_retry_times, dead letter, DLX, exponential backoff, circuit breaker, is_using_advanced_retry, is_push_to_dlx_queue_when_retry_max_times, do_task_filtering, 重试, 死信, 熔断。
-compatibility: Python 3.7+, funboost package installed
 ---
 
 # Funboost 高级重试与容错

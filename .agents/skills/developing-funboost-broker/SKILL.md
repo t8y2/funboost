@@ -1,7 +1,6 @@
 ---
 name: developing-funboost-broker
 description: 当需要为 funboost 框架添加新的消息中间件时使用。触发场景：实现自定义 Publisher/Consumer 类、使用 register_custom_broker 注册新 broker、使用 override_cls 定制现有 broker 行为。关键词：new broker, AbstractPublisher, AbstractConsumer, register_custom_broker, consumer_override_cls, publisher_override_cls, 扩展中间件, 新增 broker。
-compatibility: Python 3.7+, funboost source code access
 ---
 
 # 开发 Funboost Broker 中间件

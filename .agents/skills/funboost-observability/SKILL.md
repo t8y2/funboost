@@ -1,7 +1,6 @@
 ---
 name: funboost-observability
 description: 当需要为 funboost 任务添加监控、链路追踪或告警时使用。触发场景：Prometheus 指标、OpenTelemetry 链路追踪、异常告警通知、周期额度限制、函数结果持久化。关键词：Prometheus, OpenTelemetry, OTel, 告警, 监控, metrics, tracing, AlertNotifier, PeriodicQuota。
-compatibility: Python 3.7+, funboost
 ---
 
 # Funboost 可观测性配置
